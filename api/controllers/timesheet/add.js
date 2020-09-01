@@ -76,14 +76,14 @@ module.exports = {
         // Check if an office hours record exists.
         sails.models.calendar.calendardb.whoShouldBeIn(async (calendar) => {
           if (calendar.length > 0)
-            calendar = calendar.filter((cal) => cal.director === record.ID);
+            calendar = calendar.find((cal) => cal.director === record.ID);
 
 
           // If the entry is less than 30 minutes off from the current time, approve automatically
           if (thetime.isAfter(moment().subtract(30, 'minutes')) && thetime.isBefore(moment().add(30, 'minutes'))) { toapprove = 1 }
 
           // Clock-ins need a new entry
-          await sails.models.timesheet.create({ name: record.name, unique: calendar[ 0 ] ? calendar[ 0 ].unique : null, scheduledIn: calendar[ 0 ] ? moment(calendar[ 0 ].start).toISOString(true) : null, scheduledOut: calendar[ 0 ] ? moment(calendar[ 0 ].end).toISOString(true) : null, timeIn: thetime.toISOString(true), approved: toapprove }).fetch()
+          await sails.models.timesheet.create({ name: record.name, unique: calendar ? calendar.unique : null, scheduledIn: calendar ? moment(calendar.start).toISOString(true) : null, scheduledOut: calendar ? moment(calendar.end).toISOString(true) : null, timeIn: thetime.toISOString(true), approved: toapprove }).fetch()
 
           // Update the director presence
           await sails.models.directors.update({ ID: record.ID }, { present: true, since: thetime.toISOString(true) })

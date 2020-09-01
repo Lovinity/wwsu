@@ -95,7 +95,7 @@ module.exports = {
               });
 
               // Generate playlist object
-              playlists[playlist.ID] = {
+              playlists[ playlist.ID ] = {
                 ID: playlist.ID,
                 name: playlist.name,
                 duration: duration,
@@ -110,7 +110,7 @@ module.exports = {
             // Load all manual RadioDJ events into memory
             var djeventsR = await sails.models.events.find({ type: 3 });
             djeventsR.map((_event) => {
-              djevents[_event.ID] = _event;
+              djevents[ _event.ID ] = _event;
             });
 
             // Load directors into memory
@@ -124,7 +124,7 @@ module.exports = {
               .filter(
                 (event) =>
                   (event.scheduleType === null ||
-                    ["canceled", "canceled-system", "canceled-changed"].indexOf(
+                    [ "canceled", "canceled-system", "canceled-changed" ].indexOf(
                       event.scheduleType
                     ) === -1) &&
                   moment(event.end).isAfter(moment())
@@ -139,7 +139,7 @@ module.exports = {
                       }
                       issues.push(
                         `Prerecord event "${event.hosts} - ${
-                          event.name
+                        event.name
                         }" for ${moment(event.start).format(
                           "llll"
                         )} does not have a playlist assigned to it. This event will not air until fixed!`
@@ -148,13 +148,13 @@ module.exports = {
                     }
 
                     // Playlist does not exist in RadioDJ
-                    if (typeof playlists[event.playlistID] === "undefined") {
+                    if (typeof playlists[ event.playlistID ] === "undefined") {
                       if (status > 3) {
                         status = 3;
                       }
                       issues.push(
                         `Prerecord event "${event.hosts} - ${
-                          event.name
+                        event.name
                         }" for ${moment(event.start).format(
                           "llll"
                         )} has an assigned playlist that does not exist in RadioDJ. This event will not air until an existing playlist is assigned!`
@@ -215,15 +215,15 @@ module.exports = {
                     */
 
                     // Duplicate tracks
-                    if (playlists[event.playlistID].duplicates > 0) {
+                    if (playlists[ event.playlistID ].duplicates > 0) {
                       if (status > 4) {
                         status = 4;
                       }
                       issues.push(
                         `Prerecord playlist "${event.hosts} - ${
-                          event.name
+                        event.name
                         }" for ${moment(event.start).format("llll")} has ${
-                          playlists[event.playlistID].duplicates
+                        playlists[ event.playlistID ].duplicates
                         } duplicate tracks which will be skipped.`
                       );
                     }
@@ -237,7 +237,7 @@ module.exports = {
                       }
                       issues.push(
                         `Playlist event "${event.hosts} - ${
-                          event.name
+                        event.name
                         }" for ${moment(event.start).format(
                           "llll"
                         )} does not have a playlist assigned to it. This event will not air until fixed!`
@@ -246,13 +246,13 @@ module.exports = {
                     }
 
                     // Playlist does not exist in RadioDJ
-                    if (typeof playlists[event.playlistID] === "undefined") {
+                    if (typeof playlists[ event.playlistID ] === "undefined") {
                       if (status > 3) {
                         status = 3;
                       }
                       issues.push(
                         `Playlist event "${event.hosts} - ${
-                          event.name
+                        event.name
                         }" for ${moment(event.start).format(
                           "llll"
                         )} has an assigned playlist that does not exist in RadioDJ. This event will not air until an existing playlist is assigned!`
@@ -313,15 +313,15 @@ module.exports = {
                     */
 
                     // Duplicate tracks
-                    if (playlists[event.playlistID].duplicates > 0) {
+                    if (playlists[ event.playlistID ].duplicates > 0) {
                       if (status > 4) {
                         status = 4;
                       }
                       issues.push(
                         `Playlist event "${event.hosts} - ${
-                          event.name
+                        event.name
                         }" for ${moment(event.start).format("llll")} has ${
-                          playlists[event.playlistID].duplicates
+                        playlists[ event.playlistID ].duplicates
                         } duplicate tracks which will be skipped.`
                       );
                     }
@@ -344,7 +344,7 @@ module.exports = {
                     }
 
                     // Assigned event does not exist in RadioDJ
-                    if (typeof djevents[event.eventID] === "undefined") {
+                    if (typeof djevents[ event.eventID ] === "undefined") {
                       if (status > 3) {
                         status = 3;
                       }
@@ -360,7 +360,7 @@ module.exports = {
 
                     // Event does not actually load any rotations
                     if (
-                      !djevents[event.eventID].data.includes("Load Rotation")
+                      !djevents[ event.eventID ].data.includes("Load Rotation")
                     ) {
                       if (status > 3) {
                         status = 3;
@@ -375,7 +375,7 @@ module.exports = {
                     }
 
                     // Event disabled (should be minor severity because sometimes we may want to disable a genre)
-                    if (djevents[event.eventID].enabled !== "True") {
+                    if (djevents[ event.eventID ].enabled !== "True") {
                       if (status > 4) {
                         status = 4;
                       }
@@ -456,7 +456,7 @@ module.exports = {
           async (_eventNow) => {
             var triggered = false;
             for (var eventNow in _eventNow) {
-              eventNow = _eventNow[eventNow];
+              eventNow = _eventNow[ eventNow ];
               if (
                 (eventNow.type === "prerecord" ||
                   eventNow.type === "playlist") &&
@@ -510,7 +510,7 @@ module.exports = {
                     (event.scheduleType !== "canceled" &&
                       event.scheduleType !== "canceled-system" &&
                       event.scheduleType !== "canceled-changed")) &&
-                  ["show", "sports", "prerecord", "remote", "playlist"].indexOf(
+                  [ "show", "sports", "prerecord", "remote", "playlist" ].indexOf(
                     event.type
                   ) !== -1
               )
@@ -543,9 +543,9 @@ module.exports = {
                         title: `A scheduled show did not air!`,
                         event: `Show: ${event.hosts} - ${
                           event.name
-                        }}<br />Scheduled time: ${moment(event.start).format(
-                          "llll"
-                        )} - ${moment(event.end).format("llll")}`,
+                          }}<br />Scheduled time: ${moment(event.start).format(
+                            "llll"
+                          )} - ${moment(event.end).format("llll")}`,
                         createdAt: moment().toISOString(true),
                       })
                       .fetch()
@@ -567,12 +567,12 @@ module.exports = {
                       `Dear ${event.hosts},<br /><br />
                             
                               Your show, <strong>${
-                                event.name
-                              }</strong>, was scheduled to air, but you did not air your show. This counts as an <strong>unexcused absence</strong>. Repeat unexcused absences could result in disciplinary action, including loss of your show.<br /><br />
+                      event.name
+                      }</strong>, was scheduled to air, but you did not air your show. This counts as an <strong>unexcused absence</strong>. Repeat unexcused absences could result in disciplinary action, including loss of your show.<br /><br />
                             
                               Scheduled time: ${moment(event.start).format(
-                                "LLLL"
-                              )} - ${moment(event.end).format("LTS")}<br />
+                        "LLLL"
+                      )} - ${moment(event.end).format("LTS")}<br />
                                                               
                               Please reply all to this email if you feel this was not an unexcused absence (such as if you notified them ahead of time you would not be doing your show).`
                     );
@@ -589,11 +589,11 @@ module.exports = {
                         title: `A scheduled prerecord did not air!`,
                         event: `Prerecord: ${event.hosts} - ${
                           event.name
-                        }<br />Scheduled time: ${moment(event.start).format(
-                          "llll"
-                        )} - ${moment(event.end).format(
-                          "llll"
-                        )}<br />Note: When prerecords do not air, this is usually because of a system problem or the prerecord was not correctly added to the system. If this is the case, please mark this as excused.`,
+                          }<br />Scheduled time: ${moment(event.start).format(
+                            "llll"
+                          )} - ${moment(event.end).format(
+                            "llll"
+                          )}<br />Note: When prerecords do not air, this is usually because of a system problem or the prerecord was not correctly added to the system. If this is the case, please mark this as excused.`,
                         createdAt: moment().toISOString(true),
                       })
                       .fetch()
@@ -615,12 +615,12 @@ module.exports = {
                       `Dear ${event.hosts},<br /><br />
                             
                               A prerecord, <strong>${
-                                event.name
-                              }</strong>, was scheduled to air, but it did not air. This counts as an <strong>unexcused absence</strong>. Repeat unexcused absences could result in disciplinary action, including loss of your show.<br /><br />
+                      event.name
+                      }</strong>, was scheduled to air, but it did not air. This counts as an <strong>unexcused absence</strong>. Repeat unexcused absences could result in disciplinary action, including loss of your show.<br /><br />
                             
                               Scheduled time: ${moment(event.start).format(
-                                "LLLL"
-                              )} - ${moment(event.end).format("LTS")}<br />
+                        "LLLL"
+                      )} - ${moment(event.end).format("LTS")}<br />
                                                               
                               <strong>This could have been a system problem rather than an unexcused absence.</strong> If that is the case, or if you emailed a director ahead of time asking to cancel the prerecord, please reply all to this email.`
                     );
@@ -637,9 +637,9 @@ module.exports = {
                         title: `A scheduled remote broadcast did not air!`,
                         event: `Remote: ${event.hosts} - ${
                           event.name
-                        }<br />Scheduled time: ${moment(event.start).format(
-                          "llll"
-                        )} - ${moment(event.end).format("llll")}`,
+                          }<br />Scheduled time: ${moment(event.start).format(
+                            "llll"
+                          )} - ${moment(event.end).format("llll")}`,
                         createdAt: moment().toISOString(true),
                       })
                       .fetch()
@@ -661,12 +661,12 @@ module.exports = {
                       `Dear ${event.hosts},<br /><br />
                             
                               Your remote broadcast, <strong>${
-                                event.name
-                              }</strong>, was scheduled to air, but you did not air your remote broadcast. This counts as an <strong>unexcused absence</strong>. Repeat unexcused absences could result in disciplinary action, including loss of your show.<br /><br />
+                      event.name
+                      }</strong>, was scheduled to air, but you did not air your remote broadcast. This counts as an <strong>unexcused absence</strong>. Repeat unexcused absences could result in disciplinary action, including loss of your show.<br /><br />
                             
                               Scheduled time: ${moment(event.start).format(
-                                "LLLL"
-                              )} - ${moment(event.end).format("LTS")}<br />
+                        "LLLL"
+                      )} - ${moment(event.end).format("LTS")}<br />
                                                               
                               Please reply all to this email if you feel this was not an unexcused absence (such as if you notified them ahead of time you would not be doing your show, or if you experienced technical problems with WWSU preventing you from doing the remote broadcast).`
                     );
@@ -683,9 +683,9 @@ module.exports = {
                         title: `A scheduled sports broadcast did not air!`,
                         event: `Sport: ${
                           event.name
-                        }<br />Scheduled time: ${moment(event.start).format(
-                          "llll"
-                        )} - ${moment(event.end).format("llll")}`,
+                          }<br />Scheduled time: ${moment(event.start).format(
+                            "llll"
+                          )} - ${moment(event.end).format("llll")}`,
                         createdAt: moment().toISOString(true),
                       })
                       .fetch()
@@ -707,12 +707,12 @@ module.exports = {
                       `Dear directors,<br /><br />
                             
                               A sports broadcast, <strong>${
-                                event.name
-                              }</strong>, was scheduled to air, but it did not air.<br /><br />
+                      event.name
+                      }</strong>, was scheduled to air, but it did not air.<br /><br />
                             
                               Scheduled time: ${moment(event.start).format(
-                                "LLLL"
-                              )} - ${moment(event.end).format("LTS")}<br />
+                        "LLLL"
+                      )} - ${moment(event.end).format("LTS")}<br />
                                                               
                               Please cancel sports broadcasts in the calendar in advance if they no longer are supposed to air. Otherwise, DJs who have had their shows canceled/rescheduled will unnecessarily miss part or all of their show.`
                     );
@@ -729,11 +729,11 @@ module.exports = {
                         title: `A scheduled playlist did not air!`,
                         event: `Playlist: ${
                           event.name
-                        }<br />Scheduled time: ${moment(event.start).format(
-                          "llll"
-                        )} - ${moment(event.end).format(
-                          "llll"
-                        )}<br />Note: when playlists do not air, this is usually because of a system problem or the playlist was not correctly added to the system.`,
+                          }<br />Scheduled time: ${moment(event.start).format(
+                            "llll"
+                          )} - ${moment(event.end).format(
+                            "llll"
+                          )}<br />Note: when playlists do not air, this is usually because of a system problem or the playlist was not correctly added to the system.`,
                         createdAt: moment().toISOString(true),
                       })
                       .fetch()
@@ -755,18 +755,33 @@ module.exports = {
                       `Dear ${event.hosts},<br /><br />
                             
                               A playlist, <strong>${
-                                event.name
-                              }</strong>, was scheduled to air, but it did not air. This counts as an <strong>unexcused absence</strong>. Repeat unexcused absences could result in disciplinary action, including loss of your show.<br /><br />
+                      event.name
+                      }</strong>, was scheduled to air, but it did not air. This counts as an <strong>unexcused absence</strong>. Repeat unexcused absences could result in disciplinary action, including loss of your show.<br /><br />
                             
                               Scheduled time: ${moment(event.start).format(
-                                "LLLL"
-                              )} - ${moment(event.end).format("LTS")}<br />
+                        "LLLL"
+                      )} - ${moment(event.end).format("LTS")}<br />
                                                               
                               <strong>This could have been a system problem rather than an unexcused absence.</strong> If that is the case, or if you emailed a director ahead of time asking to cancel the playlist, please reply all to this email.`
                     );
                   }
                 }
               });
+
+            // Check director hours not tied to a calendar entry. Tie them to an entry if applicable.
+            var check2 = await sails.models.timesheet.find({
+              unique: null,
+              timeIn: { '!=': null },
+              timeOut: null
+            });
+            if (check2 && check2.length > 0) {
+              check2.map(async (check3) => {
+                var eventCheck2 = eventCheck.find((event) => event.name === check3.name && moment(check3.timeIn).isSameOrAfter(event.start) && moment(check3.timeIn).isBefore(event.end));
+                if (eventCheck2) {
+                  await sails.models.timesheet.update({ ID: check3.ID }, { unique: event.unique, scheduledIn: event.start, scheduledOut: event.end }).fetch();
+                }
+              });
+            }
 
             // Director hours absence checking
             eventCheck
@@ -808,9 +823,9 @@ module.exports = {
                       title: `A director failed to clock in for scheduled office hours!`,
                       event: `Director: ${
                         event.hosts
-                      }<br />Scheduled time: ${moment(event.start).format(
-                        "llll"
-                      )} - ${moment(event.end).format("llll")}`,
+                        }<br />Scheduled time: ${moment(event.start).format(
+                          "llll"
+                        )} - ${moment(event.end).format("llll")}`,
                       createdAt: moment().toISOString(true),
                     })
                     .fetch()
@@ -821,7 +836,7 @@ module.exports = {
                     "accountability-directors",
                     "Director failed to do their hours!",
                     `${
-                      event.hosts
+                    event.hosts
                     } failed to show up for their scheduled hours at ${moment(
                       event.start
                     ).format("llll")} - ${moment(event.end).format("llll")}.`
