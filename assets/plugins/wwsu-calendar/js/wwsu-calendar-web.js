@@ -321,45 +321,43 @@ class CalendarDb {
               var startInterval;
               switch (schedule.recurrenceInterval.measure) {
                 case "days":
-                  startInterval = moment(start).startOf("day");
+                  startInterval = moment(schedule.startDate).startOf("day");
                   if (
                     moment(eventStart)
                       .startOf("day")
-                      .diff(startInterval, "days") %
-                      schedule.recurrenceInterval.unit !==
+                      .diff(startInterval, "days", true) %
+                      parseInt(schedule.recurrenceInterval.unit) !==
                     0
                   )
                     return;
                   break;
                 case "weeks":
-                  startInterval = moment(start).startOf("week");
+                  startInterval = moment(schedule.startDate).startOf("week");
                   if (
-                    moment(eventStart)
-                      .startOf("week")
-                      .diff(startInterval, "weeks") %
-                      schedule.recurrenceInterval.unit !==
+                    moment(eventStart).diff(startInterval, "weeks") %
+                      parseInt(schedule.recurrenceInterval.unit) !==
                     0
                   )
                     return;
                   break;
                 case "months":
-                  startInterval = moment(start).startOf("month");
+                  startInterval = moment(schedule.startDate).startOf("month");
                   if (
                     moment(eventStart)
                       .startOf("month")
                       .diff(startInterval, "months") %
-                      schedule.recurrenceInterval.unit !==
+                      parseInt(schedule.recurrenceInterval.unit) !==
                     0
                   )
                     return;
                   break;
                 case "years":
-                  startInterval = moment(start).startOf("year");
+                  startInterval = moment(schedule.startDate).startOf("year");
                   if (
                     moment(eventStart)
                       .startOf("year")
                       .diff(startInterval, "years") %
-                      schedule.recurrenceInterval.unit !==
+                      parseInt(schedule.recurrenceInterval.unit) !==
                     0
                   )
                     return;

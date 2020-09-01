@@ -1086,12 +1086,13 @@ module.exports.bootstrap = async function (done) {
 
           // Manage breaks intelligently using track queue length. This gets complicated, so comments explain the process.
 
-          // Do not run this process if we cannot get a duration for the currently playing track, or if we suspect the current queue duration to be inaccurate
+          // Do not run this process if we cannot get a duration for the currently playing track, we are changing states, or if we suspect the current queue duration to be inaccurate
           if (
             sails.models.status.errorCheck.trueZero <= 0 &&
             typeof queue[0] !== "undefined" &&
             typeof queue[0].Duration !== "undefined" &&
-            typeof queue[0].Elapsed !== "undefined"
+            typeof queue[0].Elapsed !== "undefined" &&
+            sails.models.meta.memory.changingState === null
           ) {
             // Iterate through each configured break to see if it's time to do it
             for (var key in sails.config.custom.breaks) {
