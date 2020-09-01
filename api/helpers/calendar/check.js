@@ -774,13 +774,17 @@ module.exports = {
               timeIn: { '!=': null },
               timeOut: null
             });
+            sails.log.verbose(`CALENDAR DIRECTOR CHECK: ${check2.length} clocked in records with no calendar event.`);
             if (check2 && check2.length > 0) {
-              check2.map(async (check3) => {
+              var maps = check2.map(async (check3) => {
                 var eventCheck2 = eventCheck.find((event) => event.name === check3.name && moment(check3.timeIn).isSameOrAfter(event.start) && moment(check3.timeIn).isBefore(event.end));
+                sails.log.verbose(`CALENDAR DIRECTOR CHECK: ${check3.ID} -> eventCheck2?`);
+                sails.log.verbose(eventCheck2);
                 if (eventCheck2) {
-                  await sails.models.timesheet.update({ ID: check3.ID }, { unique: event.unique, scheduledIn: event.start, scheduledOut: event.end }).fetch();
+                  await sails.models.timesheet.update({ ID: check3.ID }, { unique: eventCheck2.unique, scheduledIn: eventCheck2.start, scheduledOut: eventCheck2.end }).fetch();
                 }
               });
+              await Promise.all(maps);
             }
 
             // Director hours absence checking
