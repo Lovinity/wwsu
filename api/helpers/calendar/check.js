@@ -774,18 +774,11 @@ module.exports = {
               timeIn: { '!=': null },
               timeOut: null
             });
-            sails.log.verbose(`CALENDAR DIRECTOR CHECK: ${check2.length} clocked in records with no calendar event.`);
             if (check2 && check2.length > 0) {
               var maps = check2.map(async (check3) => {
-                sails.log.verbose(`CALENDAR DIRECTOR CHECK: Check3`);
-                sails.log.verbose(check3);
                 var eventCheck2 = eventCheck.find((event) => {
-                  sails.log.verbose(`CALENDAR DIRECTOR CHECK: Checking event`)
-                  sails.log.verbose(event);
                   return event.name === check3.name && moment().isSameOrAfter(event.start) && moment(check3.timeIn).isBefore(event.end);
                 });
-                sails.log.verbose(`CALENDAR DIRECTOR CHECK: ${check3.ID} -> eventCheck2?`);
-                sails.log.verbose(eventCheck2);
                 if (eventCheck2) {
                   await sails.models.timesheet.update({ ID: check3.ID }, { unique: eventCheck2.unique, scheduledIn: eventCheck2.start, scheduledOut: eventCheck2.end }).fetch();
                 }
