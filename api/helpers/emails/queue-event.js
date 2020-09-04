@@ -66,7 +66,7 @@ module.exports = {
             `Changed date/time for ${inputs.event.hosts} - ${inputs.event.name}`,
             `Dear ${inputs.event.hosts},<br /><br />
 
-  A time slot for your show, <strong>${inputs.event.name}</strong>, was <strong>re-scheduled</strong>.<br /><br />
+  A time slot for your ${inputs.event.type}, <strong>${inputs.event.name}</strong>, was <strong>re-scheduled</strong>.<br /><br />
 
   Original time: ${moment(inputs.event.originalTime).format("LLLL")}<br />
   New time: <strong>${moment(inputs.event.start).format("LLLL")} - ${moment(inputs.event.end).format("LT")}</strong><br /><br />
@@ -86,7 +86,7 @@ module.exports = {
             `Canceled date/time for ${inputs.event.hosts} - ${inputs.event.name}`,
             `Dear ${inputs.event.hosts},<br /><br />
 
-  A time slot for your show, <strong>${inputs.event.name}</strong>, was <strong>canceled</strong>.<br /><br />
+  A time slot for your ${inputs.event.type}, <strong>${inputs.event.name}</strong>, was <strong>canceled</strong>.<br /><br />
 
   Canceled time: ${moment(inputs.event.originalTime).format("LLLL")}<br />
   
@@ -109,10 +109,10 @@ module.exports = {
             `Reversal of a re-schedule for ${inputs.event.hosts} - ${inputs.event.name}`,
             `Dear ${inputs.event.hosts},<br /><br />
 
-  Your show, <strong>${inputs.event.name}</strong>, was originally re-scheduled to a different time. However, that re-schedule was reversed and your show is now scheduled for its <strong>original time</strong>.<br /><br />
+  Your ${inputs.event.type}, <strong>${inputs.event.name}</strong>, was originally re-scheduled to a different time. However, that re-schedule was reversed and your ${inputs.event.type} is now scheduled for its <strong>original time</strong>.<br /><br />
 
   Rescheduled time: ${moment(inputs.event.start).format("LLLL")} - ${moment(inputs.event.end).format("LT")}<br />
-  <strong>The show should now air on its originally scheduled start time of ${moment(inputs.event.originalTime).format("LLLL")} and end at its original end time.</strong>
+  <strong>The ${inputs.event.type} should now air on its originally scheduled start time of ${moment(inputs.event.originalTime).format("LLLL")} and end at its original end time.</strong>
   
   If you have any questions or concerns, please reply all to this email.`
           );
@@ -125,9 +125,9 @@ module.exports = {
             `Reversal of cancellation for ${inputs.event.hosts} - ${inputs.event.name}`,
             `Dear ${inputs.event.hosts},<br /><br />
 
-  Your show, <strong>${inputs.event.name}</strong>, was originally canceled on a date/time. However, that cancellation was reversed and your show is now scheduled for its <strong>original time</strong>.<br /><br />
+  Your ${inputs.event.type}, <strong>${inputs.event.name}</strong>, was originally canceled on a date/time. However, that cancellation was reversed and your ${inputs.event.type} is now scheduled for its <strong>original time</strong>.<br /><br />
 
-  <strong>The show should now air on its originally scheduled start time of ${moment(inputs.event.originalTime).format("LLLL")} and end at its original end time; the cancellation of this date/time was reversed.</strong>
+  <strong>The ${inputs.event.type} should now air on its originally scheduled start time of ${moment(inputs.event.originalTime).format("LLLL")} and end at its original end time; the cancellation of this date/time was reversed.</strong>
   
   If you have any questions or concerns, please reply all to this email.`
           );
