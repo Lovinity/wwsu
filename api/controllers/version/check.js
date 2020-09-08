@@ -31,6 +31,6 @@ module.exports = {
     }
 
     // Return version and download URL
-    return { version: record.version, downloadURL: record.downloadURL };
+    return exits.success({ version: record.version, downloadURL: record.downloadURL });
   },
 };
