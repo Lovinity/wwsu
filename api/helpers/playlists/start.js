@@ -129,7 +129,83 @@ module.exports = {
           return exits.error(new Error("Playlist not found!"));
         }
 
-        // This private function will load the playlist from the variable theplaylist, gather playlist tracks in memory, wait until deemed queued, then resolve.
+        // Load the playlist tracks into memory so CRON can check when the playlist has finished.
+        // LINT: Playlists_list must NOT be camel case; this is how it is in the RadioDJ database.
+        // eslint-disable-next-line camelcase
+        var playlistTracks = await sails.models.playlists_list
+          .find({ pID: theplaylist.ID })
+          .sort("ord ASC");
+        sails.log.verbose(
+          `Playlists_list records retrieved: ${playlistTracks.length}`
+        );
+
+        // Bail and log if there are no tracks in this playlist
+        if (!playlistTracks) {
+          if (!inputs.ignoreChangingState) {
+            await sails.helpers.meta.change.with({ changingState: null });
+          }
+          sails.models.playlists.queuing = false;
+          sails.log.verbose(`playlists.start: NO TRACKS`);
+          var record = await sails.models.attendance
+            .create({
+              calendarID: inputs.event.calendarID,
+              unique: inputs.event.unique,
+              dj: inputs.event.hostDJ,
+              cohostDJ1: inputs.event.cohostDJ1,
+              cohostDJ2: inputs.event.cohostDJ2,
+              cohostDJ3: inputs.event.cohostDJ3,
+              event: `${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name}`,
+              happened: 0,
+              happenedReason: "Playlist had no tracks",
+              scheduledStart: moment(inputs.event.start).toISOString(true),
+              scheduledEnd: moment(inputs.event.end).toISOString(true),
+              badPlaylist: true,
+            })
+            .fetch();
+          await sails.models.logs
+            .create({
+              attendanceID: record.ID,
+              logtype: "bad-playlist",
+              loglevel: "orange",
+              logsubtype: `${inputs.event.hosts} - ${inputs.event.name}`,
+              logIcon: `fas fa-play-circle`,
+              title: `A ${inputs.event.type} failed to air!`,
+              event: `${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name}<br />The playlist assigned to this event had no tracks to queue.`,
+            })
+            .fetch()
+            .tolerate((err) => {
+              // Do not throw for errors, but log them.
+              sails.log.error(err);
+            });
+          await sails.helpers.onesignal.sendMass(
+            "emergencies",
+            `${inputs.event.type} failed to air!`,
+            `${inputs.event.hosts} - ${
+              inputs.event.name
+            } failed to air on ${moment(inputs.event.start).format(
+              "llll"
+            )} - ${moment(inputs.event.end).format(
+              "llll"
+            )}; there were no tracks in the playlist to queue.`
+          );
+          await sails.helpers.emails.queueDjs(
+            inputs.event,
+            `${inputs.event.type} failed to air: ${inputs.event.hosts} - ${inputs.event.name}`,
+            `Dear ${inputs.event.hosts},<br /><br />
+                                    
+                  A scheduled ${inputs.event.type}, <strong>${inputs.event.name}</strong>, failed to air because there were no tracks to queue in the playlist. This is likely something the directors need to resolve, and they were included in this email.<br /><br />
+                  You can reply all to this email if you need assistance from the directors.`
+          );
+          return exits.error(new Error(`No playlist tracks were returned.`));
+        }
+
+        // Map all tracks in the playlist into memory.
+        sails.models.playlists.active.tracks = [];
+        playlistTracks.map((playlistTrack) =>
+          sails.models.playlists.active.tracks.push(playlistTrack.sID)
+        );
+
+        // This private function will load the playlist and wait until deemed queued, then resolve.
         var loadPlaylist = function () {
           // LINT: async is required because await is necessary for Sails.js
           // eslint-disable-next-line no-async-promise-executor
@@ -138,84 +214,6 @@ module.exports = {
               sails.log.verbose(`playlists.start: loadPlaylist called.`);
 
               await sails.helpers.rest.cmd("LoadPlaylist", theplaylist.ID); // Queue the playlist
-
-              // Load the playlist tracks into memory so CRON can check when the playlist has finished.
-              // LINT: Playlists_list must NOT be camel case; this is how it is in the RadioDJ database.
-              // eslint-disable-next-line camelcase
-              var playlistTracks = await sails.models.playlists_list
-                .find({ pID: theplaylist.ID })
-                .sort("ord ASC");
-              sails.log.verbose(
-                `Playlists_list records retrieved: ${playlistTracks.length}`
-              );
-
-              // Bail and log if there are no tracks in this playlist
-              if (!playlistTracks) {
-                if (!inputs.ignoreChangingState) {
-                  await sails.helpers.meta.change.with({ changingState: null });
-                }
-                sails.models.playlists.queuing = false;
-                sails.log.verbose(`playlists.start: NO TRACKS`);
-                var record = await sails.models.attendance
-                  .create({
-                    calendarID: inputs.event.calendarID,
-                    unique: inputs.event.unique,
-                    dj: inputs.event.hostDJ,
-                    cohostDJ1: inputs.event.cohostDJ1,
-                    cohostDJ2: inputs.event.cohostDJ2,
-                    cohostDJ3: inputs.event.cohostDJ3,
-                    event: `${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name}`,
-                    happened: 0,
-                    happenedReason: "Playlist had no tracks",
-                    scheduledStart: moment(inputs.event.start).toISOString(
-                      true
-                    ),
-                    scheduledEnd: moment(inputs.event.end).toISOString(true),
-                    badPlaylist: true,
-                  })
-                  .fetch();
-                await sails.models.logs
-                  .create({
-                    attendanceID: record.ID,
-                    logtype: "bad-playlist",
-                    loglevel: "orange",
-                    logsubtype: `${inputs.event.hosts} - ${inputs.event.name}`,
-                    logIcon: `fas fa-play-circle`,
-                    title: `A ${inputs.event.type} failed to air!`,
-                    event: `${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name}<br />The playlist assigned to this event had no tracks to queue.`,
-                  })
-                  .fetch()
-                  .tolerate((err) => {
-                    // Do not throw for errors, but log them.
-                    sails.log.error(err);
-                  });
-                await sails.helpers.onesignal.sendMass(
-                  "emergencies",
-                  `${inputs.event.type} failed to air!`,
-                  `${inputs.event.hosts} - ${
-                    inputs.event.name
-                  } failed to air on ${moment(inputs.event.start).format(
-                    "llll"
-                  )} - ${moment(inputs.event.end).format(
-                    "llll"
-                  )}; there were no tracks in the playlist to queue.`
-                );
-                await sails.helpers.emails.queueDjs(
-                  inputs.event,
-                  `${inputs.event.type} failed to air: ${inputs.event.hosts} - ${inputs.event.name}`,
-                  `Dear ${inputs.event.hosts},<br /><br />
-                                    
-                  A scheduled ${inputs.event.type}, <strong>${inputs.event.name}</strong>, failed to air because there were no tracks to queue in the playlist. This is likely something the directors need to resolve, and they were included in this email.<br /><br />
-                  You can reply all to this email if you need assistance from the directors.`
-                );
-                return reject(new Error(`No playlist tracks were returned.`));
-              }
-
-              // Map all tracks in the playlist into memory.
-              sails.models.playlists.active.tracks = [];
-              playlistTracks.map((playlistTrack) =>
-                sails.models.playlists.active.tracks.push(playlistTrack.sID)
-              );
 
               var slot = 10;
               var prevLength = 0;
@@ -461,6 +459,7 @@ module.exports = {
         await sails.helpers.meta.change.with({ changingState: null });
       }
       sails.models.playlists.queuing = false;
+      await sails.helpers.rest.cmd("EnableAutoDJ", 1);
       console.error(e);
       return exits.error(e);
     }
