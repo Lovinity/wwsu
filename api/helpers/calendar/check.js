@@ -164,7 +164,7 @@ module.exports = {
                     }
 
                     // Playlist has no tracks
-                    if (!playlists[ event.playlistID ].tracks) {
+                    if (!playlists[ event.playlistID ].tracks || playlists[ event.playlistID ].tracks.length < 1) {
                       if (status > 3) {
                         status = 3;
                       }
@@ -277,7 +277,7 @@ module.exports = {
                     }
 
                     // Playlist has no tracks
-                    if (!playlists[ event.playlistID ].tracks) {
+                    if (!playlists[ event.playlistID ].tracks || playlists[ event.playlistID ].tracks.length < 1) {
                       if (status > 3) {
                         status = 3;
                       }

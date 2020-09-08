@@ -140,7 +140,7 @@ module.exports = {
         );
 
         // Bail and log if there are no tracks in this playlist
-        if (!playlistTracks) {
+        if (playlistTracks.length < 1) {
           if (!inputs.ignoreChangingState) {
             await sails.helpers.meta.change.with({ changingState: null });
           }
