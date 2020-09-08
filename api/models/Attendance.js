@@ -136,6 +136,11 @@ module.exports = {
       defaultsTo: false,
     },
 
+    badPlaylist: {
+      type: 'boolean',
+      defaultsTo: false,
+    },
+
     scheduledStart: {
       type: 'ref',
       columnType: 'datetime'

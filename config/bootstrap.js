@@ -771,6 +771,7 @@ module.exports.bootstrap = async function (done) {
                               sails.helpers.meta.newShow().then(() => {});
                             });
                         }
+
                         // Flip to prerecord_break if not currently playing a track from the prerecord playlist, and back to prerecord_on otherwise
                         if (index === 0) {
                           playingTrack = true;
@@ -851,7 +852,7 @@ module.exports.bootstrap = async function (done) {
                           attendanceID: sails.models.meta.memory.attendanceID,
                           logtype: "sign-off",
                           loglevel: "primary",
-                          logsubtype: sails.models.meta.memory.playlist,
+                          logsubtype: sails.models.meta.memory.show,
                           logIcon: `fas fa-play-circle`,
                           title: `Prerecord finished airing; no more tracks to play.`,
                           event: ``,
@@ -861,6 +862,83 @@ module.exports.bootstrap = async function (done) {
                           // Do not throw for errors, but log it.
                           sails.log.error(err);
                         });
+                      break;
+
+                    // Uh oh! This is a bad prerecord playlist! Log this and notify the directors.
+                    case "automation_prerecord":
+                      var eventNow = sails.models.calendar.calendardb.whatShouldBePlaying(
+                        null,
+                        false
+                      );
+                      eventNow = eventNow.find(
+                        (event) =>
+                          event.type === "prerecord" &&
+                          sails.models.meta.memory.show ===
+                            `${event.hosts} - ${event.name}` &&
+                          [
+                            "canceled",
+                            "canceled-system",
+                            "canceled-changed",
+                          ].indexOf(event.scheduleType) === -1
+                      );
+                      if (eventNow) {
+                        var record = await sails.models.attendance
+                          .create({
+                            calendarID: eventNow.calendarID,
+                            unique: eventNow.unique,
+                            dj: eventNow.hostDJ,
+                            cohostDJ1: eventNow.cohostDJ1,
+                            cohostDJ2: eventNow.cohostDJ2,
+                            cohostDJ3: eventNow.cohostDJ3,
+                            event: `prerecord: ${eventNow.hosts} - ${eventNow.name}`,
+                            happened: 0,
+                            happenedReason: "Bad Playlist",
+                            scheduledStart: moment(
+                              eventNow.start
+                            ).toISOString(true),
+                            scheduledEnd: moment(eventNow.end).toISOString(
+                              true
+                            ),
+                            badPlaylist: true,
+                          })
+                          .fetch();
+                        await sails.models.logs
+                          .create({
+                            attendanceID: record.ID,
+                            logtype: "bad-playlist",
+                            loglevel: "orange",
+                            logsubtype: sails.models.meta.memory.show,
+                            logIcon: `fas fa-play-circle`,
+                            title: `A prerecord failed to air!`,
+                            event: `Prerecord: ${sails.models.meta.memory.show}<br />This is probably because the tracks in the prerecord's radioDJ playlist are corrupt.`,
+                          })
+                          .fetch()
+                          .tolerate((err) => {
+                            // Do not throw for errors, but log them.
+                            sails.log.error(err);
+                          });
+                        await sails.helpers.onesignal.sendMass(
+                          "emergencies",
+                          "Prerecord failed to air!",
+                          `${eventNow.hosts} - ${
+                            eventNow.name
+                          } failed to air on ${moment(eventNow.start).format(
+                            "llll"
+                          )} - ${moment(eventNow.end).format(
+                            "llll"
+                          )}; most likely, the tracks in the playlist are corrupted.`
+                        );
+                        await sails.helpers.emails.queueDjs(
+                          eventNow,
+                          `Prerecord failed to air: ${eventNow.hosts} - ${eventNow.name}`,
+                          `Dear ${eventNow.hosts},<br /><br />
+                                    
+                                    A scheduled prerecord, <strong>${
+                                      eventNow.name
+                                    }</strong>, tried to go on the air. However, it failed to broadcast, and the system immediately went back to automation. Please check to ensure the tracks uploaded to the system and/or in the RadioDJ Playlist are valid and not corrupt.<br /><br />
+                          You can reply all to this email if you need assistance from the directors.`
+                        );
+                      }
                       break;
                   }
                   await sails.helpers.rest.cmd("EnableAssisted", 0);

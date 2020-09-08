@@ -155,6 +155,7 @@ module.exports = {
   ${stats.silence.length > 0 && typeof stats.silence.map === 'function' ? `<li><strong>There was excessive silence / very low audio at these times;</strong> please avoid excessive silence on the air as this violates FCC regulations:</strong><br />
   ${stats.silence.map((record) => moment(record).format("LT")).join("<br />")}
   </li>` : ``}
+  ${stats.badPlaylist ? `<li><strong>The broadcast did not successfully air due to a bad playlist.</strong> Please ensure the tracks you added/uploaded for this broadcast were not corrupted. If they are not corrupt, please let the directors know.</li>` : ``}
   ${stats.signedOnEarly ? `<li><strong>You signed on 5 or more minutes early.</strong> Please avoid doing this, especially if there's a scheduled show before yours.</li>` : ``}
   ${stats.signedOnLate ? `<li><strong>You signed on 10 or more minutes late.</strong> Please inform directors in advance if you are going to be late for your show.</li>` : ``}
   ${stats.signedOffEarly ? `<li><strong>You signed off 10 or more minutes early.</strong> Please inform directors in advance if you are going to end your show early.</li>` : ``}

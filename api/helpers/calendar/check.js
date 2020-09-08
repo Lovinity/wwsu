@@ -98,6 +98,7 @@ module.exports = {
               playlists[ playlist.ID ] = {
                 ID: playlist.ID,
                 name: playlist.name,
+                tracks: songs,
                 duration: duration,
                 duplicates: playlistDuplicates,
                 duplicateTracks: duplicateTracks.join("<br />"),
@@ -158,6 +159,21 @@ module.exports = {
                         }" for ${moment(event.start).format(
                           "llll"
                         )} has an assigned playlist that does not exist in RadioDJ. This event will not air until an existing playlist is assigned!`
+                      );
+                      break;
+                    }
+
+                    // Playlist has no tracks
+                    if (!playlists[ event.playlistID ].tracks) {
+                      if (status > 3) {
+                        status = 3;
+                      }
+                      issues.push(
+                        `Prerecord event "${event.hosts} - ${
+                        event.name
+                        }" for ${moment(event.start).format(
+                          "llll"
+                        )} has no tracks in its assigned playlist. Please add the tracks that should be aired for this prerecord.`
                       );
                       break;
                     }
@@ -256,6 +272,21 @@ module.exports = {
                         }" for ${moment(event.start).format(
                           "llll"
                         )} has an assigned playlist that does not exist in RadioDJ. This event will not air until an existing playlist is assigned!`
+                      );
+                      break;
+                    }
+
+                    // Playlist has no tracks
+                    if (!playlists[ event.playlistID ].tracks) {
+                      if (status > 3) {
+                        status = 3;
+                      }
+                      issues.push(
+                        `Playlist event "${event.hosts} - ${
+                        event.name
+                        }" for ${moment(event.start).format(
+                          "llll"
+                        )} has no tracks in its assigned playlist. Please add the tracks that should be aired for this playlist.`
                       );
                       break;
                     }
