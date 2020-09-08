@@ -1720,7 +1720,9 @@ module.exports.bootstrap = async function (done) {
           await sails.helpers.status.change.with({
             name: "EAS-internal",
             label: "Internal EAS",
-            data: `All NWS CAPS (${sails.config.custom.EAS.NWSX.map((cap) => cap.name).join()}) are online.`,
+            data: `All NWS CAPS (${sails.config.custom.EAS.NWSX.map(
+              (cap) => cap.name
+            ).join()}) are online.`,
             status: 5,
           });
         } else {
@@ -1794,6 +1796,7 @@ module.exports.bootstrap = async function (done) {
           sails.models.sports,
           sails.models.xp,
           sails.models.schedule,
+          sails.models.version,
         ];
         // Memory checks
         var checkStatus = { data: ``, status: 5 };
