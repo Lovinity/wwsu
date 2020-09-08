@@ -21,8 +21,7 @@ module.exports = {
     sails.log.debug(`Controller version/check called`);
 
     // Get record
-    var record = await sails.models.version.findOne({ app: inputs.app });
-    if (!record) return exits.notFound();
+    var record = await sails.models.version.find({ app: inputs.app });
 
     // Subscribe to socket
     if (this.req.isSocket) {
