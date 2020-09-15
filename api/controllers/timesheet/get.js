@@ -18,6 +18,12 @@ module.exports = {
       },
       description: `moment() parsable string of the end date/time to get records. Defaults to now.`,
     },
+    endInclusive: {
+      type: "boolean",
+      deafultsTo: true,
+      description:
+        "If true, will use start of next day for end instead of exact date/time. Set this to false when specifying a specific time for end or when end date should be exclusive.",
+    },
   },
 
   fn: async function (inputs, exits) {
@@ -36,7 +42,11 @@ module.exports = {
       var start = inputs.start
         ? moment(inputs.start)
         : moment().subtract(2, "weeks");
-      var end = inputs.end ? moment(inputs.end) : moment();
+      var end = inputs.end
+        ? inputs.endInclusive
+          ? moment(inputs.end).add(1, "days").startOf("day")
+          : moment(inputs.end)
+        : moment();
 
       // Get timesheet records
       var records = await sails.models.timesheet

@@ -28,7 +28,8 @@ module.exports = {
 
         downloadURL: {
             type: 'string',
-            required: true
+            required: true,
+            isURL: true
         },
 
     },

@@ -102,6 +102,7 @@ module.exports.policies = {
   'uab/timesheet/view': 'isBanned',
   'underwritings/*': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
   'underwritings/get': ['isBanned', 'isSocket'],
+  'version/edit': ['isBanned', 'isSocket', 'isAuthorizedAdminDirector'],
   'xp/*': ['isBanned', 'isSocket', 'isAuthorizedDirector'],
   'xp/get': ['isBanned', 'isSocket', 'isAuthorizedHost']
 }
