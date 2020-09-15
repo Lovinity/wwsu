@@ -1,62 +1,85 @@
 module.exports = {
+  friendlyName: "Timesheet / Get",
 
-  friendlyName: 'Timesheet / Get',
-
-  description: 'Get a week of timesheet entries.',
+  description: "Get a week of timesheet entries.",
 
   inputs: {
-    date: {
-      type: 'string',
+    start: {
+      type: "string",
       custom: function (value) {
-        return moment(value).isValid()
+        return moment(value).isValid();
       },
-      allowNull: true,
-      description: `moment() parsable string of a date that falls within the week to get timesheet entries. Defaults to now.`
+      description: `moment() parsable string of the start date/time to get records. Defaults to 14 days ago.`,
     },
-    fourteenDays: {
-      type: 'boolean',
-      defaultsTo: false,
-      description: `If true, will get timesheet records for the specified date, the past 7 days, and the next 7 days, instead of the week which the date falls in.`
-    }
+    end: {
+      type: "string",
+      custom: function (value) {
+        return moment(value).isValid();
+      },
+      description: `moment() parsable string of the end date/time to get records. Defaults to now.`,
+    },
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller timesheet/get called.')
+    sails.log.debug("Controller timesheet/get called.");
 
     try {
-      if (!inputs.date || inputs.date === null) {
+      if (!inputs.start || inputs.start === null) {
         // Join timesheet socket if applicable
         if (this.req.isSocket) {
-          sails.sockets.join(this.req, 'timesheet')
-          sails.log.verbose('Request was a socket. Joining timesheet.')
+          sails.sockets.join(this.req, "timesheet");
+          sails.log.verbose("Request was a socket. Joining timesheet.");
         }
       }
 
-      // Get a range of one week
-      var start = inputs.date !== null ? moment(inputs.date).startOf('week') : moment().startOf('week')
-      var end = moment(start).add(1, 'weeks')
-
-      // ...or a range of 14 days if fourteenDays is true
-      if (inputs.fourteenDays) {
-        start = moment(inputs.date).subtract(7, 'days')
-        end = moment(inputs.date).add(7, 'days')
-      }
+      // Get the time ranges
+      var start = inputs.start
+        ? moment(inputs.start)
+        : moment().subtract(2, "weeks");
+      var end = inputs.end ? moment(inputs.end) : moment();
 
       // Get timesheet records
-      var records = await sails.models.timesheet.find({ or: [
-        { timeIn: { '>=': start.toISOString(true), '<': end.toISOString(true) } },
-        { timeOut: { '>=': start.toISOString(true), '<': end.toISOString(true) } },
-        { timeIn: null, timeOut: null, scheduledIn: { '>=': start.toISOString(true), '<': end.toISOString(true) } },
-        { timeIn: null, timeOut: null, scheduledOut: { '>=': start.toISOString(true), '<': end.toISOString(true) } }
-      ] }).sort([{ timeIn: 'ASC' }, { scheduledIn: 'ASC' }])
-      sails.log.verbose(`Returned Timesheet records: ${records.length}`)
-      sails.log.silly(records)
+      var records = await sails.models.timesheet
+        .find({
+          or: [
+            {
+              timeIn: {
+                ">=": start.toISOString(true),
+                "<": end.toISOString(true),
+              },
+            },
+            {
+              timeOut: {
+                ">=": start.toISOString(true),
+                "<": end.toISOString(true),
+              },
+            },
+            {
+              timeIn: null,
+              timeOut: null,
+              scheduledIn: {
+                ">=": start.toISOString(true),
+                "<": end.toISOString(true),
+              },
+            },
+            {
+              timeIn: null,
+              timeOut: null,
+              scheduledOut: {
+                ">=": start.toISOString(true),
+                "<": end.toISOString(true),
+              },
+            },
+          ],
+        })
+        .sort([{ timeIn: "ASC" }, { scheduledIn: "ASC" }]);
+      sails.log.verbose(`Returned Timesheet records: ${records.length}`);
+      sails.log.silly(records);
 
       // return the records
-      return exits.success(records)
+      return exits.success(records);
     } catch (e) {
-      return exits.error(e)
+      return exits.error(e);
     }
-  }
-
-}
+  },
+};
