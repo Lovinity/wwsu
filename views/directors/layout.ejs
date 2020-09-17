@@ -180,7 +180,7 @@
             src="/images/display/logo_true.png"
             alt="WWSU Logo"
             class="brand-image img-circle bg-white elevation-3"
-            style="opacity: 0.8;"
+            style="opacity: 0.8"
           />
           <span class="brand-text font-weight-light">WWSU 106.9 FM</span>
         </a>
@@ -201,22 +201,18 @@
                 <a
                   href="#"
                   class="nav-link"
-                  id="nav-timesheet"
+                  id="nav-timesheets"
                   title="Timesheets"
                 >
                   <i class="nav-icon fas fa-user-clock"></i>
-                  <p>
-                    Timesheets
-                  </p>
+                  <p>Timesheets</p>
                 </a>
               </li>
 
               <li class="nav-item">
                 <a href="#" class="nav-link" id="nav-calendar" title="Calendar">
                   <i class="nav-icon fas fa-calendar"></i>
-                  <p>
-                    Calendar
-                  </p>
+                  <p>Calendar</p>
                 </a>
               </li>
             </ul>
@@ -228,9 +224,66 @@
 
       <!-- Content Wrapper. Contains page content -->
       <div class="content-wrapper">
-        <section id="section-timesheet" style="display: none;"></section>
+        <!-- Timesheets -->
+        <section id="section-timesheets" style="display: none">
+          <div class="content-wrapper">
+            <div class="content-header">
+              <div class="container-fluid">
+                <div class="row mb-2">
+                  <div class="col-12">
+                    <h1 class="m-0 text-dark">Director Timesheets</h1>
+                  </div>
+                  <!-- /.col -->
+                </div>
+                <!-- /.row -->
+              </div>
+              <!-- /.container-fluid -->
+            </div>
 
-        <section id="section-calendar" style="display: none;">
+            <div class="content">
+              <div class="card card-primary elevation-2">
+                <div class="card-header">
+                  <h3 class="card-title">Choose Date Range</h3>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                  <div class="form-group" title="Choose timesheet date range.">
+                    <label for="section-timesheets-start">Start</label>
+                    <input type="date" id="section-timesheets-start" />
+                    <label for="section-timesheets-end">End</label>
+                    <input type="date" id="section-timesheets-end" />
+                    <input
+                      type="submit"
+                      class="btn btn-primary"
+                      id="section-timesheets-browse"
+                      value="Browse"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="card card-warning elevation-2">
+                <div class="card-header">
+                  <h3 class="card-title">Hours</h3>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body" id="section-timesheets-hours"></div>
+                <!-- /.card-body -->
+              </div>
+
+              <div class="card card-info elevation-2">
+                <div class="card-header">
+                  <h3 class="card-title">Records</h3>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body" id="section-timesheets-records"></div>
+                <!-- /.card-body -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="section-calendar" style="display: none">
           <div class="content-header">
             <div class="container-fluid">
               <div class="row mb-2">
@@ -298,9 +351,7 @@
                   </div>
                   <div class="card">
                     <div class="card-header">
-                      <h4 class="card-title">
-                        Filter Calendar by Event Type
-                      </h4>
+                      <h4 class="card-title">Filter Calendar by Event Type</h4>
                     </div>
                     <div class="card-body container-fluid">
                       <div class="row p-2">

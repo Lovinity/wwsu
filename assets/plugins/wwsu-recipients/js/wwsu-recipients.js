@@ -14,7 +14,7 @@ class WWSUrecipients extends WWSUdb {
 
     this.endpoints = {
       get: "/recipients/get",
-      addComputer: "/recipients/add-computer",
+      addComputer: "/recipients/add-computers",
     };
     this.data = {
       get: {},
