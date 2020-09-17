@@ -138,17 +138,17 @@
 
     <!--WWSU-->
     <script src="/plugins/sails.io/sails.io.js" autoConnect="false"></script>
-    <script src="/plugins/wwsu-sails/js/wwsu.js?v=202008081820"></script>
-    <script src="/plugins/wwsu-navigation/js/wwsu-navigation.js?v=202008081820"></script>
-    <script src="/plugins/wwsu-directors/js/wwsu-directors.js?v=202008081820"></script>
-    <script src="/plugins/wwsu-discipline/js/wwsu-discipline.js?v=202008081820"></script>
-    <script src="/plugins/wwsu-djs/js/wwsu-djs.js?v=202008081820"></script>
-    <script src="/plugins/wwsu-meta/js/wwsu-meta.js?v=202008081820"></script>
-    <script src="/plugins/wwsu-timesheet/js/wwsu-timesheet.js?v=202008081820"></script>
-    <script src="/plugins/wwsu-subscriptions/js/wwsu-subscriptions.js?v=202008081820"></script>
-    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-web.js?v=202008081820"></script>
-    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-class.js?v=202008081820"></script>
-    <script src="/plugins/wwsu-website/wwsu-website-directors-v7.js?v=202008081820"></script>
+    <script src="/plugins/wwsu-sails/js/wwsu.js?v=202009171227"></script>
+    <script src="/plugins/wwsu-navigation/js/wwsu-navigation.js?v=202009171227"></script>
+    <script src="/plugins/wwsu-directors/js/wwsu-directors.js?v=202009171227"></script>
+    <script src="/plugins/wwsu-discipline/js/wwsu-discipline.js?v=202009171227"></script>
+    <script src="/plugins/wwsu-djs/js/wwsu-djs.js?v=202009171227"></script>
+    <script src="/plugins/wwsu-meta/js/wwsu-meta.js?v=202009171227"></script>
+    <script src="/plugins/wwsu-timesheet/js/wwsu-timesheet.js?v=202009171227"></script>
+    <script src="/plugins/wwsu-subscriptions/js/wwsu-subscriptions.js?v=202009171227"></script>
+    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-web.js?v=202009171227"></script>
+    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-class.js?v=202009171227"></script>
+    <script src="/plugins/wwsu-website/wwsu-website-directors-v7.js?v=202009171227"></script>
   </head>
 
   <body
@@ -222,68 +222,67 @@
         <!-- /.sidebar -->
       </aside>
 
-      <!-- Content Wrapper. Contains page content -->
-      <div class="content-wrapper">
-        <!-- Timesheets -->
-        <section id="section-timesheets" style="display: none">
-          <div class="content-wrapper">
-            <div class="content-header">
-              <div class="container-fluid">
-                <div class="row mb-2">
-                  <div class="col-12">
-                    <h1 class="m-0 text-dark">Director Timesheets</h1>
-                  </div>
-                  <!-- /.col -->
+      <!-- Timesheets -->
+      <section id="section-timesheets" style="display: none">
+        <div class="content-wrapper">
+          <div class="content-header">
+            <div class="container-fluid">
+              <div class="row mb-2">
+                <div class="col-12">
+                  <h1 class="m-0 text-dark">Director Timesheets</h1>
                 </div>
-                <!-- /.row -->
+                <!-- /.col -->
               </div>
-              <!-- /.container-fluid -->
+              <!-- /.row -->
+            </div>
+            <!-- /.container-fluid -->
+          </div>
+
+          <div class="content">
+            <div class="card card-primary elevation-2">
+              <div class="card-header">
+                <h3 class="card-title">Choose Date Range</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <div class="form-group" title="Choose timesheet date range.">
+                  <label for="section-timesheets-start">Start</label>
+                  <input type="date" id="section-timesheets-start" />
+                  <label for="section-timesheets-end">End</label>
+                  <input type="date" id="section-timesheets-end" />
+                  <input
+                    type="submit"
+                    class="btn btn-primary"
+                    id="section-timesheets-browse"
+                    value="Browse"
+                  />
+                </div>
+              </div>
             </div>
 
-            <div class="content">
-              <div class="card card-primary elevation-2">
-                <div class="card-header">
-                  <h3 class="card-title">Choose Date Range</h3>
-                </div>
-                <!-- /.card-header -->
-                <div class="card-body">
-                  <div class="form-group" title="Choose timesheet date range.">
-                    <label for="section-timesheets-start">Start</label>
-                    <input type="date" id="section-timesheets-start" />
-                    <label for="section-timesheets-end">End</label>
-                    <input type="date" id="section-timesheets-end" />
-                    <input
-                      type="submit"
-                      class="btn btn-primary"
-                      id="section-timesheets-browse"
-                      value="Browse"
-                    />
-                  </div>
-                </div>
+            <div class="card card-warning elevation-2">
+              <div class="card-header">
+                <h3 class="card-title">Hours</h3>
               </div>
+              <!-- /.card-header -->
+              <div class="card-body" id="section-timesheets-hours"></div>
+              <!-- /.card-body -->
+            </div>
 
-              <div class="card card-warning elevation-2">
-                <div class="card-header">
-                  <h3 class="card-title">Hours</h3>
-                </div>
-                <!-- /.card-header -->
-                <div class="card-body" id="section-timesheets-hours"></div>
-                <!-- /.card-body -->
+            <div class="card card-info elevation-2">
+              <div class="card-header">
+                <h3 class="card-title">Records</h3>
               </div>
-
-              <div class="card card-info elevation-2">
-                <div class="card-header">
-                  <h3 class="card-title">Records</h3>
-                </div>
-                <!-- /.card-header -->
-                <div class="card-body" id="section-timesheets-records"></div>
-                <!-- /.card-body -->
-              </div>
+              <!-- /.card-header -->
+              <div class="card-body" id="section-timesheets-records"></div>
+              <!-- /.card-body -->
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section id="section-calendar" style="display: none">
+      <section id="section-calendar" style="display: none">
+        <div class="content-wrapper">
           <div class="content-header">
             <div class="container-fluid">
               <div class="row mb-2">
@@ -543,8 +542,8 @@
             </div>
             <!-- /.container-fluid -->
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
       <!-- /.content-wrapper -->
     </div>
 
