@@ -1,9 +1,9 @@
 /*!
- *   AdminLTE v3.0.5
+ *   AdminLTE v3.1.0-pre
  *     Only Pages
  *   Author: Colorlib
- *   Website: AdminLTE.io <http://adminlte.io>
- *   License: Open source - MIT <http://opensource.org/licenses/MIT>
+ *   Website: AdminLTE.io <https://adminlte.io>
+ *   License: Open source - MIT <https://opensource.org/licenses/MIT>
  */
 .close, .mailbox-attachment-close {
   float: right;
@@ -11,8 +11,14 @@
   font-weight: 700;
   line-height: 1;
   color: #000;
-  text-shadow: 0 1px 0 #ffffff;
+  text-shadow: 0 1px 0 #fff;
   opacity: .5;
+}
+
+@media (max-width: 1200px) {
+  .close, .mailbox-attachment-close {
+    font-size: calc(1.275rem + 0.3vw) ;
+  }
 }
 
 .close:hover, .mailbox-attachment-close:hover {
@@ -28,7 +34,6 @@ button.close, button.mailbox-attachment-close {
   padding: 0;
   background-color: transparent;
   border: 0;
-  appearance: none;
 }
 
 a.close.disabled, a.disabled.mailbox-attachment-close {
@@ -86,7 +91,7 @@ a.close.disabled, a.disabled.mailbox-attachment-close {
 
 .mailbox-attachment-name {
   color: #666;
-  font-weight: bold;
+  font-weight: 700;
 }
 
 .mailbox-attachment-icon,
@@ -96,7 +101,7 @@ a.close.disabled, a.disabled.mailbox-attachment-close {
 }
 
 .mailbox-attachment-info {
-  background: #f8f9fa;
+  background-color: #f8f9fa;
   padding: 10px;
 }
 
@@ -107,7 +112,7 @@ a.close.disabled, a.disabled.mailbox-attachment-close {
 
 .mailbox-attachment-size > span {
   display: inline-block;
-  padding-top: 0.75rem;
+  padding-top: .75rem;
 }
 
 .mailbox-attachment-icon {
@@ -128,7 +133,7 @@ a.close.disabled, a.disabled.mailbox-attachment-close {
 }
 
 .lockscreen {
-  background: #e9ecef;
+  background-color: #e9ecef;
 }
 
 .lockscreen .lockscreen-name {
@@ -155,7 +160,7 @@ a.close.disabled, a.disabled.mailbox-attachment-close {
 
 .lockscreen-item {
   border-radius: 4px;
-  background: #ffffff;
+  background-color: #fff;
   margin: 10px auto 30px;
   padding: 0;
   position: relative;
@@ -164,7 +169,7 @@ a.close.disabled, a.disabled.mailbox-attachment-close {
 
 .lockscreen-image {
   border-radius: 50%;
-  background: #ffffff;
+  background-color: #fff;
   left: -10px;
   padding: 5px;
   position: absolute;
@@ -187,7 +192,7 @@ a.close.disabled, a.disabled.mailbox-attachment-close {
 }
 
 .lockscreen-credentials .btn {
-  background-color: #ffffff;
+  background-color: #fff;
   border: 0;
   padding: 0 10px;
 }
@@ -211,11 +216,15 @@ a.close.disabled, a.disabled.mailbox-attachment-close {
 
 .login-page,
 .register-page {
+  -ms-flex-align: center;
   align-items: center;
-  background: #e9ecef;
+  background-color: #e9ecef;
+  display: -ms-flexbox;
   display: flex;
+  -ms-flex-direction: column;
   flex-direction: column;
   height: 100vh;
+  -ms-flex-pack: center;
   justify-content: center;
 }
 
@@ -232,9 +241,14 @@ a.close.disabled, a.disabled.mailbox-attachment-close {
   }
 }
 
+.login-box .card,
+.register-box .card {
+  margin-bottom: 0;
+}
+
 .login-card-body,
 .register-card-body {
-  background: #ffffff;
+  background-color: #fff;
   border-top: 0;
   color: #666;
   padding: 20px;
@@ -252,7 +266,7 @@ a.close.disabled, a.disabled.mailbox-attachment-close {
 
 .login-card-body .input-group .form-control:focus ~ .input-group-append .input-group-text,
 .register-card-body .input-group .form-control:focus ~ .input-group-append .input-group-text {
-  border-color: #80bdff;
+  border-color: #3395ff;
 }
 
 .login-card-body .input-group .form-control.is-valid:focus,
@@ -262,7 +276,7 @@ a.close.disabled, a.disabled.mailbox-attachment-close {
 
 .login-card-body .input-group .form-control.is-valid ~ .input-group-append .input-group-text,
 .register-card-body .input-group .form-control.is-valid ~ .input-group-append .input-group-text {
-  border-color: #28a745;
+  border-color: #186429;
 }
 
 .login-card-body .input-group .form-control.is-invalid:focus,
@@ -272,7 +286,7 @@ a.close.disabled, a.disabled.mailbox-attachment-close {
 
 .login-card-body .input-group .form-control.is-invalid ~ .input-group-append .input-group-text,
 .register-card-body .input-group .form-control.is-invalid ~ .input-group-append .input-group-text {
-  border-color: #dc3545;
+  border-color: #9E0C1A;
 }
 
 .login-card-body .input-group .input-group-text,
@@ -343,7 +357,7 @@ a.close.disabled, a.disabled.mailbox-attachment-close {
 }
 
 .invoice {
-  background: #ffffff;
+  background-color: #fff;
   border: 1px solid rgba(0, 0, 0, 0.125);
   position: relative;
 }
@@ -393,7 +407,9 @@ a.close.disabled, a.disabled.mailbox-attachment-close {
 }
 
 .product-image-thumbs {
+  -ms-flex-align: stretch;
   align-items: stretch;
+  display: -ms-flexbox;
   display: flex;
   margin-top: 2rem;
 }
@@ -401,8 +417,9 @@ a.close.disabled, a.disabled.mailbox-attachment-close {
 .product-image-thumb {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.075);
   border-radius: 0.25rem;
-  background-color: #ffffff;
+  background-color: #fff;
   border: 1px solid #dee2e6;
+  display: -ms-flexbox;
   display: flex;
   margin-right: 1rem;
   max-width: 7rem;
@@ -412,11 +429,12 @@ a.close.disabled, a.disabled.mailbox-attachment-close {
 .product-image-thumb img {
   max-width: 100%;
   height: auto;
+  -ms-flex-item-align: center;
   align-self: center;
 }
 
 .product-image-thumb:hover {
-  opacity: 0.5;
+  opacity: .5;
 }
 
 .product-share a {
@@ -441,5 +459,4 @@ a.close.disabled, a.disabled.mailbox-attachment-close {
 .projects .project-state {
   text-align: center;
 }
-
 /*# sourceMappingURL=adminlte.pages.css.map */

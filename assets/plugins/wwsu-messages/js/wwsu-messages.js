@@ -103,7 +103,7 @@ class WWSUmessages extends WWSUdb {
                         "type": "tinymce",
                         "options": {
                             "toolbar": 'undo redo | bold italic underline strikethrough | fontselect fontsizeselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | fullscreen preview | link | ltr rtl',
-                            "plugins": 'autoresize preview paste searchreplace autolink autosave save directionality visualblocks visualchars fullscreen link table hr pagebreak nonbreaking toc insertdatetime advlist lists wordcount textpattern noneditable help',
+                            "plugins": 'autoresize preview paste searchreplace autolink save directionality visualblocks visualchars fullscreen link table hr pagebreak nonbreaking toc insertdatetime advlist lists wordcount textpattern noneditable help',
                             "menubar": 'file edit view insert format tools table help'
                         },
                     },

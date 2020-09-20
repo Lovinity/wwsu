@@ -35,24 +35,6 @@ class WWSUstate extends WWSUevents {
             overlayClose: false,
             zindex: 1100,
         });
-
-        this.topOfHourBreak = new WWSUmodal(
-            `Top of Hour ID Break Required`,
-            `bg-warning bg-flash-warning`,
-            `<div style="text-align: center;">
-                <i class="fas fa-clock" style="font-size: 25vw;"></i>
-            </div>
-            <h3>A break is required before :05 after the hour!</h3>
-            <p>If you are not about to end the broadcast, you must take a top-of-hour ID break before :05 past the hour. This is an FCC requirement.</p>`,
-            true,
-            {
-                headerColor: '',
-                overlayClose: true,
-                zindex: 5000,
-                timeout: (1000 * 60 * 10),
-                timeoutProgressbar: true,
-            }
-        );
     }
 
     /**

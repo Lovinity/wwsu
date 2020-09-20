@@ -1617,26 +1617,26 @@ class CalendarDb {
   getColor(event) {
     switch (event.type) {
       case "show":
-        return "#dc3545";
+        return "#9E0C1A";
       case "sports":
-        return "#28a745";
+        return "#186429";
       case "remote":
-        return "#6f42c1";
+        return "#6610f2";
       case "prerecord":
-        return "#e83e8c";
+        return "#EE77AE";
       case "genre":
-        return "#007bff";
+        return "#73C7D4";
       case "playlist":
-        return "#17a2b8";
+        return "#0056B2";
       case "office-hours":
         return "#ffc107";
       case "task":
         return "#ff851b";
       case "onair-booking":
       case "prod-booking":
-        return "#39cccc";
+        return "#20c997";
       default:
-        return "#6c757d";
+        return "#495057";
     }
   }
 
@@ -1657,9 +1657,9 @@ class CalendarDb {
       case "prerecord":
         return "pink";
       case "genre":
-        return "primary";
-      case "playlist":
         return "info";
+      case "playlist":
+        return "primary";
       case "office-hours":
         return "warning";
       case "task":

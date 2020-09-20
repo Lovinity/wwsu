@@ -366,7 +366,7 @@ class WWSUannouncements extends WWSUdb {
                         "type": "tinymce",
                         "options": {
                             "toolbar": 'undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | fullscreen preview | image link | ltr rtl',
-                            "plugins": 'autoresize preview paste importcss searchreplace autolink autosave save directionality visualblocks visualchars fullscreen image link table hr pagebreak nonbreaking toc insertdatetime advlist lists wordcount imagetools textpattern noneditable help quickbars',
+                            "plugins": 'autoresize preview paste importcss searchreplace autolink save directionality visualblocks visualchars fullscreen image link table hr pagebreak nonbreaking toc insertdatetime advlist lists wordcount imagetools textpattern noneditable help quickbars',
                             "menubar": 'file edit view insert format tools table help'
                         },
                         "helper": "For display signs, content will be auto-scaled to fit the screen. Avoid using large images when also using text for display sign announcements; the text will become very small when scaled."

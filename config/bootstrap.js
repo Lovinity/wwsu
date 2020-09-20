@@ -24,12 +24,12 @@ module.exports.bootstrap = async function (done) {
   // Generate token secrets
   sails.log.verbose(`BOOTSTRAP: generating token secrets`);
   sails.config.custom.secrets = {};
-  sails.config.custom.secrets.host = cryptoRandomString(256);
-  sails.config.custom.secrets.dj = cryptoRandomString(256);
-  sails.config.custom.secrets.director = cryptoRandomString(256);
-  sails.config.custom.secrets.adminDirector = cryptoRandomString(256);
-  sails.config.custom.secrets.directorUab = cryptoRandomString(256);
-  sails.config.custom.secrets.adminDirectorUab = cryptoRandomString(256);
+  sails.config.custom.secrets.host = cryptoRandomString({length: 256});
+  sails.config.custom.secrets.dj = cryptoRandomString({length: 256});
+  sails.config.custom.secrets.director = cryptoRandomString({length: 256});
+  sails.config.custom.secrets.adminDirector = cryptoRandomString({length: 256});
+  sails.config.custom.secrets.directorUab = cryptoRandomString({length: 256});
+  sails.config.custom.secrets.adminDirectorUab = cryptoRandomString({length: 256});
 
   // Load darksky
   // DEPRECATED. TODO: remove.
