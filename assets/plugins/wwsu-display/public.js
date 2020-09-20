@@ -1178,28 +1178,29 @@ window.addEventListener("DOMContentLoaded", () => {
           }, 3000);
           switch (response.state) {
             case "automation_on":
-            case "automation_genre":
             case "automation_break":
-              nowplaying.style.background = "#1F285A";
+              nowplaying.style.background = "#495057";
               break;
+            case "automation_genre":
+              nowplaying.style.background = "#2E4F54";
             case "automation_playlist":
-              nowplaying.style.background = "#014D72";
+              nowplaying.style.background = "#0056B2";
               break;
             case "automation_prerecord":
             case "automation_live":
             case "automation_remote":
             case "automation_sports":
             case "automation_sportsremote":
-              nowplaying.style.background = "#312607";
+              nowplaying.style.background = "#7E3F0A";
               break;
             case "live_on":
             case "live_break":
             case "live_returning":
-              nowplaying.style.background = "#6A0000";
+              nowplaying.style.background = "#9E0C1A";
               break;
             case "prerecord_on":
             case "prerecord_break":
-              nowplaying.style.background = "#5C312E";
+              nowplaying.style.background = "#773B57";
               break;
             case "sports_on":
             case "sports_break":
@@ -1210,15 +1211,15 @@ window.addEventListener("DOMContentLoaded", () => {
             case "sportsremote_returning":
             case "sportsremote_halftime":
             case "sportsremote_break_disconnected":
-              nowplaying.style.background = "#054021";
+              nowplaying.style.background = "#186429";
               break;
             case "remote_on":
             case "remote_break":
             case "remote_returning":
-              nowplaying.style.background = "#471255";
+              nowplaying.style.background = "#6610f2";
               break;
             default:
-              nowplaying.style.background = "#191919";
+              nowplaying.style.background = "#212529";
           }
 
           if (calendar.length > 0 && response.state.startsWith("automation_")) {

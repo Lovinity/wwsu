@@ -34,11 +34,11 @@ window.addEventListener("DOMContentLoaded", () => {
       "website-chat",
       "website-schedule",
       "website-request",
-      "website-directors",
+      "website-directors"
     ]);
 
     // Add event handlers
-    announcements.on("change", "renderer", (db) => {
+    announcements.on("change", "renderer", db => {
       processAnnouncements();
     });
 
@@ -57,7 +57,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     // subscriptions
     var subscriptions = new WWSUsubscriptions(socket, noReq);
-    subscriptions.on("subscriptions", "renderer", (subscriptions) => {
+    subscriptions.on("subscriptions", "renderer", subscriptions => {
       meta.meta = { state: meta.meta.state };
     });
 
@@ -77,7 +77,7 @@ window.addEventListener("DOMContentLoaded", () => {
       title: "Error initializing",
       body:
         "There was an error initializing the website. Please report this to wwsu4@wright.edu.",
-      icon: "fas fa-skull-crossbones fa-lg",
+      icon: "fas fa-skull-crossbones fa-lg"
     });
   }
 
@@ -88,9 +88,9 @@ window.addEventListener("DOMContentLoaded", () => {
         songs: [
           {
             url: "https://server.wwsu1069.org/stream",
-            live: true,
-          },
-        ],
+            live: true
+          }
+        ]
       });
     }
 
@@ -142,40 +142,40 @@ window.addEventListener("DOMContentLoaded", () => {
     );
 
     // Add change event for chat-nickname
-    $("#chat-nickname").change(function () {
+    $("#chat-nickname").change(function() {
       socket.post(
         "/recipients/edit-web",
         { label: $(this).val() },
-        function serverResponded () { }
+        function serverResponded() {}
       );
     });
 
     // Add click events for subscription buttons
-    $(`#modal-eventinfo-subscribe-once`).click((e) => {
+    $(`#modal-eventinfo-subscribe-once`).click(e => {
       subscribe(`calendar-once`, viewingEvent.unique);
       $("#modal-eventinfo").modal("hide");
     });
-    $(`#modal-eventinfo-subscribe-once`).keypress((e) => {
+    $(`#modal-eventinfo-subscribe-once`).keypress(e => {
       if (e.key === "Enter") {
         subscribe(`calendar-once`, viewingEvent.unique);
         $("#modal-eventinfo").modal("hide");
       }
     });
-    $(`#modal-eventinfo-subscribe-all`).click((e) => {
+    $(`#modal-eventinfo-subscribe-all`).click(e => {
       subscribe(`calendar-all`, viewingEvent.calendarID);
       $("#modal-eventinfo").modal("hide");
     });
-    $(`#modal-eventinfo-subscribe-all`).keypress((e) => {
+    $(`#modal-eventinfo-subscribe-all`).keypress(e => {
       if (e.key === "Enter") {
         subscribe(`calendar-all`, viewingEvent.calendarID);
         $("#modal-eventinfo").modal("hide");
       }
     });
-    $(`#modal-eventinfo-unsubscribe`).click((e) => {
+    $(`#modal-eventinfo-unsubscribe`).click(e => {
       unsubscribe(viewingEvent.unique, viewingEvent.calendarID);
       $("#modal-eventinfo").modal("hide");
     });
-    $(`#modal-eventinfo-unsubscribe`).keypress((e) => {
+    $(`#modal-eventinfo-unsubscribe`).keypress(e => {
       if (e.key === "Enter") {
         unsubscribe(viewingEvent.unique, viewingEvent.calendarID);
         $("#modal-eventinfo").modal("hide");
@@ -184,13 +184,13 @@ window.addEventListener("DOMContentLoaded", () => {
     $(`#send-message-public`).click(() => {
       sendMessage();
     });
-    $(`#send-message-public`).keydown((e) => {
+    $(`#send-message-public`).keydown(e => {
       if (e.code === "Space" || e.code === "Enter") sendMessage();
     });
     $(`#send-message-private`).click(() => {
       sendMessage(true);
     });
-    $(`#send-message-private`).keydown((e) => {
+    $(`#send-message-private`).keydown(e => {
       if (e.code === "Space" || e.code === "Enter") sendMessage(true);
     });
     $(`#schedule-select`).change(() => {
@@ -199,13 +199,13 @@ window.addEventListener("DOMContentLoaded", () => {
     $(`#request-search`).click(() => {
       loadTracks(0);
     });
-    $(`#request-search`).keydown((e) => {
+    $(`#request-search`).keydown(e => {
       if (e.code === "Space" || e.code === "Enter") loadTracks(0);
     });
     $(`#request-more`).click(() => {
       loadTracks();
     });
-    $(`#request-more`).keydown((e) => {
+    $(`#request-more`).keydown(e => {
       if (e.code === "Space" || e.code === "Enter") loadTracks();
     });
   } catch (e) {
@@ -215,7 +215,7 @@ window.addEventListener("DOMContentLoaded", () => {
       title: "Error in document.ready",
       body:
         "There was an error in initializing the webpage. Please report this to wwsu4@wright.edu.",
-      icon: "fas fa-skull-crossbones fa-lg",
+      icon: "fas fa-skull-crossbones fa-lg"
     });
   }
 
@@ -233,14 +233,14 @@ window.addEventListener("DOMContentLoaded", () => {
     try {
       socket._raw.io._reconnection = true;
       socket._raw.io._reconnectionAttempts = Infinity;
-    } catch (unusedE) { }
+    } catch (unusedE) {}
   });
 
   /*
     DISCIPLINE FUNCTIONS
 */
 
-  socket.on("discipline", (data) => {
+  socket.on("discipline", data => {
     socket.disconnect();
     $("#modal-discipline-title").html(
       `Disciplinary action issued - Disconnected from WWSU`
@@ -257,25 +257,27 @@ window.addEventListener("DOMContentLoaded", () => {
    *
    * @param {function} cb Callback executed if user is not under a discipline
    */
-  function checkDiscipline (cb) {
-    socket.post("/discipline/get-web", {}, function serverResponded (body) {
+  function checkDiscipline(cb) {
+    socket.post("/discipline/get-web", {}, function serverResponded(body) {
       try {
         var docb = true;
         if (body.length > 0) {
-          body.map((discipline) => {
+          body.map(discipline => {
             var activeDiscipline =
               discipline.active &&
               (discipline.action !== "dayban" ||
-                moment(discipline.createdAt).add(1, "days").isAfter(moment()));
+                moment(discipline.createdAt)
+                  .add(1, "days")
+                  .isAfter(moment()));
             if (activeDiscipline) {
               docb = false;
             }
             if (activeDiscipline || !discipline.acknowledged) {
               $("#modal-discipline-title").html(
                 `Disciplinary action ${
-                activeDiscipline
-                  ? `active against you`
-                  : `was issued in the past against you`
+                  activeDiscipline
+                    ? `active against you`
+                    : `was issued in the past against you`
                 }`
               );
               $("#modal-discipline-body").html(`<p>On ${moment(
@@ -284,16 +286,16 @@ window.addEventListener("DOMContentLoaded", () => {
                 "LLL"
               )}, disciplinary action was issued against you for the following reason: ${
                 discipline.message
-                }.</p>
+              }.</p>
                 <p>${
-                activeDiscipline
-                  ? `A ${discipline.action} is currently active, and you are not allowed to use WWSU's services at this time.`
-                  : `The discipline has expired, but you must acknowledge this message before you may use WWSU's services. Further issues may warrant more severe disciplinary action.`
+                  activeDiscipline
+                    ? `A ${discipline.action} is currently active, and you are not allowed to use WWSU's services at this time.`
+                    : `The discipline has expired, but you must acknowledge this message before you may use WWSU's services. Further issues may warrant more severe disciplinary action.`
                 }</p>
                 <p>Please contact gm@wwsu1069.org if you have any questions or concerns.</p>`);
               $("#modal-discipline").modal({
                 backdrop: "static",
-                keyboard: false,
+                keyboard: false
               });
             }
           });
@@ -308,7 +310,7 @@ window.addEventListener("DOMContentLoaded", () => {
           title: "Error checking discipline",
           body:
             "There was an error checking to see if you are allowed to access WWSU. Please try again later, or contact wwsu4@wright.edu if this problem continues.",
-          icon: "fas fa-skull-crossbones fa-lg",
+          icon: "fas fa-skull-crossbones fa-lg"
         });
       }
     });
@@ -323,7 +325,7 @@ window.addEventListener("DOMContentLoaded", () => {
    *
    * @param {boolean} firsttime Whether or not this is the first time executing doSockets since the user loaded the page.
    */
-  function doSockets (firsttime = false) {
+  function doSockets(firsttime = false) {
     // Mobile devices and web devices where device parameter was passed, start sockets immediately.
     if (isMobile || !firsttime || (!isMobile && device !== null)) {
       checkDiscipline(() => {
@@ -370,18 +372,18 @@ window.addEventListener("DOMContentLoaded", () => {
         if (_meta.state.startsWith("live_")) {
           $(".nowplaying-icon").html(
             `${
-            _meta.showLogo !== null
-              ? `<img class="profile-user-img img-fluid img-circle bg-danger" src="/uploads/calendar/logo/${_meta.showLogo}" alt="Show Logo">`
-              : `<i class="profile-user-img img-fluid img-circle fas fa-microphone bg-danger" aria-hidden="true" title="Live radio show"></i><span class="sr-only">Live radio show</span>`
+              _meta.showLogo !== null
+                ? `<img class="profile-user-img img-fluid img-circle bg-danger" src="/uploads/calendar/logo/${_meta.showLogo}" alt="Show Logo">`
+                : `<i class="profile-user-img img-fluid img-circle fas fa-microphone bg-danger" aria-hidden="true" title="Live radio show"></i><span class="sr-only">Live radio show</span>`
             }`
           );
         }
         if (_meta.state.startsWith("prerecord_")) {
           $(".nowplaying-icon").html(
             `${
-            _meta.showLogo !== null
-              ? `<img class="profile-user-img img-fluid img-circle bg-danger" src="/uploads/calendar/logo/${_meta.showLogo}" alt="Show Logo">`
-              : `<i class="profile-user-img img-fluid img-circle fas fa-play-circle bg-pink" aria-hidden="true" title="Prerecorded show"></i><span class="sr-only">Prerecorded show</span>`
+              _meta.showLogo !== null
+                ? `<img class="profile-user-img img-fluid img-circle bg-pink" src="/uploads/calendar/logo/${_meta.showLogo}" alt="Show Logo">`
+                : `<i class="profile-user-img img-fluid img-circle fas fa-play-circle bg-pink" aria-hidden="true" title="Prerecorded show"></i><span class="sr-only">Prerecorded show</span>`
             }`
           );
         }
@@ -391,9 +393,9 @@ window.addEventListener("DOMContentLoaded", () => {
         ) {
           $(".nowplaying-icon").html(
             `${
-            _meta.showLogo !== null
-              ? `<img class="profile-user-img img-fluid img-circle bg-success" src="/uploads/calendar/logo/${_meta.showLogo}" alt="Show Logo">`
-              : `<i class="profile-user-img img-fluid img-circle fas fa-basketball-ball bg-success" aria-hidden="true" title="Sports broadcast"></i><span class="sr-only">Sports broadcast</span>`
+              _meta.showLogo !== null
+                ? `<img class="profile-user-img img-fluid img-circle bg-success" src="/uploads/calendar/logo/${_meta.showLogo}" alt="Show Logo">`
+                : `<i class="profile-user-img img-fluid img-circle fas fa-basketball-ball bg-success" aria-hidden="true" title="Sports broadcast"></i><span class="sr-only">Sports broadcast</span>`
             }`
           );
         }
@@ -403,18 +405,42 @@ window.addEventListener("DOMContentLoaded", () => {
           );
           $(".nowplaying-icon").html(
             `${
-            _meta.showLogo !== null
-              ? `<img class="profile-user-img img-fluid img-circle bg-purple" src="/uploads/calendar/logo/${_meta.showLogo}" alt="Show Logo">`
-              : `<i class="profile-user-img img-fluid img-circle fas fa-broadcast-tower bg-purple" aria-hidden="true" title="Remote broadcast"></i><span class="sr-only">Remote broadcast</span>`
+              _meta.showLogo !== null
+                ? `<img class="profile-user-img img-fluid img-circle bg-purple" src="/uploads/calendar/logo/${_meta.showLogo}" alt="Show Logo">`
+                : `<i class="profile-user-img img-fluid img-circle fas fa-broadcast-tower bg-purple" aria-hidden="true" title="Remote broadcast"></i><span class="sr-only">Remote broadcast</span>`
             }`
           );
         }
         if (
-          _meta.state.startsWith("automation_") ||
-          _meta.state === "unknown"
+          _meta.state.startsWith("automation_") &&
+          [
+            "automation_on",
+            "automation_break",
+            "automation_genre",
+            "automation_playlist"
+          ].indexOf(_meta.state) === -1
         ) {
           $(".nowplaying-icon").html(
-            `<i class="profile-user-img img-fluid img-circle fas fa-music bg-primary" aria-hidden="true" title="Music genre"></i><span class="sr-only">Music</span>`
+            `<i class="profile-user-img img-fluid img-circle fas fa-music bg-orange" aria-hidden="true" title="Broadcast about to start"></i><span class="sr-only">Broadcast about to start</span>`
+          );
+        }
+        if (
+          ["automation_on", "automation_break", "unknown"].indexOf(
+            _meta.state
+          ) !== -1
+        ) {
+          $(".nowplaying-icon").html(
+            `<i class="profile-user-img img-fluid img-circle fas fa-music bg-secondary" aria-hidden="true" title="Music"></i><span class="sr-only">Music</span>`
+          );
+        }
+        if (_meta.state === "automation_playlist") {
+          $(".nowplaying-icon").html(
+            `<i class="profile-user-img img-fluid img-circle fas fa-music bg-primary" aria-hidden="true" title="Music playlist"></i><span class="sr-only">Music playlist</span>`
+          );
+        }
+        if (_meta.state === "automation_genre") {
+          $(".nowplaying-icon").html(
+            `<i class="profile-user-img img-fluid img-circle fas fa-music bg-info" aria-hidden="true" title="Music genre"></i><span class="sr-only">Music genre</span>`
           );
         }
 
@@ -445,7 +471,8 @@ window.addEventListener("DOMContentLoaded", () => {
         } else if (response.state.startsWith("prerecord_")) {
           if (automationpost !== response.show) {
             automationpost = response.show;
-            $(".chat-status").html(`<p class="h5">Chat Status: Messages Will be Emailed</p>
+            $(".chat-status")
+              .html(`<p class="h5">Chat Status: Messages Will be Emailed</p>
                     <p>The show airing now is prerecorded. There might not be anyone in the studio to see your messages. However, any messages you send will be emailed to the show hosts when the prerecord is finished airing.</p>`);
           }
 
@@ -559,33 +586,37 @@ window.addEventListener("DOMContentLoaded", () => {
       if (typeof response.history !== "undefined") {
         // reset recent tracks
         $(".nowplaying-recentlyplayed").html(
-          response.history.map((track) => {
+          response.history.map(track => {
             return `<tr>
                 <td>
                 ${track.track}
                 </td>
                 <td>
                 ${
-              track.likable && track.ID !== 0
-                ? `${
-                likedtracks.likedTracks.indexOf(track.ID) === -1
-                  ? `<button type="button" data-id="${track.ID}" class="btn btn-success btn-small button-track-like" tabindex="0" title="Like this track; liked tracks play more often on WWSU.">Like Track</button>`
-                  : `<button type="button" class="btn btn-outline-success btn-small disabled" tabindex="0" title="You already liked this track.">Already Liked</button>`
-                }`
-                : `<button type="button" class="btn btn-outline-danger btn-small disabled" tabindex="0" title="This track was not played in the WWSU automation system. If you like it, please send a message to the DJ instead.">Manually Played</button>`
-              }
+                  track.likable && track.ID !== 0
+                    ? `${
+                        likedtracks.likedTracks.indexOf(track.ID) === -1
+                          ? `<button type="button" data-id="${track.ID}" class="btn btn-success btn-small button-track-like" tabindex="0" title="Like this track; liked tracks play more often on WWSU.">Like Track</button>`
+                          : `<button type="button" class="btn btn-outline-success btn-small disabled" tabindex="0" title="You already liked this track.">Already Liked</button>`
+                      }`
+                    : `<button type="button" class="btn btn-outline-danger btn-small disabled" tabindex="0" title="This track was not played in the WWSU automation system. If you like it, please send a message to the DJ instead.">Manually Played</button>`
+                }
                 </td>
                 </tr>`;
           })
         );
         window.requestAnimationFrame(() => {
-          $(`.button-track-like`).unbind('click').click((e) => {
-            likeTrack(parseInt($(e.currentTarget).data("id")));
-          });
-          $(`.button-track-like`).unbind('keydown').keydown((e) => {
-            if (e.code === "Space" || e.code === "Enter")
+          $(`.button-track-like`)
+            .unbind("click")
+            .click(e => {
               likeTrack(parseInt($(e.currentTarget).data("id")));
-          });
+            });
+          $(`.button-track-like`)
+            .unbind("keydown")
+            .keydown(e => {
+              if (e.code === "Space" || e.code === "Enter")
+                likeTrack(parseInt($(e.currentTarget).data("id")));
+            });
         });
       }
     } catch (e) {
@@ -602,7 +633,7 @@ window.addEventListener("DOMContentLoaded", () => {
    *
    * @param {integer || string} trackID The ID number of the track to like, or a string of the track artist - name if the track was played manually.
    */
-  function likeTrack (trackID) {
+  function likeTrack(trackID) {
     likedtracks.likeTrack(trackID);
   }
 
@@ -613,16 +644,16 @@ window.addEventListener("DOMContentLoaded", () => {
   /**
    *  Update all announcements for the website.
    */
-  function processAnnouncements () {
+  function processAnnouncements() {
     // Process all announcements
     var html = {
       nowplaying: ``,
       chat: ``,
       schedule: ``,
       request: ``,
-      directors: ``,
+      directors: ``
     };
-    announcements.db().each((announcement) => {
+    announcements.db().each(announcement => {
       if (
         moment(meta.meta.time).isAfter(moment(announcement.starts)) &&
         moment(meta.meta.time).isBefore(moment(announcement.expires))
@@ -641,10 +672,10 @@ window.addEventListener("DOMContentLoaded", () => {
               autohide: true,
               delay: announcement.displayTime * 1000 || 15000,
               body: announcement.announcement,
-              icon: "fas fa-bullhorn fa-lg",
+              icon: "fas fa-bullhorn fa-lg"
             });
           } else {
-            html[ type ] += `<div class="alert alert-${announcement.level}">
+            html[type] += `<div class="alert alert-${announcement.level}">
                     <p class="h5">${announcement.title}</p>
                     ${announcement.announcement}
                   </div>`;
@@ -656,7 +687,7 @@ window.addEventListener("DOMContentLoaded", () => {
     // Display announcements on website
     for (var announcementType in html) {
       if (Object.prototype.hasOwnProperty.call(html, announcementType)) {
-        $(`.announcements-${announcementType}`).html(html[ announcementType ]);
+        $(`.announcements-${announcementType}`).html(html[announcementType]);
       }
     }
   }
@@ -665,7 +696,7 @@ window.addEventListener("DOMContentLoaded", () => {
     CALENDAR / SCHEDULE FUNCTIONS
 */
 
-  calendardb.on("calendarUpdated", "renderer", (db) => {
+  calendardb.on("calendarUpdated", "renderer", db => {
     updateCalendar();
     updateDirectorsCalendar();
   });
@@ -677,7 +708,7 @@ window.addEventListener("DOMContentLoaded", () => {
    * Re-process calendar events
    */
   var calendarUpdating = false;
-  function updateCalendar () {
+  function updateCalendar() {
     if (calendarUpdating) return;
     calendarUpdating = true;
     $("#schedule-events").block({
@@ -702,18 +733,18 @@ window.addEventListener("DOMContentLoaded", () => {
 
         // Process events for the next 7 days
         calendardb.getEvents(
-          (events) => {
+          events => {
             var html = "";
 
             // Run through every event in memory and add appropriate ones into our formatted calendar variable.
             events
               .filter(
-                (event) =>
+                event =>
                   [
                     "event",
                     "onair-booking",
                     "prod-booking",
-                    "office-hours",
+                    "office-hours"
                   ].indexOf(event.type) === -1 &&
                   moment(event.start).isSameOrBefore(
                     moment(meta.meta.time)
@@ -726,7 +757,7 @@ window.addEventListener("DOMContentLoaded", () => {
                       .add(selectedOption, `days`)
                   )
               )
-              .map((event) => {
+              .map(event => {
                 try {
                   var colorClass = `secondary`;
                   var iconClass = "far fa-calendar-alt";
@@ -734,6 +765,9 @@ window.addEventListener("DOMContentLoaded", () => {
 
                   switch (event.type) {
                     case "genre":
+                      colorClass = "info";
+                      iconClass = "fas fa-music";
+                      accessibleText = "Music";
                     case "playlist":
                       colorClass = "primary";
                       iconClass = "fas fa-music";
@@ -750,7 +784,7 @@ window.addEventListener("DOMContentLoaded", () => {
                       accessibleText = "Sports Broadcast";
                       break;
                     case "remote":
-                      colorClass = "purple";
+                      colorClass = "indigo";
                       iconClass = "fas fa-broadcast-tower";
                       accessibleText = "Remote Broadcast";
                       break;
@@ -762,7 +796,7 @@ window.addEventListener("DOMContentLoaded", () => {
                   }
 
                   if (
-                    [ "canceled", "canceled-system", "canceled-changed" ].indexOf(
+                    ["canceled", "canceled-system", "canceled-changed"].indexOf(
                       event.scheduleType
                     ) !== -1
                   ) {
@@ -770,11 +804,11 @@ window.addEventListener("DOMContentLoaded", () => {
                   }
 
                   var badgeInfo;
-                  if ([ "canceled-changed" ].indexOf(event.scheduleType) !== -1) {
+                  if (["canceled-changed"].indexOf(event.scheduleType) !== -1) {
                     badgeInfo = `<span class="badge-warning" style="font-size: 1em;">RESCHEDULED</span>`;
                   }
                   if (
-                    [ "updated", "updated-system" ].indexOf(
+                    ["updated", "updated-system"].indexOf(
                       event.scheduleType
                     ) !== -1 &&
                     event.timeChanged
@@ -782,7 +816,7 @@ window.addEventListener("DOMContentLoaded", () => {
                     badgeInfo = `<span class="badge badge-warning" style="font-size: 1em;">TEMP TIME CHANGE</span>`;
                   }
                   if (
-                    [ "canceled", "canceled-system" ].indexOf(
+                    ["canceled", "canceled-system"].indexOf(
                       event.scheduleType
                     ) !== -1
                   ) {
@@ -790,49 +824,51 @@ window.addEventListener("DOMContentLoaded", () => {
                   }
 
                   var shouldBeDark =
-                    [ "canceled", "canceled-system", "canceled-changed" ].indexOf(
+                    ["canceled", "canceled-system", "canceled-changed"].indexOf(
                       event.scheduleType
                     ) !== -1 || moment().isAfter(moment(event.end));
 
                   html += `<div class="col" style="min-width: 280px;">
                 <div class="p-2 card card-${colorClass} card-outline${
                     shouldBeDark ? ` bg-secondary` : ``
-                    }">
+                  }">
                   <div class="card-body box-profile">
                     <div class="text-center">
                     ${
-                    event.logo !== null
-                      ? `<img class="profile-user-img img-fluid img-circle" src="/uploads/calendar/logo/${event.logo}" alt="Show Logo">`
-                      : `<i class="profile-user-img img-fluid img-circle ${iconClass} bg-${colorClass}" style="font-size: 5rem;" aria-hidden="true" title="${accessibleText}"></i><span class="sr-only">${accessibleText}</span>`
+                      event.logo !== null
+                        ? `<img class="profile-user-img img-fluid img-circle" src="/uploads/calendar/logo/${event.logo}" alt="Show Logo">`
+                        : `<i class="profile-user-img img-fluid img-circle ${iconClass} bg-${colorClass}" style="font-size: 5rem;" aria-hidden="true" title="${accessibleText}"></i><span class="sr-only">${accessibleText}</span>`
                     }
                     </div>
     
                     <p class="profile-username text-center h3">${event.name}</p>
     
                     <p class="${
-                    !shouldBeDark ? `text-muted ` : ``
+                      !shouldBeDark ? `text-muted ` : ``
                     }text-center">${event.hosts}</p>
     
                     <ul class="list-group list-group-unbordered mb-3 text-center">
                     ${
-                    badgeInfo
-                      ? `<li class="list-group-item${
-                      shouldBeDark ? ` bg-secondary` : ``
-                      }">
+                      badgeInfo
+                        ? `<li class="list-group-item${
+                            shouldBeDark ? ` bg-secondary` : ``
+                          }">
                     <b>${badgeInfo}</b>
                   </li>`
-                      : ``
+                        : ``
                     }
                     <li class="list-group-item${
-                    shouldBeDark ? ` bg-secondary` : ``
+                      shouldBeDark ? ` bg-secondary` : ``
                     }">
                         <b>${moment(event.start).format("hh:mm A")} - ${moment(
-                      event.end
-                    ).format("hh:mm A")}</b>
+                    event.end
+                  ).format("hh:mm A")}</b>
                     </li>
                     </ul>
     
-                    <a href="#" class="btn btn-primary btn-block button-event-info" tabindex="0" title="Click to view more information about this event and to subscribe or unsubscribe from push notifications." data-id="${event.unique}"><b>More Info / Notifications</b></a>
+                    <a href="#" class="btn btn-primary btn-block button-event-info" tabindex="0" title="Click to view more information about this event and to subscribe or unsubscribe from push notifications." data-id="${
+                      event.unique
+                    }"><b>More Info / Notifications</b></a>
                   </div>
                 </div>
               </div>`;
@@ -843,7 +879,7 @@ window.addEventListener("DOMContentLoaded", () => {
                     title: "calendar error",
                     body:
                       "There was an error in the updateCalendar function, event mapping. Please report this to wwsu4@wright.edu.",
-                    icon: "fas fa-skull-crossbones fa-lg",
+                    icon: "fas fa-skull-crossbones fa-lg"
                   });
                 }
               });
@@ -852,18 +888,24 @@ window.addEventListener("DOMContentLoaded", () => {
             $("#schedule-events").unblock();
 
             window.requestAnimationFrame(() => {
-              $(`.button-event-info`).unbind('click').click((e) => {
-                displayEventInfo($(e.currentTarget).data("id"));
-              });
-              $(`.button-event-info`).unbind('keydown').keydown((e) => {
-                if (e.code === "Space" || e.code === "Enter")
+              $(`.button-event-info`)
+                .unbind("click")
+                .click(e => {
                   displayEventInfo($(e.currentTarget).data("id"));
-              });
+                });
+              $(`.button-event-info`)
+                .unbind("keydown")
+                .keydown(e => {
+                  if (e.code === "Space" || e.code === "Enter")
+                    displayEventInfo($(e.currentTarget).data("id"));
+                });
             });
 
             calendarUpdating = false;
           },
-          moment().add(selectedOption, "days").startOf("day"),
+          moment()
+            .add(selectedOption, "days")
+            .startOf("day"),
           moment()
             .add(selectedOption + 1, "days")
             .startOf("day")
@@ -871,7 +913,7 @@ window.addEventListener("DOMContentLoaded", () => {
       },
       onUnblock: () => {
         calendarUpdating = false;
-      },
+      }
     });
   }
 
@@ -879,7 +921,7 @@ window.addEventListener("DOMContentLoaded", () => {
    * Update director office hours
    */
   var directorsCalendarUpdating = false;
-  function updateDirectorsCalendar () {
+  function updateDirectorsCalendar() {
     if (directorsCalendarUpdating) return;
     directorsCalendarUpdating = true;
     $("#schedule-hours").block({
@@ -890,14 +932,14 @@ window.addEventListener("DOMContentLoaded", () => {
         try {
           directorHours = {};
 
-          directorsdb.db().each((director) => {
-            directorHours[ director.ID ] = { director: director, hours: [] };
+          directorsdb.db().each(director => {
+            directorHours[director.ID] = { director: director, hours: [] };
           });
 
           // A list of Office Hours for the directors
 
           // Define a comparison function that will order calendar events by start time when we run the iteration
-          var compare = function (a, b) {
+          var compare = function(a, b) {
             try {
               if (moment(a.start).valueOf() < moment(b.start).valueOf()) {
                 return -1;
@@ -916,16 +958,16 @@ window.addEventListener("DOMContentLoaded", () => {
               console.error(e);
               iziToast.show({
                 title: "An error occurred - Please check the logs",
-                message: `Error occurred in the compare function of Calendar.sort in the Calendar[0] call.`,
+                message: `Error occurred in the compare function of Calendar.sort in the Calendar[0] call.`
               });
             }
           };
           calendardb.getEvents(
-            (events) => {
+            events => {
               events
                 .sort(compare)
-                .filter((event) => event.type === "office-hours")
-                .map((event) => {
+                .filter(event => event.type === "office-hours")
+                .map(event => {
                   // null start or end? Use a default to prevent errors.
                   if (!moment(event.start).isValid()) {
                     event.start = moment(meta.meta.time).startOf("day");
@@ -956,16 +998,18 @@ window.addEventListener("DOMContentLoaded", () => {
                   // Update strings if need be, if say, start time was before this day, or end time is after this day.
                   if (
                     moment(event.end).isAfter(
-                      moment(event.start).startOf("day").add(1, "days")
+                      moment(event.start)
+                        .startOf("day")
+                        .add(1, "days")
                     )
                   ) {
                     event.endT = `${moment(event.end).format("MM/DD ")} ${
                       event.endT
-                      }`;
+                    }`;
                   }
                   event.startT = `${moment(event.start).format("MM/DD ")} ${
                     event.startT
-                    }`;
+                  }`;
 
                   var endText = `<span class="text-dark">${event.startT} - ${event.endT}</span>`;
                   if (event.timeChanged) {
@@ -982,10 +1026,10 @@ window.addEventListener("DOMContentLoaded", () => {
                   }
 
                   if (
-                    typeof directorHours[ event.director ] !== "undefined" &&
-                    typeof directorHours[ event.director ].hours !== "undefined"
+                    typeof directorHours[event.director] !== "undefined" &&
+                    typeof directorHours[event.director].hours !== "undefined"
                   ) {
-                    directorHours[ event.director ].hours.push(endText);
+                    directorHours[event.director].hours.push(endText);
                   }
                 });
 
@@ -1002,7 +1046,7 @@ window.addEventListener("DOMContentLoaded", () => {
                   var textTitle =
                     "This director is not currently in the WWSU office.";
                   var theClass = "danger";
-                  if (directorHours[ directorHour ].director.present) {
+                  if (directorHours[directorHour].director.present) {
                     text1 = "IN OFFICE";
                     textTitle =
                       "This director is currently in the WWSU office.";
@@ -1013,31 +1057,31 @@ window.addEventListener("DOMContentLoaded", () => {
                     <div class="card-body box-profile">
                       <div class="text-center">
                       ${
-                    directorHours[ directorHour ].director.avatar !== ""
-                      ? `<img class="profile-user-img img-fluid img-circle" src="${directorHours[ directorHour ].director.avatar}" alt="Director Avatar">`
-                      : `<div class="bg-${theClass} profile-user-img img-fluid img-circle">${jdenticon.toSvg(
-                        `Director ${directorHours[ directorHour ].director.name}`,
-                        96
-                      )}</div>`
-                    }
+                        directorHours[directorHour].director.avatar !== ""
+                          ? `<img class="profile-user-img img-fluid img-circle" src="${directorHours[directorHour].director.avatar}" alt="Director Avatar">`
+                          : `<div class="bg-${theClass} profile-user-img img-fluid img-circle">${jdenticon.toSvg(
+                              `Director ${directorHours[directorHour].director.name}`,
+                              96
+                            )}</div>`
+                      }
                       </div>
       
                       <p class="profile-username text-center h3">${
-                    directorHours[ directorHour ].director.name
-                    }</p>
+                        directorHours[directorHour].director.name
+                      }</p>
       
                       <p class="text-center">${
-                    directorHours[ directorHour ].director.position
-                    }</p>
+                        directorHours[directorHour].director.position
+                      }</p>
       
                       <ul class="list-group list-group-unbordered mb-3 text-center">
                       <li class="list-group-item">
                       <div class="p-1 text-center" style="width: 100%;"><span class="notification badge badge-${theClass}" style="font-size: 1em;" title="${textTitle}">${text1}</span></div>
                       </li>
                       <li class="list-group-item">
-                          <strong>${directorHours[ directorHour ].hours.join(
-                      "<br />"
-                    )}</strong>
+                          <strong>${directorHours[directorHour].hours.join(
+                            "<br />"
+                          )}</strong>
                       </li>
                       </ul>
                     </div>
@@ -1052,19 +1096,21 @@ window.addEventListener("DOMContentLoaded", () => {
               directorsCalendarUpdating = false;
             },
             moment().startOf("day"),
-            moment().add(7, "days").startOf("day")
+            moment()
+              .add(7, "days")
+              .startOf("day")
           );
         } catch (e) {
           iziToast.show({
             title: "An error occurred - Please check the logs",
-            message: "Error occurred during the call of office hours.",
+            message: "Error occurred during the call of office hours."
           });
           console.error(e);
         }
       },
       onUnblock: () => {
         directorsCalendarUpdating = false;
-      },
+      }
     });
   }
 
@@ -1073,10 +1119,10 @@ window.addEventListener("DOMContentLoaded", () => {
    *
    * @param {string} showID Unique ID of the event to show
    */
-  function displayEventInfo (showID) {
+  function displayEventInfo(showID) {
     calendardb.getEvents(
-      (events) => {
-        events = events.filter((event) => event.unique === showID);
+      events => {
+        events = events.filter(event => event.unique === showID);
         if (events.length === 0) {
           $(document).Toasts("create", {
             class: "bg-danger",
@@ -1084,11 +1130,11 @@ window.addEventListener("DOMContentLoaded", () => {
             subtitle: showID,
             body:
               "There was an error trying to load that event. Please report this to wwsu4@wright.edu.",
-            icon: "fas fa-skull-crossbones fa-lg",
+            icon: "fas fa-skull-crossbones fa-lg"
           });
           return null;
         }
-        var event = events[ 0 ];
+        var event = events[0];
         viewingEvent = event;
         var colorClass = `secondary`;
         var iconClass = "far fa-calendar-alt";
@@ -1124,7 +1170,7 @@ window.addEventListener("DOMContentLoaded", () => {
         }
 
         if (
-          [ "canceled", "canceled-system", "canceled-changed" ].indexOf(
+          ["canceled", "canceled-system", "canceled-changed"].indexOf(
             event.scheduleType
           ) !== -1
         ) {
@@ -1132,17 +1178,17 @@ window.addEventListener("DOMContentLoaded", () => {
         }
 
         var badgeInfo;
-        if ([ "canceled-changed" ].indexOf(event.scheduleType) !== -1) {
+        if (["canceled-changed"].indexOf(event.scheduleType) !== -1) {
           badgeInfo = `<span class="badge-warning" style="font-size: 1em;">RESCHEDULED</span>`;
         }
         if (
-          [ "updated", "updated-system" ].indexOf(event.scheduleType) !== -1 &&
+          ["updated", "updated-system"].indexOf(event.scheduleType) !== -1 &&
           event.timeChanged
         ) {
           badgeInfo = `<span class="badge badge-warning" style="font-size: 1em;">TEMP TIME CHANGE</span>`;
         }
         if (
-          [ "canceled", "canceled-system" ].indexOf(event.scheduleType) !== -1
+          ["canceled", "canceled-system"].indexOf(event.scheduleType) !== -1
         ) {
           badgeInfo = `<span class="badge badge-danger" style="font-size: 1em;">CANCELED</span>`;
         }
@@ -1152,10 +1198,10 @@ window.addEventListener("DOMContentLoaded", () => {
       <div class="card-body box-profile">
         <div class="text-center">
         ${
-            event.logo !== null
-              ? `<img class="profile-user-img img-fluid img-circle" src="/uploads/calendar/logo/${event.logo}" alt="Show Logo">`
-              : `<i class="profile-user-img img-fluid img-circle ${iconClass} bg-${colorClass}" style="font-size: 5rem;" aria-hidden="true" title="${accessibleText}"></i><span class="sr-only">${accessibleText}</span>`
-            }
+          event.logo !== null
+            ? `<img class="profile-user-img img-fluid img-circle" src="/uploads/calendar/logo/${event.logo}" alt="Show Logo">`
+            : `<i class="profile-user-img img-fluid img-circle ${iconClass} bg-${colorClass}" style="font-size: 5rem;" aria-hidden="true" title="${accessibleText}"></i><span class="sr-only">${accessibleText}</span>`
+        }
         </div>
 
         <p class="profile-username text-center h3">${event.name}</p>
@@ -1164,34 +1210,34 @@ window.addEventListener("DOMContentLoaded", () => {
 
         <ul class="list-group list-group-unbordered mb-3">
         ${
-            badgeInfo
-              ? `<li class="list-group-item text-center">
+          badgeInfo
+            ? `<li class="list-group-item text-center">
         <p><b>${badgeInfo}</b></p>
         ${
-              event.scheduleReason !== null
-                ? `<p><strong>${event.scheduleReason}</strong></p>`
-                : ``
-              }
+          event.scheduleReason !== null
+            ? `<p><strong>${event.scheduleReason}</strong></p>`
+            : ``
+        }
       </li>`
-              : ``
-            }
+            : ``
+        }
         <li class="list-group-item text-center">
             <b>${
-            [ "canceled", "canceled-system", "canceled-updated" ].indexOf(
-              event.scheduleType
-            ) !== -1
-              ? `Original Time: `
-              : ``
+              ["canceled", "canceled-system", "canceled-updated"].indexOf(
+                event.scheduleType
+              ) !== -1
+                ? `Original Time: `
+                : ``
             }${moment(event.start).format("lll")} - ${moment(event.end).format(
-              "hh:mm A"
-            )}</b>
+          "hh:mm A"
+        )}</b>
         </li>
         <li class="list-group-item">
         ${
-            event.banner !== null
-              ? `<img class="img-fluid" src="/uploads/calendar/banner/${event.banner}" alt="Show Banner">`
-              : ``
-            }
+          event.banner !== null
+            ? `<img class="img-fluid" src="/uploads/calendar/banner/${event.banner}" alt="Show Banner">`
+            : ``
+        }
         </li>
         <li class="list-group-item">
             ${event.description !== null ? event.description : ``}
@@ -1241,16 +1287,20 @@ window.addEventListener("DOMContentLoaded", () => {
           $("#modal-eventinfo-unsubscribe").prop("disabled", false);
           $("#modal-eventinfo-unsubscribe").html(`Unsubscribe All Times`);
 
-          $(`#modal-eventinfo-subscribe-all`).off('click').click((event) => {
-            OneSignal.showSlidedownPrompt({ force: true });
-            $("#modal-eventinfo").modal("hide");
-          });
-          $(`#modal-eventinfo-subscribe-all`).off('keydown').keydown((event) => {
-            if (event.code === "Enter" || event.code === "Space") {
+          $(`#modal-eventinfo-subscribe-all`)
+            .off("click")
+            .click(event => {
               OneSignal.showSlidedownPrompt({ force: true });
               $("#modal-eventinfo").modal("hide");
-            }
-          });
+            });
+          $(`#modal-eventinfo-subscribe-all`)
+            .off("keydown")
+            .keydown(event => {
+              if (event.code === "Enter" || event.code === "Space") {
+                OneSignal.showSlidedownPrompt({ force: true });
+                $("#modal-eventinfo").modal("hide");
+              }
+            });
         }
 
         $("#modal-eventinfo").modal("show");
@@ -1266,7 +1316,7 @@ window.addEventListener("DOMContentLoaded", () => {
    * @param {string} type calendar-once for one-time subscription, or calendar-all for permanent subscription.
    * @param {string} subtype event.unique if one-time subscription, or calendarID if permanent subscription.
    */
-  function subscribe (type, subtype) {
+  function subscribe(type, subtype) {
     subscriptions.subscribe(type, subtype);
   }
 
@@ -1276,7 +1326,7 @@ window.addEventListener("DOMContentLoaded", () => {
    * @param {string} ID event.unique to unsubscribe from
    * @param {string} event calendarID to unsubscribe from
    */
-  function unsubscribe (ID, event) {
+  function unsubscribe(ID, event) {
     subscriptions.unsubscribe(ID, event);
   }
 
@@ -1285,27 +1335,27 @@ window.addEventListener("DOMContentLoaded", () => {
 */
 
   // When a new message is received, process it.
-  socket.on("messages", (data) => {
+  socket.on("messages", data => {
     try {
       for (var key in data) {
         if (Object.prototype.hasOwnProperty.call(data, key)) {
           switch (key) {
             case "insert":
-              addMessage(data[ key ], firstTime);
+              addMessage(data[key], firstTime);
               break;
             case "remove":
-              removeMessage(data[ key ]);
+              removeMessage(data[key]);
               break;
           }
         }
       }
-    } catch (unusedE) { }
+    } catch (unusedE) {}
   });
 
   /**
    * Updates all new message counts with the number of unread DJ messages
    */
-  function updateNewMessages () {
+  function updateNewMessages() {
     $(".chat-newmessages").html(newMessages);
     if (newMessages < 1) {
       $(".chat-newmessages").removeClass("bg-danger");
@@ -1319,13 +1369,13 @@ window.addEventListener("DOMContentLoaded", () => {
   /**
    * Hit the messages endpoint and subscribe to receiving messages.
    */
-  function messagesSocket () {
-    socket.post("/messages/get-web", {}, function serverResponded (body) {
+  function messagesSocket() {
+    socket.post("/messages/get-web", {}, function serverResponded(body) {
       //console.log(body);
       try {
         body
-          .filter((message) => messageIDs.indexOf(message.ID) === -1)
-          .map((message) => addMessage(message, firstTime));
+          .filter(message => messageIDs.indexOf(message.ID) === -1)
+          .map(message => addMessage(message, firstTime));
         firstTime = false;
       } catch (e) {
         console.error(e);
@@ -1340,7 +1390,7 @@ window.addEventListener("DOMContentLoaded", () => {
    * @param {object} data Data object for the message from WWSU
    * @param {boolean} firsttime Whether or not this message was added on initial load (if true, no toast notification will display)
    */
-  function addMessage (data, firsttime = false) {
+  function addMessage(data, firsttime = false) {
     // Note the ID; used to determine new messages upon reconnection of a socket disconnect
     messageIDs.push(data.ID);
 
@@ -1348,14 +1398,14 @@ window.addEventListener("DOMContentLoaded", () => {
     if (data.to.startsWith("website-")) {
       $("#chat-messages").append(`<div class="direct-chat-msg" id="msg-${
         data.ID
-        }">
+      }">
         <div class="direct-chat-infos clearfix">
           <span class="direct-chat-name float-left">${
-        data.fromFriendly
-        } (Private Message)</span>
+            data.fromFriendly
+          } (Private Message)</span>
           <span class="direct-chat-timestamp float-right">${moment(
-          data.createdAt
-        ).format("hh:mm A")}</span>
+            data.createdAt
+          ).format("hh:mm A")}</span>
         </div>
         <div class="direct-chat-img bg-secondary">${jdenticon.toSvg(
           data.from,
@@ -1372,7 +1422,7 @@ window.addEventListener("DOMContentLoaded", () => {
           autohide: true,
           delay: 15000,
           body: data.message,
-          icon: "fas fa-comments fa-lg",
+          icon: "fas fa-comments fa-lg"
         });
       }
       newMessages++;
@@ -1382,12 +1432,12 @@ window.addEventListener("DOMContentLoaded", () => {
     } else if (data.to === "website") {
       $("#chat-messages").append(`<div class="direct-chat-msg" id="msg-${
         data.ID
-        }">
+      }">
         <div class="direct-chat-infos clearfix">
           <span class="direct-chat-name float-left">${data.fromFriendly}</span>
           <span class="direct-chat-timestamp float-right">${moment(
-          data.createdAt
-        ).format("hh:mm A")}</span>
+            data.createdAt
+          ).format("hh:mm A")}</span>
         </div>
         <div class="direct-chat-img bg-secondary">${jdenticon.toSvg(
           data.from,
@@ -1404,7 +1454,7 @@ window.addEventListener("DOMContentLoaded", () => {
           autohide: true,
           delay: 15000,
           body: data.message,
-          icon: "fas fa-comments fa-lg",
+          icon: "fas fa-comments fa-lg"
         });
       }
       newMessages++;
@@ -1414,12 +1464,12 @@ window.addEventListener("DOMContentLoaded", () => {
     } else if (data.to === "DJ-private" && data.from !== client) {
       $("#chat-messages").append(`<div class="direct-chat-msg" id="msg-${
         data.ID
-        }">
+      }">
         <div class="direct-chat-infos clearfix">
           <span class="direct-chat-name float-left">${data.fromFriendly}</span>
           <span class="direct-chat-timestamp float-right">${moment(
-          data.createdAt
-        ).format("hh:mm A")}</span>
+            data.createdAt
+          ).format("hh:mm A")}</span>
         </div>
         <div class="direct-chat-img bg-secondary">${jdenticon.toSvg(
           data.from,
@@ -1437,20 +1487,20 @@ window.addEventListener("DOMContentLoaded", () => {
           autohide: true,
           delay: 15000,
           body: data.message,
-          icon: "fas fa-comments fa-lg",
+          icon: "fas fa-comments fa-lg"
         });
       }
     } else if (data.from === client) {
       $("#chat-messages").append(`<div class="direct-chat-msg right" id="msg-${
         data.ID
-        }">
+      }">
         <div class="direct-chat-infos clearfix">
           <span class="direct-chat-name float-right">YOU${
-        data.to === "DJ-private" ? ` (Private Message)` : ``
-        }</span>
+            data.to === "DJ-private" ? ` (Private Message)` : ``
+          }</span>
           <span class="direct-chat-timestamp float-left">${moment(
-          data.createdAt
-        ).format("hh:mm A")}</span>
+            data.createdAt
+          ).format("hh:mm A")}</span>
         </div>
         <div class="direct-chat-img bg-secondary">${jdenticon.toSvg(
           data.from,
@@ -1465,12 +1515,12 @@ window.addEventListener("DOMContentLoaded", () => {
     } else {
       $("#chat-messages").append(`<div class="direct-chat-msg" id="msg-${
         data.ID
-        }">
+      }">
         <div class="direct-chat-infos clearfix">
           <span class="direct-chat-name float-left">${data.fromFriendly}</span>
           <span class="direct-chat-timestamp float-right">${moment(
-          data.createdAt
-        ).format("hh:mm A")}</span>
+            data.createdAt
+          ).format("hh:mm A")}</span>
         </div>
         <div class="direct-chat-img bg-secondary">${jdenticon.toSvg(
           data.from,
@@ -1488,7 +1538,7 @@ window.addEventListener("DOMContentLoaded", () => {
    *
    * @param {number} ID ID of the message to remove.
    */
-  function removeMessage (ID) {
+  function removeMessage(ID) {
     $(`#msg-${ID}`).remove();
   }
 
@@ -1497,7 +1547,7 @@ window.addEventListener("DOMContentLoaded", () => {
    *
    * @param {boolean} privateMsg Is this message to be sent privately?
    */
-  function sendMessage (privateMsg = false) {
+  function sendMessage(privateMsg = false) {
     if (blocked) {
       return null;
     }
@@ -1508,7 +1558,7 @@ window.addEventListener("DOMContentLoaded", () => {
         autohide: true,
         delay: 10000,
         body: "You did not type a message to send.",
-        icon: "fas fa-skull-crossbones fa-lg",
+        icon: "fas fa-skull-crossbones fa-lg"
       });
       return null;
     }
@@ -1517,9 +1567,9 @@ window.addEventListener("DOMContentLoaded", () => {
       {
         message: $("#chat-message").val(),
         nickname: $("#chat-nickname").val(),
-        private: privateMsg,
+        private: privateMsg
       },
-      function serverResponded (response) {
+      function serverResponded(response) {
         try {
           if (response !== "OK") {
             $(document).Toasts("create", {
@@ -1529,7 +1579,7 @@ window.addEventListener("DOMContentLoaded", () => {
               delay: 15000,
               body:
                 "WWSU rejected your message. This could be because you are sending messages too fast, or you are banned from sending messages.",
-              icon: "fas fa-skull-crossbones fa-lg",
+              icon: "fas fa-skull-crossbones fa-lg"
             });
             return null;
           }
@@ -1541,7 +1591,7 @@ window.addEventListener("DOMContentLoaded", () => {
             title: "Error sending message",
             body:
               "There was an error sending your message. Please report this to wwsu4@wright.edu.",
-            icon: "fas fa-skull-crossbones fa-lg",
+            icon: "fas fa-skull-crossbones fa-lg"
           });
         }
       }
@@ -1555,11 +1605,11 @@ window.addEventListener("DOMContentLoaded", () => {
   /**
    * Re-load the available genres to filter by in the track request system.
    */
-  function loadGenres () {
-    socket.post("/songs/get-genres", {}, function serverResponded (response) {
+  function loadGenres() {
+    socket.post("/songs/get-genres", {}, function serverResponded(response) {
       try {
         var html = `<option value="0">Any Genre</option>`;
-        response.map((subcat) => {
+        response.map(subcat => {
           html += `<option value="${subcat.ID}">${subcat.name}</option>`;
         });
         $("#request-genre").html(html);
@@ -1570,7 +1620,7 @@ window.addEventListener("DOMContentLoaded", () => {
           title: "Error loading genres for request system",
           body:
             "There was an error loading the available genres to filter by in the request system. Please report this to wwsu4@wright.edu.",
-          icon: "fas fa-skull-crossbones fa-lg",
+          icon: "fas fa-skull-crossbones fa-lg"
         });
       }
     });
@@ -1581,20 +1631,22 @@ window.addEventListener("DOMContentLoaded", () => {
    *
    * @param {integer} skip Start at the provided track number.
    */
-  function loadTracks (skip = skipIt) {
+  function loadTracks(skip = skipIt) {
     var query = {
       search: $("#request-name").val(),
       skip: skip,
       limit: 50,
       ignoreDisabled: true,
-      ignoreNonMusic: true,
+      ignoreNonMusic: true
     };
-    var selectedOption = $("#request-genre").children("option:selected").val();
+    var selectedOption = $("#request-genre")
+      .children("option:selected")
+      .val();
     if (selectedOption !== "0") {
       query.genre = parseInt(selectedOption);
     }
     var html = ``;
-    socket.post("/songs/get", query, function serverResponded (response) {
+    socket.post("/songs/get", query, function serverResponded(response) {
       try {
         // response = JSON.parse(response);
         if (response === "false" || !response) {
@@ -1606,36 +1658,42 @@ window.addEventListener("DOMContentLoaded", () => {
           $("#request-more-none").css("display", "none");
           $("#request-more").css("display", "");
 
-          response.map((track) => {
+          response.map(track => {
             html += `<tr class="${track.enabled !== 1 ? "bg-dark" : ""}">
             <td>${track.artist} - ${track.title}${
               track.enabled !== 1 ? " (DISABLED)" : ""
-              }</td>
+            }</td>
             <td>
             ${
               track.enabled === 1
-                ? `<button type="button" class="btn btn-success button-request-track" data-id="${track.ID}" title="Get more info, or request, ${wwsuutil.escapeHTML(
-                  track.artist
-                )} - ${wwsuutil.escapeHTML(
-                  track.title
-                )}}">Info / Request</button>`
+                ? `<button type="button" class="btn btn-success button-request-track" data-id="${
+                    track.ID
+                  }" title="Get more info, or request, ${wwsuutil.escapeHTML(
+                    track.artist
+                  )} - ${wwsuutil.escapeHTML(
+                    track.title
+                  )}}">Info / Request</button>`
                 : `<button type="button" class="btn btn-info" id="request-track-${
-                track.ID
-                }" title="Get more info about ${wwsuutil.escapeHTML(
-                  track.artist
-                )} - ${wwsuutil.escapeHTML(track.title)}}.">Info</button>`
-              }
+                    track.ID
+                  }" title="Get more info about ${wwsuutil.escapeHTML(
+                    track.artist
+                  )} - ${wwsuutil.escapeHTML(track.title)}}.">Info</button>`
+            }
             </td>
           </tr>`;
 
             window.requestAnimationFrame(() => {
-              $(`.button-request-track`).unbind('click').click((e) => {
-                loadTrackInfo(parseInt($(e.currentTarget).data("id")));
-              });
-              $(`.button-request-track`).unbind('keydown').keydown((e) => {
-                if (e.code === "Space" || e.code === "Enter")
+              $(`.button-request-track`)
+                .unbind("click")
+                .click(e => {
                   loadTrackInfo(parseInt($(e.currentTarget).data("id")));
-              });
+                });
+              $(`.button-request-track`)
+                .unbind("keydown")
+                .keydown(e => {
+                  if (e.code === "Space" || e.code === "Enter")
+                    loadTrackInfo(parseInt($(e.currentTarget).data("id")));
+                });
             });
           });
 
@@ -1654,7 +1712,7 @@ window.addEventListener("DOMContentLoaded", () => {
           title: "Error loading tracks for request system",
           body:
             "There was an error loading the tracks for the request system. Please report this to wwsu4@wright.edu.",
-          icon: "fas fa-skull-crossbones fa-lg",
+          icon: "fas fa-skull-crossbones fa-lg"
         });
       }
     });
@@ -1665,64 +1723,63 @@ window.addEventListener("DOMContentLoaded", () => {
    *
    * @param {integer} trackID ID of the track to get more information.
    */
-  function loadTrackInfo (trackID) {
+  function loadTrackInfo(trackID) {
     socket.post(
       "/songs/get",
       { ID: trackID, ignoreSpins: true },
-      function serverResponded (response) {
+      function serverResponded(response) {
         try {
-          $("#track-info-ID").html(response[ 0 ].ID);
+          $("#track-info-ID").html(response[0].ID);
           $("#track-info-status").html(
-            response[ 0 ].enabled === 1 ? "Enabled" : "Disabled"
+            response[0].enabled === 1 ? "Enabled" : "Disabled"
           );
           document.getElementById("track-info-status").className = `bg-${
-            response[ 0 ].enabled === 1 ? "success" : "dark"
-            }`;
-          $("#track-info-artist").html(response[ 0 ].artist);
-          $("#track-info-title").html(response[ 0 ].title);
-          $("#track-info-album").html(response[ 0 ].album);
-          $("#track-info-genre").html(response[ 0 ].genre);
+            response[0].enabled === 1 ? "success" : "dark"
+          }`;
+          $("#track-info-artist").html(response[0].artist);
+          $("#track-info-title").html(response[0].title);
+          $("#track-info-album").html(response[0].album);
+          $("#track-info-genre").html(response[0].genre);
           $("#track-info-duration").html(
-            moment.duration(response[ 0 ].duration, "seconds").format("HH:mm:ss")
+            moment.duration(response[0].duration, "seconds").format("HH:mm:ss")
           );
           $("#track-info-lastplayed").html(
-            moment(response[ 0 ].date_played).isAfter("2002-01-01 00:00:01")
-              ? moment(response[ 0 ].date_played).format("LLLL")
+            moment(response[0].date_played).isAfter("2002-01-01 00:00:01")
+              ? moment(response[0].date_played).format("LLLL")
               : "Unknown"
           );
           $("#track-info-limits").html(`<ul>
               ${
-            response[ 0 ].limit_action > 0 &&
-              response[ 0 ].count_played < response[ 0 ].play_limit
-              ? `<li>Track has ${
-              response[ 0 ].play_limit - response[ 0 ].count_played
-              } spins left</li>`
-              : ``
-            }
+                response[0].limit_action > 0 &&
+                response[0].count_played < response[0].play_limit
+                  ? `<li>Track has ${response[0].play_limit -
+                      response[0].count_played} spins left</li>`
+                  : ``
+              }
               ${
-            response[ 0 ].limit_action > 0 &&
-              response[ 0 ].count_played >= response[ 0 ].play_limit
-              ? `<li>Track expired (reached spin limit)</li>`
-              : ``
-            }
+                response[0].limit_action > 0 &&
+                response[0].count_played >= response[0].play_limit
+                  ? `<li>Track expired (reached spin limit)</li>`
+                  : ``
+              }
               ${
-            moment(response[ 0 ].start_date).isAfter()
-              ? `<li>Track cannot be played until ${moment(
-                response[ 0 ].start_date
-              ).format("LLLL")}</li>`
-              : ``
-            }
+                moment(response[0].start_date).isAfter()
+                  ? `<li>Track cannot be played until ${moment(
+                      response[0].start_date
+                    ).format("LLLL")}</li>`
+                  : ``
+              }
               ${
-            moment(response[ 0 ].end_date).isBefore() &&
-              moment(response[ 0 ].end_date).isAfter("2002-01-01 00:00:01")
-              ? `<li>Track expired on ${moment(response[ 0 ].end_date).format(
-                "LLLL"
-              )}</li>`
-              : ``
-            }
+                moment(response[0].end_date).isBefore() &&
+                moment(response[0].end_date).isAfter("2002-01-01 00:00:01")
+                  ? `<li>Track expired on ${moment(response[0].end_date).format(
+                      "LLLL"
+                    )}</li>`
+                  : ``
+              }
               </ul>`);
 
-          if (response[ 0 ].request.requestable) {
+          if (response[0].request.requestable) {
             $("#track-info-request").html(`<div class="form-group">
                                       <h6>Request this Track</h6>
                                       <label for="track-request-name">Name (optional; displayed when the request plays)</label>
@@ -1732,18 +1789,22 @@ window.addEventListener("DOMContentLoaded", () => {
                                       </div>                    
                                       <div class="form-group"><button type="submit" id="track-request-submit" class="btn btn-primary" tabindex="0">Place Request</button></div>`);
             window.requestAnimationFrame(() => {
-              $(`#track-request-submit`).unbind('click').click((e) => {
-                requestTrack(response[ 0 ].ID);
-              });
-              $(`#track-request-submit`).unbind('keydown').keydown((e) => {
-                if (e.code === "Space" || e.code === "Enter")
-                  requestTrack(response[ 0 ].ID);
-              });
+              $(`#track-request-submit`)
+                .unbind("click")
+                .click(e => {
+                  requestTrack(response[0].ID);
+                });
+              $(`#track-request-submit`)
+                .unbind("keydown")
+                .keydown(e => {
+                  if (e.code === "Space" || e.code === "Enter")
+                    requestTrack(response[0].ID);
+                });
             });
           } else {
             $("#track-info-request")
-              .html(`<div class="callout callout-${response[ 0 ].request.listDiv}">
-                          ${response[ 0 ].request.message}
+              .html(`<div class="callout callout-${response[0].request.listDiv}">
+                          ${response[0].request.message}
                       </div>`);
           }
 
@@ -1756,7 +1817,7 @@ window.addEventListener("DOMContentLoaded", () => {
             subtitle: trackID,
             body:
               "There was an error loading track information. Please report this to wwsu4@wright.edu.",
-            icon: "fas fa-skull-crossbones fa-lg",
+            icon: "fas fa-skull-crossbones fa-lg"
           });
         }
       }
@@ -1768,16 +1829,16 @@ window.addEventListener("DOMContentLoaded", () => {
    *
    * @param {integer} trackID ID of the track to request
    */
-  function requestTrack (trackID) {
+  function requestTrack(trackID) {
     var data = {
       ID: trackID,
       name: $("#track-request-name").val(),
-      message: $("#track-request-message").val(),
+      message: $("#track-request-message").val()
     };
     if (device !== null) {
       data.device = device;
     }
-    socket.post("/requests/place", data, function serverResponded (response) {
+    socket.post("/requests/place", data, function serverResponded(response) {
       try {
         if (response.requested) {
           $(document).Toasts("create", {
@@ -1787,7 +1848,7 @@ window.addEventListener("DOMContentLoaded", () => {
             autohide: true,
             delay: 10000,
             body: `Your request has been placed!`,
-            icon: "fas fa-file-audio fa-lg",
+            icon: "fas fa-file-audio fa-lg"
           });
         } else {
           $(document).Toasts("create", {
@@ -1797,7 +1858,7 @@ window.addEventListener("DOMContentLoaded", () => {
             autohide: true,
             delay: 10000,
             body: `WWSU rejected your track request. The track may already be in the queue or might not be requestable at this time.`,
-            icon: "fas fa-file-audio fa-lg",
+            icon: "fas fa-file-audio fa-lg"
           });
         }
         $("#modal-trackinfo").modal("hide");
@@ -1809,7 +1870,7 @@ window.addEventListener("DOMContentLoaded", () => {
           subtitle: trackID,
           body:
             "There was an error placing the track request. Please report this to wwsu4@wright.edu.",
-          icon: "fas fa-skull-crossbones fa-lg",
+          icon: "fas fa-skull-crossbones fa-lg"
         });
       }
     });
@@ -1824,15 +1885,15 @@ window.addEventListener("DOMContentLoaded", () => {
    *
    * @param {boolean} doOneSignal Should we initialize OneSignal?
    */
-  function onlineSocket (doOneSignal = false) {
+  function onlineSocket(doOneSignal = false) {
     socket.post(
       "/recipients/add-web",
       { device: device },
-      function serverResponded (body) {
+      function serverResponded(body) {
         try {
           try {
             $("#chat-nickname").val(
-              body.label.replace("Web ", "").match(/\(([^)]+)\)/)[ 1 ]
+              body.label.replace("Web ", "").match(/\(([^)]+)\)/)[1]
             );
           } catch (e2) {
             $("#chat-nickname").val(body.label);
@@ -1845,14 +1906,14 @@ window.addEventListener("DOMContentLoaded", () => {
             OneSignal.push(() => {
               OneSignal.init({
                 appId: "150c0123-e224-4e5b-a8b2-fc202d78e2f1",
-                autoResubscribe: true,
+                autoResubscribe: true
               });
 
               notificationsSupported = OneSignal.isPushNotificationsSupported();
 
-              OneSignal.isPushNotificationsEnabled().then((isEnabled) => {
+              OneSignal.isPushNotificationsEnabled().then(isEnabled => {
                 if (isEnabled) {
-                  OneSignal.getUserId().then((userId) => {
+                  OneSignal.getUserId().then(userId => {
                     device = userId;
                     onlineSocket();
                   });
@@ -1862,47 +1923,10 @@ window.addEventListener("DOMContentLoaded", () => {
                 }
               });
 
-              OneSignal.on(
-                "notificationPermissionChange",
-                (permissionChange) => {
-                  var currentPermission = permissionChange.to;
-                  if (currentPermission === "granted" && device === null) {
-                    OneSignal.getUserId().then((userId) => {
-                      $(document).Toasts("create", {
-                        class: "bg-success",
-                        title: "Notifications Enabled",
-                        autohide: true,
-                        delay: 15000,
-                        body:
-                          "<p>You have granted WWSU permission to send you notifications. Now, you can subscribe to your favorite shows to get notified when they air and when their schedule changes.</p>",
-                        icon: "fas fa-bell fa-lg",
-                      });
-                      device = userId;
-                      onlineSocket();
-                    });
-                  } else if (
-                    currentPermission === "denied" &&
-                    device !== null
-                  ) {
-                    $(document).Toasts("create", {
-                      class: "bg-success",
-                      title: "Notifications Disabled",
-                      autohide: true,
-                      delay: 15000,
-                      body:
-                        "<p>You have rejected WWSU permission to send you notifications. You will no longer receive any notifications, including shows you subscribed.</p>",
-                      icon: "fas fa-bell-slash fa-lg",
-                    });
-                    device = null;
-                    onlineSocket();
-                  }
-                }
-              );
-
-              // On changes to web notification subscriptions; update subscriptions and device.
-              OneSignal.on("subscriptionChange", (isSubscribed) => {
-                if (isSubscribed && device === null) {
-                  OneSignal.getUserId().then((userId) => {
+              OneSignal.on("notificationPermissionChange", permissionChange => {
+                var currentPermission = permissionChange.to;
+                if (currentPermission === "granted" && device === null) {
+                  OneSignal.getUserId().then(userId => {
                     $(document).Toasts("create", {
                       class: "bg-success",
                       title: "Notifications Enabled",
@@ -1910,7 +1934,38 @@ window.addEventListener("DOMContentLoaded", () => {
                       delay: 15000,
                       body:
                         "<p>You have granted WWSU permission to send you notifications. Now, you can subscribe to your favorite shows to get notified when they air and when their schedule changes.</p>",
-                      icon: "fas fa-bell fa-lg",
+                      icon: "fas fa-bell fa-lg"
+                    });
+                    device = userId;
+                    onlineSocket();
+                  });
+                } else if (currentPermission === "denied" && device !== null) {
+                  $(document).Toasts("create", {
+                    class: "bg-success",
+                    title: "Notifications Disabled",
+                    autohide: true,
+                    delay: 15000,
+                    body:
+                      "<p>You have rejected WWSU permission to send you notifications. You will no longer receive any notifications, including shows you subscribed.</p>",
+                    icon: "fas fa-bell-slash fa-lg"
+                  });
+                  device = null;
+                  onlineSocket();
+                }
+              });
+
+              // On changes to web notification subscriptions; update subscriptions and device.
+              OneSignal.on("subscriptionChange", isSubscribed => {
+                if (isSubscribed && device === null) {
+                  OneSignal.getUserId().then(userId => {
+                    $(document).Toasts("create", {
+                      class: "bg-success",
+                      title: "Notifications Enabled",
+                      autohide: true,
+                      delay: 15000,
+                      body:
+                        "<p>You have granted WWSU permission to send you notifications. Now, you can subscribe to your favorite shows to get notified when they air and when their schedule changes.</p>",
+                      icon: "fas fa-bell fa-lg"
                     });
                     device = userId;
                     onlineSocket();
@@ -1923,7 +1978,7 @@ window.addEventListener("DOMContentLoaded", () => {
                     delay: 15000,
                     body:
                       "<p>You have rejected WWSU permission to send you notifications. You will no longer receive any notifications, including shows you subscribed.</p>",
-                    icon: "fas fa-bell-slash fa-lg",
+                    icon: "fas fa-bell-slash fa-lg"
                   });
                   device = null;
                   onlineSocket();
