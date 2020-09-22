@@ -1252,8 +1252,6 @@ module.exports = {
 
       await new Promise(async (resolve2) => {
         var process3_2 = (record) => {
-          console.log(`3_2 record`);
-          console.dir(record);
           // Calculate how many duplicate records for the same show exists and add reputation score to offset a penalty
           if (record.unique !== null && record.unique !== ``) {
             if (
@@ -1452,8 +1450,6 @@ module.exports = {
               }
             }
             unique[record.unique] = _.cloneDeep(record);
-            console.log(`Unique record ${record.unique}`);
-            console.dir(record);
           }
 
           tasksLeft--;
@@ -1469,8 +1465,6 @@ module.exports = {
 
       await new Promise(async (resolve2) => {
         var process3_3 = (record) => {
-          console.log(`3_3 record`);
-          console.dir(record);
           if (
             record.actualStart !== null &&
             record.actualEnd !== null &&
@@ -2259,8 +2253,6 @@ module.exports = {
         for (let uniqueRecord in unique) {
           if (Object.prototype.hasOwnProperty.call(unique, uniqueRecord)) {
             tasksLeft2++;
-            console.log(`Queuing unique ${uniqueRecord}`);
-            console.dir(unique[uniqueRecord]);
             WWSUqueue.add(() => process3_3(_.cloneDeep(unique[uniqueRecord])));
           }
         }
