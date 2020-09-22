@@ -946,7 +946,7 @@ module.exports = {
       }
 
       records.map((record) => {
-        WWSUqueue.add(() => process1_2(record));
+        WWSUqueue.add(() => process1_2(_.cloneDeep(record)));
       });
     });
 
@@ -1142,7 +1142,7 @@ module.exports = {
       }
 
       records.map((record) => {
-        WWSUqueue.add(() => process2_2(record));
+        WWSUqueue.add(() => process2_2(_.cloneDeep(record)));
       });
     });
 
@@ -1270,7 +1270,7 @@ module.exports = {
                 }
               }
             }
-            unique[ record.unique ] = _.cloneDeep(record);
+            unique[ record.unique ] = record;
           }
 
           tasksLeft--;
@@ -1279,7 +1279,7 @@ module.exports = {
 
         records
           .map((record) => {
-            WWSUqueue.add(() => process3_2(record));
+            WWSUqueue.add(() => process3_2(_.cloneDeep(record)));
           });
       });
 
@@ -2952,7 +2952,7 @@ module.exports = {
       }
 
       records.map(async (record) => {
-        WWSUqueue.add(() => process4_2(record));
+        WWSUqueue.add(() => process4_2(_.cloneDeep(record)));
       });
     });
 
