@@ -1836,8 +1836,8 @@ module.exports = {
           if (Object.prototype.hasOwnProperty.call(unique, uniqueRecord)) {
             tasksLeft2++;
             console.log(`Queuing unique ${uniqueRecord}`);
-            console.dir(unique[ uniqueRecord ]);
-            WWSUqueue.add(() => process3_3(unique[ uniqueRecord ]));
+            console.dir(unique[ uniqueRecord ])
+            WWSUqueue.add(() => process3_3(_.cloneDeep(unique[ uniqueRecord ])));
           }
         }
 
