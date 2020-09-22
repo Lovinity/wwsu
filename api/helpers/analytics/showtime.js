@@ -1163,6 +1163,8 @@ module.exports = {
 
       await new Promise(async (resolve2) => {
         var process3_2 = (record) => {
+          console.log(`3_2 record`);
+          console.dir(record);
           // Calculate how many duplicate records for the same show exists and add reputation score to offset a penalty
           if (record.unique !== null && record.unique !== ``) {
             if (record.unique in unique && record.showTime && record.scheduledStart !== null && record.scheduledEnd !== null) {
@@ -1271,6 +1273,8 @@ module.exports = {
               }
             }
             unique[ record.unique ] = record;
+            console.log(`Unique record ${record.unique}`);
+            console.dir(record);
           }
 
           tasksLeft--;
@@ -1287,6 +1291,8 @@ module.exports = {
 
       await new Promise(async (resolve2) => {
         var process3_3 = (record) => {
+          console.log(`3_3 record`);
+          console.dir(record);
           if (record.actualStart !== null && record.actualEnd !== null && record.happened === 1) {
             var maxBreaks = Object.keys(sails.config.custom.breaks).length > 0 ? record.showTime / (60 / Object.keys(sails.config.custom.breaks).length) : 0;
             var breakPoints = Math.min(maxBreaks, record.breaks);
@@ -1829,6 +1835,8 @@ module.exports = {
         for (var uniqueRecord in unique) {
           if (Object.prototype.hasOwnProperty.call(unique, uniqueRecord)) {
             tasksLeft2++;
+            console.log(`Queuing unique ${uniqueRecord}`);
+            console.dir(unique[ uniqueRecord ]);
             WWSUqueue.add(() => process3_3(unique[ uniqueRecord ]));
           }
         }
