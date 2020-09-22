@@ -1288,9 +1288,7 @@ module.exports = {
       await new Promise(async (resolve2) => {
         var process3_3 = (record) => {
           console.log(`Processing showtime record`);
-          console.dir(record.createdAt);
-          console.log(record.createdAt.constructor);
-          console.log(moment(record.createdAt));
+          console.dir(record);
           if (record.actualStart !== null && record.actualEnd !== null && record.happened === 1) {
             var maxBreaks = Object.keys(sails.config.custom.breaks).length > 0 ? record.showTime / (60 / Object.keys(sails.config.custom.breaks).length) : 0;
             var breakPoints = Math.min(maxBreaks, record.breaks);
