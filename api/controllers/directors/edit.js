@@ -48,14 +48,14 @@ module.exports = {
       description: 'Should this director receive emails of critical problems?'
     },
 
-    emailDJs: {
+    emailCalendar: {
       type: 'boolean',
-      description: 'Should this director receive emails regarding DJ shows, accountability, and analytics?'
+      description: 'Should this director receive emails regarding calendar events and shows?'
     },
 
-    emailDirectors: {
+    emailWeeklyAnalytics: {
       type: 'boolean',
-      description: 'Should this director receive emails of director hours and timesheets?'
+      description: 'Should this director receive emails every week with analytics?'
     },
   },
 
@@ -91,9 +91,9 @@ module.exports = {
 
       if (typeof inputs.emailEmergencies !== 'undefined' && inputs.emailEmergencies !== null) { criteria.emailEmergencies = inputs.emailEmergencies }
 
-      if (typeof inputs.emailDJs !== 'undefined' && inputs.emailDJs !== null) { criteria.emailDJs = inputs.emailDJs }
+      if (typeof inputs.emailCalendar !== 'undefined' && inputs.emailCalendar !== null) { criteria.emailCalendar = inputs.emailCalendar }
 
-      if (typeof inputs.emailDirectors !== 'undefined' && inputs.emailDirectors !== null) { criteria.emailDirectors = inputs.emailDirectors }
+      if (typeof inputs.emailWeeklyAnalytics !== 'undefined' && inputs.emailWeeklyAnalytics !== null) { criteria.emailWeeklyAnalytics = inputs.emailWeeklyAnalytics }
 
       // We must clone the InitialValues object due to how Sails.js manipulates any objects passed as InitialValues.
       var criteriaB = _.cloneDeep(criteria)

@@ -65,12 +65,12 @@ module.exports = {
       defaultsTo: false
     },
 
-    emailDJs: {
+    emailCalendar: {
       type: 'boolean',
       defaultsTo: false
     },
 
-    emailDirectors: {
+    emailWeeklyAnalytics: {
       type: 'boolean',
       defaultsTo: false
     },

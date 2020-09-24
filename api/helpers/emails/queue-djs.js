@@ -4,7 +4,7 @@ module.exports = {
   friendlyName: 'helpers.emails.queueDjs',
 
 
-  description: 'Queue emails to emailDJs and specific DJs in an event.',
+  description: 'Queue emails to emailCalendar directors and specific DJs in an event.',
 
 
   inputs: {
@@ -62,7 +62,7 @@ module.exports = {
 
     // Load in directors to be CCd
     if (!inputs.skipDirectors) {
-      var records = await sails.models.directors.find({ emailDJs: true });
+      var records = await sails.models.directors.find({ emailCalendar: true });
       cc = records
         .filter((record) => record.email && record.email !== '')
         .map((record) => record.email);

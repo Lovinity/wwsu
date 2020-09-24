@@ -1,80 +1,93 @@
-const bcrypt = require('bcrypt')
+const bcrypt = require("bcrypt");
 module.exports = {
+  friendlyName: "directors / add",
 
-  friendlyName: 'directors / add',
-
-  description: 'Add a new director into the system.',
+  description: "Add a new director into the system.",
 
   inputs: {
     name: {
-      type: 'string',
+      type: "string",
       required: true,
-      description: 'The director to add.'
+      description: "The director to add.",
     },
 
     login: {
-      type: 'string',
+      type: "string",
       required: true,
-      description: 'The login used for the clock-in and clock-out computer.'
+      description: "The login used for the clock-in and clock-out computer.",
     },
 
     email: {
-      type: 'string',
+      type: "string",
       isEmail: true,
-      description: 'The email address of the director'
+      description: "The email address of the director",
     },
 
     admin: {
-      type: 'boolean',
+      type: "boolean",
       defaultsTo: false,
-      description: 'Is this director an administrator? Defaults to false.'
+      description: "Is this director an administrator? Defaults to false.",
     },
 
     assistant: {
-      type: 'boolean',
+      type: "boolean",
       defaultsTo: false,
-      description: 'Is this director an assistant director opposed to a main director? Defaults to false.'
+      description:
+        "Is this director an assistant director opposed to a main director? Defaults to false.",
     },
 
     position: {
-      type: 'string',
+      type: "string",
       required: true,
-      description: 'The description of the position of this director (such as general manager).'
+      description:
+        "The description of the position of this director (such as general manager).",
     },
 
     emailEmergencies: {
-      type: 'boolean',
+      type: "boolean",
       defaultsTo: false,
-      description: 'Should this director receive emails of critical problems?'
+      description: "Should this director receive emails of critical problems?",
     },
 
-    emailDJs: {
-      type: 'boolean',
+    emailCalendar: {
+      type: "boolean",
       defaultsTo: false,
-      description: 'Should this director receive emails regarding DJ shows, accountability, and analytics?'
+      description:
+        "Should this director receive emails regarding calendar events and shows?",
     },
 
-    emailDirectors: {
-      type: 'boolean',
+    emailWeeklyAnalytics: {
+      type: "boolean",
       defaultsTo: false,
-      description: 'Should this director receive emails of director hours and timesheets?'
+      description:
+        "Should this director receive emails every week with analytics?",
     },
   },
 
-  exits: {
-
-  },
+  exits: {},
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller directors/add called.')
+    sails.log.debug("Controller directors/add called.");
 
     try {
       // Add the director and bcrypt the login
-      await sails.models.directors.create({ name: inputs.name, login: bcrypt.hashSync(inputs.login, 10), admin: inputs.admin, assistant: inputs.assistant, position: inputs.position, present: false, since: moment().toISOString() }).fetch()
-      return exits.success()
+      await sails.models.directors
+        .create({
+          name: inputs.name,
+          login: bcrypt.hashSync(inputs.login, 10),
+          admin: inputs.admin,
+          assistant: inputs.assistant,
+          position: inputs.position,
+          present: false,
+          emailEmergencies: inputs.emailEmergencies,
+          emailCalendar: inputs.emailCalendar,
+          emailWeeklyAnalytics: inputs.emailWeeklyAnalytics,
+          since: moment().toISOString(),
+        })
+        .fetch();
+      return exits.success();
     } catch (e) {
-      return exits.error(e)
+      return exits.error(e);
     }
-  }
-
-}
+  },
+};

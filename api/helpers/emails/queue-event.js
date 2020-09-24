@@ -50,7 +50,7 @@ module.exports = {
       await Promise.all(maps);
 
       // Load in directors to be CCd
-      var records = await sails.models.directors.find({ emailDJs: true });
+      var records = await sails.models.directors.find({ emailCalendar: true });
       cc = records
         .filter((record) => record.email && record.email !== '')
         .map((record) => record.email);

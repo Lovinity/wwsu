@@ -4,7 +4,7 @@ module.exports = {
     friendlyName: 'helpers.emails.queueDjs',
   
   
-    description: 'Queue emails to directors with emailDJs set.',
+    description: 'Queue emails to directors with emailCalendar set.',
   
   
     inputs: {
@@ -37,7 +37,7 @@ module.exports = {
       var to = [];
   
       // Load in directors
-      var records = await sails.models.directors.find({ emailDJs: true });
+      var records = await sails.models.directors.find({ emailCalendar: true });
       to = records
         .filter((record) => record.email && record.email !== '')
         .map((record) => record.email);
