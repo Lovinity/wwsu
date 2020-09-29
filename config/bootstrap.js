@@ -2392,13 +2392,16 @@ module.exports.bootstrap = async function (done) {
 
     // Check for missing items
     let items = await sails.models.items.find();
+    records = await sails.models.checkout
+      .find({
+        checkOutDate: { "!=": null },
+        checkInDate: { "!=": null },
+      })
+      .populate("item");
     items.map((item) => {
       let quantity = item.quantity;
-      records
-        .filter((record) => record.checkOutDate && record.checkInDate)
-        .map((record) => {
-          quantity -= record.checkOutQuantity - record.checkInQuantity;
-        });
+      let record = records.find((record) => record.item.ID === item.ID);
+      if (record) quantity -= record.checkOutQuantity - record.checkInQuantity;
       if (quantity < item.quantity) {
         if (status > 4) status = 4;
         issues.push(
