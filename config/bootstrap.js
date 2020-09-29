@@ -24,12 +24,16 @@ module.exports.bootstrap = async function (done) {
   // Generate token secrets
   sails.log.verbose(`BOOTSTRAP: generating token secrets`);
   sails.config.custom.secrets = {};
-  sails.config.custom.secrets.host = cryptoRandomString({length: 256});
-  sails.config.custom.secrets.dj = cryptoRandomString({length: 256});
-  sails.config.custom.secrets.director = cryptoRandomString({length: 256});
-  sails.config.custom.secrets.adminDirector = cryptoRandomString({length: 256});
-  sails.config.custom.secrets.directorUab = cryptoRandomString({length: 256});
-  sails.config.custom.secrets.adminDirectorUab = cryptoRandomString({length: 256});
+  sails.config.custom.secrets.host = cryptoRandomString({ length: 256 });
+  sails.config.custom.secrets.dj = cryptoRandomString({ length: 256 });
+  sails.config.custom.secrets.director = cryptoRandomString({ length: 256 });
+  sails.config.custom.secrets.adminDirector = cryptoRandomString({
+    length: 256,
+  });
+  sails.config.custom.secrets.directorUab = cryptoRandomString({ length: 256 });
+  sails.config.custom.secrets.adminDirectorUab = cryptoRandomString({
+    length: 256,
+  });
 
   // Load darksky
   // DEPRECATED. TODO: remove.
@@ -893,9 +897,9 @@ module.exports.bootstrap = async function (done) {
                             event: `prerecord: ${eventNow.hosts} - ${eventNow.name}`,
                             happened: 0,
                             happenedReason: "Bad Playlist",
-                            scheduledStart: moment(
-                              eventNow.start
-                            ).toISOString(true),
+                            scheduledStart: moment(eventNow.start).toISOString(
+                              true
+                            ),
                             scheduledEnd: moment(eventNow.end).toISOString(
                               true
                             ),
@@ -933,9 +937,7 @@ module.exports.bootstrap = async function (done) {
                           `Prerecord failed to air: ${eventNow.hosts} - ${eventNow.name}`,
                           `Dear ${eventNow.hosts},<br /><br />
                                     
-                                    A scheduled prerecord, <strong>${
-                                      eventNow.name
-                                    }</strong>, tried to go on the air. However, it failed to broadcast, and the system immediately went back to automation. Please check to ensure the tracks uploaded to the system and/or in the RadioDJ Playlist are valid and not corrupt.<br /><br />
+                                    A scheduled prerecord, <strong>${eventNow.name}</strong>, tried to go on the air. However, it failed to broadcast, and the system immediately went back to automation. Please check to ensure the tracks uploaded to the system and/or in the RadioDJ Playlist are valid and not corrupt.<br /><br />
                           You can reply all to this email if you need assistance from the directors.`
                         );
                       }
@@ -1876,6 +1878,7 @@ module.exports.bootstrap = async function (done) {
           sails.models.schedule,
           sails.models.version,
         ];
+        var checksInventory = [sails.models.checkout, sails.models.items];
         // Memory checks
         var checkStatus = { data: ``, status: 5 };
         sails.log.debug(`CHECK: DB Memory`);
@@ -2012,6 +2015,51 @@ module.exports.bootstrap = async function (done) {
           status: checkStatus.status,
         });
 
+        // Inventory check
+        sails.log.debug(`CHECK: DB inventory`);
+        checkStatus = { data: ``, status: 5 };
+        sails.log.debug(
+          `Calling asyncForEach in cron checkDB for inventory database checks`
+        );
+        await sails.helpers.asyncForEach(checksInventory, (check, index) => {
+          // eslint-disable-next-line no-async-promise-executor
+          return new Promise(async (resolve) => {
+            try {
+              var record = await check
+                .find()
+                .limit(1)
+                .tolerate(() => {
+                  checkStatus.status = 1;
+                  checkStatus.data += `Model failure (query error): ${index}. Please ensure this table / the database is online and not corrupt. `;
+                });
+              if (
+                typeof record[0] === "undefined" ||
+                typeof record[0].ID === "undefined"
+              ) {
+                if (checkStatus.status > 3) {
+                  checkStatus.status = 3;
+                }
+                checkStatus.data += `Model failure (No records returned): ${index}. Expected at least 1 row in this database table. Please ensure the table is not corrupt.`;
+              }
+              return resolve(false);
+            } catch (err) {
+              checkStatus.status = 1;
+              checkStatus.data += `Model failure (internal error): ${index}. Please ensure the database is online, and check the server logs.`;
+              sails.log.error(err);
+              return resolve(false);
+            }
+          });
+        });
+        if (checkStatus.status === 5) {
+          checkStatus.data = `This datastore is fully operational.`;
+        }
+        await sails.helpers.status.change.with({
+          name: "db-inventory",
+          label: "DB Inventory",
+          data: checkStatus.data,
+          status: checkStatus.status,
+        });
+
         return true;
       } catch (e) {
         await sails.helpers.status.change.with({
@@ -2031,6 +2079,13 @@ module.exports.bootstrap = async function (done) {
         await sails.helpers.status.change.with({
           name: "db-nodebase",
           label: "DB Nodebase",
+          data:
+            "The CRON checkDB failed. Please ensure the database is online and functional, and the credentials in config/datastores are correct.",
+          status: 1,
+        });
+        await sails.helpers.status.change.with({
+          name: "db-inventory",
+          label: "DB Inventory",
           data:
             "The CRON checkDB failed. Please ensure the database is online and functional, and the credentials in config/datastores are correct.",
           status: 1,
@@ -2307,10 +2362,67 @@ module.exports.bootstrap = async function (done) {
     });
   });
 
-  // Every minute at second 15, check server memory and CPU use.
+  // Every fifth minute at second 15, run inventory checks
+  sails.log.verbose(`BOOTSTRAP: scheduling climacell CRON.`);
+  cron.schedule("15 */5 * * * *", async () => {
+    let status = 5;
+    let issues = [];
+
+    // Check for items not checked in yet that are overdue
+    let records = await sails.models.checkout
+      .find({
+        checkInDate: null,
+        checkInDue: { "!=": null },
+      })
+      .populate("item");
+    records
+      .filter((record) => moment(record.checkInDue).isBefore(moment()))
+      .map((record) => {
+        if (status > 4) status = 4;
+        issues.push(
+          `${record.name} checked out ${record.checkOutQuantity} ${
+            record.item.name
+          } (${record.item.location} / ${
+            record.item.subLocation
+          }). They were supposed to be returned on ${moment(
+            record.checkInDue
+          ).format("LLLL")}, but have still not been checked back in.`
+        );
+      });
+
+    // Check for missing items
+    let items = await sails.models.items.find();
+    items.map((item) => {
+      let quantity = item.quantity;
+      records
+        .filter((record) => record.checkOutDate && record.checkInDate)
+        .map((record) => {
+          quantity -= record.checkOutQuantity - record.checkInQuantity;
+        });
+      if (quantity < item.quantity) {
+        if (status > 4) status = 4;
+        issues.push(
+          `${item.name} (${item.location} / ${item.subLocation}) is missing items! Expected ${item.quantity} quantity, but only ${quantity} quantity was checked in.`
+        );
+      }
+    });
+
+    // Update status
+    await sails.helpers.status.change.with({
+      name: `inventory`,
+      label: `Inventory`,
+      status: status,
+      data:
+        issues.length === 0
+          ? `No issues.`
+          : `<ul>${issues.map((issue) => `<li>${issue}</li>`)}</ul>`,
+    });
+  });
+
+  // Every minute at second 16, check server memory and CPU use.
   // ADVICE: It is advised that serverCheck is the last cron executed at the top of the minute. That way, the 1-minute CPU load will more likely detect issues.
   sails.log.verbose(`BOOTSTRAP: scheduling serverCheck CRON.`);
-  cron.schedule("15 * * * * *", () => {
+  cron.schedule("16 * * * * *", () => {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       sails.log.debug(`CRON serverCheck called.`);

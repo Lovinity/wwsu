@@ -49,6 +49,7 @@ module.exports = {
     { name: 'db-nodebase', label: 'DB Nodebase', status: 4, data: 'Successful database test has not been run yet since initialization.', time: null },
     { name: 'db-radiodj', label: 'DB RadioDJ', status: 4, data: 'Successful database test has not been run yet since initialization.', time: null },
     { name: 'db-memory', label: 'DB Memory', status: 4, data: 'Successful database test has not been run yet since initialization.', time: null },
+    { name: 'db-inventory', label: 'DB Inventory', status: 4, data: 'Successful database test has not been run yet since initialization.', time: null },
     { name: 'website', label: 'Website', data: 'No connection to wwsu1069.org could be made yet since initialization.', status: 4, time: null },
     { name: 'stream-public', label: 'Radio Stream', data: 'Public radio stream has not reported online since initialization.', status: 4, time: null },
     { name: 'silence', label: 'Silence', data: 'The silence detection system has not reported silence since initialization.', status: 5, time: null },
@@ -59,6 +60,7 @@ module.exports = {
     { name: 'underwritings', label: 'Underwritings', data: 'Underwritings were not yet checked since initialization.', status: 4, time: null },
     { name: 'delay-system', label: 'Delay System', data: 'Status of Delay System has not been checked since initialization', status: 4, time: moment().toISOString(true) },
     { name: 'reported', label: 'Reported Problems', status: 4, data: 'System has not yet checked reported problems since initialization.', time: null },
+    { name: 'inventory', label: 'Inventory', status: 4, data: 'Inventory checks have not been run since initialization.', time: null },
   ],
 
   /* Object used internally to check for errors.
