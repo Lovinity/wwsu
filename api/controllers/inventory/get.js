@@ -7,15 +7,19 @@ module.exports = {
     ID: {
       type: "number",
       description:
-        "If getting a single item and its checkout records, specify it here.",
-    },
+        "If getting a single item and its checkout records, specify it here."
+    }
   },
 
-  fn: async function (inputs) {
+  fn: async function(inputs) {
     if (inputs.ID) {
       var records = await sails.models.items
         .findOne({ ID: inputs.ID })
         .populate("checkoutRecords");
+
+      records.availableQuantity = await sails.helpers.inventory.getAvailableQuantity(
+        inputs.ID
+      );
     } else {
       var records = await sails.models.items.find();
     }
@@ -27,5 +31,5 @@ module.exports = {
     }
 
     return records;
-  },
+  }
 };
