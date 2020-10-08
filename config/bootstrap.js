@@ -2333,7 +2333,7 @@ module.exports.bootstrap = async function(done) {
           moment(delay.time)
             .add(3, "minutes")
             .isBefore(moment()) &&
-          delay.status > 3
+          delay.status > 4
         ) {
           await sails.helpers.status.change.with({
             name: "delay-system",
