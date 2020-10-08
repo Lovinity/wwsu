@@ -2330,10 +2330,9 @@ module.exports.bootstrap = async function(done) {
         // Delay system; error if no status data for over 3 minutes
         var delay = await sails.models.status.findOne({ name: "delay-system" });
         if (
-          moment(delay.time)
+          moment(delay.updatedAt)
             .add(3, "minutes")
-            .isBefore(moment()) &&
-          delay.status > 4
+            .isBefore(moment())
         ) {
           await sails.helpers.status.change.with({
             name: "delay-system",
