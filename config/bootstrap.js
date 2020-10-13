@@ -346,6 +346,8 @@ module.exports.bootstrap = async function (done) {
   // CRON JOBS
 
   // Automation / queue checks every second
+  var logBreakDebug = true;
+  var breakDebug = [];
   sails.log.verbose(`BOOTSTRAP: scheduling checks CRON.`);
   cron.schedule("* * * * * *", () => {
     // LINT: Must use async because of sails.js await
@@ -454,6 +456,10 @@ module.exports.bootstrap = async function (done) {
               var theTracks = [];
               change.trackID = parseInt(queue[0].ID);
               change.trackIDSubcat = parseInt(queue[0].IDSubcat) || 0;
+              if (change.trackID !== sails.models.meta.memory.trackID) {
+                logBreakDebug = true;
+                breakDebug = [];
+              }
 
               var breakQueueLength = -2;
               var firstNoMeta = 0;
@@ -1182,15 +1188,22 @@ module.exports.bootstrap = async function (done) {
                   key
                 )
               ) {
+                breakDebug.push(`Break checking for break ${key}`);
+
                 // Helps determine if we are due for the break
                 var breakTime = moment().minutes(key);
                 var breakTime2 = moment().minutes(key).add(1, "hours");
+
+                breakDebug.push(`breakTime: ${breakTime}`);
+                breakDebug.push(`breakTime2: ${breakTime2}`);
 
                 // Determine when the current track in RadioDJ will finish.
                 var endTime = moment().add(
                   queue[0].Duration - queue[0].Elapsed,
                   "seconds"
                 );
+
+                breakDebug.push(`endTime: ${endTime}`);
 
                 var doBreak = false;
                 var distancebefore;
@@ -1204,6 +1217,9 @@ module.exports.bootstrap = async function (done) {
                   (moment().isBefore(moment(breakTime2)) &&
                     moment(endTime).isAfter(moment(breakTime2)))
                 ) {
+                  breakDebug.push(
+                    `doBreak set to true on the basis of current track finishing after scheduled break.`
+                  );
                   doBreak = true;
                 }
 
@@ -1215,32 +1231,54 @@ module.exports.bootstrap = async function (done) {
                   typeof queue[1].Duration !== "undefined"
                 ) {
                   if (moment().isBefore(moment(breakTime))) {
+                    breakDebug.push(
+                      `Current time is before scheduled break (current hour).`
+                    );
                     distancebefore = moment(breakTime).diff(moment(endTime));
+                    breakDebug.push(`distancebefore: ${distancebefore}`);
                     endtime2 = moment(endTime).add(
                       queue[1].Duration,
                       "seconds"
                     );
+                    breakDebug.push(`endtime2: ${endtime2}`);
                     distanceafter = endtime2.diff(breakTime);
+                    breakDebug.push(`distanceafter: ${distanceafter}`);
                     if (
                       moment(endtime2).isAfter(moment(breakTime)) &&
                       distanceafter > distancebefore
                     ) {
+                      breakDebug.push(
+                        `doBreak is true because next track will finish further from scheduled time than the current track would.`
+                      );
                       doBreak = true;
                     }
                   } else {
+                    breakDebug.push(
+                      `Current time is after scheduled break (current hour).`
+                    );
                     distancebefore = moment(breakTime2).diff(moment(endTime));
+                    breakDebug.push(`distancebefore: ${distancebefore}`);
                     endtime2 = moment(endTime).add(
                       queue[1].Duration,
                       "seconds"
                     );
+                    breakDebug.push(`endtime2: ${endtime2}`);
                     distanceafter = endtime2.diff(breakTime2);
+                    breakDebug.push(`distanceafter: ${distanceafter}`);
                     if (
                       moment(endtime2).isAfter(moment(breakTime2)) &&
                       distanceafter > distancebefore
                     ) {
+                      breakDebug.push(
+                        `doBreak is true because next track will finish further from scheduled time than the current track would.`
+                      );
                       doBreak = true;
                     }
                   }
+                } else {
+                  breakDebug.push(
+                    `Next track in queue does not exist or is undefined duration.`
+                  );
                 }
 
                 // Do not queue if we are not in automation, playlist, genre, or prerecord states, or if we are in a break already.
@@ -1251,6 +1289,7 @@ module.exports.bootstrap = async function (done) {
                     !sails.models.meta.memory.state.startsWith("prerecord_")) ||
                   sails.models.meta.memory.state.endsWith("_break")
                 ) {
+                  breakDebug.push(`doBreak false: Not in automation.`);
                   doBreak = false;
                 }
 
@@ -1262,6 +1301,9 @@ module.exports.bootstrap = async function (done) {
                     moment().subtract(sails.config.custom.breakCheck, "minutes")
                   )
                 ) {
+                  breakDebug.push(
+                    `doBreak false: (key !== 0) prevBreak is ${sails.models.status.errorCheck.prevBreak}, which is less than ${sails.config.custom.breakCheck} minutes ago.`
+                  );
                   doBreak = false;
                 }
 
@@ -1273,6 +1315,9 @@ module.exports.bootstrap = async function (done) {
                     moment().subtract(10, "minutes")
                   )
                 ) {
+                  breakDebug.push(
+                    `doBreak false: (key === 0) prevID is ${sails.models.status.errorCheck.prevID}, which is less than 10 minutes ago.`
+                  );
                   doBreak = false;
                 }
 
@@ -1282,6 +1327,13 @@ module.exports.bootstrap = async function (done) {
                   queue[0].Duration - queue[0].Elapsed >=
                     60 * sails.config.custom.breakCheck
                 ) {
+                  breakDebug.push(
+                    `doBreak false: (key !== 0) current track has more than ${
+                      sails.config.custom.breakCheck
+                    } minutes remaining (${
+                      (queue[0].Duration - queue[0].Elapsed) / 60
+                    }).`
+                  );
                   doBreak = false;
                 }
 
@@ -1289,6 +1341,11 @@ module.exports.bootstrap = async function (done) {
                   key === 0 &&
                   queue[0].Duration - queue[0].Elapsed >= 60 * 10
                 ) {
+                  breakDebug.push(
+                    `doBreak false: (key === 0) current track has more than 10 minutes remaining (${
+                      (queue[0].Duration - queue[0].Elapsed) / 60
+                    }).`
+                  );
                   doBreak = false;
                 }
 
@@ -1356,6 +1413,27 @@ module.exports.bootstrap = async function (done) {
                   }
                 }
               }
+            }
+            if (logBreakDebug) {
+              await sails.models.logs
+                .create({
+                  attendanceID: sails.models.meta.memory.attendanceID,
+                  logtype: "break-debug",
+                  loglevel: "info",
+                  logsubtype: "",
+                  logIcon: `fas fa-bug`,
+                  title: `Break check debug information:`,
+                  event: `<ul>${breakDebug
+                    .map((bd) => `<li>${bd}</li>`)
+                    .join("")}</ul>`,
+                })
+                .fetch()
+                .tolerate((err) => {
+                  // Do not throw for errors, but log it.
+                  sails.log.error(err);
+                });
+              breakDebug = [];
+              logBreakDebug = false;
             }
           }
         }
