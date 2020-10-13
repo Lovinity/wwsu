@@ -426,11 +426,14 @@ window.addEventListener("DOMContentLoaded", () => {
               break;
             case 4:
               statusMarquee += `<div class="col-2">
-                      <span class="m-1 badge badge-secondary">${thestatus.label}</span>
+                      <span class="m-1 badge badge-info">${thestatus.label}</span>
                       </div>
                       <div class="col text-white">
-                      <strong>Offline</strong>: ${thestatus.data}
+                      <strong>Info</strong>: ${thestatus.data}
                       </div>`;
+              if (globalStatus > 4) {
+                globalStatus = 4;
+              }
               break;
             case 5:
               statusMarquee += `<div class="col-2">
@@ -439,7 +442,7 @@ window.addEventListener("DOMContentLoaded", () => {
                       <div class="col text-white">
                       <strong>Good</strong>: ${thestatus.data}
                       </div>`;
-              if (globalStatus > 3) {
+              if (globalStatus > 5) {
                 globalStatus = 5;
               }
               break;
@@ -529,6 +532,14 @@ window.addEventListener("DOMContentLoaded", () => {
           statusLine.innerHTML = "WWSU is experiencing minor issues";
           clearTimeout(offlineTimer);
           color = "rgba(251, 192, 45, 0.5)";
+
+          Slides.slide(`system`).isSticky = false;
+          Slides.slide(`system`).active = true;
+          break;
+        case 4:
+          statusLine.innerHTML = "WWSU is operational; information available";
+          clearTimeout(offlineTimer);
+          color = "rgba(18, 129, 147, 0.5)";
 
           Slides.slide(`system`).isSticky = false;
           Slides.slide(`system`).active = true;
@@ -766,12 +777,20 @@ window.addEventListener("DOMContentLoaded", () => {
                     .format("MM/DD h:mmA");
                 }
 
-                var endText = `<span class="text-white${moment(Meta.meta.time).isAfter(moment(event.end)) ? ` text-muted` : ``}">${event.startT} - ${event.endT}</span>`;
+                var endText = `<span class="text-white${
+                  moment(Meta.meta.time).isAfter(moment(event.end))
+                    ? ` text-muted`
+                    : ``
+                }">${event.startT} - ${event.endT}</span>`;
                 if (
                   ["updated", "updated-system"].indexOf(event.scheduleType) !==
                   -1
                 ) {
-                  endText = `<span class="text-warning${moment(Meta.meta.time).isAfter(moment(event.end)) ? ` text-muted` : ``}">${event.startT} - ${event.endT}</span>`;
+                  endText = `<span class="text-warning${
+                    moment(Meta.meta.time).isAfter(moment(event.end))
+                      ? ` text-muted`
+                      : ``
+                  }">${event.startT} - ${event.endT}</span>`;
                 }
                 if (
                   ["canceled", "canceled-system", "canceled-changed"].indexOf(

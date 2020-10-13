@@ -7,65 +7,65 @@ module.exports = {
     ID: {
       type: "number",
       required: true,
-      description: "The record to edit",
+      description: "The record to edit"
     },
 
     name: {
-      type: "string",
+      type: "string"
     },
 
     checkOutDate: {
       type: "string",
       description: "The date/time the item was checked out. Defaults to now.",
-      custom: function (value) {
+      custom: function(value) {
         return moment(value).isValid();
-      },
+      }
     },
 
     checkOutCondition: {
       type: "string",
-      isIn: ["Excellent", "Very Good", "Good", "Fair", "Poor", "Broken"],
+      isIn: ["Excellent", "Very Good", "Good", "Fair", "Poor", "Broken"]
     },
 
     checkOutQuantity: {
-      type: "number",
+      type: "number"
     },
 
     checkOutNotes: {
-      type: "string",
+      type: "string"
     },
 
     checkInDue: {
       type: "string",
       description: "When the item is expected to be checked back in.",
-      custom: function (value) {
+      custom: function(value) {
         return moment(value).isValid();
-      },
+      }
     },
 
     checkInDate: {
       type: "string",
       description: "When the item was checked in.",
-      custom: function (value) {
+      custom: function(value) {
         return moment(value).isValid();
-      },
+      }
     },
 
     checkInCondition: {
       type: "string",
-      isIn: ["Excellent", "Very Good", "Good", "Fair", "Poor", "Broken"],
+      isIn: ["Excellent", "Very Good", "Good", "Fair", "Poor", "Broken"]
     },
 
     checkInQuantity: {
-      type: "number",
+      type: "number"
     },
 
     checkInNotes: {
-      type: "string",
-    },
+      type: "string"
+    }
   },
 
-  fn: async function (inputs) {
+  fn: async function(inputs) {
     var criteria = {
       name: inputs.name,
       checkOutDate: inputs.checkOutDate
@@ -82,13 +82,13 @@ module.exports = {
         : undefined,
       checkInCondition: inputs.checkInCondition,
       checkInQuantity: inputs.checkInQuantity,
-      checkInNotes: inputs.checkInNotes,
+      checkInNotes: inputs.checkInNotes
     };
 
     var criteriaB = _.cloneDeep(criteria);
 
-    await sails.models.checkout.updateOne({ ID: inputs, ID }, criteriaB);
+    await sails.models.checkout.updateOne({ ID: inputs.ID }, criteriaB);
 
     return;
-  },
+  }
 };

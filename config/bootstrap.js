@@ -16,7 +16,7 @@ const queryString = require("query-string");
 const DarkSkyApi = require("dark-sky"); // DEPRECATED. TODO: remove
 const cryptoRandomString = require("crypto-random-string");
 
-module.exports.bootstrap = async function (done) {
+module.exports.bootstrap = async function(done) {
   sails.log.verbose(`BOOTSTRAP: started; initializing variables`);
 
   const darksky = new DarkSkyApi(sails.config.custom.darksky.api);
@@ -28,11 +28,11 @@ module.exports.bootstrap = async function (done) {
   sails.config.custom.secrets.dj = cryptoRandomString({ length: 256 });
   sails.config.custom.secrets.director = cryptoRandomString({ length: 256 });
   sails.config.custom.secrets.adminDirector = cryptoRandomString({
-    length: 256,
+    length: 256
   });
   sails.config.custom.secrets.directorUab = cryptoRandomString({ length: 256 });
   sails.config.custom.secrets.adminDirectorUab = cryptoRandomString({
-    length: 256,
+    length: 256
   });
 
   // Load darksky
@@ -55,8 +55,8 @@ module.exports.bootstrap = async function (done) {
     sails.log.verbose(`BOOTSTRAP: Initiating sports events in calendar`);
 
     // Add sports into the calendar as a non-scheduled event if they do not exist
-    sails.config.custom.sports.map((sport) => {
-      (async (_sport) => {
+    sails.config.custom.sports.map(sport => {
+      (async _sport => {
         sails.models.calendar
           .findOrCreate(
             { type: "sports", name: sport },
@@ -64,10 +64,10 @@ module.exports.bootstrap = async function (done) {
               type: "sports",
               active: true,
               priority: sails.models.calendar.calendardb.getDefaultPriority({
-                type: "sports",
+                type: "sports"
               }),
               name: sport,
-              startDate: moment().toISOString(true),
+              startDate: moment().toISOString(true)
             }
           )
           .exec(async (err, record, wasCreated) => {
@@ -80,7 +80,7 @@ module.exports.bootstrap = async function (done) {
                     priority: sails.models.calendar.calendardb.getDefaultPriority(
                       { type: "sports" }
                     ),
-                    startDate: moment().toISOString(true),
+                    startDate: moment().toISOString(true)
                   }
                 )
                 .fetch();
@@ -101,9 +101,9 @@ module.exports.bootstrap = async function (done) {
   sails.log.verbose(`BOOTSTRAP: Initiating director events in calendar`);
   var records = await sails.models.directors.find();
   var IDs = [];
-  records.map((director) => {
+  records.map(director => {
     IDs.push(director.ID);
-    (async (_director) => {
+    (async _director => {
       sails.models.calendar
         .findOrCreate(
           { type: "office-hours", director: _director.ID },
@@ -111,12 +111,12 @@ module.exports.bootstrap = async function (done) {
             type: "office-hours",
             active: true,
             priority: sails.models.calendar.calendardb.getDefaultPriority({
-              type: "office-hours",
+              type: "office-hours"
             }),
             hosts: _director.name,
             name: _director.name,
             director: _director.ID,
-            startDate: moment().toISOString(true),
+            startDate: moment().toISOString(true)
           }
         )
         .exec(async (err, record, wasCreated) => {
@@ -129,7 +129,7 @@ module.exports.bootstrap = async function (done) {
                   priority: sails.models.calendar.calendardb.getDefaultPriority(
                     { type: "office-hours" }
                   ),
-                  startDate: moment().toISOString(true),
+                  startDate: moment().toISOString(true)
                 }
               )
               .fetch();
@@ -152,7 +152,7 @@ module.exports.bootstrap = async function (done) {
       name: "OnAir Studio Bookings",
       start: moment().toISOString(true),
       duration: 0,
-      schedule: null,
+      schedule: null
     }
   );
   await sails.models.calendar.findOrCreate(
@@ -164,7 +164,7 @@ module.exports.bootstrap = async function (done) {
       name: "Production Studio Bookings",
       start: moment().toISOString(true),
       duration: 0,
-      schedule: null,
+      schedule: null
     }
   );
 
@@ -188,24 +188,24 @@ module.exports.bootstrap = async function (done) {
 
   // Load default status template into memory. Add radioDJ and DJ Controls instances to template as well.
   sails.log.verbose(`BOOTSTRAP: Loading RadioDJ instances into template`);
-  sails.config.custom.radiodjs.forEach((radiodj) => {
+  sails.config.custom.radiodjs.forEach(radiodj => {
     sails.models.status.template.push({
       name: `radiodj-${radiodj.name}`,
       label: `RadioDJ ${radiodj.label}`,
       status: radiodj.level,
       data: "This RadioDJ has not reported online since initialization.",
-      time: null,
+      time: null
     });
   });
   sails.log.verbose(`BOOTSTRAP: Loading Client instances into template`);
   var clients = await sails.models.hosts
     .find({ authorized: true })
-    .tolerate((err) => {
+    .tolerate(err => {
       // Don't throw errors, but log them
       sails.log.error(err);
     });
   if (clients.length > 0) {
-    clients.forEach((client) => {
+    clients.forEach(client => {
       var offStatus = 4;
       if (client.silenceDetection || client.recordAudio || client.answerCalls) {
         if (client.silenceDetection || client.recordAudio) {
@@ -220,20 +220,20 @@ module.exports.bootstrap = async function (done) {
           label: `Host ${client.friendlyname}`,
           status: offStatus,
           data: "This host has not reported online since initialization.",
-          time: null,
+          time: null
         });
       }
     });
   }
 
   sails.log.verbose(`BOOTSTRAP: Loading Display Sign instances into template`);
-  sails.config.custom.displaysigns.forEach((display) => {
+  sails.config.custom.displaysigns.forEach(display => {
     sails.models.status.template.push({
       name: `display-${display.name}`,
       label: `Display ${display.label}`,
       status: display.level,
       data: "This display sign has not reported online since initialization.",
-      time: null,
+      time: null
     });
   });
 
@@ -242,7 +242,7 @@ module.exports.bootstrap = async function (done) {
   );
   await sails.models.status
     .createEach(sails.models.status.template)
-    .tolerate((err) => {
+    .tolerate(err => {
       return done(err);
     });
   await sails.helpers.status.checkReported();
@@ -253,7 +253,7 @@ module.exports.bootstrap = async function (done) {
   );
   await sails.models.recipients
     .createEach(sails.models.recipients.template)
-    .tolerate((err) => {
+    .tolerate(err => {
       return done(err);
     });
 
@@ -265,14 +265,18 @@ module.exports.bootstrap = async function (done) {
     .find({
       status: "active",
       from: { startsWith: "website-" },
-      createdAt: { ">": moment().subtract(1, "hours").toDate() },
+      createdAt: {
+        ">": moment()
+          .subtract(1, "hours")
+          .toDate()
+      }
     })
     .sort("createdAt DESC")
     .tolerate(() => {});
   if (records && records.length > 0) {
     var insertRecords = [];
     var hosts = [];
-    records.forEach((record) => {
+    records.forEach(record => {
       if (hosts.indexOf(record.from) === -1) {
         hosts.push(record.from);
         insertRecords.push({
@@ -280,12 +284,12 @@ module.exports.bootstrap = async function (done) {
           group: "website",
           label: record.from_friendly,
           status: 0,
-          time: record.createdAt,
+          time: record.createdAt
         });
       }
     });
 
-    await sails.models.recipients.createEach(insertRecords).tolerate((err) => {
+    await sails.models.recipients.createEach(insertRecords).tolerate(err => {
       return done(err);
     });
   }
@@ -299,7 +303,7 @@ module.exports.bootstrap = async function (done) {
     var meta = await sails.models.meta
       .find()
       .limit(1)
-      .tolerate((err) => {
+      .tolerate(err => {
         sails.log.error(err);
       });
     meta = meta[0];
@@ -308,7 +312,7 @@ module.exports.bootstrap = async function (done) {
     await sails.helpers.meta.change.with(meta);
     if (meta.playlist !== null && meta.playlist !== "") {
       var theplaylist = await sails.models.playlists.findOne({
-        ID: meta.playlistID,
+        ID: meta.playlistID
       });
       // LINT: RadioDJ table; is not camel cased
       // eslint-disable-next-line camelcase
@@ -317,7 +321,7 @@ module.exports.bootstrap = async function (done) {
         .tolerate(() => {});
       sails.models.playlists.active.tracks = [];
       if (typeof playlistTracks !== "undefined") {
-        playlistTracks.forEach((playlistTrack) => {
+        playlistTracks.forEach(playlistTrack => {
           sails.models.playlists.active.tracks.push(playlistTrack.sID);
         });
       }
@@ -333,7 +337,7 @@ module.exports.bootstrap = async function (done) {
   // Check calendar events and integrity
   sails.log.verbose(`BOOTSTRAP: Loading calendar events.`);
   await sails.helpers.meta.change.with({
-    changingState: `Initializing program calendar`,
+    changingState: `Initializing program calendar`
   });
   await sails.helpers.calendar.check(false, true);
   try {
@@ -352,7 +356,7 @@ module.exports.bootstrap = async function (done) {
   cron.schedule("* * * * * *", () => {
     // LINT: Must use async because of sails.js await
     // eslint-disable-next-line no-async-promise-executor
-    return new Promise(async (resolve) => {
+    return new Promise(async resolve => {
       sails.log.debug(`CRON checks triggered.`);
 
       var queueLength = 0;
@@ -388,7 +392,7 @@ module.exports.bootstrap = async function (done) {
           var meta = await sails.models.meta
             .find()
             .limit(1)
-            .tolerate((err) => {
+            .tolerate(err => {
               sails.log.error(err);
               return resolve(err);
             });
@@ -401,7 +405,7 @@ module.exports.bootstrap = async function (done) {
           await sails.helpers.meta.change.with(meta);
           if (meta.playlist !== null && meta.playlist !== "") {
             theplaylist = await sails.models.playlists.findOne({
-              name: meta.playlist,
+              name: meta.playlist
             });
             // LINT: RadioDJ table that is not camel case
             // eslint-disable-next-line camelcase
@@ -410,7 +414,7 @@ module.exports.bootstrap = async function (done) {
               .tolerate(() => {});
             sails.models.playlists.active.tracks = [];
             if (typeof playlistTracks !== "undefined") {
-              playlistTracks.forEach((playlistTrack) => {
+              playlistTracks.forEach(playlistTrack => {
                 sails.models.playlists.active.tracks.push(playlistTrack.sID);
               });
             }
@@ -516,7 +520,7 @@ module.exports.bootstrap = async function (done) {
                 );
                 await sails.helpers.asyncForEach(queue, (track, index) => {
                   // eslint-disable-next-line promise/param-names
-                  return new Promise((resolve2) => {
+                  return new Promise(resolve2 => {
                     var title = `${track.Artist} - ${track.Title}`;
                     // If there is a duplicate, remove the track, store for later queuing if necessary.
                     // Also, calculate length of the queue
@@ -536,7 +540,7 @@ module.exports.bootstrap = async function (done) {
                         .cmd("RemovePlaylistTrack", index - 1)
                         .then(() => {
                           theTracks = [];
-                          sails.helpers.rest.getQueue().then((theQueue) => {
+                          sails.helpers.rest.getQueue().then(theQueue => {
                             queue = theQueue;
                             queueLength = 0;
                             return resolve2(true);
@@ -652,13 +656,13 @@ module.exports.bootstrap = async function (done) {
                   }
                   if (sails.models.meta.memory.state === "automation_sports") {
                     await sails.helpers.meta.change.with({
-                      state: "sports_on",
+                      state: "sports_on"
                     });
                     await sails.helpers.meta.newShow();
                   }
                   if (sails.models.meta.memory.state === "automation_remote") {
                     await sails.helpers.meta.change.with({
-                      state: "remote_on",
+                      state: "remote_on"
                     });
                     await sails.helpers.meta.newShow();
                   }
@@ -666,7 +670,7 @@ module.exports.bootstrap = async function (done) {
                     sails.models.meta.memory.state === "automation_sportsremote"
                   ) {
                     await sails.helpers.meta.change.with({
-                      state: "sportsremote_on",
+                      state: "sportsremote_on"
                     });
                     await sails.helpers.meta.newShow();
                   }
@@ -674,22 +678,22 @@ module.exports.bootstrap = async function (done) {
                     switch (sails.models.meta.memory.state) {
                       case "live_returning":
                         await sails.helpers.meta.change.with({
-                          state: "live_on",
+                          state: "live_on"
                         });
                         break;
                       case "remote_returning":
                         await sails.helpers.meta.change.with({
-                          state: "remote_on",
+                          state: "remote_on"
                         });
                         break;
                       case "sports_returning":
                         await sails.helpers.meta.change.with({
-                          state: "sports_on",
+                          state: "sports_on"
                         });
                         break;
                       case "sportsremote_returning":
                         await sails.helpers.meta.change.with({
-                          state: "sportsremote_on",
+                          state: "sportsremote_on"
                         });
                         break;
                     }
@@ -756,7 +760,7 @@ module.exports.bootstrap = async function (done) {
               var playingTrack = false;
               await sails.helpers.asyncForEach(queue, (autoTrack, index) => {
                 // eslint-disable-next-line promise/param-names
-                return new Promise((resolve2) => {
+                return new Promise(resolve2 => {
                   try {
                     for (
                       var i = 0;
@@ -792,7 +796,7 @@ module.exports.bootstrap = async function (done) {
                           ) {
                             (async () => {
                               await sails.helpers.meta.change.with({
-                                state: `prerecord_on`,
+                                state: `prerecord_on`
                               });
                             })();
                           }
@@ -804,7 +808,7 @@ module.exports.bootstrap = async function (done) {
                         ) {
                           (async () => {
                             await sails.helpers.meta.change.with({
-                              state: `prerecord_break`,
+                              state: `prerecord_break`
                             });
                           })();
                         }
@@ -835,7 +839,7 @@ module.exports.bootstrap = async function (done) {
                   sails.models.meta.memory.changingState === null
                 ) {
                   await sails.helpers.meta.change.with({
-                    changingState: `Ending playlist`,
+                    changingState: `Ending playlist`
                   });
                   switch (sails.models.meta.memory.state) {
                     case "automation_playlist":
@@ -847,10 +851,10 @@ module.exports.bootstrap = async function (done) {
                           logsubtype: sails.models.meta.memory.playlist,
                           logIcon: `fas fa-play`,
                           title: `Playlist finished airing; no more tracks to play.`,
-                          event: ``,
+                          event: ``
                         })
                         .fetch()
-                        .tolerate((err) => {
+                        .tolerate(err => {
                           // Do not throw for errors, but log it.
                           sails.log.error(err);
                         });
@@ -865,10 +869,10 @@ module.exports.bootstrap = async function (done) {
                           logsubtype: sails.models.meta.memory.show,
                           logIcon: `fas fa-play-circle`,
                           title: `Prerecord finished airing; no more tracks to play.`,
-                          event: ``,
+                          event: ``
                         })
                         .fetch()
-                        .tolerate((err) => {
+                        .tolerate(err => {
                           // Do not throw for errors, but log it.
                           sails.log.error(err);
                         });
@@ -881,14 +885,14 @@ module.exports.bootstrap = async function (done) {
                         false
                       );
                       eventNow = eventNow.find(
-                        (event) =>
+                        event =>
                           event.type === "prerecord" &&
                           sails.models.meta.memory.show ===
                             `${event.hosts} - ${event.name}` &&
                           [
                             "canceled",
                             "canceled-system",
-                            "canceled-changed",
+                            "canceled-changed"
                           ].indexOf(event.scheduleType) === -1
                       );
                       if (eventNow) {
@@ -909,7 +913,7 @@ module.exports.bootstrap = async function (done) {
                             scheduledEnd: moment(eventNow.end).toISOString(
                               true
                             ),
-                            badPlaylist: true,
+                            badPlaylist: true
                           })
                           .fetch();
                         await sails.models.logs
@@ -920,10 +924,10 @@ module.exports.bootstrap = async function (done) {
                             logsubtype: sails.models.meta.memory.show,
                             logIcon: `fas fa-play-circle`,
                             title: `A prerecord failed to air!`,
-                            event: `Prerecord: ${sails.models.meta.memory.show}<br />This is probably because the tracks in the prerecord's radioDJ playlist are corrupt.`,
+                            event: `Prerecord: ${sails.models.meta.memory.show}<br />This is probably because the tracks in the prerecord's radioDJ playlist are corrupt.`
                           })
                           .fetch()
-                          .tolerate((err) => {
+                          .tolerate(err => {
                             // Do not throw for errors, but log them.
                             sails.log.error(err);
                           });
@@ -962,7 +966,7 @@ module.exports.bootstrap = async function (done) {
                     show: "",
                     topic: "",
                     playlist: null,
-                    playlistPosition: 0,
+                    playlistPosition: 0
                   });
 
                   // Re-check for programs that should begin.
@@ -1028,14 +1032,14 @@ module.exports.bootstrap = async function (done) {
               .tolerate(() => {});
             sails.models.playlists.active.tracks = [];
             if (typeof playlistTracks !== "undefined") {
-              playlistTracks.forEach((playlistTrack) => {
+              playlistTracks.forEach(playlistTrack => {
                 sails.models.playlists.active.tracks.push(playlistTrack.sID);
               });
             }
           } else {
             await sails.helpers.meta.change.with({
               playlist: null,
-              playlistID: null,
+              playlistID: null
             });
           }
         } catch (e) {
@@ -1123,7 +1127,7 @@ module.exports.bootstrap = async function (done) {
                 break;
               case "sportsremote_returning":
                 await sails.helpers.meta.change.with({
-                  state: "sportsremote_on",
+                  state: "sportsremote_on"
                 });
                 break;
             }
@@ -1192,7 +1196,9 @@ module.exports.bootstrap = async function (done) {
 
                 // Helps determine if we are due for the break
                 var breakTime = moment().minutes(key);
-                var breakTime2 = moment().minutes(key).add(1, "hours");
+                var breakTime2 = moment()
+                  .minutes(key)
+                  .add(1, "hours");
 
                 breakDebug.push(`breakTime: ${breakTime}`);
                 breakDebug.push(`breakTime2: ${breakTime2}`);
@@ -1525,7 +1531,7 @@ module.exports.bootstrap = async function (done) {
             name: "stream-public",
             label: "Radio Stream",
             data: "Stream is online.",
-            status: 5,
+            status: 5
           });
 
           // Log listeners if there are any changes
@@ -1537,23 +1543,23 @@ module.exports.bootstrap = async function (done) {
             await sails.models.listeners
               .create({
                 dj: sails.models.meta.memory.dj,
-                listeners: streams[0].uniquelisteners,
+                listeners: streams[0].uniquelisteners
               })
               .tolerate(() => {});
             await sails.helpers.meta.change.with({
-              listeners: streams[0].uniquelisteners,
+              listeners: streams[0].uniquelisteners
             });
           }
           sails.models.listeners.memory = {
             dj: sails.models.meta.memory.dj,
-            listeners: streams[0].uniquelisteners,
+            listeners: streams[0].uniquelisteners
           };
         } else {
           await sails.helpers.status.change.with({
             name: "stream-public",
             label: "Radio Stream",
             data: `Stream is offline. Please ensure the audio encoder is connected and streaming to the ${sails.config.custom.stream} Shoutcast server.`,
-            status: 2,
+            status: 2
           });
         }
         return true;
@@ -1562,7 +1568,7 @@ module.exports.bootstrap = async function (done) {
           name: "stream-public",
           label: "Radio Stream",
           data: `Error parsing data from the Shoutcast server. Please ensure the Shoutcast server ${sails.config.custom.stream} is online and working properly.`,
-          status: 2,
+          status: 2
         });
         return false;
       }
@@ -1571,7 +1577,7 @@ module.exports.bootstrap = async function (done) {
         name: "stream-public",
         label: "Radio Stream",
         data: "Error checking Shoutcast server. Please see node server logs.",
-        status: 2,
+        status: 2
       });
       sails.log.error(e);
       return false;
@@ -1590,12 +1596,12 @@ module.exports.bootstrap = async function (done) {
         );
         await sails.helpers.asyncForEach(
           sails.config.custom.radiodjs,
-          (radiodj) => {
+          radiodj => {
             // eslint-disable-next-line promise/param-names
-            return new Promise((resolve2) => {
+            return new Promise(resolve2 => {
               sails.models.status
                 .findOne({ name: `radiodj-${radiodj.name}` })
-                .then(async (status) => {
+                .then(async status => {
                   try {
                     var resp = await needle(
                       "get",
@@ -1612,7 +1618,7 @@ module.exports.bootstrap = async function (done) {
                         name: `radiodj-${radiodj.name}`,
                         label: `RadioDJ ${radiodj.label}`,
                         data: "RadioDJ is online.",
-                        status: 5,
+                        status: 5
                       });
                       // We were waiting for a good RadioDJ to switch to. Switch to it immediately.
                       if (sails.models.status.errorCheck.waitForGoodRadioDJ) {
@@ -1621,24 +1627,24 @@ module.exports.bootstrap = async function (done) {
                         // Get the current RadioDJ out of critical status if necessary
                         var maps = sails.config.custom.radiodjs
                           .filter(
-                            (instance) =>
+                            instance =>
                               instance.rest ===
                                 sails.models.meta.memory.radiodj &&
                               instance.name !== radiodj.name
                           )
-                          .map(async (instance) => {
+                          .map(async instance => {
                             await sails.helpers.status.change.with({
                               name: `radiodj-${instance.name}`,
                               label: `RadioDJ ${instance.label}`,
                               status: instance.level,
-                              data: `RadioDJ is not operational. Please ensure this RadioDJ is running and the REST server is online, configured properly, and accessible. When opening RadioDJ, you may have to start playing a track before REST begins working.`,
+                              data: `RadioDJ is not operational. Please ensure this RadioDJ is running and the REST server is online, configured properly, and accessible. When opening RadioDJ, you may have to start playing a track before REST begins working.`
                             });
                             return true;
                           });
                         await Promise.all(maps);
                         var queue = sails.models.meta.automation;
                         await sails.helpers.meta.change.with({
-                          radiodj: radiodj.rest,
+                          radiodj: radiodj.rest
                         });
                         await sails.helpers.rest.cmd("ClearPlaylist", 1);
                         await sails.helpers.error.post(queue);
@@ -1647,16 +1653,16 @@ module.exports.bootstrap = async function (done) {
                       if (sails.models.meta.memory.radiodj !== radiodj.rest) {
                         var automation = [];
                         if (resp.body.name === "ArrayOfSongData") {
-                          resp.body.children.map((trackA) => {
+                          resp.body.children.map(trackA => {
                             var theTrack = {};
-                            trackA.children.map((track) => {
+                            trackA.children.map(track => {
                               theTrack[track.name] = track.value;
                             });
                             automation.push(theTrack);
                           });
                         } else {
                           var theTrack = {};
-                          resp.body.children.map((track) => {
+                          resp.body.children.map(track => {
                             theTrack[track.name] = track.value;
                           });
                           automation.push(theTrack);
@@ -1684,8 +1690,8 @@ module.exports.bootstrap = async function (done) {
                                   response_timeout: 10000,
                                   read_timeout: 10000,
                                   headers: {
-                                    "Content-Type": "application/json",
-                                  },
+                                    "Content-Type": "application/json"
+                                  }
                                 }
                               );
                             } catch (unusedE3) {
@@ -1696,7 +1702,7 @@ module.exports.bootstrap = async function (done) {
                             sails.models.meta.memory.changingState === null
                           ) {
                             await sails.helpers.meta.change.with({
-                              changingState: `Switching radioDJ instances`,
+                              changingState: `Switching radioDJ instances`
                             });
                             await sails.helpers.rest.cmd(
                               "EnableAssisted",
@@ -1710,7 +1716,7 @@ module.exports.bootstrap = async function (done) {
                             );
                             await sails.helpers.error.post();
                             await sails.helpers.meta.change.with({
-                              changingState: null,
+                              changingState: null
                             });
                           }
                         }
@@ -1722,7 +1728,7 @@ module.exports.bootstrap = async function (done) {
                           label: `RadioDJ ${radiodj.label}`,
                           data:
                             "RadioDJ REST did not return queue data. Please ensure the REST server is online, configured properly, and accessible. When opening RadioDJ, you may have to start playing a track before REST begins working.",
-                          status: radiodj.level,
+                          status: radiodj.level
                         });
                       }
                     }
@@ -1734,7 +1740,7 @@ module.exports.bootstrap = async function (done) {
                         label: `RadioDJ ${radiodj.label}`,
                         data:
                           "RadioDJ REST returned an error or is not responding. Please ensure RadioDJ is open and functional, and the REST server is online, configured properly, and accessible. When opening RadioDJ, you may have to start playing a track before REST begins working.",
-                        status: radiodj.level,
+                        status: radiodj.level
                       });
                     }
                     return resolve2(false);
@@ -1767,14 +1773,14 @@ module.exports.bootstrap = async function (done) {
           name: `website`,
           label: `Website`,
           data: "Website is online.",
-          status: 5,
+          status: 5
         });
       } else {
         await sails.helpers.status.change.with({
           name: `website`,
           label: `Website`,
           data: `Website ${sails.config.custom.website} did not return body data. Please ensure the website is online.`,
-          status: 2,
+          status: 2
         });
       }
     } catch (e) {
@@ -1782,7 +1788,7 @@ module.exports.bootstrap = async function (done) {
         name: `website`,
         label: `Website`,
         data: `Error checking the status of the ${sails.config.custom.website} website. The website might be offline. Please check server logs.`,
-        status: 2,
+        status: 2
       });
       sails.log.error(e);
     }
@@ -1814,10 +1820,10 @@ module.exports.bootstrap = async function (done) {
             sails.models.meta.memory.show !== ""
               ? sails.models.meta.memory.show
               : sails.models.meta.memory.genre
-          }`,
+          }`
         })
         .fetch()
-        .tolerate((err) => {
+        .tolerate(err => {
           sails.log.error(err);
         });
 
@@ -1846,7 +1852,7 @@ module.exports.bootstrap = async function (done) {
           `Calling asyncLoop in cron EAS for checking every EAS source`
         );
 
-        var asyncLoop = async function (array, callback) {
+        var asyncLoop = async function(array, callback) {
           for (let index = 0; index < array.length; index++) {
             // LINT: This is a loop; we do not want to return the callback.
             // eslint-disable-next-line callback-return
@@ -1854,7 +1860,7 @@ module.exports.bootstrap = async function (done) {
           }
         };
 
-        await asyncLoop(sails.config.custom.EAS.NWSX, async (county) => {
+        await asyncLoop(sails.config.custom.EAS.NWSX, async county => {
           try {
             var resp = await needle(
               "get",
@@ -1879,9 +1885,9 @@ module.exports.bootstrap = async function (done) {
             name: "EAS-internal",
             label: "Internal EAS",
             data: `All NWS CAPS (${sails.config.custom.EAS.NWSX.map(
-              (cap) => cap.name
+              cap => cap.name
             ).join()}) are online.`,
-            status: 5,
+            status: 5
           });
         } else {
           await sails.helpers.status.change.with({
@@ -1890,7 +1896,7 @@ module.exports.bootstrap = async function (done) {
             data: `Could not fetch the following NWS CAPS counties: ${bad.join(
               ", "
             )}. This is usually caused by a network issue, or the NWS CAPS server is experiencing a temporary service disruption.`,
-            status: 3,
+            status: 3
           });
         }
 
@@ -1926,7 +1932,7 @@ module.exports.bootstrap = async function (done) {
           sails.models.playlists_list,
           sails.models.requests,
           sails.models.settings,
-          sails.models.subcategory,
+          sails.models.subcategory
         ];
         var checksNodebase = [
           sails.models.announcements,
@@ -1954,7 +1960,7 @@ module.exports.bootstrap = async function (done) {
           sails.models.sports,
           sails.models.xp,
           sails.models.schedule,
-          sails.models.version,
+          sails.models.version
         ];
         var checksInventory = [sails.models.checkout, sails.models.items];
         // Memory checks
@@ -1965,7 +1971,7 @@ module.exports.bootstrap = async function (done) {
         );
         await sails.helpers.asyncForEach(checksMemory, (check, index) => {
           // eslint-disable-next-line no-async-promise-executor
-          return new Promise(async (resolve) => {
+          return new Promise(async resolve => {
             try {
               var record = await check
                 .find()
@@ -1999,7 +2005,7 @@ module.exports.bootstrap = async function (done) {
           name: "db-memory",
           label: "DB Memory",
           data: checkStatus.data,
-          status: checkStatus.status,
+          status: checkStatus.status
         });
 
         // RadioDJ checks
@@ -2010,7 +2016,7 @@ module.exports.bootstrap = async function (done) {
         );
         await sails.helpers.asyncForEach(checksRadioDJ, (check, index) => {
           // eslint-disable-next-line no-async-promise-executor
-          return new Promise(async (resolve) => {
+          return new Promise(async resolve => {
             try {
               var record = await check
                 .find()
@@ -2044,7 +2050,7 @@ module.exports.bootstrap = async function (done) {
           name: "db-radiodj",
           label: "DB RadioDJ",
           data: checkStatus.data,
-          status: checkStatus.status,
+          status: checkStatus.status
         });
 
         // Nodebase checks
@@ -2055,7 +2061,7 @@ module.exports.bootstrap = async function (done) {
         );
         await sails.helpers.asyncForEach(checksNodebase, (check, index) => {
           // eslint-disable-next-line no-async-promise-executor
-          return new Promise(async (resolve) => {
+          return new Promise(async resolve => {
             try {
               var record = await check
                 .find()
@@ -2090,7 +2096,7 @@ module.exports.bootstrap = async function (done) {
           name: "db-nodebase",
           label: "DB Nodebase",
           data: checkStatus.data,
-          status: checkStatus.status,
+          status: checkStatus.status
         });
 
         // Inventory check
@@ -2101,7 +2107,7 @@ module.exports.bootstrap = async function (done) {
         );
         await sails.helpers.asyncForEach(checksInventory, (check, index) => {
           // eslint-disable-next-line no-async-promise-executor
-          return new Promise(async (resolve) => {
+          return new Promise(async resolve => {
             try {
               var record = await check
                 .find()
@@ -2135,7 +2141,7 @@ module.exports.bootstrap = async function (done) {
           name: "db-inventory",
           label: "DB Inventory",
           data: checkStatus.data,
-          status: checkStatus.status,
+          status: checkStatus.status
         });
 
         return true;
@@ -2145,28 +2151,28 @@ module.exports.bootstrap = async function (done) {
           label: "DB Memory",
           data:
             "The CRON checkDB failed. Please ensure the database is online and functional, and the credentials in config/datastores are correct.",
-          status: 1,
+          status: 1
         });
         await sails.helpers.status.change.with({
           name: "db-radiodj",
           label: "DB RadioDJ",
           data:
             "The CRON checkDB failed. Please ensure the database is online and functional, and the credentials in config/datastores are correct.",
-          status: 1,
+          status: 1
         });
         await sails.helpers.status.change.with({
           name: "db-nodebase",
           label: "DB Nodebase",
           data:
             "The CRON checkDB failed. Please ensure the database is online and functional, and the credentials in config/datastores are correct.",
-          status: 1,
+          status: 1
         });
         await sails.helpers.status.change.with({
           name: "db-inventory",
           label: "DB Inventory",
           data:
             "The CRON checkDB failed. Please ensure the database is online and functional, and the credentials in config/datastores are correct.",
-          status: 1,
+          status: 1
         });
         sails.log.error(e);
         return null;
@@ -2213,7 +2219,7 @@ module.exports.bootstrap = async function (done) {
             name: `music-library`,
             status: 1,
             label: `Music Library`,
-            data: `Music library has ${found} bad tracks. This is critically high and should be fixed immediately! Tracks are marked bad when either corrupt or cannot be accessed by RadioDJ. Please ensure all tracks used by RadioDJ are saved on a [network] drive that can be accessed by all RadioDJs. Run the "verify tracks" utility in RadioDJ to see which tracks are bad.`,
+            data: `Music library has ${found} bad tracks. This is critically high and should be fixed immediately! Tracks are marked bad when either corrupt or cannot be accessed by RadioDJ. Please ensure all tracks used by RadioDJ are saved on a [network] drive that can be accessed by all RadioDJs. Run the "verify tracks" utility in RadioDJ to see which tracks are bad.`
           });
         } else if (
           found &&
@@ -2223,7 +2229,7 @@ module.exports.bootstrap = async function (done) {
             name: `music-library`,
             status: 2,
             label: `Music Library`,
-            data: `Music library has ${found} bad tracks. This is quite high. Tracks are marked bad when either corrupt or cannot be accessed by RadioDJ. Please ensure all tracks used by RadioDJ are saved on a [network] drive that can be accessed by all RadioDJs. Run the "verify tracks" utility in RadioDJ to see which tracks are bad.`,
+            data: `Music library has ${found} bad tracks. This is quite high. Tracks are marked bad when either corrupt or cannot be accessed by RadioDJ. Please ensure all tracks used by RadioDJ are saved on a [network] drive that can be accessed by all RadioDJs. Run the "verify tracks" utility in RadioDJ to see which tracks are bad.`
           });
         } else if (
           found &&
@@ -2233,14 +2239,14 @@ module.exports.bootstrap = async function (done) {
             name: `music-library`,
             status: 3,
             label: `Music Library`,
-            data: `Music library has ${found} bad tracks. Tracks are marked bad when either corrupt or cannot be accessed by RadioDJ. Please ensure all tracks used by RadioDJ are saved on a [network] drive that can be accessed by all RadioDJs. Run the "verify tracks" utility in RadioDJ to see which tracks are bad.`,
+            data: `Music library has ${found} bad tracks. Tracks are marked bad when either corrupt or cannot be accessed by RadioDJ. Please ensure all tracks used by RadioDJ are saved on a [network] drive that can be accessed by all RadioDJs. Run the "verify tracks" utility in RadioDJ to see which tracks are bad.`
           });
         } else {
           await sails.helpers.status.change.with({
             name: `music-library`,
             status: 5,
             label: `Music Library`,
-            data: `Music library has ${found} bad tracks.`,
+            data: `Music library has ${found} bad tracks.`
           });
         }
 
@@ -2261,11 +2267,11 @@ module.exports.bootstrap = async function (done) {
       try {
         var records = await sails.models.recipients.find({
           host: { "!=": ["website"] },
-          status: 0,
+          status: 0
         });
         var destroyIt = [];
         var searchto = moment().subtract(4, "hours");
-        records.forEach((record) => {
+        records.forEach(record => {
           if (moment(record.time).isBefore(moment(searchto))) {
             destroyIt.push(record.ID);
           }
@@ -2295,7 +2301,7 @@ module.exports.bootstrap = async function (done) {
           .longitude(sails.config.custom.darksky.position.longitude)
           .exclude("alerts")
           .get()
-          .then(async (resp) => {
+          .then(async resp => {
             await sails.models.darksky
               .update(
                 { ID: 1 },
@@ -2303,12 +2309,12 @@ module.exports.bootstrap = async function (done) {
                   currently: resp.currently,
                   minutely: resp.minutely,
                   hourly: resp.hourly,
-                  daily: resp.daily,
+                  daily: resp.daily
                 }
               )
               .fetch();
           })
-          .catch((err) => {
+          .catch(err => {
             sails.log.error(err);
             reject(err);
           });
@@ -2347,11 +2353,11 @@ module.exports.bootstrap = async function (done) {
       try {
         // Get all noFade tracks
         var records = await sails.models.songs.find({
-          id_subcat: sails.config.custom.subcats.noFade,
+          id_subcat: sails.config.custom.subcats.noFade
         });
 
         if (records && records.length > 0) {
-          records.map((record) => {
+          records.map(record => {
             var cueData = queryString.parse(record.cue_times);
             // If fade in and fade out are both 0 (treat when fade in or fade out is not specified as being 0), skip this track; nothing to do.
             if (
@@ -2402,14 +2408,15 @@ module.exports.bootstrap = async function (done) {
         // Delay system; error if no status data for over 3 minutes
         var delay = await sails.models.status.findOne({ name: "delay-system" });
         if (
-          moment(delay.time).add(3, "minutes").isBefore(moment()) &&
-          delay.status > 3
+          moment(delay.updatedAt)
+            .add(3, "minutes")
+            .isBefore(moment())
         ) {
           await sails.helpers.status.change.with({
             name: "delay-system",
             label: "Delay System",
             data: `There has been no information received about the delay system for over 3 minutes. Please ensure the delay system is online, the serial port is properly connected to the responsible computer, and DJ Controls is running on the responsible computer.`,
-            status: 1,
+            status: 1
           });
           await sails.helpers.meta.change.with({ delaySystem: null });
         }
@@ -2441,7 +2448,7 @@ module.exports.bootstrap = async function (done) {
   });
 
   // Every fifth minute at second 15, run inventory checks
-  sails.log.verbose(`BOOTSTRAP: scheduling climacell CRON.`);
+  sails.log.verbose(`BOOTSTRAP: scheduling inventory CRON.`);
   cron.schedule("15 */5 * * * *", async () => {
     let status = 5;
     let issues = [];
@@ -2450,21 +2457,21 @@ module.exports.bootstrap = async function (done) {
     let records = await sails.models.checkout
       .find({
         checkInDate: null,
-        checkInDue: { "!=": null },
+        checkInDue: { "!=": null }
       })
       .populate("item");
     records
-      .filter((record) => moment(record.checkInDue).isBefore(moment()))
-      .map((record) => {
+      .filter(record => moment(record.checkInDue).isBefore(moment()))
+      .map(record => {
         if (status > 4) status = 4;
         issues.push(
-          `${record.name} checked out ${record.checkOutQuantity} ${
-            record.item.name
-          } (${record.item.location} / ${
+          `${record.checkOutQuantity} of ${record.item.name} (${
+            record.item.location
+          } / ${
             record.item.subLocation
-          }). They were supposed to be returned on ${moment(
+          }) is/are still checked out. They were supposed to be returned by ${moment(
             record.checkInDue
-          ).format("LLLL")}, but have still not been checked back in.`
+          ).format("LLLL")}.`
         );
       });
 
@@ -2473,12 +2480,12 @@ module.exports.bootstrap = async function (done) {
     records = await sails.models.checkout
       .find({
         checkOutDate: { "!=": null },
-        checkInDate: { "!=": null },
+        checkInDate: { "!=": null }
       })
       .populate("item");
-    items.map((item) => {
+    items.map(item => {
       let quantity = item.quantity;
-      let record = records.find((record) => record.item.ID === item.ID);
+      let record = records.find(record => record.item.ID === item.ID);
       if (record) quantity -= record.checkOutQuantity - record.checkInQuantity;
       if (quantity < item.quantity) {
         if (status > 4) status = 4;
@@ -2496,7 +2503,7 @@ module.exports.bootstrap = async function (done) {
       data:
         issues.length === 0
           ? `No issues.`
-          : `<ul>${issues.map((issue) => `<li>${issue}</li>`)}</ul>`,
+          : `<ul>${issues.map(issue => `<li>${issue}</li>`)}</ul>`
     });
   });
 
@@ -2524,7 +2531,7 @@ module.exports.bootstrap = async function (done) {
             name: `server`,
             label: `Server`,
             status: 1,
-            data: `Server resource use is dangerously high!!! CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`,
+            data: `Server resource use is dangerously high!!! CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`
           });
         } else if (
           load[0] >= sails.config.custom.status.server.load1.error ||
@@ -2536,7 +2543,7 @@ module.exports.bootstrap = async function (done) {
             name: `server`,
             label: `Server`,
             status: 2,
-            data: `Server resource use is very high! CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`,
+            data: `Server resource use is very high! CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`
           });
         } else if (
           load[0] >= sails.config.custom.status.server.load1.warn ||
@@ -2548,14 +2555,14 @@ module.exports.bootstrap = async function (done) {
             name: `server`,
             label: `Server`,
             status: 3,
-            data: `Server resource use is mildly high. CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`,
+            data: `Server resource use is mildly high. CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`
           });
         } else {
           await sails.helpers.status.change.with({
             name: `server`,
             label: `Server`,
             status: 5,
-            data: `Server resource use is good. CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`,
+            data: `Server resource use is good. CPU: 1-min ${load[0]}, 5-min: ${load[1]}, 15-min: ${load[2]}. Free memory: ${mem}`
           });
         }
 
@@ -2575,7 +2582,7 @@ module.exports.bootstrap = async function (done) {
       sails.log.debug(`CRON clockOutDirectors called`);
       try {
         await sails.helpers.meta.change.with({
-          time: moment().toISOString(true),
+          time: moment().toISOString(true)
         });
 
         var records = await sails.models.timesheet
@@ -2588,7 +2595,7 @@ module.exports.bootstrap = async function (done) {
 
           // Sequential async
           records.reduce(async (prevReturn, record) => {
-            return await (async (recordB) => {
+            return await (async recordB => {
               if (!theEnd) {
                 theStart = recordB.scheduledIn;
               } else {
@@ -2602,7 +2609,7 @@ module.exports.bootstrap = async function (done) {
                     {
                       timeIn: moment(theStart).toISOString(true),
                       timeOut: moment(theEnd).toISOString(true),
-                      approved: 0,
+                      approved: 0
                     }
                   )
                   .fetch()
@@ -2618,7 +2625,7 @@ module.exports.bootstrap = async function (done) {
                 {
                   timeIn: moment(theEnd).toISOString(true),
                   timeOut: moment().toISOString(true),
-                  approved: 0,
+                  approved: 0
                 }
               )
               .fetch()
@@ -2636,7 +2643,7 @@ module.exports.bootstrap = async function (done) {
         }
 
         if (recordsX.length > 0) {
-          recordsX.map((record) => {
+          recordsX.map(record => {
             (async () => {
               await sails.helpers.onesignal.sendMass(
                 "accountability-directors",
@@ -2658,7 +2665,7 @@ module.exports.bootstrap = async function (done) {
             { timeOut: moment().toISOString(true), approved: false }
           )
           .fetch()
-          .tolerate((err) => {});
+          .tolerate(err => {});
         await sails.helpers.uabdirectors.update();
 
         return resolve();
@@ -2696,7 +2703,7 @@ module.exports.bootstrap = async function (done) {
         sails.log.debug(
           `Calling asyncForEach in cron priorityCheck for every RadioDJ song`
         );
-        songs.map((song) => {
+        songs.map(song => {
           try {
             var minPriority =
               song.rating === 0 ? 0 : defaultPriority[0] * (song.rating / 9);
@@ -2840,10 +2847,10 @@ module.exports.bootstrap = async function (done) {
       logsubtype: "automation",
       logIcon: `fas fa-exclamation-triangle`,
       title: `The Node server was started.`,
-      event: `If this reboot was not intentional, please check the server and error logs.`,
+      event: `If this reboot was not intentional, please check the server and error logs.`
     })
     .fetch()
-    .tolerate((err) => {
+    .tolerate(err => {
       // Don't throw errors, but log them
       sails.log.error(err);
     });

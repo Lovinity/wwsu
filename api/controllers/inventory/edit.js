@@ -1,15 +1,11 @@
 module.exports = {
+  friendlyName: "Inventory / Edit",
 
-
-  friendlyName: 'Inventory / Edit',
-
-
-  description: 'Edit inventory item.',
-
+  description: "Edit inventory item.",
 
   inputs: {
     ID: {
-      type: 'number',
+      type: "number",
       required: true
     },
 
@@ -21,47 +17,45 @@ module.exports = {
         "Production Studio",
         "GM Office",
         "Engineering",
-        "Penthouse",
-      ],
+        "Penthouse"
+      ]
     },
 
     subLocation: {
-      type: "string",
+      type: "string"
     },
 
     name: {
-      type: "string",
+      type: "string"
     },
 
     make: {
-      type: "string",
+      type: "string"
     },
 
     model: {
-      type: "string",
+      type: "string"
     },
 
     otherInfo: {
-      type: "string",
+      type: "string"
     },
 
     quantity: {
-      type: "number",
+      type: "number"
     },
 
     condition: {
       type: "string",
-      isIn: ["Excellent", "Very Good", "Good", "Fair", "Poor", "Broken"],
+      isIn: ["Excellent", "Very Good", "Good", "Fair", "Poor", "Broken"]
     },
 
     canCheckOut: {
-      type: "boolean",
-    },
+      type: "boolean"
+    }
   },
 
-
-  fn: async function (inputs) {
-
+  fn: async function(inputs) {
     var criteria = {
       location: inputs.location,
       subLocation: inputs.subLocation,
@@ -71,15 +65,13 @@ module.exports = {
       otherInfo: inputs.otherInfo,
       quantity: inputs.quantity,
       condition: inputs.condition,
-      canCheckOut: inputs.canCheckOut,
+      canCheckOut: inputs.canCheckOut
     };
 
     var criteriaB = _.cloneDeep(criteria);
 
-    await sails.models.items.updateOne({ID: inputs.ID}, criteriaB);
+    await sails.models.items.updateOne({ ID: inputs.ID }, criteriaB);
 
     return;
   }
-
-
 };
