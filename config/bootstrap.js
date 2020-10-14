@@ -1302,6 +1302,7 @@ module.exports.bootstrap = async function(done) {
                 // Do not queue if we queued a break less than the configured failsafe time, and this isn't the 0 break
                 if (
                   key !== 0 &&
+                  key !== "0" &&
                   sails.models.status.errorCheck.prevBreak !== null &&
                   moment(sails.models.status.errorCheck.prevBreak).isAfter(
                     moment().subtract(sails.config.custom.breakCheck, "minutes")
@@ -1315,7 +1316,7 @@ module.exports.bootstrap = async function(done) {
 
                 // The 0 break has its own hard coded failsafe of 10 minutes, separate from other breaks, since it's a FCC required break
                 if (
-                  key === 0 &&
+                  (key === 0 || key === "0") &&
                   sails.models.status.errorCheck.prevID !== null &&
                   moment(sails.models.status.errorCheck.prevID).isAfter(
                     moment().subtract(10, "minutes")
@@ -1330,33 +1331,37 @@ module.exports.bootstrap = async function(done) {
                 // Do not queue anything yet if the current track has breakCheck minutes or more left (resolves a discrepancy with the previous logic)
                 if (
                   key !== 0 &&
+                  key !== "0" &&
                   queue[0].Duration - queue[0].Elapsed >=
                     60 * sails.config.custom.breakCheck
                 ) {
                   breakDebug.push(
                     `doBreak false: (key !== 0) current track has more than ${
                       sails.config.custom.breakCheck
-                    } minutes remaining (${
-                      (queue[0].Duration - queue[0].Elapsed) / 60
-                    }).`
+                    } minutes remaining (${(queue[0].Duration -
+                      queue[0].Elapsed) /
+                      60}).`
                   );
                   doBreak = false;
                 }
 
                 if (
-                  key === 0 &&
+                  (key === 0 || key === "0") &&
                   queue[0].Duration - queue[0].Elapsed >= 60 * 10
                 ) {
                   breakDebug.push(
-                    `doBreak false: (key === 0) current track has more than 10 minutes remaining (${
-                      (queue[0].Duration - queue[0].Elapsed) / 60
-                    }).`
+                    `doBreak false: (key === 0) current track has more than 10 minutes remaining (${(queue[0]
+                      .Duration -
+                      queue[0].Elapsed) /
+                      60}).`
                   );
                   doBreak = false;
                 }
 
                 // Do the break if we are supposed to
                 if (doBreak) {
+                  breakDebug.push(`DOING BREAK`);
+
                   // Reset the break clock
                   sails.models.status.errorCheck.prevBreak = moment();
 
@@ -1364,23 +1369,32 @@ module.exports.bootstrap = async function(done) {
                   sails.models.status.errorCheck.prevLiner = moment();
 
                   // enforce station ID for top of the hour breaks
-                  if (key === 0) {
+                  if (key === 0 || key === "0") {
+                    breakDebug.push(`(is station ID break)`);
                     sails.models.status.errorCheck.prevID = moment();
                     await sails.helpers.error.count("stationID");
                   }
 
                   // Remove liners in the queue. Do not do the playlist re-queue method as there may be a big prerecord or playlist in the queue.
-                  await sails.helpers.songs.remove(
-                    false,
-                    sails.config.custom.subcats.liners,
-                    true,
-                    true
-                  );
+                  try {
+                    await sails.helpers.songs.remove(
+                      false,
+                      sails.config.custom.subcats.liners,
+                      true,
+                      true
+                    );
+                  } catch (srerror) {
+                    breakDebug.push(`Error: ${srerror.message}`);
+                  }
 
                   // Execute the break array
-                  await sails.helpers.break.executeArray(
-                    sails.config.custom.breaks[key]
-                  );
+                  try {
+                    await sails.helpers.break.executeArray(
+                      sails.config.custom.breaks[key]
+                    );
+                  } catch (baerror) {
+                    breakDebug.push(`Error: ${baerror.message}`);
+                  }
 
                   // If not doing a break, check to see if it's time to do a liner
                 } else {
@@ -1430,11 +1444,11 @@ module.exports.bootstrap = async function(done) {
                   logIcon: `fas fa-bug`,
                   title: `Break check debug information:`,
                   event: `<ul>${breakDebug
-                    .map((bd) => `<li>${bd}</li>`)
-                    .join("")}</ul>`,
+                    .map(bd => `<li>${bd}</li>`)
+                    .join("")}</ul>`
                 })
                 .fetch()
-                .tolerate((err) => {
+                .tolerate(err => {
                   // Do not throw for errors, but log it.
                   sails.log.error(err);
                 });
