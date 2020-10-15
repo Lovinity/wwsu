@@ -75,7 +75,15 @@ module.exports = {
     sails.log.debug("Controller directors/edit called.");
 
     try {
-      // First, determine if we need to lock out of editing admin
+      // Do not allow editing of the master director if we did not authorize with master director
+      if (inputs.ID === 0 && this.req.payload.ID !== 0)
+        return new Error("Not allowed to edit the master director with any authorization other than the master director.");
+
+      // If editing master director, do not allow disabling of the admin setting
+      if (inputs.ID === 0)
+        inputs.admin = true;
+
+      // Determine if we need to lock out of editing admin
       var lockout = await sails.models.directors.count({ admin: true });
 
       // Block requests to change admin  to false if there are 1 or less admin directors.
