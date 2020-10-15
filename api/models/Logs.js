@@ -13,6 +13,7 @@ module.exports = {
       autoIncrement: true
     },
 
+    // attendanceID 0 = waiting for meta.changingState to become null; will be updated to current attendanceID once so.
     attendanceID: {
       type: 'number',
       allowNull: true
