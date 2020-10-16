@@ -44,7 +44,7 @@ module.exports = {
         : moment().subtract(2, "weeks");
       var end = inputs.end
         ? inputs.endInclusive
-          ? moment(inputs.end).add(1, "days").startOf("day")
+          ? moment(inputs.end).add(1, "days")
           : moment(inputs.end)
         : moment();
 
