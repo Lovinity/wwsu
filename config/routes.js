@@ -9,30 +9,29 @@
  */
 
 module.exports.routes = {
-
   //  ╦ ╦╔═╗╔╗ ╔═╗╔═╗╔═╗╔═╗╔═╗
   //  ║║║║╣ ╠╩╗╠═╝╠═╣║ ╦║╣ ╚═╗
   //  ╚╩╝╚═╝╚═╝╩  ╩ ╩╚═╝╚═╝╚═╝
 
   /***************************************************************************
-  *                                                                          *
-  * Make the view located at `views/homepage.ejs` your home page.            *
-  *                                                                          *
-  * (Alternatively, remove this and add an `index.html` file in your         *
-  * `assets` directory)                                                      *
-  *                                                                          *
-  ***************************************************************************/
+   *                                                                          *
+   * Make the view located at `views/homepage.ejs` your home page.            *
+   *                                                                          *
+   * (Alternatively, remove this and add an `index.html` file in your         *
+   * `assets` directory)                                                      *
+   *                                                                          *
+   ***************************************************************************/
 
   /***************************************************************************
-  *                                                                          *
-  * More custom routes here...                                               *
-  * (See https://sailsjs.com/config/routes for examples.)                    *
-  *                                                                          *
-  * If a request to a URL doesn't match any of the routes in this file, it   *
-  * is matched against "shadow routes" (e.g. blueprint routes).  If it does  *
-  * not match any of those, it is matched against static assets.             *
-  *                                                                          *
-  ***************************************************************************/
+   *                                                                          *
+   * More custom routes here...                                               *
+   * (See https://sailsjs.com/config/routes for examples.)                    *
+   *                                                                          *
+   * If a request to a URL doesn't match any of the routes in this file, it   *
+   * is matched against "shadow routes" (e.g. blueprint routes).  If it does  *
+   * not match any of those, it is matched against static assets.             *
+   *                                                                          *
+   ***************************************************************************/
 
   //  ╔═╗╔═╗╦  ╔═╗╔╗╔╔╦╗╔═╗╔═╗╦╔╗╔╔╦╗╔═╗
   //  ╠═╣╠═╝║  ║╣ ║║║ ║║╠═╝║ ║║║║║ ║ ╚═╗
@@ -46,67 +45,73 @@ module.exports.routes = {
   //  ║║║║╚═╗║
   //  ╩ ╩╩╚═╝╚═╝
 
-  'GET /': {
-    view: 'website/home',
+  "GET /": {
+    view: "website/home",
     locals: {
-      layout: 'website/layout',
+      layout: "website/layout"
     }
   },
 
-  'GET /listen': {
-    view: 'website/home',
+  "GET /listen": {
+    view: "website/home",
     locals: {
-      layout: 'website/layout',
+      layout: "website/layout"
     }
   },
 
-  'GET /chat': {
-    view: 'website/chat',
+  "GET /chat": {
+    view: "website/chat",
     locals: {
-      layout: 'website/layout',
+      layout: "website/layout"
     }
   },
 
-  'GET /schedule': {
-    view: 'website/schedule',
+  "GET /schedule": {
+    view: "website/schedule",
     locals: {
-      layout: 'website/layout',
+      layout: "website/layout"
     }
   },
 
-  'GET /hours': {
-    view: 'website/hours',
+  "GET /hours": {
+    view: "website/hours",
     locals: {
-      layout: 'website/layout',
+      layout: "website/layout"
     }
   },
 
-  'GET /request': {
-    view: 'website/request',
+  "GET /request": {
+    view: "website/request",
     locals: {
-      layout: 'website/layout',
+      layout: "website/layout"
     }
   },
 
-  'GET /directors': {
-    view: 'directors/timesheets',
+  "GET /directors": {
+    view: "directors/timesheets",
     locals: {
-      layout: 'directors/layout',
+      layout: "directors/layout"
     }
   },
 
-  'GET /directors/timesheets': {
-    view: 'directors/timesheets',
+  "GET /directors/timesheets": {
+    view: "directors/timesheets",
     locals: {
-      layout: 'directors/layout',
+      layout: "directors/layout"
     }
   },
 
-  'GET /directors/calendar': {
-    view: 'directors/calendar',
+  "GET /directors/calendar": {
+    view: "directors/calendar",
     locals: {
-      layout: 'directors/layout',
+      layout: "directors/layout"
     }
   },
 
-}
+  "GET /director/:director": function(req, res) {
+    return res.view("directors/director", {
+      layout: "directors/layout",
+      director: req.param("director")
+    });
+  }
+};
