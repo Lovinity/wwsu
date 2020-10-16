@@ -1434,7 +1434,9 @@ module.exports.bootstrap = async function(done) {
                 }
               }
             }
+
             if (logBreakDebug) {
+              /*
               await sails.models.logs
                 .create({
                   attendanceID: sails.models.meta.memory.attendanceID,
@@ -1452,6 +1454,7 @@ module.exports.bootstrap = async function(done) {
                   // Do not throw for errors, but log it.
                   sails.log.error(err);
                 });
+                */
               breakDebug = [];
               logBreakDebug = false;
             }
