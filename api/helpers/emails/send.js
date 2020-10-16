@@ -31,10 +31,10 @@ module.exports = {
 
     // Send the email
     transporter.sendMail({
-      from: 'wwsu4@wright.edu',
+      from: 'wwsu1069fm@wright.edu',
       to: record.to ? record.to : undefined,
       cc: record.cc ? record.cc : undefined,
-      subject: `[WWSU] ${record.subject}`,
+      subject: record.subject,
       text: record.text,
       html: record.text
     }, (err, info) => {

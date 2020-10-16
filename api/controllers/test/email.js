@@ -25,7 +25,7 @@ module.exports = {
             path: '/usr/sbin/sendmail'
         });
         transporter.sendMail({
-            from: 'wwsu4@wright.edu',
+            from: 'wwsu1069fm@wright.edu',
             to: inputs.to,
             subject: 'Message',
             text: 'I hope this message gets delivered!'
