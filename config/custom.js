@@ -11,858 +11,12 @@
  */
 
 // Declare global variables for a couple common libraries.
-global[ 'moment' ] = require('moment-timezone')
+global['moment'] = require('moment-timezone')
 require('moment-duration-format')
 require('moment-recur-ts')
-global[ 'needle' ] = require('needle')
+global['needle'] = require('needle')
 const WWSU = require("../assets/plugins/wwsu-sails/js/wwsu.js");
-global[ 'WWSUqueue' ] = new WWSU.WWSUqueue();
-
-// Declare the break task schema
-const breakTaskSchema = [
-  // Logs
-  {
-    properties: {
-      task: {
-        type: 'string',
-        const: "log",
-        description: "The task to perform."
-      },
-      event: {
-        type: "string",
-        description: "The log entry to insert."
-      }
-    },
-    required: [ "task", "event" ]
-  },
-
-  // queue Requests
-  {
-    properties: {
-      task: {
-        type: 'string',
-        const: "queueRequests",
-        description: "The task to perform."
-      },
-      quantity: {
-        type: 'number',
-        minimum: 1,
-        description: "The number of tracks to queue."
-      }
-    },
-    required: [ "task", "quantity" ]
-  },
-
-  // queue
-  {
-    properties: {
-      task: {
-        type: 'string',
-        const: "queue",
-        description: "The task to perform."
-      },
-      quantity: {
-        type: 'number',
-        minimum: 1,
-        description: "The number of tracks to queue."
-      },
-      category: {
-        type: 'string',
-        description: "The name of the category to queue from as defined in the categories config."
-      },
-      rules: {
-        type: "boolean",
-        description: "Whether or not to enforce playlist rotation rules."
-      }
-    },
-    required: [ "task", "quantity", "category" ]
-  },
-
-  // queue Duplicates
-  {
-    properties: {
-      task: {
-        type: 'string',
-        const: "queueDuplicates",
-        description: "The task to perform."
-      },
-    },
-    required: [ "task" ]
-  },
-
-  // queue Underwritings
-  {
-    properties: {
-      task: {
-        type: 'string',
-        const: "queueUnderwritings",
-        description: "The task to perform."
-      },
-      quantity: {
-        type: 'number',
-        minimum: 1,
-        description: "The number of tracks to queue."
-      },
-    },
-    required: [ "task", "quantity" ]
-  },
-];
-
-// Declare config store
-const Conf = require('conf');
-
-// Create and export the config store
-module.exports.custom = new Conf({
-
-  // We want an error to be thrown if the config file is corrupt
-  clearInvalidConfig: false,
-
-  // TODO: Keep this up to date by adding any/all changes to the schema here (and bumping the version). Use >= syntax.
-  migrations: {
-
-  },
-
-  schema: {
-
-    website: {
-      type: 'string',
-      format: 'uri',
-      default: 'https://wwsu1069.org',
-      description: "The full URL to the WWSU website, used by the status system to check if it is online.",
-    },
-
-    stream: {
-      type: 'string',
-      format: 'uri',
-      default: 'https://server.wwsu1069.org/shoutcast',
-      description: "The full URL to the Shoutcast internet stream server, used for status checking and counting online listeners."
-    },
-
-    hostSecret: {
-      type: 'string',
-      default: 'WWSU1069',
-      description: "A secret key used to obfuscate host IP addresses in the API. WARNING! Changing this will invalidate active discipline."
-    },
-
-    startOfSemester: {
-      type: "string",
-      format: "date-time",
-      default: moment('2019-01-14 00:00:00').toISOString(true),
-      description: "The date/time the current semester started, used for analytics."
-    },
-
-    onesignal: {
-      type: "object",
-      additionalProperties: false,
-      description: "OneSignal manages push notifications for radio shows and accountability.",
-      properties: {
-        rest: {
-          type: "string",
-          default: "",
-          description: "The REST API key for OneSignal app."
-        },
-        app: {
-          type: "string",
-          default: "",
-          description: "The OneSignal app ID."
-        }
-      },
-      required: [ "rest", "app" ]
-    },
-
-    darksky: {
-      type: "object",
-      additionalProperties: false,
-      description: "DEPRECATED: Config for Darksky weather API.",
-      properties: {
-        api: {
-          type: "string",
-          default: "",
-          description: "The Darksky API key."
-        },
-        unitSystem: {
-          type: "string",
-          default: "us",
-          description: "What units of measurement should be returned from Climacell."
-        },
-        position: {
-          type: "object",
-          description: "The location information to get weather.",
-          properties: {
-            latitude: {
-              type: "number",
-              minimum: -180,
-              maximum: 180,
-              default: 39.7800196
-            },
-            longitude: {
-              type: "number",
-              minimum: -180,
-              maximum: 180,
-              default: -84.0599189
-            },
-          },
-          required: [ "latitude", "longitude" ]
-        }
-      },
-      required: [ "api", "position" ]
-    },
-
-    climacell: {
-      type: "object",
-      additionalProperties: false,
-      description: "Config for Climacell weather API.",
-      properties: {
-        api: {
-          type: "string",
-          default: "",
-          description: "The Climacell API key."
-        },
-        position: {
-          type: "object",
-          description: "The location information to get weather.",
-          properties: {
-            latitude: {
-              type: "number",
-              minimum: -180,
-              maximum: 180,
-              default: 39.7800196
-            },
-            longitude: {
-              type: "number",
-              minimum: -180,
-              maximum: 180,
-              default: -84.0599189
-            },
-          },
-          required: [ "latitude", "longitude" ]
-        }
-      },
-      required: [ "api", "unitSystem", "position" ]
-    },
-
-    categories: {
-      type: "object",
-      description: "These properties tie RadioDJ track categories and subcategories in with category names (the object key) used by the system.",
-
-      // System categories
-      properties: {
-        music: {
-          type: "object",
-          description: "The music property defines what tracks in RadioDJ are considered music (and therefore can be requested by the track request system).",
-          additionalProperties: {
-            type: "array",
-            description: "Each property (RadioDJ main category) contains an array of subcategories to attribute. An empty array means to use all subcategories.",
-            items: {
-              type: "string"
-            }
-          },
-          default: {
-            "Music": [],
-            "Top Adds": []
-          }
-        },
-
-        adds: {
-          type: "object",
-          description: "Top Adds (music for high promotion); a random track from this will play when a DJ clicks to play a Top Add in wwsu-dj-controls.",
-          additionalProperties: {
-            type: "array",
-            description: "Each property (RadioDJ main category) contains an array of subcategories to attribute. An empty array means to use all subcategories.",
-            items: {
-              type: "string"
-            }
-          },
-          default: {
-            "Top Adds": []
-          }
-        },
-
-        IDs: {
-          type: "object",
-          description: "The tracks considered to follow the FCC definition of a legal station ID (Call letters, frequency, market locations). System monitors to make sure one plays around (+- 5 minutes) the top of every hour and logs when that does not happen.",
-          additionalProperties: {
-            type: "array",
-            description: "Each property (RadioDJ main category) contains an array of subcategories to attribute. An empty array means to use all subcategories.",
-            items: {
-              type: "string"
-            }
-          },
-          default: {
-            'Station IDs': [ 'Standard IDs' ]
-          }
-        },
-
-        PSAs: {
-          type: "object",
-          description: "A public service announcement which promotes a non-profit organization, social issue, or cause. These are usually played during breaks.",
-          additionalProperties: {
-            type: "array",
-            description: "Each property (RadioDJ main category) contains an array of subcategories to attribute. An empty array means to use all subcategories.",
-            items: {
-              type: "string"
-            }
-          },
-          default: {
-            "PSAs": [],
-          }
-        },
-
-        sweepers: {
-          type: "object",
-          description: "Fun non-legal station IDs.",
-          additionalProperties: {
-            type: "array",
-            description: "Each property (RadioDJ main category) contains an array of subcategories to attribute. An empty array means to use all subcategories.",
-            items: {
-              type: "string"
-            }
-          },
-          default: {
-            "Sweepers": [ "Break Sweepers" ],
-          }
-        },
-
-        underwritings: {
-          type: "object",
-          description: "Paid or non-paid sponsorship messages to be aired often at certain times/days and/or for certain number of spins. System uses this to determine which tracks may be selected for use in underwriting scheduling.",
-          additionalProperties: {
-            type: "array",
-            description: "Each property (RadioDJ main category) contains an array of subcategories to attribute. An empty array means to use all subcategories.",
-            items: {
-              type: "string"
-            }
-          },
-          default: {
-            "Commercials": [],
-          }
-        },
-
-        liners: {
-          type: "object",
-          description: "A short ( < 7 seconds) audio clip played periodically between songs telling listeners what station they are listening to.",
-          additionalProperties: {
-            type: "array",
-            description: "Each property (RadioDJ main category) contains an array of subcategories to attribute. An empty array means to use all subcategories.",
-            items: {
-              type: "string"
-            }
-          },
-          default: {
-            "Liners": [ "Standard Liners" ],
-          }
-        },
-
-        requestLiners: {
-          type: "object",
-          description: "A random request liner is played before requested tracks are aired.",
-          additionalProperties: {
-            type: "array",
-            description: "Each property (RadioDJ main category) contains an array of subcategories to attribute. An empty array means to use all subcategories.",
-            items: {
-              type: "string"
-            }
-          },
-          default: {
-            "Liners": [ "Request Liners" ],
-          }
-        },
-
-        promos: {
-          type: "object",
-          description: "Advertisements for the shows and programming that airs on the station.",
-          additionalProperties: {
-            type: "array",
-            description: "Each property (RadioDJ main category) contains an array of subcategories to attribute. An empty array means to use all subcategories.",
-            items: {
-              type: "string"
-            }
-          },
-          default: {
-            "Promos": [ "Radio Show Promos" ],
-          }
-        },
-
-        halftime: {
-          type: "object",
-          description: "Upbeat music played during halftime and extended breaks in sports broadcasts.",
-          additionalProperties: {
-            type: "array",
-            description: "Each property (RadioDJ main category) contains an array of subcategories to attribute. An empty array means to use all subcategories.",
-            items: {
-              type: "string"
-            }
-          },
-          default: {
-            'Sports Music': [ 'Halftime and Break Music' ]
-          }
-        },
-
-        technicalIssues: {
-          type: "object",
-          description: "Generic liners (eg. 'We apologize for the technical issues. We will be right back.') played when the system sends itself into break due to a technical issue (such as a remote stream disconnecting during a broadcast).",
-          additionalProperties: {
-            type: "array",
-            description: "Each property (RadioDJ main category) contains an array of subcategories to attribute. An empty array means to use all subcategories.",
-            items: {
-              type: "string"
-            }
-          },
-          default: {
-            "Liners": [ 'Technical Issues Liners' ]
-          }
-        },
-
-        noClearGeneral: {
-          type: "object",
-          description: "When changing genre rotations or playlists, tracks in the queue will be removed EXCEPT those in this category.",
-          additionalProperties: {
-            type: "array",
-            description: "Each property (RadioDJ main category) contains an array of subcategories to attribute. An empty array means to use all subcategories.",
-            items: {
-              type: "string"
-            }
-          },
-          default: {
-            "Sweepers": [],
-            'Station IDs': [],
-            "Jingles": [],
-            "Promos": [],
-            "Liners": [],
-            "Commercials": [],
-            "News": [],
-            "PSAs": [],
-            'Radio Shows': [],
-            'Sports Openers': [],
-            'Sports Liners': [],
-            'Sports Closers': [],
-            'Show Openers': [],
-            'Show Returns': [],
-            'Show Closers': [],
-            "Segments": []
-          }
-        },
-
-        noClearShow: {
-          type: "object",
-          description: "When starting a broadcast or prerecord, tracks in the queue will be removed EXCEPT those in this category.",
-          additionalProperties: {
-            type: "array",
-            description: "Each property (RadioDJ main category) contains an array of subcategories to attribute. An empty array means to use all subcategories.",
-            items: {
-              type: "string"
-            }
-          },
-          default: {
-            "Sweepers": [],
-            'Station IDs': [],
-            "Jingles": [],
-            "Promos": [],
-            "Commercials": [],
-            'Sports Openers': [],
-            'Sports Liners': [],
-            'Sports Closers': [],
-            'Show Openers': [],
-            'Show Returns': [],
-            'Show Closers': []
-          }
-        },
-
-        clearBreak: {
-          type: "object",
-          description: "When a broadcast host requests to return from a break, these tracks will be removed from the queue.",
-          additionalProperties: {
-            type: "array",
-            description: "Each property (RadioDJ main category) contains an array of subcategories to attribute. An empty array means to use all subcategories.",
-            items: {
-              type: "string"
-            }
-          },
-          default: {
-            "PSAs": [],
-            'Sports Music': [ 'Halftime and Break Music' ]
-          }
-        },
-
-        noMeta: {
-          type: "object",
-          description: "Tracks in this category will have alternate meta displayed in now playing info instead of its own track info when playing. In addition, the system determines broadcasts and prerecords as on the air when no more noMeta tracks are in the queue.",
-          additionalProperties: {
-            type: "array",
-            description: "Each property (RadioDJ main category) contains an array of subcategories to attribute. An empty array means to use all subcategories.",
-            items: {
-              type: "string"
-            }
-          },
-          default: {
-            "Jingles": [],
-            'Station IDs': [],
-            "PSAs": [],
-            "Liners": [],
-            "Sweepers": [],
-            "Promos": [],
-            'Sports Music': [],
-            'Show Returns': [],
-            'Sports Liners': [],
-            "Commercials": []
-          }
-        },
-
-        noFade: {
-          type: "object",
-          description: "An hourly CRON will run and set the fade on these tracks to 0, disabling all fading / crossfading on those tracks.",
-          additionalProperties: {
-            type: "array",
-            description: "Each property (RadioDJ main category) contains an array of subcategories to attribute. An empty array means to use all subcategories.",
-            items: {
-              type: "string"
-            }
-          },
-          default: {
-            'Station IDs': [],
-            "Promos": [],
-            "PSAs": [],
-            "Commercials": []
-          }
-        },
-      },
-      // Disallow removal of system categories by marking them required
-      required: [ `music`, `adds`, `IDs`, `PSAs`, `sweepers`, `underwritings`, `liners`, `requestLiners`, `promos`, `halftime`, `technicalIssues`, `noClearGeneral`, `noClearShow`, `clearBreak`, `noMeta`, `noFade` ],
-
-      // Additional categories
-      additionalProperties: {
-        type: "object",
-        description: "Each property's key is the name of a RadioDJ main category.",
-        additionalProperties: {
-          type: "array",
-          description: "Each property contains an array of subcategories to attribute. An empty array means to use all subcategories.",
-          items: {
-            type: "string"
-          }
-        }
-      }
-    },
-
-    sports: {
-      type: 'array',
-      description: "An array of sports that have been configured for use in sports broadcasts. The RadioDJ categories of Sports Openers, Sports Liners, and Sports Closers must have a subcategory with each of these sports, and appropriate tracks in those subcategories.",
-      items: {
-        type: 'string',
-        description: "Name of a sport as defined in subcategories for Sports Openers, Sports Liners, and Sports Closers RadioDJ categories."
-      },
-      default: [
-        `Men's Basketball`,
-        `Women's Basketball`,
-        `Men's Baseball`,
-        `Women's Softball`,
-        `Men's Soccer`,
-        `Women's Soccer`,
-        `Men's Tennis`,
-        `Women's Tennis`,
-        `Men's Volleyball`,
-        `Women's Volleyball`,
-        `Men's Football`,
-        `Women's Football`
-      ]
-    },
-
-    meta: {
-      type: "object",
-      additionalProperties: false,
-      description: "Settings pertaining to metadata / now playing information.",
-      properties: {
-
-        clearTime: {
-          type: 'number',
-          minimum: 1,
-          description: "When a live DJ logs a manual track, it will be displayed for (up to) this many minutes in metadata before cleared automatically.",
-          default: 10
-        },
-
-        alt: {
-          type: "object",
-          additionalProperties: false,
-          description: "Alternate metadata to display when a noMeta category track is playing, depending on the system state.",
-          properties: {
-            automation: {
-              type: 'string',
-              default: "We'll get back to the music shortly...",
-              description: "Alt metadata to display when a noMeta track is playing during default automation."
-            },
-            playlist: {
-              type: 'string',
-              default: "We'll get back to the playlist shortly...",
-              description: "Alt metadata to display when a noMeta track is playing during a playlist."
-            },
-            genre: {
-              type: 'string',
-              default: "We'll get back to the music shortly...",
-              description: "Alt metadata to display when a noMeta track is playing during a genre rotation."
-            },
-            live: {
-              type: 'string',
-              default: "We'll get back to the show shortly...",
-              description: "Alt metadata to display when a noMeta track is playing during a live show."
-            },
-            prerecord: {
-              type: 'string',
-              default: "We'll get back to the show shortly...",
-              description: "Alt metadata to display when a noMeta track is playing during a prerecorded show playlist."
-            },
-            remote: {
-              type: 'string',
-              default: "We'll get back to the broadcast shortly...",
-              description: "Alt metadata to display when a noMeta track is playing during a remote broadcast."
-            },
-            sports: {
-              type: 'string',
-              default: "We'll get back to sports coverage shortly...",
-              description: "Alt metadata to display when a noMeta track is playing during a sports broadcast."
-            }
-          },
-          required: [ "automation", "playlist", "genre", "live", "prerecord", "remote", "sports" ]
-        },
-
-        prefix: {
-          type: "object",
-          additionalProperties: false,
-          description: "Text to prepend to the beginning of now playing information depending on programming. Please pay attention to which line is indicated the text will display. Note: Spaces are NOT automatically added; add a space at the end of the prefix if you want one.",
-          properties: {
-            automation: {
-              type: 'string',
-              default: "Playing: ",
-              description: "Prefix to use when playing a track during automation, genre, or playlist, on line 1 of metadata. It will be proceeded by the Artist - Title of the track."
-            },
-            genre: {
-              type: 'string',
-              default: "Genre: ",
-              description: "Prefix to use on line 2 when in a genre rotation. Will be proceeded by the name of the genre rotation event."
-            },
-            playlist: {
-              type: 'string',
-              default: "Playlist: ",
-              description: "Prefix to use on line 2 when playing a playlist. Will be proceeded by the name of the playlist event."
-            },
-            request: {
-              type: 'string',
-              default: "Requested by ",
-              description: "When a requested track is playing, this prefix will be used on line 2 followed by the name of the person who requested the track."
-            },
-            pendLive: {
-              type: 'string',
-              default: "Coming Up: ",
-              description: "Prefix to use on line 2 when a live show is about to start. Will be proceeded by DJ handle(s) - show name."
-            },
-            pendPrerecord: {
-              type: 'string',
-              default: "Coming Up: ",
-              description: "Prefix to use on line 2 when a prerecord is about to start. Will be proceeded by DJ handle(s) - show name."
-            },
-            pendRemote: {
-              type: 'string',
-              default: "Coming Up: ",
-              description: "Prefix to use on line 2 when a remote broadcast is about to start. Will be proceeded by DJ handle(s) - show name."
-            },
-            pendSports: {
-              type: 'string',
-              default: "Coming Up: Raider Sports - ",
-              description: "Prefix to use on line 2 when a sports broadcast is about to start. Will be proceeded by the name of the sport."
-            },
-            prerecord: {
-              type: 'string',
-              default: "Airing: ",
-              description: "Prefix to use on line 1 when a prerecorded show is airing. Will be proceeded by DJ Handle(s) - Show Name."
-            },
-            live: {
-              type: 'string',
-              default: "Live: ",
-              description: "Prefix to use on line 1 when a live show is airing. Will be proceeded by DJ Handle(s) - Show Name."
-            },
-            remote: {
-              type: 'string',
-              default: "Broadcasting: ",
-              description: "Prefix to use on line 1 when a remote broadcast is airing. Will be proceeded by DJ Handle(s) - Show Name."
-            },
-            sports: {
-              type: 'string',
-              default: "Live Raider Sports Coverage: ",
-              description: "Prefix to use on line 1 when a sports broadcast is airing. Will be proceeded by the name of the sport."
-            },
-            playing: {
-              type: 'string',
-              default: "Playing: ",
-              description: "Prefix to use on line 2 when a track is playing in radioDJ during a live, remote, sports, or prerecorded show. Will be proceeded by the artist - title of the track."
-            },
-          },
-          required: [ "automation", "genre", "playlist", "request", "pendLive", "pendPrerecord", "pendRemote", "pendSports", "prerecord", "live", "remote", "sports", "playing" ]
-        }
-
-      },
-      required: [ "clearTime", "alt", "prefix" ]
-    },
-
-    /*
-         * Configuration format
-         *
-         * Each break is configured as a property in the breaks object as follows, based on an hourly clock wheel:
-         * minuteNumberOfTheHour: [array of option objects] (for example, 0: [] will execute at around the top of every hour... 20: [] will execute at around :20 past every hour.
-         * NOTE: A 0 (top of the hour) break is REQUIRED by the FCC and by this application. You must have an entry for a 0 break in the breaks configuration.
-         *
-         * Each break contains an array of option objects (0: [array of option objects]). Here are the options you can use:
-         *
-         * // This adds an info log entry under automation.
-         * {task: "log", event: "What to log"}
-         *
-         * // This queues up to (quantity) number of requested tracks, and adds a request liner (categories.requestLiners) at the beginning (if any requests were queued).
-         * {task: "queueRequests", quantity: 1}
-         *
-         * // Queues (quantity) number of tracks from (category) as configured in the categories section. If rules is true, tracks will be checked against playlist rotation rules.
-         * {task: "queue", category: "categoryName (from the categories configuration)", quantity: 1, rules: true}
-         *
-         * // If any underwritings etc were removed from the queue due to duplicates, they get stored in memory. This re-queues them. It is advised to have this in every break.
-         * {task: "queueDuplicates"}
-         *
-         * NOTE: everything is executed in REVERSE (items from the end of the array happen before the items in the beginning). But this works out because that way,
-         * queued tracks end up in the order you specified. For example, if you put PSAs before an ID in the array, the PSAs will be above the IDs in RadioDJ, and will play first.
-         *
-         * Example:
-         *
-         * // The "20" means this break will queue around minute 20 of every hour
-         * 20: [
-         *         {task: "queue", category: "PSAs", quantity: 2}, // This queues 2 tracks that fall within the configured categories.PSAs tracks
-         *         {task: "queueDuplicates"}, // This adds any underwritings etc that were previously removed from the queue due to duplicates
-         *         {task: "queue", category: "sweepers", quantity: 1}, // This queues 1 sweeper (track configured in categories.sweepers)
-         *         {task: "queueRequests", quantity: 3} // This queues up to 3 requested tracks, and adds a request liner (categories.requestLiners) at the beginning.
-         *         {task: "queueUnderwritings", quantity: 2} // Queue up to quantity number of scheduled underwritings. Quantity may be ignored if there are more underwritings way behind schedule.
-         *     ],
-         *
-         * // This break and set of options will queue at around :40 past every hour. We won't give another array of options example as it is redundant.
-         * 40: [...]
-         */
-
-    /*
-       * How Breaks Work (automation, playlists, genres, and prerecords)
-       *
-       * Breaks do NOT queue exactly at the configured minute every hour. Instead, the system uses algorithms / logic to determine when to queue them.
-       * The primary goal is to queue breaks in such a way they are as on-time as possible, even if they have to queue a little early/late.
-       * The secondary goal is to avoid having multiple breaks getting queued back to back.
-       * NOTE: With the exception of the 0 break, which is never skipped... breaks may be skipped if necessary to prevent duplicate break queuing.
-       *
-       * Logic chart for determining when to queue breaks:
-       *
-       * For each configured break, checked every second:
-       *
-       * Current minute past the hour is < scheduled break minute, OR the break we are checking for is the 0 break (top of hour breaks should never be skipped).
-       *     Yes v     No > exit / do not queue; if this happens and the break was never queued for this hour, it is skipped until the next hour.
-       * Previous break was queued >= breakCheck (in configuration) minutes ago (0 break always uses 10 minutes regardless of breakCheck, and is compared to the previous 0 break only)
-       *     Yes v     No > exit / do not queue at this time.
-       * Current playing track remaining time is < breakCheck minutes (0 break always uses 10 minutes regardless of breakCheck)
-       *     Yes v     No > exit / do not queue at this time.
-       * Current playing track will finish after the scheduled break time
-       *     No v      Yes > queue the break and exit. Break will air after the current track is finished. In this case, the break usually airs a little past scheduled time.
-       * Current track will finish before scheduled break, and next track will finish after. But between being late and being early, break would be more late than it would early.
-       *     No v      Yes > queue the break and exit. Break will air after the current track is finished and before the next one... a little early compared to its scheduled time.
-       * Exit (do not queue the break at this time)
-       *
-       */
-
-    /*
-       * How Breaks Work (live shows, remotes, and sports broadcasts)
-       *
-       * Breaks for shows/remotes/sports broadcasts are configured in "specialBreaks"; "breaks" is only for during automation/genre/playlist/prerecord.
-       *
-       */
-    breaks: {
-      type: "object",
-      description: "An hourly clockwheel defining breaks to take during automation and when. The key for every property in the object must be a number indicating the minute of the hour the break is to be executed. The value is an array of tasks to execute for that break.",
-      propertyNames: {
-        format: "number",
-        minimum: 0,
-        maximum: 59
-      },
-      default: {
-        0: [
-          { task: 'log', event: 'Queued :00 top of the hour ID break.' },
-          { task: 'queue', category: 'IDs', quantity: 1 }
-        ],
-      },
-      required: [ "0" ],
-      additionalProperties: {
-        type: "array",
-        description: "Array of tasks to execute for this break. They will be executed in REVERSE order, which because track queuing is done at the top, tracks will end up playing in the order specified in this array.",
-        items: {
-          type: "object",
-          additionalProperties: false,
-          description: "A task to execute for this break.",
-          oneOf: breakTaskSchema
-        }
-      }
-    },
-
-    specialBreaks: {
-      type: "object",
-      additionalProperties: false,
-      description: "Special rules for non-automation breaks.",
-      properties: {
-
-        automation: {
-          type: "object",
-          additionalProperties: false,
-          description: "Special non-clockwheel breaks during automation.",
-          properties: {
-            during: {
-              type: "array",
-              description: "During automation_break (when a DJ switches show and the system awaits the next DJ), these tasks will indefinitely execute when the queue is empty until the next DJ signs on or automation_break times out.",
-              items: breakTaskSchema,
-              default: [
-                { task: 'queue', category: 'PSAs', quantity: 1 }
-              ]
-            }
-          },
-          required: [ "during" ]
-        },
-
-        live: {
-          type: "object",
-          additionalProperties: false,
-          description: "Special non-clockwheel breaks during live shows. Note: Do not include show openers, returns, closers, nor station IDs, in this configuration; those are queued automatically.",
-          properties: {
-            start: {
-              type: "array",
-              description: "When a DJ is starting a live show broadcast, after all tracks not in the noClearShow category are removed, these tasks will be executed.",
-              items: breakTaskSchema,
-              default: [
-                { task: 'queueUnderwritings', quantity: 1 }
-              ]
-            },
-            before: {
-              type: "array",
-              description: "When a DJ is starting a break, these tasks will be executed.",
-              items: breakTaskSchema,
-              default: [
-                { task: 'queueDuplicates' },
-                { task: 'queueUnderwritings', quantity: 2 }
-              ]
-            },
-            during: {
-              type: "array",
-              description: "When a DJ is in a break, these tasks will be executed indefinitely whenever the RadioDJ queue is empty until the DJ returns from break.",
-              items: breakTaskSchema,
-              default: [
-                { task: 'queue', category: 'PSAs', quantity: 1 }
-              ]
-            },
-
-            // TODO: Continue here
-          },
-          required: [ "start", "before", "during" ]
-        }
-      },
-      required: [ "automation", "live" ]
-    }
-  }
-});
-
+global['WWSUqueue'] = new WWSU.WWSUqueue();
 
 // Create a config factory store; we are not using easy-config-store directly because it does not have a deleteProperty handler.
 const config = (() => {
@@ -875,7 +29,7 @@ const config = (() => {
 
   const handle = {
     get: function (oTarget, sKey) {
-      const result = oTarget[ sKey ]
+      const result = oTarget[sKey]
       return result
     },
     set: function (oTarget, sKey, vValue) {
@@ -884,13 +38,13 @@ const config = (() => {
         vValue = new Proxy(vValue, handle)
       } else {
       }
-      oTarget[ sKey ] = vValue
+      oTarget[sKey] = vValue
       saveConfigFunc(config)
       return true
     },
     deleteProperty: function (oTarget, sKey) {
       if (sKey in oTarget) {
-        delete oTarget[ sKey ]
+        delete oTarget[sKey]
         saveConfigFunc(config)
         return true
       }
@@ -904,18 +58,18 @@ const config = (() => {
     cfgClear: {
       value: () => {
         for (const k in config) {
-          delete config[ k ]
+          delete config[k]
         }
       }
     },
     cfgReset: {
       value: () => {
         for (const k in config) {
-          delete config[ k ]
+          delete config[k]
         }
         const cfg = Object.assign({}, defaultCfg)
         for (const k in cfg) {
-          config[ k ] = cfg[ k ]
+          config[k] = cfg[k]
         }
       }
     },
@@ -926,7 +80,7 @@ const config = (() => {
         }
         defaultCfg = Object.assign({}, cfg)
         for (const k in cfg) {
-          config[ k ] = cfg[ k ]
+          config[k] = cfg[k]
         }
       }
     },
@@ -947,11 +101,11 @@ const config = (() => {
     },
     cfgUseLocalStorage: {
       value: (key) => {
-        const cfg = JSON.parse(localStorage[ key ])
+        const cfg = JSON.parse(localStorage[key])
         config.setOptions(cfg, (cfg) => {
           clearTimeout(timer)
           timer = setTimeout(() => {
-            localStorage[ key ] = JSON.stringify(cfg)
+            localStorage[key] = JSON.stringify(cfg)
           }, 300)
         })
       }
@@ -971,10 +125,10 @@ const config = (() => {
     proxys.push(obj)
     for (var k in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, k)) {
-        const v = obj[ k ]
+        const v = obj[k]
         if (v && typeof v === 'object') {
           proxyObject(v, proxys)
-          obj[ k ] = new Proxy(v, handle)
+          obj[k] = new Proxy(v, handle)
         } else {
         }
       }
@@ -1063,7 +217,7 @@ var defaultConfig = {
   categories: {
 
     // Restrict removal of the provided category keys by the config system.
-    _doNotRemove: [ `music`, `adds`, `IDs`, `PSAs`, `sweepers`, `underwritings`, `liners`, `requestLiners`, `promos`, `halftime`, `technicalIssues`, `noClearGeneral`, `noClearShow`, `clearBreak`, `noMeta`, `noFade` ],
+    _doNotRemove: [`music`, `adds`, `IDs`, `PSAs`, `sweepers`, `underwritings`, `liners`, `requestLiners`, `promos`, `halftime`, `technicalIssues`, `noClearGeneral`, `noClearShow`, `clearBreak`, `noMeta`, `noFade`],
 
     /*
          * REQUIRED CATEGORIES
@@ -1087,7 +241,7 @@ var defaultConfig = {
     // Legal Station IDs
     // DEFINITION: Required FCC ID at the top of every hour that includes call sign, frequency, and coverage area
     IDs: {
-      'Station IDs': [ 'Standard IDs' ]
+      'Station IDs': ['Standard IDs']
     },
 
     // Public Service Announcements
@@ -1099,7 +253,7 @@ var defaultConfig = {
     // Station Sweepers
     // DEFINITION: Fun audio clips, generally 15-30 seconds, identifying the station, played as defined in break configuration.
     sweepers: {
-      Sweepers: [ 'Break Sweepers' ]
+      Sweepers: ['Break Sweepers']
     },
 
     // Station underwritings and commercials
@@ -1112,29 +266,29 @@ var defaultConfig = {
     // DEFINITION: Short (usually <6 seconds) station identification that plays in between music tracks during non-break times in automation.
     // NOTE: When a break is queued, any liners in the queue will be removed; it would be unprofessional for a liner to play right before or after a break.
     liners: {
-      Liners: [ 'Standard Liners' ]
+      Liners: ['Standard Liners']
     },
 
     // Request liners
     // DEFINITION: Short (usually <6 seconds) audio clips that play before the system plays requested tracks (if in automation).
     requestLiners: {
-      Liners: [ 'Request Liners' ]
+      Liners: ['Request Liners']
     },
 
     // radio show promos
     // DEFINITION: An audio clip (usually 30-60 seconds) promoting a radio show or broadcast, played as defined in break configuration.
     promos: {
-      Promos: [ 'Radio Show Promos' ]
+      Promos: ['Radio Show Promos']
     },
 
     // Music used for sports haltime and other extended sports breaks
     halftime: {
-      'Sports Music': [ 'Halftime and Break Music' ]
+      'Sports Music': ['Halftime and Break Music']
     },
 
     // Liners played when the system is sent to break because of a technical issue (remote broadcasts)
     technicalIssues: {
-      Liners: [ 'Technical Issues Liners' ]
+      Liners: ['Technical Issues Liners']
     },
 
     // When the system changes to a new playlist or genre, all tracks will be removed from the current queue EXCEPT tracks that are in these defined categories / subcategories.
@@ -1175,7 +329,7 @@ var defaultConfig = {
     // When a DJ or producer requests to exit break, all tracks in these defined categories and subcategories will be removed from the queue
     clearBreak: {
       PSAs: [],
-      'Sports Music': [ 'Halftime and Break Music' ]
+      'Sports Music': ['Halftime and Break Music']
     },
 
     // Hide Meta Data for these categories, and instead display the corresponding meta.alt metadata. See meta.alt below.
@@ -1896,24 +1050,24 @@ var defaultConfig = {
      */
 
   sanitize: {
-    allowedTags: [ 'h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol',
-      'nl', 'li', 'b', 'i', 'strong', 'em', 'strike', 'code', 'hr', 'br', 'u', 's', 'span' ],
+    allowedTags: ['h5', 'h6', 'blockquote', 'p', 'a', 'ul', 'ol',
+      'nl', 'li', 'b', 'i', 'strong', 'em', 'strike', 'code', 'hr', 'br', 'u', 's', 'span'],
     allowedAttributes: {
-      a: [ 'href', 'name', 'target' ],
-      span: [ 'style' ]
+      a: ['href', 'name', 'target'],
+      span: ['style']
     },
     allowedStyles: {
       span: {
         // Match HEX and RGB
-        color: [ /^#(0x)?[0-9a-f]+$/i, /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/ ]
+        color: [/^#(0x)?[0-9a-f]+$/i, /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/]
       }
     },
     // Lots of these won't come up by default because we don't allow them
-    selfClosing: [ 'br', 'hr', 'area', 'base', 'basefont', 'input', 'link', 'meta' ],
+    selfClosing: ['br', 'hr', 'area', 'base', 'basefont', 'input', 'link', 'meta'],
     // URL schemes we permit
-    allowedSchemes: [ 'http', 'https' ],
+    allowedSchemes: ['http', 'https'],
     allowedSchemesByTag: {},
-    allowedSchemesAppliedToAttributes: [ 'href', 'src', 'cite' ],
+    allowedSchemesAppliedToAttributes: ['href', 'src', 'cite'],
     allowProtocolRelative: true
   },
 
@@ -2059,3 +1213,12 @@ var defaultConfig = {
   secrets: {}
 
 }
+
+// Load default configuration first
+config.setOptions(defaultConfig)
+
+// Then replace default configuration with anything in the config.cfg file. Also save all changes to config.cfg.
+config.cfgUseFile('config.cfg')
+
+// Export the module for use in the Sails application
+module.exports.custom = config
