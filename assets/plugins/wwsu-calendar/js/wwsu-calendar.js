@@ -3,7 +3,7 @@
 // Node require libraries
 if (typeof require !== "undefined") {
 	if (typeof TAFFY === "undefined") {
-		var TAFFY = require("../../taffy/js/taffy-min.js").taffy;
+		var TAFFY = require("../../taffydb/taffy-min.js").taffy;
 	}
 
 	if (typeof WWSUdb === "undefined") {
