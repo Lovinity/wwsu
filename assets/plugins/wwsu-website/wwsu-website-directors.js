@@ -1,6 +1,7 @@
 "use strict";
 window.addEventListener("DOMContentLoaded", () => {
   var machineID = null;
+  var hosts;
 
   // Animation queue
   var animations = new WWSUanimations();
@@ -266,7 +267,6 @@ window.addEventListener("DOMContentLoaded", () => {
       djs.init();
       calendar.init();
       announcements.init();
-      version.init();
     });
   });
 

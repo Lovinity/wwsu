@@ -422,12 +422,12 @@ class WWSUtimesheet extends WWSUevents {
 							data: null,
 							defaultContent: "",
 						},
-						{ title: "ID" },
-						{ title: "Director" },
-						{ title: "Status" },
-						{ title: "Clock In" },
-						{ title: "Clock Out" },
-						{ title: "Actions" },
+						{ title: "ID", data: "ID" },
+						{ title: "Director", data: "director" },
+						{ title: "Status", data: "status" },
+						{ title: "Clock In", data: "clockIn" },
+						{ title: "Clock Out", data: "clockOut" },
+						{ title: "Actions", data: "actions" },
 					],
 					columnDefs: [{ responsivePriority: 1, targets: 6 }],
 					order: [[1, "asc"]],
@@ -717,16 +717,16 @@ class WWSUtimesheet extends WWSUevents {
 										status = `<span class="badge badge-secondary">Cancelled</span>`;
 										break;
 								}
-								return [
-									``,
-									record.ID,
-									record.name,
-									`${
+								return {
+									notes: record.notes,
+									ID: record.ID,
+									director: record.name,
+									status: `${
 										record.remote
 											? `<span class="badge bg-indigo">Remote</span>`
 											: ``
 									}${status}`,
-									`<ul>
+									clockIn: `<ul>
 									<li>Scheduled: ${
 										record.scheduledIn
 											? moment
@@ -752,7 +752,7 @@ class WWSUtimesheet extends WWSUevents {
 												: `Absent`
 										}</li>
 										</ul>`,
-									`<ul>
+									clockOut: `<ul>
 									<li>Scheduled: ${
 										record.scheduledOut
 											? moment
@@ -780,9 +780,9 @@ class WWSUtimesheet extends WWSUevents {
 												: `Absent`
 										}</li>
 										</ul>`,
-									`<div class="btn-group">
+									actions: `<div class="btn-group">
                                     <button class="btn btn-sm btn-warning btn-timesheet-edit" data-id="${record.ID}" title="Edit Timesheet Record"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-danger btn-timesheet-delete" data-id="${record.ID}" title="Remove Timesheet record"><i class="fas fa-trash"></i></button></div>`,
-								];
+									};
 							})
 						);
 						this.tables.records.draw();
