@@ -19,32 +19,32 @@ window.addEventListener("DOMContentLoaded", () => {
     var Recipients = new WWSUrecipientsweb(socket, noReq);
 
     // Add event listeners
-    Status.on("change", "renderer", db => processStatus(db.get()));
+    Status.on("change", "renderer", (db) => processStatus(db.get()));
     Directors.on("change", "renderer", () => {
       updateCalendar();
     });
     Calendar.on("calendarUpdated", "renderer", (data, db) => {
       updateCalendar();
     });
-    Announcements.on("update", "renderer", data => {
+    Announcements.on("update", "renderer", (data) => {
       Slides.removeSlide(`attn-${data.ID}`);
       createAnnouncement(data);
     });
-    Announcements.on("insert", "renderer", data => createAnnouncement(data));
-    Announcements.on("remove", "renderer", data =>
+    Announcements.on("insert", "renderer", (data) => createAnnouncement(data));
+    Announcements.on("remove", "renderer", (data) =>
       Slides.removeSlide(`attn-${data}`)
     );
-    Announcements.on("replace", "renderer", db => {
+    Announcements.on("replace", "renderer", (db) => {
       console.dir(db.get());
       // Remove all announcement slides
       Slides.allSlides()
-        .filter(slide => slide.name.startsWith(`attn-`))
-        .map(slide => Slides.removeSlide(slide.name));
+        .filter((slide) => slide.name.startsWith(`attn-`))
+        .map((slide) => Slides.removeSlide(slide.name));
 
       // Add slides for each announcement
-      db.each(data => createAnnouncement(data));
+      db.each((data) => createAnnouncement(data));
     });
-    Meta.on("newMeta", "renderer", data => {
+    Meta.on("newMeta", "renderer", (data) => {
       try {
         for (var key in data) {
           if (Object.prototype.hasOwnProperty.call(data, key)) {
@@ -57,7 +57,7 @@ window.addEventListener("DOMContentLoaded", () => {
       } catch (e) {
         iziToast.show({
           title: "An error occurred - Please check the logs",
-          message: "Error occurred on meta event."
+          message: "Error occurred on meta event.",
         });
         console.error(e);
       }
@@ -98,7 +98,7 @@ window.addEventListener("DOMContentLoaded", () => {
         iziToast.show({
           title: "An error occurred - Please check the logs",
           message:
-            "Error occurred trying to make socket reconnect indefinitely."
+            "Error occurred trying to make socket reconnect indefinitely.",
         });
         console.error(e);
       }
@@ -116,7 +116,7 @@ window.addEventListener("DOMContentLoaded", () => {
       critical: new Howl({ src: ["/sounds/display/critical.mp3"] }),
       disconnected: new Howl({ src: ["/sounds/display/disconnected.mp3"] }),
       warning: new Howl({ src: ["/sounds/display/warning.mp3"] }),
-      ping: new Howl({ src: ["/sounds/display/ping.mp3"] })
+      ping: new Howl({ src: ["/sounds/display/ping.mp3"] }),
     };
 
     /*
@@ -138,7 +138,7 @@ window.addEventListener("DOMContentLoaded", () => {
       transitionOut: `fadeOut`,
       displayTime: 5,
       fitContent: false,
-      html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: One-time office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: One-time cancellation.</span><span class="text-white">9AM - 5PM</span>: Regular office hours.</span></p>`
+      html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: One-time office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: One-time cancellation.</span><span class="text-white">9AM - 5PM</span>: Regular office hours.</span></p>`,
     });
 
     // Assistant Director hours
@@ -153,7 +153,7 @@ window.addEventListener("DOMContentLoaded", () => {
       transitionOut: `fadeOut`,
       displayTime: 5,
       fitContent: false,
-      html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: One-time office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: One-time cancellation.</span><span class="text-white">9AM - 5PM/span>: Regular office hours.</span></p>`
+      html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: One-time office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: One-time cancellation.</span><span class="text-white">9AM - 5PM/span>: Regular office hours.</span></p>`,
     });
 
     // System Status
@@ -168,7 +168,7 @@ window.addEventListener("DOMContentLoaded", () => {
       transitionOut: `fadeOut`,
       displayTime: 15,
       fitContent: false,
-      html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">System Status</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1"></div>`
+      html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">System Status</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1"></div>`,
     });
 
     // Director auto-clockout message
@@ -183,7 +183,7 @@ window.addEventListener("DOMContentLoaded", () => {
       transitionOut: `fadeOut`,
       displayTime: 60,
       fitContent: true,
-      html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Automatic Director Clockout at Midnight</h1><span style="color: #FFFFFF;">All directors who are still clocked in must clock out before midnight.<br>Otherwise, the system will automatically clock you out and flag your timesheet.<br>If you are still doing hours, you can clock back in after midnight.</span>`
+      html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Automatic Director Clockout at Midnight</h1><span style="color: #FFFFFF;">All directors who are still clocked in must clock out before midnight.<br>Otherwise, the system will automatically clock you out and flag your timesheet.<br>If you are still doing hours, you can clock back in after midnight.</span>`,
     });
 
     // Define HTML elements
@@ -222,7 +222,7 @@ window.addEventListener("DOMContentLoaded", () => {
         top: "0px",
         left: "0px",
         display: "none",
-        "z-index": 9999
+        "z-index": 9999,
       })
       .appendTo("body");
 
@@ -234,16 +234,16 @@ window.addEventListener("DOMContentLoaded", () => {
         $burnGuard
           .css({
             left: "0px",
-            "background-color": rColor
+            "background-color": rColor,
           })
           .show()
           .animate(
             {
-              left: $(window).width() + "px"
+              left: $(window).width() + "px",
             },
             scrollDelay,
             "linear",
-            function() {
+            function () {
               $(this).hide();
             }
           );
@@ -251,7 +251,7 @@ window.addEventListener("DOMContentLoaded", () => {
       } catch (e) {
         iziToast.show({
           title: "An error occurred - Please check the logs",
-          message: "Error occurred during the burnGuardAnimate function."
+          message: "Error occurred during the burnGuardAnimate function.",
         });
         console.error(e);
       }
@@ -273,26 +273,26 @@ window.addEventListener("DOMContentLoaded", () => {
       layout: 1,
       closeOnClick: true,
       position: "center",
-      timeout: 30000
+      timeout: 30000,
     });
   } catch (e) {
     iziToast.show({
       title: "An error occurred - Please check the logs",
       message:
-        "Error occurred when trying to load initial variables and/or burn guard."
+        "Error occurred when trying to load initial variables and/or burn guard.",
     });
     console.error(e);
   }
 
   $.fn.extend({
     // Add an animateCss function to JQuery to trigger an animation of an HTML element with animate.css
-    animateCss: function(animationName, callback) {
-      var animationEnd = (function(el) {
+    animateCss: function (animationName, callback) {
+      var animationEnd = (function (el) {
         var animations = {
           animation: "animationend",
           OAnimation: "oAnimationEnd",
           MozAnimation: "mozAnimationEnd",
-          WebkitAnimation: "webkitAnimationEnd"
+          WebkitAnimation: "webkitAnimationEnd",
         };
 
         for (var t in animations) {
@@ -302,7 +302,7 @@ window.addEventListener("DOMContentLoaded", () => {
         }
       })(document.createElement("div"));
 
-      this.addClass("animated " + animationName).one(animationEnd, function() {
+      this.addClass("animated " + animationName).one(animationEnd, function () {
         $(this).removeClass("animated " + animationName);
 
         if (typeof callback === "function") {
@@ -311,7 +311,7 @@ window.addEventListener("DOMContentLoaded", () => {
       });
 
       return this;
-    }
+    },
   });
 
   // Define a reload timer; terminates if socket connection gets established. This ensures if no connection is made, page will refresh itself to try again.
@@ -378,7 +378,7 @@ window.addEventListener("DOMContentLoaded", () => {
                     }">`;
 
       // Add status info to table for each status, and determine current global status (worst of all statuses)
-      db.forEach(thestatus => {
+      db.forEach((thestatus) => {
         try {
           if (thestatus.status === 5) return; // Skip good statuses
           if (!secondRow) {
@@ -451,7 +451,7 @@ window.addEventListener("DOMContentLoaded", () => {
         } catch (e) {
           iziToast.show({
             title: "An error occurred - Please check the logs",
-            message: `Error occurred during Status iteration in processStatus call.`
+            message: `Error occurred during Status iteration in processStatus call.`,
           });
           console.error(e);
         }
@@ -571,7 +571,7 @@ window.addEventListener("DOMContentLoaded", () => {
     } catch (e) {
       iziToast.show({
         title: "An error occurred - Please check the logs",
-        message: "Error occurred during the call of Status[0]."
+        message: "Error occurred during the call of Status[0].",
       });
       console.error(e);
     }
@@ -583,13 +583,13 @@ window.addEventListener("DOMContentLoaded", () => {
     clearTimeout(officeHoursTimer);
     officeHoursTimer = setTimeout(() => {
       Calendar.getEvents(
-        events => {
+        (events) => {
           var directorHours = [];
           var tasks = [];
 
           directorHours = events
             .filter(
-              event =>
+              (event) =>
                 ["office-hours"].indexOf(event.type) !== -1 &&
                 moment(event.end)
                   .add(1, "days")
@@ -602,7 +602,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
           tasks = events
             .filter(
-              event =>
+              (event) =>
                 ["tasks"].indexOf(event.type) !== -1 &&
                 moment(event.end)
                   .add(1, "days")
@@ -614,7 +614,7 @@ window.addEventListener("DOMContentLoaded", () => {
             );
 
           // Sort director hours by start time
-          var compare = function(a, b) {
+          var compare = function (a, b) {
             try {
               if (moment(a.start).valueOf() < moment(b.start).valueOf()) {
                 return -1;
@@ -627,7 +627,7 @@ window.addEventListener("DOMContentLoaded", () => {
               console.error(e);
               iziToast.show({
                 title: "An error occurred - Please check the logs",
-                message: `Error occurred in the compare function of Calendar.sort in the Calendar[0] call.`
+                message: `Error occurred in the compare function of Calendar.sort in the Calendar[0] call.`,
               });
             }
           };
@@ -636,7 +636,7 @@ window.addEventListener("DOMContentLoaded", () => {
           var calendar = {};
           var asstcalendar = {};
 
-          Directors.find({ assistant: false }).forEach(director => {
+          Directors.find({ assistant: false }).forEach((director) => {
             calendar[director.ID] = {};
             calendar[director.ID]["director"] = director;
             calendar[director.ID][0] = ``;
@@ -648,7 +648,7 @@ window.addEventListener("DOMContentLoaded", () => {
             calendar[director.ID][6] = ``;
           });
 
-          Directors.find({ assistant: true }).forEach(director => {
+          Directors.find({ assistant: true }).forEach((director) => {
             asstcalendar[director.ID] = {};
             asstcalendar[director.ID]["director"] = director;
             asstcalendar[director.ID][0] = ``;
@@ -660,7 +660,7 @@ window.addEventListener("DOMContentLoaded", () => {
             asstcalendar[director.ID][6] = ``;
           });
 
-          directorHours.sort(compare).map(event => {
+          directorHours.sort(compare).map((event) => {
             // First, get the director
             var temp = Directors.find({ ID: event.director }, true);
 
@@ -804,14 +804,16 @@ window.addEventListener("DOMContentLoaded", () => {
                 if (!assistant) {
                   calendar[event.director][
                     i
-                  ] += `<div class="m-1 text-white" style="${bg ||
-                    ``}">${endText}</div>`;
+                  ] += `<div class="m-1 text-white" style="${
+                    bg || ``
+                  }">${endText}</div>`;
                 }
                 if (assistant) {
                   asstcalendar[event.director][
                     i
-                  ] += `<div class="m-1 text-white" style="${bg ||
-                    ``}">${endText}</div>`;
+                  ] += `<div class="m-1 text-white" style="${
+                    bg || ``
+                  }">${endText}</div>`;
                 }
               }
             }
@@ -876,7 +878,11 @@ window.addEventListener("DOMContentLoaded", () => {
                 doShade ? `bg-dark-3` : `bg-dark-2`
               }">
      <div class="col-3 shadow-2" style="background-color: ${
-       temp.present ? `rgba(56, 142, 60, 0.25)` : `rgba(211, 47, 47, 0.25)`
+       temp.present
+         ? temp.present === 2
+           ? `rgba(102, 16, 242, 0.25)`
+           : `rgba(56, 142, 60, 0.25)`
+         : `rgba(211, 47, 47, 0.25)`
      };">
                 <div class="container">
   <div class="row">
@@ -894,7 +900,9 @@ window.addEventListener("DOMContentLoaded", () => {
       }</span><br />
       ${
         temp.present
-          ? `<span class="text-success"><strong>IN</strong></span>`
+          ? temp.present === 2
+            ? `<span class="text-success"><strong>REMOTE</strong></span>`
+            : `<span class="text-success"><strong>IN</strong></span>`
           : `<span class="text-danger"><strong>OUT</strong></span>`
       }
     </div>
@@ -995,7 +1003,11 @@ window.addEventListener("DOMContentLoaded", () => {
                 doShade ? `bg-dark-3` : `bg-dark-2`
               }">
      <div class="col-3 shadow-2" style="background-color: ${
-       temp2.present ? `rgba(56, 142, 60, 0.25)` : `rgba(211, 47, 47, 0.25)`
+       temp.present
+         ? temp.present === 2
+           ? `rgba(102, 16, 242, 0.25)`
+           : `rgba(56, 142, 60, 0.25)`
+         : `rgba(211, 47, 47, 0.25)`
      };">
                 <div class="container">
   <div class="row">
@@ -1012,8 +1024,10 @@ window.addEventListener("DOMContentLoaded", () => {
         temp2.position
       }</span><br />
       ${
-        temp2.present
-          ? `<span class="text-success"><strong>IN</strong></span>`
+        temp.present
+          ? temp.present === 2
+            ? `<span class="text-success"><strong>REMOTE</strong></span>`
+            : `<span class="text-success"><strong>IN</strong></span>`
           : `<span class="text-danger"><strong>OUT</strong></span>`
       }
     </div>
@@ -1080,7 +1094,7 @@ window.addEventListener("DOMContentLoaded", () => {
         transitionOut: `fadeOut`,
         displayTime: data.displayTime || 15,
         fitContent: true,
-        html: `<div style="overflow-y: hidden; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="text-white" id="content-attn-${data.ID}">${data.announcement}</div>`
+        html: `<div style="overflow-y: hidden; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="text-white" id="content-attn-${data.ID}">${data.announcement}</div>`,
       });
     }
   }

@@ -32,7 +32,7 @@ module.exports = {
                 return exits.notFound();
 
             // If the director is present, this is a clock-out entry.
-            if (record.present)
+            if (record.present > 0)
             {
                 var toapprove = false;
                 thetime = moment(inputs.timestamp);

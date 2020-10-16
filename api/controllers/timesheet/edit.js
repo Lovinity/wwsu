@@ -30,6 +30,14 @@ module.exports = {
         "A moment.js compatible timestamp for when the director clocked out. Use null or blank string to indicate the director is still clocked in.",
     },
 
+    notes: {
+      type: "string",
+    },
+
+    remote: {
+      type: "boolean",
+    },
+
     approved: {
       type: "number",
       required: true,
@@ -68,6 +76,8 @@ module.exports = {
       timeIn: inputs.timeIn || undefined,
       timeOut: inputs.timeOut || undefined,
       approved: inputs.approved,
+      notes: inputs.notes,
+      remote: inputs.remote
     };
 
     var criteriaB = _.cloneDeep(criteria);

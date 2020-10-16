@@ -1046,11 +1046,16 @@ window.addEventListener("DOMContentLoaded", () => {
                   var textTitle =
                     "This director is not currently in the WWSU office.";
                   var theClass = "danger";
-                  if (directorHours[directorHour].director.present) {
+                  if (directorHours[directorHour].director.present === 1) {
                     text1 = "IN OFFICE";
                     textTitle =
                       "This director is currently in the WWSU office.";
                     theClass = "success";
+                  } else if (directorHours[directorHour].director.present === 2) {
+                    text1 = "IN REMOTE";
+                    textTitle =
+                      "This director is currently working remotely.";
+                    theClass = "indigo";
                   }
                   html += `<div class="col" style="min-width: 280px;">
                   <div class="p-2 card card-${theClass} card-outline">

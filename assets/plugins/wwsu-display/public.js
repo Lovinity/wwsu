@@ -604,7 +604,7 @@ window.addEventListener("DOMContentLoaded", () => {
       directorpresent = false;
       db.each((director) => {
         try {
-          if (director.present) {
+          if (director.present > 0) {
             directorpresent = true;
           }
         } catch (e) {

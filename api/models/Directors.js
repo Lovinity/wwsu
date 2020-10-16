@@ -51,8 +51,10 @@ module.exports = {
     },
 
     present: {
-      type: 'boolean',
-      defaultsTo: false
+      type: 'number',
+      defaultsTo: 0,
+      min: 0,
+      max: 2 // 1 = in office, 2 = in remote
     },
 
     since: {

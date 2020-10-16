@@ -507,10 +507,14 @@ function processDirectors (ddb, hdb) {
         var color = 'rgba(211, 47, 47, 0.25)'
         var text1 = 'OUT'
         var theClass = 'danger'
-        if (dodo.present) {
+        if (dodo.present === 1) {
           color = 'rgba(56, 142, 60, 0.25)'
           text1 = 'IN'
           theClass = 'success'
+        } else if (dodo.present === 2) {
+          color = 'rgba(56, 142, 60, 0.25)'
+          text1 = 'REMOTE'
+          theClass = 'indigo'
         }
         if (innercontent) {
           innercontent.innerHTML += `<div id="director-${dodo.ID}" tabindex="0" style="width: 190px; position: relative; background-color: ${color}" class="m-2 text-dark rounded shadow-8 bg-light-1">

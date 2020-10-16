@@ -78,7 +78,7 @@ module.exports = {
           admin: inputs.admin,
           assistant: inputs.assistant,
           position: inputs.position,
-          present: false,
+          present: 0,
           emailEmergencies: inputs.emailEmergencies,
           emailCalendar: inputs.emailCalendar,
           emailWeeklyAnalytics: inputs.emailWeeklyAnalytics,
