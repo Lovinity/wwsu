@@ -758,7 +758,8 @@
   var SELECTOR_DROPDOWN_MENU = '.dropdown-menu';
   var SELECTOR_DROPDOWN_MENU_ACTIVE = '.dropdown-menu.show';
   var SELECTOR_DROPDOWN_TOGGLE = '[data-toggle="dropdown"]';
-  var CLASS_NAME_DROPDOWN_RIGHT = 'dropdown-menu-right'; // TODO: this is unused; should be removed along with the extend?
+  var CLASS_NAME_DROPDOWN_RIGHT = 'dropdown-menu-right';
+  var CLASS_NAME_DROPDOWN_SUBMENU = 'dropdown-submenu'; // TODO: this is unused; should be removed along with the extend?
 
   var Default$3 = {};
   /**
@@ -857,6 +858,11 @@
   });
   $__default['default'](SELECTOR_NAVBAR + " " + SELECTOR_DROPDOWN_TOGGLE).on('click', function (event) {
     event.preventDefault();
+
+    if ($__default['default'](event.target).parent().hasClass(CLASS_NAME_DROPDOWN_SUBMENU)) {
+      return;
+    }
+
     setTimeout(function () {
       Dropdown._jQueryInterface.call($__default['default'](this), 'fixPosition');
     }, 1);
@@ -1608,6 +1614,10 @@
     _proto.init = function init() {
       var _this = this;
 
+      if ($__default['default'](SELECTOR_DATA_WIDGET$1).length == 0) {
+        return;
+      }
+
       if ($__default['default'](SELECTOR_DATA_WIDGET$1).next(SELECTOR_SEARCH_RESULTS).length == 0) {
         $__default['default'](SELECTOR_DATA_WIDGET$1).after($__default['default']('<div />', {
           class: CLASS_NAME_SEARCH_RESULTS
@@ -2264,7 +2274,8 @@
     _proto._setupListeners = function _setupListeners() {
       var _this3 = this;
 
-      $__default['default'](document).on('click', this._config.trigger, function (event) {
+      var elementId = this._element.attr('id') !== undefined ? "#" + this._element.attr('id') : '';
+      $__default['default'](document).on('click', "" + elementId + this._config.trigger, function (event) {
         _this3.toggle(event);
       });
     };

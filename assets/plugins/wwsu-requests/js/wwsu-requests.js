@@ -179,9 +179,9 @@ class WWSUrequests extends WWSUdb {
                 // Update flashing icon and number of requests badges
                 if (this.icon) {
                     if (numRequests > 0) {
-                        $(this.icon).addClass('nav-icon-flash-primary');
+                        $(this.icon).addClass('pulse-primary');
                     } else {
-                        $(this.icon).removeClass('nav-icon-flash-primary');
+                        $(this.icon).removeClass('pulse-primary');
                     }
                 }
                 if (this.badge) {

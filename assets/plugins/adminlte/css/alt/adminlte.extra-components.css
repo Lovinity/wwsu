@@ -224,7 +224,7 @@
   flex-direction: column;
   -ms-flex-pack: center;
   justify-content: center;
-  line-height: 120%;
+  line-height: 1.8;
   -ms-flex: 1;
   flex: 1;
   padding: 0 10px;
@@ -375,6 +375,11 @@
   }
 }
 
+.dark-mode .info-box {
+  background-color: #343a40;
+  color: #fff;
+}
+
 .timeline {
   margin: 0 0 45px;
   padding: 0;
@@ -497,6 +502,25 @@
   border-bottom-color: #dee2e6;
 }
 
+.dark-mode .timeline::before {
+  background-color: #6c757d;
+}
+
+.dark-mode .timeline > div > .timeline-item {
+  background-color: #343a40;
+  color: #fff;
+  border-color: #6c757d;
+}
+
+.dark-mode .timeline > div > .timeline-item > .timeline-header {
+  color: #ced4da;
+  border-color: #6c757d;
+}
+
+.dark-mode .timeline > div > .timeline-item > .time {
+  color: #ced4da;
+}
+
 .products-list {
   list-style: none;
   margin: 0;
@@ -547,6 +571,16 @@
 
 .product-list-in-card > .item:last-of-type {
   border-bottom-width: 0;
+}
+
+.dark-mode .products-list > .item {
+  background-color: #343a40;
+  color: #fff;
+  border-bottom-color: #6c757d;
+}
+
+.dark-mode .product-description {
+  color: #ced4da;
 }
 
 .direct-chat .card-body {
@@ -1019,6 +1053,24 @@
   border-left-color: #343a40;
 }
 
+.dark-mode .direct-chat-text {
+  background-color: #454d55;
+  border-color: #4b545c;
+  color: #fff;
+}
+
+.dark-mode .direct-chat-text::after, .dark-mode .direct-chat-text::before {
+  border-right-color: #4b545c;
+}
+
+.dark-mode .direct-chat-timestamp {
+  color: #adb5bd;
+}
+
+.dark-mode .right > .direct-chat-text::after, .dark-mode .right > .direct-chat-text::before {
+  border-right-color: transparent;
+}
+
 .users-list {
   padding-left: 0;
   list-style: none;
@@ -1058,6 +1110,14 @@
 .users-list-date {
   color: #748290;
   font-size: 12px;
+}
+
+.dark-mode .users-list-name {
+  color: #ced4da;
+}
+
+.dark-mode .users-list-date {
+  color: #adb5bd;
 }
 
 .card-widget {

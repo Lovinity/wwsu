@@ -1,0 +1,45 @@
+{
+  "_from": "jquery-blockui",
+  "_id": "jquery-blockui@2.7.0",
+  "_inBundle": false,
+  "_integrity": "sha512-lOiCCNYLaqUWMhBZRQ1GkeYAt2/4jX/1g9RvLYRvVtslaplGFnBLltffNAkkavjyPk6VintTj44Ky1yWrqxEzQ==",
+  "_location": "/jquery-blockui",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "jquery-blockui",
+    "name": "jquery-blockui",
+    "escapedName": "jquery-blockui",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/jquery-blockui/-/jquery-blockui-2.7.0.tgz",
+  "_shasum": "912710a9e0fb8be86e83d70b180ffe91317609d5",
+  "_spec": "jquery-blockui",
+  "_where": "C:\\Users\\user\\AdminLTE",
+  "author": {
+    "name": "DTic",
+    "email": "dtic@lucasdorioverde.mt.gov.br"
+  },
+  "bugs": {
+    "url": "https://github.com/coderlrv/blockui/issues"
+  },
+  "bundleDependencies": false,
+  "deprecated": false,
+  "description": "Simulate synchronous ajax by blocking - not locking - the UI. This plugin lets you block user interaction with the page or with a specific element on the page. Also great at displaying modal dialogs.",
+  "homepage": "https://github.com/coderlrv/blockui#readme",
+  "license": "MIT",
+  "main": "jquery.blockUI.js",
+  "name": "jquery-blockui",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/coderlrv/blockui.git"
+  },
+  "version": "2.7.0"
+}

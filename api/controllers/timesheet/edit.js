@@ -72,12 +72,15 @@ module.exports = {
       throw new Error("timeIn is required when approved is 0 or 1.");
     }
 
+    // Filter disallowed HTML
+    inputs.notes = await sails.helpers.sanitize(inputs.notes);
+
     var criteria = {
       timeIn: inputs.timeIn || undefined,
       timeOut: inputs.timeOut || undefined,
       approved: inputs.approved,
       notes: inputs.notes,
-      remote: inputs.remote
+      remote: inputs.remote,
     };
 
     var criteriaB = _.cloneDeep(criteria);

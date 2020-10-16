@@ -1,218 +1,244 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
+    <script>
+      if (typeof module === "object") {
+        window.module = module;
+        module = undefined;
+      }
+    </script>
+    <meta charset="UTF-8" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta http-equiv="x-ua-compatible" content="ie=edge" />
 
-    <title>WWSU 106.9 FM Director's Corner</title>
-
-    <style>
-      .pace {
-        -webkit-pointer-events: none;
-        pointer-events: none;
-
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        user-select: none;
-      }
-
-      .pace-inactive {
-        display: none;
-      }
-
-      .pace .pace-progress {
-        background: #29d;
-        position: fixed;
-        z-index: 2000;
-        top: 0;
-        right: 100%;
-        width: 100%;
-        height: 2px;
-      }
-    </style>
-
-    <!-- pace-progress -->
-    <script src="/plugins/pace-progress/pace.min.js"></script>
-
     <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="/plugins/fontawesome-free/css/all.min.css" />
+    <link
+      rel="stylesheet"
+      href="plugins/fontawesome-free/css/all.min.css"
+    />
+    <!-- Theme style -->
+    <link
+      rel="stylesheet"
+      href="plugins/adminlte/css/adminlte.min.css"
+    />
     <!-- overlayScrollbars -->
     <link
       rel="stylesheet"
-      href="/plugins/overlayScrollbars/css/OverlayScrollbars.min.css"
-    />
-    <!-- Theme style -->
-    <link rel="stylesheet" href="/plugins/adminlte/css/adminlte.min.css" />
-    <!-- Google Font: Source Sans Pro -->
-    <link
-      href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700"
-      rel="stylesheet"
+      href="plugins/overlayScrollbars/css/OverlayScrollbars.min.css"
     />
 
     <!-- jQuery -->
-    <script src="/plugins/jquery/jquery.min.js"></script>
+    <script src="plugins/jquery/jquery.min.js"></script>
     <!-- JQuery BlockUI -->
-    <script src="/plugins/jquery-blockui/js/jquery.blockUI.js"></script>
+    <script src="plugins/jquery-blockui/jquery.blockUI.js"></script>
     <!-- JQuery multipleselect -->
     <link
       rel="stylesheet"
-      href="/plugins/jquery-multipleselect/css/multiple-select.min.css"
+      href="plugins/jquery-multiselect/jquery-MultiSelect.css"
     />
-    <script src="/plugins/jquery-multipleselect/js/multiple-select.min.js"></script>
+    <script src="plugins/jquery-multiselect/jquery-MultiSelect.js"></script>
+    <!-- JQuery overlayScrollbars -->
+    <script src="plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
+    <!-- JQuery Mousewheel -->
+    <script src="plugins/jquery-mousewheel/jquery.mousewheel.js"></script>
+
     <!-- Bootstrap -->
-    <script src="/plugins/bootstrap/js/bootstrap.min.js"></script>
+    <script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- AdminLTE -->
+    <script src="plugins/adminlte/js/adminlte.js"></script>
+
     <!-- lodash -->
-    <script src="/plugins/lodash/js/lodash.min.js"></script>
-    <!-- AdminLTE App -->
-    <script src="/plugins/adminlte/js/adminlte.js"></script>
-    <!-- Mousewheel -->
-    <script src="/plugins/jquery-mousewheel/jquery.mousewheel.js"></script>
-
-    <!-- overlayScrollbars -->
-    <script src="/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
+    <script src="plugins/lodash/lodash.min.js"></script>
     <!-- Taffy -->
-    <script src="/plugins/taffy/js/taffy.js"></script>
+    <script src="plugins/taffydb/taffy-min.js"></script>
     <!-- Moment -->
-    <script src="/plugins/moment/moment.min.js"></script>
+    <script src="plugins/moment/moment.min.js"></script>
     <!-- Moment timezone -->
-    <script src="/plugins/moment-timezone/js/moment-timezone-with-data.js"></script>
+    <script src="plugins/moment-timezone/moment-timezone-with-data.js"></script>
     <!-- Moment Duration Format -->
-    <script src="/plugins/moment-duration-format/js/moment-duration-format.js"></script>
+    <script src="plugins/moment-duration-format/moment-duration-format.js"></script>
     <!-- Moment Recur -->
-    <script src="/plugins/moment-recur-ts/js/moment-recur-ts.js"></script>
+    <script src="plugins/moment-recur-ts/moment-recur-ts.js"></script>
     <!-- Jdenticon -->
-    <script src="/plugins/jdenticon/js/jdenticon.min.js"></script>
-    <!--OneSignal-->
-    <script
-      src="https://cdn.onesignal.com/sdks/OneSignalSDK.js"
-      async=""
-    ></script>
+    <script src="plugins/jdenticon/jdenticon.min.js"></script>
+    <!-- Howler -->
+    <script src="plugins/howler/howler.min.js"></script>
 
-    <!-- Summernote -->
-    <script src="/plugins/summernote/summernote.min.js"></script>
-    <link rel="stylesheet" href="/plugins/summernote/summernote.css" />
+    <!-- Chart.js -->
+    <script src="plugins/chart.js/Chart.bundle.min.js"></script>
+    <link rel="stylesheet" href="plugins/chart.js/Chart.min.css" />
+
+    <!-- TinyMCE -->
+    <script src="plugins/tinymce/tinymce.min.js"></script>
 
     <!-- Bootstrap Tempus Dominus (datetimepicker) -->
     <link
       rel="stylesheet"
-      href="/plugins/bootstrap-tempusdominus/css/tempusdominus-bootstrap-4.min.css"
+      href="plugins/bootstrap-tempusdominus/css/tempusdominus-bootstrap-4.min.css"
     />
-    <script src="/plugins/bootstrap-tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
+    <script src="plugins/bootstrap-tempusdominus/js/tempusdominus-bootstrap-4.min.js"></script>
 
     <!-- Handlebars -->
-    <script src="/plugins/handlebars/js/handlebars.min.js"></script>
+    <script src="plugins/handlebars/handlebars.min.js"></script>
     <!-- Alpaca (custom build) -->
-    <script src="/plugins/alpaca-wwsu/alpaca.js"></script>
-    <link rel="stylesheet" href="/plugins/alpaca-wwsu/alpaca.min.css" />
+    <script src="plugins/alpaca-wwsu/alpaca.js"></script>
+    <link rel="stylesheet" href="plugins/alpaca-wwsu/alpaca.min.css" />
 
     <!-- Datatables -->
-    <script src="/plugins/datatables/jquery.dataTables.min.js"></script>
-    <script src="/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <script src="plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
     <link
       rel="stylesheet"
-      href="/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css"
+      href="plugins/datatables-bs4/css/dataTables.bootstrap4.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="plugins/datatables-details/css/datatables-details.css"
+    />
+
+    <!-- Datatables Responsive -->
+    <script src="plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="plugins/datatables-responsive/css/responsive.bootstrap4.min.css"
     />
 
     <!--izi-->
-    <link rel="stylesheet" href="/plugins/iziModal/css/iziModal.min.css" />
-    <link rel="stylesheet" href="/plugins/iziToast/css/iziToast.min.css" />
-    <script src="/plugins/iziModal/js/iziModal.min.js"></script>
-    <script src="/plugins/iziToast/js/iziToast.min.js"></script>
-
-    <!--FullCalendar-->
-    <script src="/plugins/fullcalendar/main.min.js"></script>
-    <script src="/plugins/fullcalendar-bootstrap/main.min.js"></script>
-    <script src="/plugins/fullcalendar-daygrid/main.min.js"></script>
-    <script src="/plugins/fullcalendar-timegrid/main.min.js"></script>
-    <script src="/plugins/fullcalendar-interaction/main.min.js"></script>
-    <script src="/plugins/fullcalendar-list/main.min.js"></script>
-    <link rel="stylesheet" href="/plugins/fullcalendar/main.min.css" />
     <link
       rel="stylesheet"
-      href="/plugins/fullcalendar-bootstrap/main.min.css"
+      href="plugins/iziModal/css/iziModal.min.css"
     />
-    <link rel="stylesheet" href="/plugins/fullcalendar-daygrid/main.min.css" />
-    <link rel="stylesheet" href="/plugins/fullcalendar-timegrid/main.min.css" />
-    <link rel="stylesheet" href="/plugins/fullcalendar-list/main.min.css" />
+    <link
+      rel="stylesheet"
+      href="plugins/iziToast/css/iziToast.min.css"
+    />
+    <script src="plugins/iziModal/js/iziModal.min.js"></script>
+    <script src="plugins/iziToast/js/iziToast.min.js"></script>
+
+    <!--FullCalendar-->
+    <script src="plugins/fullcalendar/main.min.js"></script>
+    <link rel="stylesheet" href="plugins/fullcalendar/main.min.css" />
 
     <!--WWSU-->
-    <script src="/plugins/sails.io/sails.io.js" autoConnect="false"></script>
-    <script src="/plugins/wwsu-sails/js/wwsu.js?v=202009200340"></script>
-    <script src="/plugins/wwsu-navigation/js/wwsu-navigation.js?v=202009200340"></script>
-    <script src="/plugins/wwsu-directors/js/wwsu-directors.js?v=202009200340"></script>
-    <script src="/plugins/wwsu-discipline/js/wwsu-discipline.js?v=202009200340"></script>
-    <script src="/plugins/wwsu-djs/js/wwsu-djs.js?v=202009200340"></script>
-    <script src="/plugins/wwsu-meta/js/wwsu-meta.js?v=202009200340"></script>
-    <script src="/plugins/wwsu-timesheet/js/wwsu-timesheet.js?v=202009200340"></script>
-    <script src="/plugins/wwsu-subscriptions/js/wwsu-subscriptions.js?v=202009200340"></script>
-    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-web.js?v=202009200340"></script>
-    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-class.js?v=202009200340"></script>
-    <script src="/plugins/wwsu-website/wwsu-website-directors-v7.js?v=202009200340"></script>
+    <script
+      src="plugins/sails.io/sails.io.js"
+      autoConnect="false"
+      environment="production"
+      reconnection="true"
+    ></script>
+    <script src="plugins/wwsu-sails/js/wwsu.js?t=202010161510"></script>
+    <script src="plugins/wwsu-api/js/wwsu-api.js?t=202010161510"></script>
+    <script src="plugins/wwsu-navigation/js/wwsu-navigation.js?t=202010161510"></script>
+    <script src="plugins/wwsu-directors/js/wwsu-directors.js?t=202010161510"></script>
+    <script src="plugins/wwsu-djs/js/wwsu-djs.js?t=202010161510"></script>
+    <script src="plugins/wwsu-timesheet/js/wwsu-timesheet.js?t=202010161510"></script>
+    <script src="plugins/wwsu-calendar/js/wwsu-calendar-web.js?t=202010161510"></script>
+    <script src="plugins/wwsu-calendar/js/wwsu-calendar-class.js?t=202010161510"></script>
+    <script src="plugins/wwsu-meta/js/wwsu-meta.js?t=202010161510"></script>
+    <script src="plugins/wwsu-status/js/wwsu-status.js?t=202010161510"></script>
+    <script src="plugins/wwsu-eas/js/wwsu-eas.js?t=202010161510"></script>
+    <script src="plugins/wwsu-subscriptions/js/wwsu-subscriptions.js?t=202010161510"></script>
+    <script src="plugins/wwsu-likedtracks/js/wwsu-likedtracks.js?t=202010161510"></script>
+    <script src="plugins/wwsu-announcements/js/wwsu-announcements.js?t=202010161510"></script>
+    <script src="plugins/wwsu-logs/js/wwsu-logs.js?t=202010161510"></script>
+    <script src="plugins/wwsu-requests/js/wwsu-requests.js?t=202010161510"></script>
+    <script src="plugins/wwsu-state/js/wwsu-state.js?t=202010161510"></script>
+    <script src="plugins/wwsu-hosts/js/wwsu-hosts.js?t=202010161510"></script>
+    <script src="plugins/wwsu-recipients/js/wwsu-recipients.js?t=202010161510"></script>
+    <script src="plugins/wwsu-discipline/js/wwsu-discipline.js?t=202010161510"></script>
+    <script src="plugins/wwsu-messages/js/wwsu-messages.js?t=202010161510"></script>
+    <script src="plugins/wwsu-climacell/js/wwsu-climacell.js?t=202010161510"></script>
+    <script src="plugins/wwsu-version/js/wwsu-version.js?t=202010161510"></script>
+    <script src="plugins/wwsu-inventory/js/wwsu-inventory.js?t=202010161510"></script>
+    <script src="plugins/wwsu-website/wwsu-website-directors.js?t=202010161510"></script>
   </head>
 
-  <body
-    class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed"
-  >
-    <div class="wrapper">
-      <!-- Navbar -->
+  <body class="hold-transition sidebar-mini">
+    <!-- All other content -->
+    <div class="wrapper" id="content">
       <nav class="main-header navbar navbar-expand navbar-white navbar-light">
         <!-- Left navbar links -->
         <ul class="navbar-nav">
           <li class="nav-item">
-            <a
+            <button
               class="nav-link"
               data-widget="pushmenu"
-              href="#"
               title="Display / Hide Side Menu"
-              ><i class="fas fa-bars"></i
-            ></a>
+              aria-label="Display / Hide Side Menu"
+            >
+              <i class="fas fa-bars" aria-hidden="true"></i>
+            </button>
           </li>
         </ul>
       </nav>
-      <!-- /.navbar -->
 
-      <!-- Main Sidebar Container -->
-      <aside class="main-sidebar sidebar-dark-primary elevation-4">
-        <!-- Brand Logo -->
-        <a href="https://wwsu1069.org" class="brand-link">
+      <!-- Main Sidebar Menu -->
+      <aside class="main-sidebar sidebar-dark-maroon elevation-4">
+        <!-- Logo -->
+        <a href="#" class="brand-link">
           <img
-            src="/images/display/logo_true.png"
-            alt="WWSU Logo"
-            class="brand-image img-circle bg-white elevation-3"
+            src="images/logo_round.png"
+            alt="WWSU logo"
+            class="brand-image img-circle elevation-3"
             style="opacity: 0.8"
           />
-          <span class="brand-text font-weight-light">WWSU 106.9 FM</span>
+          <span class="brand-text font-weight-light">WWSU Directors</span>
         </a>
 
         <!-- Sidebar -->
         <div class="sidebar">
+          <!-- Sidebar station time -->
+          <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+            <div class="image text-light">
+              <i class="nav-icon fas fa-clock"></i>
+            </div>
+            <div class="info">
+              <span class="d-block text-light meta-time">Unknown Time</span>
+            </div>
+          </div>
+
           <!-- Sidebar Menu -->
           <nav class="mt-2">
             <ul
-              class="nav nav-pills nav-sidebar flex-column"
+              class="nav nav-pills nav-sidebar nav-compact nav-flat flex-column"
               data-widget="treeview"
               role="menu"
               data-accordion="false"
             >
-              <!-- Add icons to the links using the .nav-icon class
-               with font-awesome or any other icon font library -->
+              <li class="nav-item">
+                <a href="#" class="nav-link" id="nav-home" title="Front Page">
+                  <i class="nav-icon fas fa-lightbulb"></i>
+                  <p>Home</p>
+                </a>
+              </li>
+              <li class="nav-header text-light">DIRECTORS</li>
+              <div id="nav-directors"></div>
+              <li class="nav-header text-light">ASSISTANTS</li>
+              <div id="nav-assistants"></div>
+              <li class="nav-header text-light">CALENDAR</li>
+              <li class="nav-item">
+                <a
+                  href="#"
+                  class="nav-link"
+                  id="nav-calendar"
+                  title="Manage WWSU events calendar."
+                >
+                  <i class="nav-icon fas fa-calendar"></i>
+                  <p>Calendar</p>
+                </a>
+              </li>
+              <li class="nav-header text-light">OTHER</li>
               <li class="nav-item">
                 <a
                   href="#"
                   class="nav-link"
                   id="nav-timesheets"
-                  title="Timesheets"
+                  title="Manage and view the timesheets and clocked hours of directors."
                 >
-                  <i class="nav-icon fas fa-user-clock"></i>
+                  <i class="nav-icon fas fa-clock"></i>
                   <p>Timesheets</p>
-                </a>
-              </li>
-
-              <li class="nav-item">
-                <a href="#" class="nav-link" id="nav-calendar" title="Calendar">
-                  <i class="nav-icon fas fa-calendar"></i>
-                  <p>Calendar</p>
                 </a>
               </li>
             </ul>
@@ -222,14 +248,14 @@
         <!-- /.sidebar -->
       </aside>
 
-      <!-- Timesheets -->
-      <section id="section-timesheets" style="display: none">
+      <section id="section-home">
         <div class="content-wrapper">
+          <!-- Content Header (Page header) -->
           <div class="content-header">
             <div class="container-fluid">
               <div class="row mb-2">
-                <div class="col-12">
-                  <h1 class="m-0 text-dark">Director Timesheets</h1>
+                <div class="col-sm-6">
+                  <h1 class="m-0 text-dark">WWSU Directors</h1>
                 </div>
                 <!-- /.col -->
               </div>
@@ -237,51 +263,45 @@
             </div>
             <!-- /.container-fluid -->
           </div>
+          <!-- /.content-header -->
 
+          <!-- Main content -->
           <div class="content">
-            <div class="card card-primary elevation-2">
-              <div class="card-header">
-                <h3 class="card-title">Choose Date Range</h3>
-              </div>
-              <!-- /.card-header -->
-              <div class="card-body">
-                <div class="form-group" title="Choose timesheet date range.">
-                  <label for="section-timesheets-start">Start</label>
-                  <input type="date" id="section-timesheets-start" />
-                  <label for="section-timesheets-end">End</label>
-                  <input type="date" id="section-timesheets-end" />
-                  <input
-                    type="submit"
-                    class="btn btn-primary"
-                    id="section-timesheets-browse"
-                    value="Browse"
+            <div class="card card-primary card-outline p-1 m-3">
+              <div class="card-body box-profile">
+                <div class="text-center" style="font-size: 5rem">
+                  <img
+                    src="images/logo_round.png"
+                    alt="WWSU logo"
+                    class="brand-image img-circle elevation-3"
+                    style="width: 33%"
                   />
                 </div>
-              </div>
-            </div>
 
-            <div class="card card-warning elevation-2">
-              <div class="card-header">
-                <h3 class="card-title">Hours</h3>
-              </div>
-              <!-- /.card-header -->
-              <div class="card-body" id="section-timesheets-hours"></div>
-              <!-- /.card-body -->
-            </div>
+                <p class="text-center h1">WWSU 106.9 FM</p>
 
-            <div class="card card-info elevation-2">
-              <div class="card-header">
-                <h3 class="card-title">Records</h3>
+                <p class="text-center meta-time h2">Unknown Time</p>
+
+                <p class="text-muted text-center h6">
+                  To clock in or out, or to edit recurring office hours, please
+                  click your name in the left menu.
+                </p>
+
+                <p class="text-muted text-center h6">
+                  To view / cancel / re-schedule office hours on specific
+                  days/times, click "Calendar" in the menu.
+                </p>
               </div>
-              <!-- /.card-header -->
-              <div class="card-body" id="section-timesheets-records"></div>
               <!-- /.card-body -->
             </div>
           </div>
         </div>
       </section>
 
-      <section id="section-calendar" style="display: none">
+      <div id="sections-directors"></div>
+
+      <!-- Calendar -->
+      <section id="section-calendar">
         <div class="content-wrapper">
           <div class="content-header">
             <div class="container-fluid">
@@ -297,6 +317,16 @@
           </div>
 
           <div class="content">
+            <div class="callout callout-warning">
+              <h5>Keep Up To Date</h5>
+              <p>
+                Please keep the calendar up to date at all times. The calendar
+                is visible in many public places, such as the display signs and
+                the website. The calendar also tells the system what broadcasts
+                are expected to air and when, or which directors are expected to
+                be in the office.
+              </p>
+            </div>
             <div class="container-fluid">
               <div class="row">
                 <!-- /.col -->
@@ -308,7 +338,7 @@
                     <div class="card-body container-fluid">
                       <div class="container-fluid">
                         <div class="row">
-                          <div class="col-12 col-md-6 col-lg-3">
+                          <div class="col-12 col-md-6 col-lg-4">
                             <button
                               type="button"
                               class="btn btn-block btn-info btn-sm btn-calendar-definitions"
@@ -317,7 +347,7 @@
                               Definitions
                             </button>
                           </div>
-                          <div class="col-12 col-md-6 col-lg-3">
+                          <div class="col-12 col-md-6 col-lg-4">
                             <button
                               type="button"
                               class="btn btn-block btn-info btn-sm btn-calendar-prerequisites"
@@ -326,16 +356,7 @@
                               Prerequisites
                             </button>
                           </div>
-                          <div class="col-12 col-md-6 col-lg-3">
-                            <button
-                              type="button"
-                              class="btn btn-block btn-warning btn-sm btn-manage-djs"
-                              title="Manage the DJs in the system"
-                            >
-                              Manage DJs
-                            </button>
-                          </div>
-                          <div class="col-12 col-md-6 col-lg-3">
+                          <div class="col-12 col-md-6 col-lg-4">
                             <button
                               type="button"
                               class="btn btn-block btn-warning btn-sm btn-manage-events"
@@ -521,6 +542,9 @@
                     <!-- /.card-body -->
                   </div>
                   <div class="card card-primary">
+                    <div class="card-header">
+                      <h4 class="card-title">Calendar</h4>
+                    </div>
                     <div class="card-body p-0">
                       <p class="p-1">
                         <strong
@@ -539,13 +563,124 @@
                 <!-- /.col -->
               </div>
               <!-- /.row -->
+              <div class="row">
+                <div class="col">
+                  <div class="callout callout-info">
+                    <h5>Manage online</h5>
+
+                    <p>
+                      You can also edit the calendar online at
+                      server.wwsu1069.org/directors/calendar
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
             <!-- /.container-fluid -->
           </div>
         </div>
       </section>
-      <!-- /.content-wrapper -->
+
+      <!-- Inventory management -->
+      <section id="section-inventory">
+        <div class="content-wrapper">
+          <!-- Content Header (Page header) -->
+          <div class="content-header">
+            <div class="container-fluid">
+              <div class="row mb-2">
+                <div class="col-sm-6">
+                  <h1 class="m-0 text-dark">Manage Inventory</h1>
+                </div>
+                <!-- /.col -->
+              </div>
+              <!-- /.row -->
+            </div>
+            <!-- /.container-fluid -->
+          </div>
+          <!-- /.content-header -->
+
+          <!-- Main content -->
+          <div class="content">
+            <div class="card elevation-2">
+              <div class="card-body" id="section-inventory-content"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Timesheets -->
+      <section id="section-timesheets">
+        <div class="content-wrapper" style="padding-top: 8em">
+          <div class="content-header">
+            <div class="container-fluid">
+              <div class="row mb-2">
+                <div class="col-12">
+                  <h1 class="m-0 text-dark">Director Timesheets</h1>
+                </div>
+                <!-- /.col -->
+              </div>
+              <!-- /.row -->
+            </div>
+            <!-- /.container-fluid -->
+          </div>
+
+          <div class="content">
+            <div class="card card-primary elevation-2">
+              <div class="card-header">
+                <h3 class="card-title">Choose Date Range</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <div class="form-group" title="Choose timesheet date range.">
+                  <label for="section-timesheets-start">Start</label>
+                  <input type="date" id="section-timesheets-start" />
+                  <label for="section-timesheets-end">End</label>
+                  <input type="date" id="section-timesheets-end" />
+                  <input
+                    type="submit"
+                    class="btn btn-primary"
+                    id="section-timesheets-browse"
+                    value="Browse"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="card card-warning elevation-2">
+              <div class="card-header">
+                <h3 class="card-title">Hours</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body" id="section-timesheets-hours"></div>
+              <!-- /.card-body -->
+            </div>
+
+            <div class="card card-info elevation-2">
+              <div class="card-header">
+                <h3 class="card-title">Records</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body" id="section-timesheets-records"></div>
+              <!-- /.card-body -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Control Sidebar -->
+      <aside class="control-sidebar control-sidebar-dark">
+        <!-- Control sidebar content goes here -->
+      </aside>
+      <!-- /.control-sidebar -->
+
+      <!-- Main Footer -->
+      <footer class="main-footer">
+        This application was developed by Patrick Schmalstig. You may contact
+        them at <strong>xanaftp@gmail.com</strong>
+        if there are any problems with it.
+      </footer>
     </div>
+    <!-- ./wrapper -->
 
     <%- body %>
   </body>

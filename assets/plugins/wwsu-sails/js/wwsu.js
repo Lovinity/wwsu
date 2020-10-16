@@ -439,13 +439,13 @@ class WWSUreq {
 	}
 
 	/**
-	 * Create an authorization prompt with iziToast.
+	 * Create an authorization prompt with iziModal.
 	 *
 	 * @param {function} cb Function called after user completes the prompt. Contains (username, password) as parameters.
 	 */
 	_promptLogin(cb) {
 		var fdb;
-		if (typeof this.filter === "object" && this._db) {
+		if (typeof this.filter === "object") {
 			fdb = this.db.db(this.filter);
 		} else {
 			fdb = this.db.db();
@@ -474,65 +474,73 @@ class WWSUreq {
 			return null;
 		}
 
-		var selection = [`<option value="">--SELECT A USER--</option>`];
-		fdb.each((user) => {
-			selection.push(
-				`<option value="${user[`${this.usernameField}`]}">${
-					user[`${this.usernameField}`]
-				}</option>`
-			);
-		});
-
 		var username = ``;
 		var password = ``;
 
-		iziToast.show({
-			timeout: 60000,
-			overlay: true,
-			displayMode: "once",
-			color: "red",
-			id: "login-for-authorization",
-			layout: 2,
-			zindex: 99999,
-			maxWidth: 600,
-			title: `${this.authName} Authorization required`,
-			message: `To perform this action, you must login with ${this.authName} credentials. Please choose a user, and then type in your password.`,
-			position: "center",
-			drag: false,
-			closeOnClick: false,
-			inputs: [
-				[
-					`<select>${selection.join("")}</select>`,
-					"change",
-					function (instance, toast, select, e) {
-						username = select.options[select.selectedIndex].value;
+		let tempModal = new WWSUmodal(
+			`${this.authName} Authorization Required`,
+			`bg-danger`,
+			``,
+			true,
+			{
+				headerColor: "",
+				overlayClose: false,
+				zindex: 5000,
+				timeout: false,
+				closeOnEscape: true,
+				closeButton: true,
+				onClosed: () => {
+					tempModal.iziModal("destroy");
+					$(`#modal-${tempModal.id}`).remove();
+					tempModal = undefined;
+				},
+			}
+		);
+
+		tempModal.body = `<p>To perform this action, you must login with ${this.authName} credentials. Please choose a user, and then type in your password.</p><div id="modal-${tempModal.id}-form"></div>`;
+
+		tempModal.iziModal("open");
+
+		var util = new WWSUutil();
+		util.waitForElement(`#modal-${tempModal.id}-form`, () => {
+			$(`#modal-${tempModal.id}-form`).alpaca({
+				schema: {
+					title: `Confirm Action`,
+					type: "object",
+					properties: {
+						username: {
+							type: "string",
+							title: `User`,
+							required: true,
+							enum: fdb.get().map((user) => user.name),
+						},
+						password: {
+							title: "Password",
+							format: "password",
+							required: true,
+						},
 					},
-					true,
-				],
-				[
-					`<input type="password">`,
-					"keyup",
-					function (instance, toast, input, e) {
-						password = input.value;
+				},
+				options: {
+					form: {
+						buttons: {
+							submit: {
+								title: `Authorize`,
+								click: (form, e) => {
+									form.refreshValidationState(true);
+									if (!form.isValid(true)) {
+										form.focus();
+										return;
+									}
+									var value = form.getValue();
+									tempModal.iziModal("close");
+									cb(value.username, value.password);
+								},
+							},
+						},
 					},
-					true,
-				],
-			],
-			buttons: [
-				[
-					"<button><b>Authorize</b></button>",
-					function (instance, toast) {
-						instance.hide({ transitionOut: "fadeOut" }, toast, "button");
-						cb(username, password);
-					},
-				],
-				[
-					"<button><b>Cancel</b></button>",
-					function (instance, toast) {
-						instance.hide({ transitionOut: "fadeOut" }, toast, "button");
-					},
-				],
-			],
+				},
+			});
 		});
 	}
 }
@@ -729,76 +737,96 @@ class WWSUutil {
 	}
 
 	/**
-	 * Create a confirmation dialog with iziToast
+	 * Create a confirmation dialog with Alpaca forms and iziModal
 	 *
 	 * @param {string} description Further information to provide in the confirmation
 	 * @param {?string} confirmText Require user to type this text to confirm their action (null: use simple yes/no confirmation)
 	 * @param {function} cb Callback executed when and only if action is confirmed.
 	 */
 	confirmDialog(description, confirmText, cb) {
-		var inputValue = ``;
-		var inputs = confirmText
-			? [
-					[
-						'<input type="text">',
-						"keyup",
-						function (instance, toast, input, e) {
-							inputValue = input.value;
-						},
-						true,
-					],
-			  ]
-			: [];
-		iziToast.question({
-			timeout: 60000,
-			close: false,
-			overlay: true,
-			title: "Confirm Action",
-			layout: 2,
-			drag: false,
-			targetFirst: false,
-			zindex: 99999,
-			maxWidth: 600,
-			message: `<p>${description}</p><p>${
-				confirmText
-					? `Type <strong>${confirmText}</strong> in the box and click "Yes" to confirm your action.`
-					: `Click "Yes" to confirm your action.`
-			}</p>`,
-			position: "center",
-			inputs: inputs,
-			buttons: [
-				[
-					"<button>No</button>",
-					function (instance, toast) {
-						instance.hide({ transitionOut: "fadeOut" }, toast, "button");
-						$(document).Toasts("create", {
-							class: "bg-warning",
-							title: "Action canceled",
-							autohide: true,
-							delay: 10000,
-							body: `You clicked No.`,
-						});
-					},
-				],
-				[
-					"<button><b>Yes</b></button>",
-					function (instance, toast) {
-						instance.hide({ transitionOut: "fadeOut" }, toast, "button");
+		let tempModal = new WWSUmodal(`Confirm Action`, `bg-warning`, ``, false, {
+			headerColor: "",
+			overlayClose: false,
+			zindex: 5000,
+			timeout: false,
+			closeOnEscape: false,
+			closeButton: false,
+			onClosed: () => {
+				tempModal.iziModal("destroy");
+				$(`#modal-${tempModal.id}`).remove();
+				tempModal = undefined;
+			},
+		});
 
-						if (!confirmText || confirmText === inputValue) {
-							cb();
-						} else {
-							$(document).Toasts("create", {
-								class: "bg-warning",
-								title: "Action canceled",
-								autohide: true,
-								delay: 10000,
-								body: `You did not type in the confirmation text correctly.`,
-							});
-						}
+		tempModal.body = `<p>${description}</p><div id="modal-${tempModal.id}-form"></div>`;
+
+		tempModal.iziModal("open");
+
+		var util = new WWSUutil();
+		util.waitForElement(`#modal-${tempModal.id}-form`, () => {
+			$(`#modal-${tempModal.id}-form`).alpaca({
+				schema: {
+					title: `Confirm Action`,
+					type: "object",
+					properties: {
+						confirmText: {
+							type: "string",
+							title: `Confirmation`,
+							required: confirmText ? true : false,
+						},
 					},
-				],
-			],
+				},
+				options: {
+					fields: {
+						confirmText: {
+							helper: `Please type <strong>${confirmText}</strong> to confirm your action (case sensitive).`,
+							hidden: confirmText ? false : true,
+							validator: function (callback) {
+								var value = this.getValue();
+								if (confirmText && value !== confirmText) {
+									callback({
+										status: false,
+										message: `You must type <strong>${confirmText}</strong> to confirm your action.`,
+									});
+									return;
+								}
+								callback({
+									status: true,
+								});
+							},
+						},
+					},
+					form: {
+						buttons: {
+							submit: {
+								title: `Yes`,
+								click: (form, e) => {
+									form.refreshValidationState(true);
+									if (!form.isValid(true)) {
+										form.focus();
+										return;
+									}
+									cb();
+									tempModal.iziModal("close");
+								},
+							},
+							dismiss: {
+								title: `No`,
+								click: (form, e) => {
+									$(document).Toasts("create", {
+										class: "bg-warning",
+										title: "Action canceled",
+										autohide: true,
+										delay: 10000,
+										body: `You clicked No.`,
+									});
+									tempModal.iziModal("close");
+								},
+							},
+						},
+					},
+				},
+			});
 		});
 	}
 }

@@ -1,0 +1,53 @@
+{
+  "_from": "jquery-multiselect",
+  "_id": "jquery-multiselect@1.0.0",
+  "_inBundle": false,
+  "_integrity": "sha1-KzEl/RCb++8dS+VNyEcUNnjHGyw=",
+  "_location": "/jquery-multiselect",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "jquery-multiselect",
+    "name": "jquery-multiselect",
+    "escapedName": "jquery-multiselect",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/jquery-multiselect/-/jquery-multiselect-1.0.0.tgz",
+  "_shasum": "2b3125fd109bfbef1d4be54dc847143678c71b2c",
+  "_spec": "jquery-multiselect",
+  "_where": "C:\\Users\\user\\AdminLTE",
+  "author": {
+    "name": "Sahil Gupta",
+    "email": "sahilkkrazy@gmail.com",
+    "url": "http://techhysahil.com"
+  },
+  "bugs": {
+    "url": "https://github.com/techhysahil/jquery-MultiSelect/issues"
+  },
+  "bundleDependencies": false,
+  "deprecated": false,
+  "description": "A dead simple jQuery Multiselect",
+  "homepage": "https://github.com/techhysahil/jquery-MultiSelect#readme",
+  "keywords": [
+    "jquery",
+    "multiselect"
+  ],
+  "license": "ISC",
+  "main": "jquery-MultiSelect.js",
+  "name": "jquery-multiselect",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/techhysahil/jquery-MultiSelect.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "1.0.0"
+}

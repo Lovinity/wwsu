@@ -1,0 +1,156 @@
+{
+  "_from": "mp3-mediarecorder",
+  "_id": "mp3-mediarecorder@4.0.3",
+  "_inBundle": false,
+  "_integrity": "sha512-RRAeJ2vmCShbwbkow2ej46ITTnZQjqo0xVw6AokuuE9RbMdx8Px25ymksrMBsK75E18npglKoRGhADAfBNd2vQ==",
+  "_location": "/mp3-mediarecorder",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "mp3-mediarecorder",
+    "name": "mp3-mediarecorder",
+    "escapedName": "mp3-mediarecorder",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/mp3-mediarecorder/-/mp3-mediarecorder-4.0.3.tgz",
+  "_shasum": "8b7bb3cbf6bae288ef3726212587d49fd9a8ff51",
+  "_spec": "mp3-mediarecorder",
+  "_where": "C:\\Users\\user\\AdminLTE",
+  "author": {
+    "name": "Elias Meire"
+  },
+  "browser": "dist/index.umd.js",
+  "browserslist": [
+    "Firefox >= 52",
+    "Chrome >= 57",
+    "Edge >= 16",
+    "Safari >= 11"
+  ],
+  "bugs": {
+    "url": "https://github.com/eliasmeire/mp3-mediarecorder/issues"
+  },
+  "bundleDependencies": false,
+  "bundlesize": [
+    {
+      "path": "dist/index.umd.js",
+      "maxSize": "7kB"
+    },
+    {
+      "path": "dist/index.es5.js",
+      "maxSize": "7kB"
+    },
+    {
+      "path": "dist/index.es.js",
+      "maxSize": "7kB"
+    },
+    {
+      "path": "dist/index.js",
+      "maxSize": "7kB"
+    },
+    {
+      "path": "worker/index.umd.js",
+      "maxSize": "2kB"
+    },
+    {
+      "path": "worker/index.es5.js",
+      "maxSize": "2kB"
+    },
+    {
+      "path": "worker/index.es.js",
+      "maxSize": "2kB"
+    },
+    {
+      "path": "worker/index.js",
+      "maxSize": "2kB"
+    }
+  ],
+  "dependencies": {
+    "event-target-shim": "github:cpmsmith/event-target-shim#sentry-infinite-recursion",
+    "vmsg": "0.3.6"
+  },
+  "deprecated": false,
+  "description": "MediaRecorder ponyfill that records audio as mp3",
+  "devDependencies": {
+    "@babel/core": "7.9.6",
+    "@babel/preset-env": "7.9.6",
+    "@rollup/plugin-babel": "5.0.0",
+    "@rollup/plugin-node-resolve": "7.1.3",
+    "@semantic-release/git": "9.0.0",
+    "@types/dom-mediacapture-record": "1.0.4",
+    "@types/jest": "25.2.1",
+    "@types/node": "13.13.2",
+    "bundlesize": "0.18.0",
+    "cpy-cli": "3.1.0",
+    "del-cli": "3.0.0",
+    "jest": "25.4.0",
+    "prettier": "2.0.5",
+    "rollup": "2.7.5",
+    "rollup-plugin-typescript2": "0.27.0",
+    "semantic-release": "17.0.7",
+    "serve": "11.3.0",
+    "ts-jest": "25.4.0",
+    "tslib": "1.11.1",
+    "typescript": "3.8.3"
+  },
+  "es2015": "dist/index.es.js",
+  "files": [
+    "dist",
+    "worker",
+    "package.json",
+    "yarn.lock",
+    "README.md",
+    "LICENSE"
+  ],
+  "homepage": "https://github.com/eliasmeire/mp3-mediarecorder#readme",
+  "keywords": [
+    "mediarecorder",
+    "polyfill",
+    "ponyfill",
+    "mp3",
+    "mediastream",
+    "audio",
+    "encoding",
+    "libmp3lame",
+    "webassembly",
+    "vmsg",
+    "record",
+    "encode"
+  ],
+  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.es5.js",
+  "name": "mp3-mediarecorder",
+  "release": {
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/npm",
+      "@semantic-release/github",
+      "@semantic-release/git"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eliasmeire/mp3-mediarecorder.git"
+  },
+  "scripts": {
+    "build": "del dist worker && rollup -c rollup.config.ts && cpy node_modules/vmsg/vmsg.wasm dist && cpy dist/worker/* worker && del dist/worker",
+    "bundlesize": "bundlesize",
+    "dev": "serve .",
+    "format": "npm run format:write",
+    "format:check": "prettier -l .",
+    "format:write": "prettier --write .",
+    "test": "jest",
+    "tsc": "tsc --noEmit"
+  },
+  "types": "dist/index.d.ts",
+  "typings": "dist/index.d.ts",
+  "version": "4.0.3"
+}

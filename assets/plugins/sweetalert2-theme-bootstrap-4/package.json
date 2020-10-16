@@ -1,32 +1,32 @@
 {
   "_args": [
     [
-      "@sweetalert2/theme-bootstrap-4@3.2.0",
+      "@sweetalert2/theme-bootstrap-4@4.0.0",
       "C:\\Users\\user\\AdminLTE"
     ]
   ],
-  "_from": "@sweetalert2/theme-bootstrap-4@3.2.0",
-  "_id": "@sweetalert2/theme-bootstrap-4@3.2.0",
+  "_from": "@sweetalert2/theme-bootstrap-4@4.0.0",
+  "_id": "@sweetalert2/theme-bootstrap-4@4.0.0",
   "_inBundle": false,
-  "_integrity": "sha512-hNt+KMN84FLeL+AomgiCnsuBViFnVamq8ABwn2Y/EvLBQKPRvRQuYtoX+Ub6B6R3brdh6ylPpDwnUGC1xyhi9A==",
+  "_integrity": "sha512-ZU0sYNpo783ihs4VHWRswYkwQQ/g+T5dI8c19RhDigHoIXHS6GXqic6atsP1BmVHPbq/LvFJTpgoRJQU3/SMCQ==",
   "_location": "/@sweetalert2/theme-bootstrap-4",
   "_phantomChildren": {},
   "_requested": {
     "type": "version",
     "registry": true,
-    "raw": "@sweetalert2/theme-bootstrap-4@3.2.0",
+    "raw": "@sweetalert2/theme-bootstrap-4@4.0.0",
     "name": "@sweetalert2/theme-bootstrap-4",
     "escapedName": "@sweetalert2%2ftheme-bootstrap-4",
     "scope": "@sweetalert2",
-    "rawSpec": "3.2.0",
+    "rawSpec": "4.0.0",
     "saveSpec": null,
-    "fetchSpec": "3.2.0"
+    "fetchSpec": "4.0.0"
   },
   "_requiredBy": [
     "/"
   ],
-  "_resolved": "https://registry.npmjs.org/@sweetalert2/theme-bootstrap-4/-/theme-bootstrap-4-3.2.0.tgz",
-  "_spec": "3.2.0",
+  "_resolved": "https://registry.npmjs.org/@sweetalert2/theme-bootstrap-4/-/theme-bootstrap-4-4.0.0.tgz",
+  "_spec": "4.0.0",
   "_where": "C:\\Users\\user\\AdminLTE",
   "author": "",
   "bugs": {
@@ -53,5 +53,5 @@
     "type": "git",
     "url": "git+https://github.com/sweetalert2/sweetalert2-themes.git"
   },
-  "version": "3.2.0"
+  "version": "4.0.0"
 }

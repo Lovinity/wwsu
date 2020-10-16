@@ -6,35 +6,44 @@ class WWSUtimesheet extends WWSUevents {
 	 *
 	 * @param {sails.io} socket WWSU socket connection
 	 * @param {WWSUreq} noReq Request without authorization
+	 * @param {WWSUreq} directorReq Request with director authorization
 	 * @param {WWSUreq} adminDirectorReq Request with admin director authorization
 	 * @param {WWSUmeta} meta WWSUmeta class
+	 * @param {WWSUhosts} hosts WWSUhosts class for the timesheet computer only
 	 */
-	constructor(socket, noReq, adminDirectorReq, meta) {
+	constructor(socket, noReq, directorReq, adminDirectorReq, meta, hosts) {
 		super();
 
 		this.endpoints = {
+			add: "/timesheet/add",
 			get: "/timesheet/get",
 			edit: "/timesheet/edit",
 			remove: "/timesheet/remove",
 		};
 		this.data = {
+			add: {},
 			get: {},
 			edit: {},
 			remove: {},
 		};
 		this.requests = {
 			no: noReq,
+			director: directorReq,
 			admin: adminDirectorReq,
 		};
 		this.tables = {
 			hours: undefined,
 			records: undefined,
 		};
-		this.models = {
+		this.modals = {
 			edit: new WWSUmodal(`Edit Timesheet`, null, ``, true, {
 				headerColor: "",
 				zindex: 1200,
 				width: 800,
+			}),
+			clock: new WWSUmodal(``, null, ``, true, {
+				headerColor: "",
+				zindex: 1100,
 			}),
 		};
 		this.fields = {
@@ -44,6 +53,7 @@ class WWSUtimesheet extends WWSUevents {
 		};
 
 		this.meta = meta;
+		this.hosts = hosts;
 
 		this.animations = new WWSUanimations();
 
@@ -52,6 +62,184 @@ class WWSUtimesheet extends WWSUevents {
 		});
 
 		this.cache = [];
+	}
+
+	/**
+	 * Show clock-in or clock-out form for the specified director.
+	 *
+	 * @param {number} directorID ID of the director clocking in or out
+	 */
+	clockForm(directorID) {
+		// Find the director
+		let director = this.requests.director.db.find({ ID: directorID }, true);
+
+		this.modals.clock.title = `${director.name} - Clock ${
+			!director.present
+				? this.hosts && this.hosts.client && this.hosts.client.authorized
+					? `In`
+					: `In Remotely`
+				: `Out`
+		}`;
+
+		this.modals.clock.iziModal("open");
+
+		this.modals.clock.body = ``;
+
+		$(this.modals.clock.body).alpaca({
+			schema: {
+				title: `Clock ${
+					!director.present
+						? this.hosts && this.hosts.client && this.hosts.client.authorized
+							? `In`
+							: `In Remotely`
+						: `Out`
+				}`,
+				type: "object",
+				properties: {
+					name: {
+						type: "string",
+						required: true,
+					},
+					password: {
+						type: "string",
+						required: true,
+						format: "password",
+						title: "Password",
+					},
+					timestamp: {
+						title: `Clock-${director.present ? `Out` : `In`} Time`,
+						format: "datetime",
+					},
+					notes: {
+						type: "string",
+						title: "Accomplishments / Notes",
+						// Notes are only required for clocking out; hide it otherwise.
+						required: director.present ? true : false,
+						hidden: director.present ? false : true,
+					},
+				},
+			},
+			options: {
+				fields: {
+					name: {
+						type: "hidden",
+					},
+					timestamp: {
+						dateFormat: `YYYY-MM-DDTHH:mm:[00]${moment
+							.parseZone(this.meta ? this.meta.meta.time : undefined)
+							.format("Z")}`,
+						picker: {
+							inline: true,
+							sideBySide: true,
+						},
+						helper: `Be aware if you specify a time 30+ minutes from now, this record will be marked unapproved and will need approved by an admin director.`,
+					},
+					notes: {
+						type: "tinymce",
+						options: {
+							toolbar:
+								"undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | fullscreen preview | image link | ltr rtl",
+							plugins:
+								"autoresize preview paste importcss searchreplace autolink save directionality visualblocks visualchars fullscreen image link table hr pagebreak nonbreaking toc insertdatetime advlist lists wordcount imagetools textpattern noneditable help quickbars",
+							menubar: "file edit view insert format tools table help",
+						},
+						helper:
+							"Please briefly describe what you accomplished during your time clocked in. Optionally include things you planned to do but could not accomplish (and why), and things you plan to do next time you are in.",
+					},
+				},
+				form: {
+					buttons: {
+						submit: {
+							title: `Clock ${
+								!director.present
+									? this.hosts &&
+									  this.hosts.client &&
+									  this.hosts.client.authorized
+										? `In`
+										: `In Remotely`
+									: `Out`
+							}`,
+							click: (form, e) => {
+								form.refreshValidationState(true);
+								if (!form.isValid(true)) {
+									form.focus();
+									return;
+								}
+								var value = form.getValue();
+								this.requests.director._authorize(
+									value.name,
+									value.password,
+									(body) => {
+										if (body === 0 || typeof body.token === `undefined`) {
+											$(document).Toasts("create", {
+												class: "bg-warning",
+												title: "Authorization Error",
+												body:
+													"There was an error authorizing you. Did you type your password in correctly? Please contact the engineer if this is a bug.",
+												delay: 15000,
+												autoHide: true,
+											});
+										} else {
+											this.requests.director._tryRequest(
+												{
+													method: "POST",
+													url: "/timesheet/add",
+													data: {
+														timestamp: moment(value.timestamp).toISOString(
+															true
+														),
+														notes: value.notes,
+														remote:
+															!this.hosts ||
+															!this.hosts.client ||
+															!this.hosts.client.authorized,
+													},
+												},
+												(body2) => {
+													if (body2 === "OK") {
+														$(document).Toasts("create", {
+															class: "bg-success",
+															title: `Clocked ${
+																director.present ? `Out` : `In`
+															}`,
+															autohide: true,
+															delay: 10000,
+															body: `You successfully clocked ${
+																director.present ? `Out` : `In`
+															}. ${
+																director.present
+																	? `Have a good day!`
+																	: `Welcome!`
+															}`,
+														});
+														this.modals.clock.iziModal("close");
+													} else {
+														$(document).Toasts("create", {
+															class: "bg-warning",
+															title: "Timesheet Error",
+															body:
+																"There was an error adding your record. Please contact the engineer.",
+															delay: 10000,
+															autohide: true,
+														});
+													}
+												}
+											);
+										}
+									}
+								);
+							},
+						},
+					},
+				},
+			},
+			data: {
+				name: director.name,
+				password: ``,
+				timestamp: moment().toISOString(true),
+				notes: ``,
+			},
+		});
 	}
 
 	/**
@@ -205,9 +393,9 @@ class WWSUtimesheet extends WWSUevents {
 					columns: [
 						{ title: "Director" },
 						{ title: "Scheduled Hours" },
-						{ title: "Approved Hours" },
-						{ title: "Unapproved Hours" },
-						{ title: "Total Clocked Hours" },
+						{ title: "In-Office Hours" },
+						{ title: "Remote Hours" },
+						{ title: "Total Hours" },
 					],
 					order: [[0, "asc"]],
 				});
@@ -215,21 +403,34 @@ class WWSUtimesheet extends WWSUevents {
 
 			// Setup records table
 			util.waitForElement(`#section-timesheets-records-table`, () => {
+				// Extra information
+				let format = (d) => {
+					return `<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">
+					<tr>
+						<td>Accomplishments / Notes:</td>
+						<td>${d.notes}</td>
+					</tr>
+					</table>`;
+				};
 				this.tables.records = $(`#section-timesheets-records-table`).DataTable({
 					paging: true,
 					data: [],
 					columns: [
+						{
+							className: "details-control",
+							orderable: false,
+							data: null,
+							defaultContent: "",
+						},
 						{ title: "ID" },
 						{ title: "Director" },
 						{ title: "Status" },
-						{ title: "Scheduled In" },
-						{ title: "Scheduled Out" },
-						{ title: "Actual In" },
-						{ title: "Actual Out" },
+						{ title: "Clock In" },
+						{ title: "Clock Out" },
 						{ title: "Actions" },
 					],
 					columnDefs: [{ responsivePriority: 1, targets: 6 }],
-					order: [[0, "asc"]],
+					order: [[1, "asc"]],
 					pageLength: 25,
 					drawCallback: () => {
 						// Action button click events
@@ -258,7 +459,7 @@ class WWSUtimesheet extends WWSUevents {
 							var id = parseInt($(e.currentTarget).data("id"));
 							util.confirmDialog(
 								`<p>Are you sure you want to <strong>permanently</strong> remove the timesheet record ${id}?</p>
-                                <p>This will permanently remove the timesheet record, and all associated hours will no longer count.</p>`,
+                                <p>This will remove the timesheet record, and its logged hours will no longer tally.</p>`,
 								null,
 								() => {
 									this.remove({ ID: id }, (success) => {
@@ -271,6 +472,26 @@ class WWSUtimesheet extends WWSUevents {
 						});
 					},
 				});
+
+				// Additional info rows
+				$("#section-timesheets-records-table tbody").on(
+					"click",
+					"td.details-control",
+					(e) => {
+						var tr = $(e.target).closest("tr");
+						var row = this.tables.records.row(tr);
+
+						if (row.child.isShown()) {
+							// This row is already open - close it
+							row.child.hide();
+							tr.removeClass("shown");
+						} else {
+							// Open this row
+							row.child(format(row.data())).show();
+							tr.addClass("shown");
+						}
+					}
+				);
 			});
 		});
 	}
@@ -319,30 +540,62 @@ class WWSUtimesheet extends WWSUevents {
 							// Set up tamplate if new director
 							if (typeof directors[record.name] === "undefined") {
 								directors[record.name] = {
-									approved: 0,
-									unapproved: 0,
-									scheduled: 0,
+									scheduled: { office: 0, remote: 0, total: 0 },
+									office: { approved: 0, unapproved: 0, total: 0 },
+									remote: { approved: 0, unapproved: 0, total: 0 },
+									total: { approved: 0, unapproved: 0, total: 0 },
 								};
 							}
 
 							// Add scheduled hours
 							if (record.scheduledIn && record.scheduledOut) {
-								directors[record.name].scheduled += moment(
+								directors[record.name].scheduled[
+									record.remote ? "remote" : "office"
+								] += moment(record.scheduledOut).diff(
+									record.scheduledIn,
+									"hours",
+									true
+								);
+								directors[record.name].scheduled.total += moment(
 									record.scheduledOut
 								).diff(record.scheduledIn, "hours", true);
 							}
 
 							// Add actual hours
 							if (record.timeIn) {
-								if (record.approved === 1) {
-									directors[record.name].approved += moment(
+								if (record.remote) {
+									directors[record.name].remote[
+										record.approved === 1 ? "approved" : "unapproved"
+									] += moment(record.timeOut || undefined).diff(
+										record.timeIn,
+										"hours",
+										true
+									);
+									directors[record.name].remote.total += moment(
 										record.timeOut || undefined
 									).diff(record.timeIn, "hours", true);
 								} else {
-									directors[record.name].unapproved += moment(
+									directors[record.name].office[
+										record.approved === 1 ? "approved" : "unapproved"
+									] += moment(record.timeOut || undefined).diff(
+										record.timeIn,
+										"hours",
+										true
+									);
+									directors[record.name].office.total += moment(
 										record.timeOut || undefined
 									).diff(record.timeIn, "hours", true);
 								}
+								directors[record.name].total[
+									record.approved === 1 ? "approved" : "unapproved"
+								] += moment(record.timeOut || undefined).diff(
+									record.timeIn,
+									"hours",
+									true
+								);
+								directors[record.name].total.total += moment(
+									record.timeOut || undefined
+								).diff(record.timeIn, "hours", true);
 							}
 						});
 
@@ -353,21 +606,90 @@ class WWSUtimesheet extends WWSUevents {
 								this.tables.hours.rows.add([
 									[
 										director,
-										Math.round(
-											(directors[director].scheduled + Number.EPSILON) * 100
-										) / 100,
-										Math.round(
-											(directors[director].approved + Number.EPSILON) * 100
-										) / 100,
-										Math.round(
-											(directors[director].unapproved + Number.EPSILON) * 100
-										) / 100,
-										Math.round(
-											(directors[director].approved +
-												directors[director].unapproved +
-												Number.EPSILON) *
-												100
-										) / 100,
+										`<ul>
+										<li>In-Office: ${
+											Math.round(
+												(directors[director].scheduled.office +
+													Number.EPSILON) *
+													100
+											) / 100
+										}</li>
+										<li>Remote: ${
+											Math.round(
+												(directors[director].scheduled.remote +
+													Number.EPSILON) *
+													100
+											) / 100
+										}</li>
+										<li>Total: ${
+											Math.round(
+												(directors[director].scheduled.total + Number.EPSILON) *
+													100
+											) / 100
+										}</li>
+										</ul>`,
+										`<ul>
+										<li>Approved: ${
+											Math.round(
+												(directors[director].office.approved + Number.EPSILON) *
+													100
+											) / 100
+										}</li>
+										<li>Un-approved: ${
+											Math.round(
+												(directors[director].office.unapproved +
+													Number.EPSILON) *
+													100
+											) / 100
+										}</li>
+										<li>Total: ${
+											Math.round(
+												(directors[director].office.total + Number.EPSILON) *
+													100
+											) / 100
+										}</li>
+										</ul>`,
+										`<ul>
+										<li>Approved: ${
+											Math.round(
+												(directors[director].remote.approved + Number.EPSILON) *
+													100
+											) / 100
+										}</li>
+										<li>Un-approved: ${
+											Math.round(
+												(directors[director].remote.unapproved +
+													Number.EPSILON) *
+													100
+											) / 100
+										}</li>
+										<li>Total: ${
+											Math.round(
+												(directors[director].remote.total + Number.EPSILON) *
+													100
+											) / 100
+										}</li>
+										</ul>`,
+										`<ul>
+										<li>Approved: ${
+											Math.round(
+												(directors[director].total.approved + Number.EPSILON) *
+													100
+											) / 100
+										}</li>
+										<li>Un-approved: ${
+											Math.round(
+												(directors[director].total.unapproved +
+													Number.EPSILON) *
+													100
+											) / 100
+										}</li>
+										<li>Total: ${
+											Math.round(
+												(directors[director].total.total + Number.EPSILON) * 100
+											) / 100
+										}</li>
+										</ul>`,
 									],
 								]);
 							}
@@ -396,51 +718,68 @@ class WWSUtimesheet extends WWSUevents {
 										break;
 								}
 								return [
+									``,
 									record.ID,
 									record.name,
-									status,
-									record.scheduledIn
-										? moment
-												.tz(
-													record.scheduledIn,
-													this.meta
-														? this.meta.meta.timezone
-														: moment.tz.guess()
-												)
-												.format("YYYY-MM-DD h:mm A")
-										: `Unscheduled`,
-									record.scheduledOut
-										? moment
-												.tz(
-													record.scheduledOut,
-													this.meta
-														? this.meta.meta.timezone
-														: moment.tz.guess()
-												)
-												.format("YYYY-MM-DD h:mm A")
-										: `Unscheduled`,
-									record.timeIn
-										? moment
-												.tz(
-													record.timeIn,
-													this.meta
-														? this.meta.meta.timezone
-														: moment.tz.guess()
-												)
-												.format("YYYY-MM-DD h:mm A")
-										: `Absent`,
-									record.timeOut
-										? moment
-												.tz(
-													record.timeOut,
-													this.meta
-														? this.meta.meta.timezone
-														: moment.tz.guess()
-												)
-												.format("YYYY-MM-DD h:mm A")
-										: record.timeIn
-										? `Clocked In`
-										: `Absent`,
+									`${
+										record.remote
+											? `<span class="badge bg-indigo">Remote</span>`
+											: ``
+									}${status}`,
+									`<ul>
+									<li>Scheduled: ${
+										record.scheduledIn
+											? moment
+													.tz(
+														record.scheduledIn,
+														this.meta
+															? this.meta.meta.timezone
+															: moment.tz.guess()
+													)
+													.format("YYYY-MM-DD h:mm A")
+											: `Unscheduled`
+									}</li>
+										<li>Actual: ${
+											record.timeIn
+												? moment
+														.tz(
+															record.timeIn,
+															this.meta
+																? this.meta.meta.timezone
+																: moment.tz.guess()
+														)
+														.format("YYYY-MM-DD h:mm A")
+												: `Absent`
+										}</li>
+										</ul>`,
+									`<ul>
+									<li>Scheduled: ${
+										record.scheduledOut
+											? moment
+													.tz(
+														record.scheduledOut,
+														this.meta
+															? this.meta.meta.timezone
+															: moment.tz.guess()
+													)
+													.format("YYYY-MM-DD h:mm A")
+											: `Unscheduled`
+									}</li>
+										<li>Actual: ${
+											record.timeOut
+												? moment
+														.tz(
+															record.timeOut,
+															this.meta
+																? this.meta.meta.timezone
+																: moment.tz.guess()
+														)
+														.format("YYYY-MM-DD h:mm A")
+												: record.timeIn
+												? `Clocked In`
+												: `Absent`
+										}</li>
+										</ul>`,
 									`<div class="btn-group">
                                     <button class="btn btn-sm btn-warning btn-timesheet-edit" data-id="${record.ID}" title="Edit Timesheet Record"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-danger btn-timesheet-delete" data-id="${record.ID}" title="Remove Timesheet record"><i class="fas fa-trash"></i></button></div>`,
 								];
@@ -459,10 +798,10 @@ class WWSUtimesheet extends WWSUevents {
 	 * @param {object} data The original timesheet record
 	 */
 	timesheetForm(data) {
-		this.models.edit.body = ``;
-		this.models.edit.iziModal("open");
+		this.modals.edit.body = ``;
+		this.modals.edit.iziModal("open");
 
-		$(this.models.edit.body).alpaca({
+		$(this.modals.edit.body).alpaca({
 			schema: {
 				title: "Edit Timesheet",
 				type: "object",
@@ -486,6 +825,10 @@ class WWSUtimesheet extends WWSUevents {
 						title: "Scheduled Time Out",
 						readonly: true,
 					},
+					remote: {
+						type: "boolean",
+						title: "Is Remote Hours?",
+					},
 					approved: {
 						type: "number",
 						required: true,
@@ -499,6 +842,10 @@ class WWSUtimesheet extends WWSUevents {
 					timeOut: {
 						format: "datetime",
 						title: "Clocked Time Out",
+					},
+					notes: {
+						type: "string",
+						title: "Accomplishments / Notes",
 					},
 				},
 			},
@@ -569,6 +916,18 @@ class WWSUtimesheet extends WWSUevents {
 						helper:
 							"The date/time the director clocked out. If clocked time in is filled in, and this is left empty, we assume the director is still clocked in.",
 					},
+					notes: {
+						type: "tinymce",
+						options: {
+							toolbar:
+								"undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | fullscreen preview | image link | ltr rtl",
+							plugins:
+								"autoresize preview paste importcss searchreplace autolink save directionality visualblocks visualchars fullscreen image link table hr pagebreak nonbreaking toc insertdatetime advlist lists wordcount imagetools textpattern noneditable help quickbars",
+							menubar: "file edit view insert format tools table help",
+						},
+						helper:
+							"Accomplishments during this timesheet period. Optionally plans that could not be completed (and why), and plans for the future.",
+					},
 				},
 				form: {
 					buttons: {
@@ -583,7 +942,7 @@ class WWSUtimesheet extends WWSUevents {
 								var value = form.getValue();
 								this.edit(value, (success) => {
 									if (success) {
-										this.models.edit.iziModal("close");
+										this.modals.edit.iziModal("close");
 										this.getRecords();
 									}
 								});

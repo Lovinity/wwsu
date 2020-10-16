@@ -1,33 +1,58 @@
 {
-  "name": "@fullcalendar/list",
-  "version": "4.3.0",
-  "title": "FullCalendar List View Plugin",
-  "description": "View your events as a bulleted list",
-  "keywords": [
-    "calendar",
-    "event",
-    "full-sized"
-  ],
-  "homepage": "https://fullcalendar.io/",
-  "docs": "https://fullcalendar.io/docs/list-view",
-  "bugs": "https://fullcalendar.io/reporting-bugs",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/fullcalendar/fullcalendar.git",
-    "homepage": "https://github.com/fullcalendar/fullcalendar"
+  "_from": "@fullcalendar/list",
+  "_id": "@fullcalendar/list@5.3.1",
+  "_inBundle": false,
+  "_integrity": "sha512-0wZxRe9xhe61W8I00u7gW+FGxOxew5di+ujIVqoRjQ1JOiXsmClUwyObEtVPc8/5/Z1fFFcnh6tIAJKuVrOP1A==",
+  "_location": "/@fullcalendar/list",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "@fullcalendar/list",
+    "name": "@fullcalendar/list",
+    "escapedName": "@fullcalendar%2flist",
+    "scope": "@fullcalendar",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
   },
-  "license": "MIT",
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/@fullcalendar/list/-/list-5.3.1.tgz",
+  "_shasum": "bab30270138bc20d22ff79d185cf7ccfd588a570",
+  "_spec": "@fullcalendar/list",
+  "_where": "C:\\Users\\user\\AdminLTE",
   "author": {
     "name": "Adam Shaw",
     "email": "arshaw@arshaw.com",
     "url": "http://arshaw.com/"
   },
-  "copyright": "2019 Adam Shaw",
-  "peerDependencies": {
-    "@fullcalendar/core": "~4.3.0"
+  "browserGlobal": "FullCalendarList",
+  "bugs": {
+    "url": "https://fullcalendar.io/reporting-bugs"
   },
+  "bundleDependencies": false,
+  "dependencies": {
+    "@fullcalendar/common": "~5.3.1",
+    "tslib": "^2.0.0"
+  },
+  "deprecated": false,
+  "description": "View your events as a bulleted list",
+  "docs": "https://fullcalendar.io/docs/list-view",
+  "homepage": "https://fullcalendar.io/",
+  "jsdelivr": "main.global.min.js",
+  "license": "MIT",
   "main": "main.js",
-  "module": "main.esm.js",
-  "unpkg": "main.min.js",
-  "types": "main.d.ts"
+  "name": "@fullcalendar/list",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fullcalendar/fullcalendar.git",
+    "homepage": "https://github.com/fullcalendar/fullcalendar"
+  },
+  "title": "FullCalendar List View Plugin",
+  "type": "module",
+  "types": "main.d.ts",
+  "version": "5.3.1"
 }

@@ -1,0 +1,58 @@
+{
+  "_from": "marquee",
+  "_id": "marquee@0.2.1",
+  "_inBundle": false,
+  "_integrity": "sha1-CmfEbeKY73rre3s2EF800dESlas=",
+  "_location": "/marquee",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "marquee",
+    "name": "marquee",
+    "escapedName": "marquee",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/marquee/-/marquee-0.2.1.tgz",
+  "_shasum": "0a67c46de298ef7aeb7b7b36105f34d1d11295ab",
+  "_spec": "marquee",
+  "_where": "C:\\Users\\user\\AdminLTE",
+  "author": {
+    "name": "Damon Oehlman",
+    "email": "damon.oehlman@gmail.com"
+  },
+  "bugs": {
+    "url": "https://bitbucket.org/DamonOehlman/marquee/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "animator": "0.2.x",
+    "crel": "1.0.x",
+    "stylar": "0.2.x"
+  },
+  "deprecated": false,
+  "description": "Amaze your eyes and recapture the magic of the web with scrolling marquees",
+  "devDependencies": {},
+  "homepage": "https://bitbucket.org/DamonOehlman/marquee#readme",
+  "keywords": [
+    "marquee",
+    "browser"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "name": "marquee",
+  "repository": {
+    "type": "git",
+    "url": "git+https://bitbucket.org/DamonOehlman/marquee.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "0.2.1"
+}

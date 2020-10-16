@@ -38,6 +38,9 @@ module.exports = {
         return exits.notFound();
       }
 
+      // Filter disallowed HTML
+      inputs.notes = await sails.helpers.sanitize(inputs.notes);
+
       // If the director is present, this is a clock-out entry.
       if (record.present > 0) {
         toapprove = 0;

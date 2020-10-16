@@ -201,6 +201,22 @@ a.close.disabled, a.disabled.mailbox-attachment-close {
   margin-top: 10px;
 }
 
+.dark-mode .lockscreen-item {
+  background-color: #343a40;
+}
+
+.dark-mode .lockscreen-logo a {
+  color: #fff;
+}
+
+.dark-mode .lockscreen-credentials .btn {
+  background-color: #343a40;
+}
+
+.dark-mode .lockscreen-image {
+  background-color: #6c757d;
+}
+
 .login-logo,
 .register-logo {
   font-size: 2.1rem;
@@ -264,7 +280,9 @@ a.close.disabled, a.disabled.mailbox-attachment-close {
   box-shadow: none;
 }
 
+.login-card-body .input-group .form-control:focus ~ .input-group-prepend .input-group-text,
 .login-card-body .input-group .form-control:focus ~ .input-group-append .input-group-text,
+.register-card-body .input-group .form-control:focus ~ .input-group-prepend .input-group-text,
 .register-card-body .input-group .form-control:focus ~ .input-group-append .input-group-text {
   border-color: #3395ff;
 }
@@ -274,7 +292,9 @@ a.close.disabled, a.disabled.mailbox-attachment-close {
   box-shadow: none;
 }
 
+.login-card-body .input-group .form-control.is-valid ~ .input-group-prepend .input-group-text,
 .login-card-body .input-group .form-control.is-valid ~ .input-group-append .input-group-text,
+.register-card-body .input-group .form-control.is-valid ~ .input-group-prepend .input-group-text,
 .register-card-body .input-group .form-control.is-valid ~ .input-group-append .input-group-text {
   border-color: #186429;
 }
@@ -308,6 +328,18 @@ a.close.disabled, a.disabled.mailbox-attachment-close {
 
 .social-auth-links {
   margin: 10px 0;
+}
+
+.dark-mode .login-card-body,
+.dark-mode .register-card-body {
+  background-color: #343a40;
+  border-color: #6c757d;
+  color: #fff;
+}
+
+.dark-mode .login-logo a,
+.dark-mode .register-logo a {
+  color: #fff;
 }
 
 .error-page {
@@ -366,6 +398,10 @@ a.close.disabled, a.disabled.mailbox-attachment-close {
   margin-top: 0;
 }
 
+.dark-mode .invoice {
+  background-color: #343a40;
+}
+
 .profile-user-img {
   border: 3px solid #adb5bd;
   margin: 0 auto;
@@ -398,6 +434,11 @@ a.close.disabled, a.disabled.mailbox-attachment-close {
 
 .post .row {
   width: 100%;
+}
+
+.dark-mode .post {
+  color: #fff;
+  border-color: #6c757d;
 }
 
 .product-image {
@@ -458,5 +499,63 @@ a.close.disabled, a.disabled.mailbox-attachment-close {
 
 .projects .project-state {
   text-align: center;
+}
+
+.content-wrapper.kanban {
+  height: 1px;
+}
+
+.content-wrapper.kanban .content {
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.content-wrapper.kanban .content .container,
+.content-wrapper.kanban .content .container-fluid {
+  width: -webkit-max-content;
+  width: -moz-max-content;
+  width: max-content;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-align: stretch;
+  align-items: stretch;
+}
+
+.content-wrapper.kanban .content-header + .content {
+  height: calc(100% - ((2 * 15px) + (1.8rem * 1.2)));
+}
+
+.content-wrapper.kanban .card .card-body {
+  padding: .5rem;
+}
+
+.content-wrapper.kanban .card.card-row {
+  width: 340px;
+  display: inline-block;
+  margin: 0 .5rem;
+}
+
+.content-wrapper.kanban .card.card-row:first-child {
+  margin-left: 0;
+}
+
+.content-wrapper.kanban .card.card-row .card-body {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.content-wrapper.kanban .card.card-row .card .card-header {
+  padding: .5rem .75rem;
+}
+
+.content-wrapper.kanban .card.card-row .card .card-body {
+  padding: .75rem;
+}
+
+.content-wrapper.kanban .btn-tool.btn-link {
+  text-decoration: underline;
+  padding-left: 0;
+  padding-right: 0;
 }
 /*# sourceMappingURL=adminlte.pages.css.map */
