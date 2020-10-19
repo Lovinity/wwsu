@@ -1,4 +1,3 @@
-"use strict";
 window.addEventListener("DOMContentLoaded", () => {
   var machineID = null;
   var hosts;
@@ -80,14 +79,14 @@ window.addEventListener("DOMContentLoaded", () => {
     "#section-home",
     "Home - WWSU Timesheets",
     "/",
-    true
+    !navStart
   );
   navigation.addItem(
     "#nav-calendar",
     "#section-calendar",
     "Manage Calendar - WWSU Timesheets",
     "/directors/calendar",
-    false,
+    navStart === "#nav-calendar",
     () => {
       fullCalendar.updateSize();
     }
@@ -97,7 +96,7 @@ window.addEventListener("DOMContentLoaded", () => {
     "#section-timesheets",
     "Director timesheets - WWSU DJ Controls",
     "/directors/timesheets",
-    false
+    navStart === "#nav-timesheets"
   );
 
   /*
@@ -441,7 +440,7 @@ window.addEventListener("DOMContentLoaded", () => {
           `#section-director-${director.ID}`,
           `Director ${director.name} - WWSU Timesheets`,
           `/director/${director.ID}`,
-          false
+          navStart === `#nav-director-${director.ID}`
         );
 
         window.requestAnimationFrame(() => {
