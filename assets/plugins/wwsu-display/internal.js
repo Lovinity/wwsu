@@ -1024,8 +1024,8 @@ window.addEventListener("DOMContentLoaded", () => {
         temp2.position
       }</span><br />
       ${
-        temp.present
-          ? temp.present === 2
+        temp2.present
+          ? temp2.present === 2
             ? `<span class="text-success"><strong>REMOTE</strong></span>`
             : `<span class="text-success"><strong>IN</strong></span>`
           : `<span class="text-danger"><strong>OUT</strong></span>`
