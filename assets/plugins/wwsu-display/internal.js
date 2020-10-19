@@ -1003,8 +1003,8 @@ window.addEventListener("DOMContentLoaded", () => {
                 doShade ? `bg-dark-3` : `bg-dark-2`
               }">
      <div class="col-3 shadow-2" style="background-color: ${
-       temp.present
-         ? temp.present === 2
+       temp2.present
+         ? temp2.present === 2
            ? `rgba(102, 16, 242, 0.25)`
            : `rgba(56, 142, 60, 0.25)`
          : `rgba(211, 47, 47, 0.25)`
