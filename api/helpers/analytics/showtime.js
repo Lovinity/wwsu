@@ -311,11 +311,11 @@ module.exports = {
         [djstring, calendarIDString]
       );
 
-    console.dir(distinctEvents);
+    console.dir(distinctEvents.rows);
     return;
 
     // Determine number of broadcasts
-    distinctEvents
+    distinctEvents.rows
       .filter((dEvent) => dEvent.calendarID)
       .forEach((dEvent) => {
         let prefix = dEvent.event.split(": ")[0].toLowerCase();
