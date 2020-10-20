@@ -29,17 +29,17 @@ module.exports = {
           <p><strong>Track requests placed on the website:</strong> ${weekly.tracksRequested}</p>
           <p><strong>Messages sent/received between listeners and DJs:</strong> ${weekly.webMessagesExchanged}</p>
 
-          <p><strong>Live shows performed:</strong> ${overall[ -1 ].week.shows}</p>
-          <p><strong>Remote shows performed:</strong> ${overall[ -1 ].week.remotes}</p>
-          <p><strong>Prerecorded shows aired:</strong> ${overall[ -1 ].week.prerecords}</p>
+          <p><strong>Live shows performed:</strong> ${overall[ -1 ].week.show}</p>
+          <p><strong>Remote shows performed:</strong> ${overall[ -1 ].week.remote}</p>
+          <p><strong>Prerecorded shows aired:</strong> ${overall[ -1 ].week.prerecord}</p>
           <p><strong>Sports broadcasts performed:</strong> ${overall[ -2 ].week.sports}</p>
-          <p><strong>Playlists aired:</strong> ${overall[ -4 ].week.playlists}</p>
+          <p><strong>Playlists aired:</strong> ${overall[ -4 ].week.playlist}</p>
           
-          <p><strong>Total on-air minutes of shows/remotes/prerecords:</strong> ${overall[ -1 ].week.showtime}</p>
-          <p><strong>Total online listener minutes during shows/remotes/prerecords:</strong>: ${overall[ -1 ].week.listeners}</p>
+          <p><strong>Total on-air minutes of shows/remotes/prerecords:</strong> ${overall[ -1 ].week.showTime}</p>
+          <p><strong>Total online listener minutes during shows/remotes/prerecords:</strong>: ${overall[ -1 ].week.listenerMinutes}</p>
           <p><strong>Listener to showtime ratio of shows/remotes/prerecords (higher is better):</strong> ${overall[ -1 ].week.ratio}</p>
-          <p><strong>Total on-air minutes of sports broadcasts:</strong> ${overall[ -2 ].week.showtime}</p>
-          <p><strong>Total online listener minutes during sports:</strong>: ${overall[ -2 ].week.listeners}</p>
+          <p><strong>Total on-air minutes of sports broadcasts:</strong> ${overall[ -2 ].week.showTime}</p>
+          <p><strong>Total online listener minutes during sports:</strong>: ${overall[ -2 ].week.listenerMinutes}</p>
           <p><strong>Listener to showtime ratio of sports (higher is better):</strong> ${overall[ -2 ].week.ratio}</p>`;
 
         await sails.helpers.emails.queueDjsDirectors(`Weekly Analytics Report`, body);
