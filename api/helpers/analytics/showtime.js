@@ -300,24 +300,17 @@ module.exports = {
       query.calendarID = inputs.calendarIDs;
     }
 
-    // Determine distinct unique occurrances (use this instead because sometimes someone might sign off and sign back on again; this should still count as only 1 broadcast.)
-    // TODO: use native sails.js distinct if they implement it. Otherwise, this requires attendance uses mySQL.
-    var distinctEvents = await sails.models.attendance
-      .getDatastore()
-      .sendNativeQuery(
-        `SELECT DISTINCT "unique"${
-          where !== "" ? ` WHERE "happened" = 1${where}` : ``
-        }`,
-        [djstring, calendarIDString]
-      );
+    var distinctEvents = await sails.models.attendance.find(query);
 
-    console.dir(distinctEvents.rows);
-    return;
+    sails.log.debug(`ANALYTICS: Attendance records retrieved.`);
 
     // Determine number of broadcasts
-    distinctEvents.rows
-      .filter((dEvent) => dEvent.calendarID)
+    var distinctEventsUnique = [];
+    distinctEvents
+      .filter((dEvent) => dEvent.calendarID && dEvent.happened === 1)
       .forEach((dEvent) => {
+        if (distinctEventsUnique.indexOf(dEvent.unique) !== -1) return;
+
         let prefix = dEvent.event.split(": ")[0].toLowerCase();
 
         // Shows
