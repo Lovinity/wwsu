@@ -255,7 +255,7 @@ module.exports = {
       .map((record) => record.ID)
       .map(async (dj) => {
         initializeDJ(dj);
-        if (typeof DJs[record.dj] !== "undefined") {
+        if (typeof DJs[dj] !== "undefined") {
           DJs[dj].overall.remoteCredits += await sails.models.xp.sum("amount", {
             dj: dj,
             type: "remote",
