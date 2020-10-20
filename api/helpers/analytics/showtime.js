@@ -284,6 +284,7 @@ module.exports = {
     var where = "";
     var djstring = "";
     var calendarIDString = "";
+    var query = {};
     if (inputs.djs && inputs.djs.length > 0) {
       djstring = inputs.djs.join();
       where = ` AND (dj IN ($1) OR cohostDJ1 IN ($1) OR cohostDJ2 IN ($1) OR cohostDJ3 IN ($1))`;
