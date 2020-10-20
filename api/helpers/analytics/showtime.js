@@ -52,7 +52,7 @@ module.exports = {
   },
 
   fn: async function (inputs) {
-    sails.log.debug(`---INITIATING ANALYTICS.SHOWTIME---`)
+    sails.log.debug(`---INITIATING ANALYTICS.SHOWTIME---`);
 
     // filter out all falsey values from inputs
     if (inputs.djs && typeof inputs.djs.filter !== "undefined")
@@ -234,7 +234,10 @@ module.exports = {
       if (id && typeof shows[id] === "undefined") {
         let record = calendar.find((cal) => cal.ID === id);
         if (record) {
-          shows[id] = Object.assign(template, { name: record.name || "Unknown Event", type: record.type || "unknown" });
+          shows[id] = Object.assign(template, {
+            name: record.name || "Unknown Event",
+            type: record.type || "unknown",
+          });
         }
       }
     };
@@ -243,7 +246,9 @@ module.exports = {
       if (id && typeof DJs[id] === "undefined") {
         let record = djs.find((dj) => dj.ID === id);
         if (record) {
-          DJs[id] = Object.assign(template, { name: record.name || "Unknown DJ" });
+          DJs[id] = Object.assign(template, {
+            name: record.name || "Unknown DJ",
+          });
         }
       }
     };
@@ -306,6 +311,9 @@ module.exports = {
         [djstring, calendarIDString]
       );
 
+    console.dir(distinctEvents);
+    return;
+
     // Determine number of broadcasts
     distinctEvents
       .filter((dEvent) => dEvent.calendarID)
@@ -333,7 +341,7 @@ module.exports = {
         });
       });
 
-      sails.log.debug(`ANALYTICS: Broadcast numbers calculated.`);
+    sails.log.debug(`ANALYTICS: Broadcast numbers calculated.`);
 
     var maps = [
       "showTime",
