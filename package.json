@@ -1,5 +1,5 @@
 {
-  "name": "wwsu",
+  "name": "wwsu-4",
   "private": true,
   "version": "8.0.0-alpha.18",
   "description": "Core backend for WWSU Radio operations",
@@ -42,7 +42,6 @@
   },
   "devDependencies": {
     "@sailshq/eslint": "^4.19.3",
-    "eslint": "^7.11.0",
     "eslint-plugin-promise": "^4.2.1"
   },
   "scripts": {
