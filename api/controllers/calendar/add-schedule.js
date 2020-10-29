@@ -6,11 +6,11 @@ module.exports = {
   inputs: {
     calendarID: {
       type: "number",
-      required: true,
+      required: true
     },
     scheduleID: {
       type: "number",
-      allowNull: true,
+      allowNull: true
     },
     scheduleType: {
       type: "string",
@@ -19,17 +19,17 @@ module.exports = {
         "updated",
         "canceled",
         "updated-system",
-        "canceled-system",
+        "canceled-system"
       ],
-      allowNull: true,
+      allowNull: true
     },
     scheduleReason: {
       type: "string",
-      defaultsTo: "",
+      defaultsTo: ""
     },
     originalTime: {
       type: "ref",
-      columnType: "datetime",
+      columnType: "datetime"
     },
     type: {
       type: "string",
@@ -44,119 +44,119 @@ module.exports = {
         "onair-booking",
         "prod-booking",
         "office-hours",
-        "task",
+        "task"
       ],
-      allowNull: true,
+      allowNull: true
     },
 
     priority: {
       type: "number",
-      allowNull: true,
+      allowNull: true
     },
 
     hostDJ: {
       type: "number",
-      allowNull: true,
+      allowNull: true
     },
 
     cohostDJ1: {
       type: "number",
-      allowNull: true,
+      allowNull: true
     },
 
     cohostDJ2: {
       type: "number",
-      allowNull: true,
+      allowNull: true
     },
 
     cohostDJ3: {
       type: "number",
-      allowNull: true,
+      allowNull: true
     },
 
     eventID: {
       type: "number",
-      allowNull: true,
+      allowNull: true
     },
 
     playlistID: {
       type: "number",
-      allowNull: true,
+      allowNull: true
     },
 
     director: {
       type: "number",
-      allowNull: true,
+      allowNull: true
     },
 
     name: {
       type: "string",
-      allowNull: true,
+      allowNull: true
     },
 
     description: {
       type: "string",
-      allowNull: true,
+      allowNull: true
     },
 
     logo: {
       type: "string",
-      allowNull: true,
+      allowNull: true
     },
 
     banner: {
       type: "string",
-      allowNull: true,
+      allowNull: true
     },
 
     newTime: {
       type: "ref",
-      columnType: "datetime",
+      columnType: "datetime"
     },
 
     oneTime: {
       type: "json",
-      custom: function (value) {
+      custom: function(value) {
         var valid = true;
         if (value.length > 0) {
-          value.map((val) => {
+          value.map(val => {
             if (!moment(val).isValid()) valid = false;
           });
         }
         return valid;
-      },
+      }
     },
 
     startDate: {
       type: "ref",
-      custom: function (value) {
+      custom: function(value) {
         return moment(value).isValid();
-      },
+      }
     },
 
     endDate: {
       type: "ref",
-      custom: function (value) {
+      custom: function(value) {
         return moment(value).isValid();
-      },
+      }
     },
 
     startTime: {
       type: "string",
       allowNull: true,
-      custom: function (value) {
+      custom: function(value) {
         return moment(value, "HH:mm", true).isValid();
-      },
+      }
     },
 
     recurrenceRules: {
       type: "json",
-      custom: function (value) {
+      custom: function(value) {
         if (value === null) return true;
         var valid = true;
         if (value.constructor !== Array) return false;
         if (value.length > 0) {
-          value.map((val) => {
+          value.map(val => {
             if (typeof val !== "object") valid = false;
             if (
               !val.measure ||
@@ -165,23 +165,23 @@ module.exports = {
                 "weeksOfMonth",
                 "weeksOfMonthByDay",
                 "daysOfWeek",
-                "monthsOfYear",
+                "monthsOfYear"
               ].indexOf(val.measure) === -1
             )
               valid = false;
             if (!val.units || val.units.constructor !== Array) valid = false;
-            val.units.map((unit) => {
+            val.units.map(unit => {
               if (isNaN(unit)) valid = false;
             });
           });
         }
         return valid;
-      },
+      }
     },
 
     recurrenceInterval: {
       type: "json",
-      custom: function (value) {
+      custom: function(value) {
         if (value === null) return true;
         if (typeof value !== "object") return false;
         if (
@@ -191,18 +191,18 @@ module.exports = {
           return false;
         if (!value.unit) return false;
         return true;
-      },
+      }
     },
 
     duration: {
       type: "number",
       min: 0, // 0 = null / no change
       max: 60 * 24,
-      allowNull: true,
-    },
+      allowNull: true
+    }
   },
 
-  fn: async function (inputs, exits) {
+  fn: async function(inputs, exits) {
     sails.log.debug("Controller calendar/add-schedule called.");
     try {
       // Verify the event
@@ -232,7 +232,7 @@ module.exports = {
         startTime: inputs.startTime,
         recurrenceRules: inputs.recurrenceRules,
         recurrenceInterval: inputs.recurrenceInterval,
-        duration: inputs.duration ? inputs.duration : null,
+        duration: inputs.duration ? inputs.duration : null
       };
 
       try {
@@ -253,29 +253,26 @@ module.exports = {
 
       // Check for event conflicts
       sails.models.calendar.calendardb.checkConflicts(
-        async (conflicts) => {
-          // Add the initial event into the calendar
-          var record = await sails.models.schedule.create(event).fetch();
-
+        async conflicts => {
           // Remove records which should be removed first
           if (conflicts.removals.length > 0) {
             sails.models.schedule
               .destroy({
-                ID: conflicts.removals.map((removal) => removal.scheduleID),
+                ID: conflicts.removals.map(removal => removal.scheduleID)
               })
               .fetch()
               .exec((err, records) => {
                 sails.sockets.broadcast("schedule", "debug", [
                   "conflict destroy",
                   err,
-                  records,
+                  records
                 ]);
               });
           }
 
           // Now, add overrides
           if (conflicts.additions.length > 0) {
-            conflicts.additions.map((override) => {
+            conflicts.additions.map(override => {
               override.overriddenID = !override.overriddenID
                 ? record.ID
                 : override.overriddenID; // overrideID should be set to the newly created schedule since the new one is overriding this one.
@@ -286,7 +283,7 @@ module.exports = {
                   sails.sockets.broadcast("schedule", "debug", [
                     "conflict create",
                     err,
-                    records,
+                    records
                   ]);
                 });
             });
@@ -295,10 +292,13 @@ module.exports = {
         [{ insert: event }]
       );
 
+      // Add the initial event into the calendar as we are checking conflicts
+      var record = await sails.models.schedule.create(event).fetch();
+
       // Success
       return exits.success();
     } catch (e) {
       return exits.error(e);
     }
-  },
+  }
 };
