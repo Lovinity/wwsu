@@ -270,7 +270,17 @@ module.exports = {
       type: "boolean",
       description:
         "Set to false to restrict the ability to send chat messages through the website"
-    }
+    },
+    hostCalling: {
+      type: "number",
+      allowNull: true,
+      description: "The host ID who initiated the remote broadcast call (null: no calls in progress)"
+    },
+    hostCalled: {
+      type: "number",
+      allowNull: true,
+      description: "The host ID who was called for the remote broadcast (null: no calls in progress)"
+    },
   },
 
   fn: async function(inputs, exits) {
