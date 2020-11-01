@@ -41,7 +41,6 @@ module.exports = {
   fn: async function(inputs, exits) {
     sails.log.debug("Helper recipients.add called.");
     try {
-      sails.log.silly(`sails.models.status: ${status}`);
       var answerCalls = false;
       var makeCalls = false;
       var hostID = null;
