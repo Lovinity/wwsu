@@ -15,6 +15,17 @@ module.exports = {
   exits: {},
 
   fn: async function(inputs) {
+    // Integrity check: Reject if we are in a remote state or pending a remote state
+    if (
+      sails.models.meta.memory.state.startsWith("remote_") ||
+      sails.models.meta.memory.state.startsWith("sportsremote_") ||
+      sails.models.meta.memory.state === "automation_remote" ||
+      sails.models.meta.memory.state === "automation_sportsremote"
+    )
+      return new Error(
+        "Cannot request an audio call when a remote broadcast is in progress."
+      );
+
     // Integrity check: Make sure this DJ Controls is allowed to call
     if (!this.req.payload.makeCalls)
       return new Error("This host is not allowed to start audio calls");
