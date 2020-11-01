@@ -119,7 +119,7 @@ module.exports = {
               host: find,
               group: inputs.group,
               device: inputs.device,
-              status: status,
+              status: 5,
               answerCalls: answerCalls,
               makeCalls: makeCalls,
               time: moment().toISOString(true)
