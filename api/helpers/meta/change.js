@@ -274,13 +274,15 @@ module.exports = {
     hostCalling: {
       type: "number",
       allowNull: true,
-      description: "The host ID who initiated the remote broadcast call (null: no calls in progress)"
+      description:
+        "The host ID who initiated the remote broadcast call (null: no calls in progress)"
     },
     hostCalled: {
       type: "number",
       allowNull: true,
-      description: "The host ID who was called for the remote broadcast (null: no calls in progress)"
-    },
+      description:
+        "The host ID who was called for the remote broadcast (null: no calls in progress)"
+    }
   },
 
   fn: async function(inputs, exits) {
@@ -345,7 +347,7 @@ module.exports = {
             if (
               inputs[key] !== null &&
               moment(sails.models.meta.memory[key]).diff(inputs[key]) < 1000 &&
-                moment(sails.models.meta.memory[key]).diff(inputs[key]) > -1000
+              moment(sails.models.meta.memory[key]).diff(inputs[key]) > -1000
             ) {
               continue;
             }
@@ -687,7 +689,10 @@ module.exports = {
             // Log the new track playing if the track was new
             await sails.models.logs
               .create({
-                attendanceID: (inputs.changingState || sails.models.meta.memory.changingState) ? 0 : sails.models.meta.memory.attendanceID, // If changingState, set attendanceID to 0, which will be updated when changingState is back to null.
+                attendanceID:
+                  inputs.changingState || sails.models.meta.memory.changingState
+                    ? 0
+                    : sails.models.meta.memory.attendanceID, // If changingState, set attendanceID to 0, which will be updated when changingState is back to null.
                 logtype: "track",
                 loglevel: "secondary",
                 logsubtype: "automation",
@@ -851,14 +856,22 @@ module.exports = {
 
       // If setting changingState to null, update logs where attendanceID is 0.
       if (inputs.changingState === null) {
-        await sails.models.logs.update({attendanceID: 0}, {attendanceID: sails.models.meta.memory.attendanceID}).fetch();
+        await sails.models.logs
+          .update(
+            { attendanceID: 0 },
+            { attendanceID: sails.models.meta.memory.attendanceID }
+          )
+          .fetch();
       }
 
       // Cycle through all push2's and update metadata
+      // Always push hostCalling and hostCalled even if they are unchanged; this triggers remote calling functions in DJ Controls.
       for (var key2 in push2) {
         if (
           Object.prototype.hasOwnProperty.call(push2, key2) &&
-          push2[key2] !== sails.models.meta.memory[key2]
+          (push2[key2] !== sails.models.meta.memory[key2] ||
+            key2 === "hostCalling" ||
+            key2 === "hostCalled")
         ) {
           push[key2] = push2[key2];
           sails.models.meta.memory[key2] = push2[key2];
