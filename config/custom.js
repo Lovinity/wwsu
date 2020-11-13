@@ -195,6 +195,12 @@ var defaultConfig = {
     unitSystem: 'us'
   },
 
+  // Skyway.js
+  skyway: {
+    API: ``, // Skyway.js app API key
+    secret: `` // Secret key for API authentication (NOT the API Key)
+  },
+
   startOfSemester: moment('2019-01-14 00:00:00').toISOString(true),
 
   /*
