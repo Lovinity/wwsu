@@ -37,7 +37,7 @@ module.exports = {
 function calculateAuthToken(peerId, timestamp) {
   // calculate the auth token hash
   const hash = CryptoJS.HmacSHA256(
-    `${timestamp}:${credentialTTL}:${peerId}`,
+    `${timestamp}:${60 * 60 * 24}:${peerId}`,
     sails.config.custom.skyway.secret
   );
 
