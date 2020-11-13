@@ -13,13 +13,13 @@ module.exports = {
   exits: {},
 
   fn: async function(inputs) {
+    // Get current time
+    const unixTimestamp = Math.floor(Date.now() / 1000);
+
     // Create the Peer ID that should be used
     let peerId = `WWSU-computer-${sh.unique(
       this.req.payload.host + sails.config.custom.hostSecret
-    )}`;
-
-    // Get current time
-    const unixTimestamp = Math.floor(Date.now() / 1000);
+    )}-${sh.unique(Date.now() + sails.config.custom.hostSecret)}`;
 
     // Create the credential
     const credential = {
