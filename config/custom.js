@@ -197,7 +197,7 @@ var defaultConfig = {
 
   // Skyway.js
   skyway: {
-    API: ``, // Skyway.js app API key
+    api: ``, // Skyway.js app API key
     secret: `` // Secret key for API authentication (NOT the API Key)
   },
 

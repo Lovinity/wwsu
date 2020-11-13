@@ -26,7 +26,8 @@ module.exports = {
       peerId: peerId,
       timestamp: unixTimestamp,
       ttl: 60 * 60 * 24, // 24 hours
-      authToken: calculateAuthToken(peerId, unixTimestamp)
+      authToken: calculateAuthToken(peerId, unixTimestamp),
+      apiKey: sails.config.custom.skyway.api
     };
 
     return credential;
