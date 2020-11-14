@@ -76,11 +76,11 @@ module.exports = {
 
     try {
       // Do not allow editing of the master director if we did not authorize with master director
-      if (inputs.ID === 0 && this.req.payload.ID !== 0)
+      if (inputs.ID === 1 && this.req.payload.ID !== 1)
         return new Error("Not allowed to edit the master director with any authorization other than the master director.");
 
       // If editing master director, do not allow disabling of the admin setting
-      if (inputs.ID === 0)
+      if (inputs.ID === 1)
         inputs.admin = true;
 
       // Determine if we need to lock out of editing admin

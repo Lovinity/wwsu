@@ -23,7 +23,7 @@ module.exports = {
 
     try {
       // Do not allow removing of master director
-      if (inputs.ID === 0)
+      if (inputs.ID === 1)
         return new Error("Not allowed to remove the master director");
 
       // Determine if we need to lock out of editing admin
