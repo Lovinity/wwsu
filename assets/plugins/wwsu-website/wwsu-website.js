@@ -37,13 +37,48 @@ window.addEventListener("DOMContentLoaded", () => {
         "website-chat",
         "website-schedule",
         "website-request",
-        "website-directors",
+        "website-directors"
       ],
       meta
     );
 
+    // EAS
+    var eas = new WWSUeas(socket, noReq, null, meta);
+    eas.on("newAlert", "renderer", record => {
+      if (record.severity === "Severe" || record.severity === "Extreme") {
+        $(document).Toasts("create", {
+          class: `bg-${record.severity === "Extreme" ? `danger` : `warning`}`,
+          title: record.alert,
+          subtitle: record.counties,
+          autohide: true,
+          delay: 30000,
+          body: `A ${
+            record.alert
+          } is in effect for the WWSU listening area counties of ${
+            record.counties
+          }, from ${moment.tz(
+            record.starts,
+            meta.meta ? meta.meta.timezone : moment.tz.guess()
+          )} to ${moment.tz(
+            record.expires,
+            meta.meta ? meta.meta.timezone : moment.tz.guess()
+          )} (station time).`,
+          icon: "fas fa-bolt fa-lg"
+        });
+      }
+    });
+
+    // Discipline
+    var discipline = new WWSUdiscipline(
+      socket,
+      noReq,
+      null,
+      null,
+      meta
+    );
+
     // Add event handlers
-    announcements.on("change", "renderer", (db) => {
+    announcements.on("change", "renderer", db => {
       processAnnouncements();
     });
 
@@ -62,7 +97,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     // subscriptions
     var subscriptions = new WWSUsubscriptions(socket, noReq);
-    subscriptions.on("subscriptions", "renderer", (subscriptions) => {
+    subscriptions.on("subscriptions", "renderer", subscriptions => {
       meta.meta = { state: meta.meta.state };
     });
 
@@ -82,7 +117,7 @@ window.addEventListener("DOMContentLoaded", () => {
       title: "Error initializing",
       body:
         "There was an error initializing the website. Please report this to wwsu4@wright.edu.",
-      icon: "fas fa-skull-crossbones fa-lg",
+      icon: "fas fa-skull-crossbones fa-lg"
     });
   }
 
@@ -93,9 +128,9 @@ window.addEventListener("DOMContentLoaded", () => {
         songs: [
           {
             url: "https://server.wwsu1069.org/stream",
-            live: true,
-          },
-        ],
+            live: true
+          }
+        ]
       });
     }
 
@@ -147,7 +182,7 @@ window.addEventListener("DOMContentLoaded", () => {
     );
 
     // Add change event for chat-nickname
-    $("#chat-nickname").change(function () {
+    $("#chat-nickname").change(function() {
       socket.post(
         "/recipients/edit-web",
         { label: $(this).val() },
@@ -156,31 +191,31 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
     // Add click events for subscription buttons
-    $(`#modal-eventinfo-subscribe-once`).click((e) => {
+    $(`#modal-eventinfo-subscribe-once`).click(e => {
       subscribe(`calendar-once`, viewingEvent.unique);
       $("#modal-eventinfo").modal("hide");
     });
-    $(`#modal-eventinfo-subscribe-once`).keypress((e) => {
+    $(`#modal-eventinfo-subscribe-once`).keypress(e => {
       if (e.key === "Enter") {
         subscribe(`calendar-once`, viewingEvent.unique);
         $("#modal-eventinfo").modal("hide");
       }
     });
-    $(`#modal-eventinfo-subscribe-all`).click((e) => {
+    $(`#modal-eventinfo-subscribe-all`).click(e => {
       subscribe(`calendar-all`, viewingEvent.calendarID);
       $("#modal-eventinfo").modal("hide");
     });
-    $(`#modal-eventinfo-subscribe-all`).keypress((e) => {
+    $(`#modal-eventinfo-subscribe-all`).keypress(e => {
       if (e.key === "Enter") {
         subscribe(`calendar-all`, viewingEvent.calendarID);
         $("#modal-eventinfo").modal("hide");
       }
     });
-    $(`#modal-eventinfo-unsubscribe`).click((e) => {
+    $(`#modal-eventinfo-unsubscribe`).click(e => {
       unsubscribe(viewingEvent.unique, viewingEvent.calendarID);
       $("#modal-eventinfo").modal("hide");
     });
-    $(`#modal-eventinfo-unsubscribe`).keypress((e) => {
+    $(`#modal-eventinfo-unsubscribe`).keypress(e => {
       if (e.key === "Enter") {
         unsubscribe(viewingEvent.unique, viewingEvent.calendarID);
         $("#modal-eventinfo").modal("hide");
@@ -189,13 +224,13 @@ window.addEventListener("DOMContentLoaded", () => {
     $(`#send-message-public`).click(() => {
       sendMessage();
     });
-    $(`#send-message-public`).keydown((e) => {
+    $(`#send-message-public`).keydown(e => {
       if (e.code === "Space" || e.code === "Enter") sendMessage();
     });
     $(`#send-message-private`).click(() => {
       sendMessage(true);
     });
-    $(`#send-message-private`).keydown((e) => {
+    $(`#send-message-private`).keydown(e => {
       if (e.code === "Space" || e.code === "Enter") sendMessage(true);
     });
     $(`#schedule-select`).change(() => {
@@ -204,13 +239,13 @@ window.addEventListener("DOMContentLoaded", () => {
     $(`#request-search`).click(() => {
       loadTracks(0);
     });
-    $(`#request-search`).keydown((e) => {
+    $(`#request-search`).keydown(e => {
       if (e.code === "Space" || e.code === "Enter") loadTracks(0);
     });
     $(`#request-more`).click(() => {
       loadTracks();
     });
-    $(`#request-more`).keydown((e) => {
+    $(`#request-more`).keydown(e => {
       if (e.code === "Space" || e.code === "Enter") loadTracks();
     });
   } catch (e) {
@@ -220,7 +255,7 @@ window.addEventListener("DOMContentLoaded", () => {
       title: "Error in document.ready",
       body:
         "There was an error in initializing the webpage. Please report this to wwsu4@wright.edu.",
-      icon: "fas fa-skull-crossbones fa-lg",
+      icon: "fas fa-skull-crossbones fa-lg"
     });
   }
 
@@ -242,84 +277,6 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   /*
-    DISCIPLINE FUNCTIONS
-*/
-
-  socket.on("discipline", (data) => {
-    socket.disconnect();
-    $("#modal-discipline-title").html(
-      `Disciplinary action issued - Disconnected from WWSU`
-    );
-    $("#modal-discipline-body")
-      .html(`<p>Disciplinary action was issued against you for the following reason: ${data.message}.</p>
-<p>A ${data.action} was issued against you, and you may no longer use WWSU's services until the discipline expires.</p>
-<p>Please contact gm@wwsu1069.org if you have any questions or concerns.</p>`);
-    $("#modal-discipline").modal({ backdrop: "static", keyboard: false });
-  });
-
-  /**
-   * Check if this client has an active discipline on WWSU's API, and if so, display the #modal-discipline.
-   *
-   * @param {function} cb Callback executed if user is not under a discipline
-   */
-  function checkDiscipline(cb) {
-    socket.post("/discipline/get-web", {}, function serverResponded(body) {
-      try {
-        var docb = true;
-        if (body.length > 0) {
-          body.map((discipline) => {
-            var activeDiscipline =
-              discipline.active &&
-              (discipline.action !== "dayban" ||
-                moment(discipline.createdAt).add(1, "days").isAfter(moment()));
-            if (activeDiscipline) {
-              docb = false;
-            }
-            if (activeDiscipline || !discipline.acknowledged) {
-              $("#modal-discipline-title").html(
-                `Disciplinary action ${
-                  activeDiscipline
-                    ? `active against you`
-                    : `was issued in the past against you`
-                }`
-              );
-              $("#modal-discipline-body").html(`<p>On ${moment(
-                discipline.createdAt
-              ).format(
-                "LLL"
-              )}, disciplinary action was issued against you for the following reason: ${
-                discipline.message
-              }.</p>
-                <p>${
-                  activeDiscipline
-                    ? `A ${discipline.action} is currently active, and you are not allowed to use WWSU's services at this time.`
-                    : `The discipline has expired, but you must acknowledge this message before you may use WWSU's services. Further issues may warrant more severe disciplinary action.`
-                }</p>
-                <p>Please contact gm@wwsu1069.org if you have any questions or concerns.</p>`);
-              $("#modal-discipline").modal({
-                backdrop: "static",
-                keyboard: false,
-              });
-            }
-          });
-        }
-        if (docb) {
-          cb();
-        }
-      } catch (e) {
-        console.error(e);
-        $(document).Toasts("create", {
-          class: "bg-danger",
-          title: "Error checking discipline",
-          body:
-            "There was an error checking to see if you are allowed to access WWSU. Please try again later, or contact wwsu4@wright.edu if this problem continues.",
-          icon: "fas fa-skull-crossbones fa-lg",
-        });
-      }
-    });
-  }
-
-  /*
     SOCKET FUNCTIONS
 */
 
@@ -331,12 +288,13 @@ window.addEventListener("DOMContentLoaded", () => {
   function doSockets(firsttime = false) {
     // Mobile devices and web devices where device parameter was passed, start sockets immediately.
     if (isMobile || !firsttime || (!isMobile && device !== null)) {
-      checkDiscipline(() => {
+      discipline.checkDiscipline(() => {
         likedtracks.init();
         meta.init();
         announcements.init();
         directorsdb.init();
         calendardb.init();
+        eas.init();
         loadGenres();
         onlineSocket();
         messagesSocket();
@@ -344,12 +302,13 @@ window.addEventListener("DOMContentLoaded", () => {
       // web devices without device parameter, connect to OneSignal first and get the ID, then start sockets.
     } else {
       OneSignal = window.OneSignal || [];
-      checkDiscipline(() => {
+      discipline.checkDiscipline(() => {
         likedtracks.init();
         meta.init();
         announcements.init();
         directorsdb.init();
         calendardb.init();
+        eas.init();
         loadGenres();
         onlineSocket(true);
         messagesSocket();
@@ -420,7 +379,7 @@ window.addEventListener("DOMContentLoaded", () => {
             "automation_on",
             "automation_break",
             "automation_genre",
-            "automation_playlist",
+            "automation_playlist"
           ].indexOf(_meta.state) === -1
         ) {
           $(".nowplaying-icon").html(
@@ -589,7 +548,7 @@ window.addEventListener("DOMContentLoaded", () => {
       if (typeof response.history !== "undefined") {
         // reset recent tracks
         $(".nowplaying-recentlyplayed").html(
-          response.history.map((track) => {
+          response.history.map(track => {
             return `<tr>
                 <td>
                 ${track.track}
@@ -611,12 +570,12 @@ window.addEventListener("DOMContentLoaded", () => {
         window.requestAnimationFrame(() => {
           $(`.button-track-like`)
             .unbind("click")
-            .click((e) => {
+            .click(e => {
               likeTrack(parseInt($(e.currentTarget).data("id")));
             });
           $(`.button-track-like`)
             .unbind("keydown")
-            .keydown((e) => {
+            .keydown(e => {
               if (e.code === "Space" || e.code === "Enter")
                 likeTrack(parseInt($(e.currentTarget).data("id")));
             });
@@ -654,9 +613,9 @@ window.addEventListener("DOMContentLoaded", () => {
       chat: ``,
       schedule: ``,
       request: ``,
-      directors: ``,
+      directors: ``
     };
-    announcements.db().each((announcement) => {
+    announcements.db().each(announcement => {
       if (
         moment(meta.meta.time).isAfter(moment(announcement.starts)) &&
         moment(meta.meta.time).isBefore(moment(announcement.expires))
@@ -675,7 +634,7 @@ window.addEventListener("DOMContentLoaded", () => {
               autohide: true,
               delay: announcement.displayTime * 1000 || 15000,
               body: announcement.announcement,
-              icon: "fas fa-bullhorn fa-lg",
+              icon: "fas fa-bullhorn fa-lg"
             });
           } else {
             html[type] += `<div class="alert alert-${announcement.level}">
@@ -699,7 +658,7 @@ window.addEventListener("DOMContentLoaded", () => {
     CALENDAR / SCHEDULE FUNCTIONS
 */
 
-  calendardb.on("calendarUpdated", "renderer", (db) => {
+  calendardb.on("calendarUpdated", "renderer", db => {
     updateCalendar();
     updateDirectorsCalendar();
   });
@@ -736,18 +695,18 @@ window.addEventListener("DOMContentLoaded", () => {
 
         // Process events for the next 7 days
         calendardb.getEvents(
-          (events) => {
+          events => {
             var html = "";
 
             // Run through every event in memory and add appropriate ones into our formatted calendar variable.
             events
               .filter(
-                (event) =>
+                event =>
                   [
                     "event",
                     "onair-booking",
                     "prod-booking",
-                    "office-hours",
+                    "office-hours"
                   ].indexOf(event.type) === -1 &&
                   moment(event.start).isSameOrBefore(
                     moment(meta.meta.time)
@@ -760,7 +719,7 @@ window.addEventListener("DOMContentLoaded", () => {
                       .add(selectedOption, `days`)
                   )
               )
-              .map((event) => {
+              .map(event => {
                 try {
                   var colorClass = `secondary`;
                   var iconClass = "far fa-calendar-alt";
@@ -882,7 +841,7 @@ window.addEventListener("DOMContentLoaded", () => {
                     title: "calendar error",
                     body:
                       "There was an error in the updateCalendar function, event mapping. Please report this to wwsu4@wright.edu.",
-                    icon: "fas fa-skull-crossbones fa-lg",
+                    icon: "fas fa-skull-crossbones fa-lg"
                   });
                 }
               });
@@ -893,12 +852,12 @@ window.addEventListener("DOMContentLoaded", () => {
             window.requestAnimationFrame(() => {
               $(`.button-event-info`)
                 .unbind("click")
-                .click((e) => {
+                .click(e => {
                   displayEventInfo($(e.currentTarget).data("id"));
                 });
               $(`.button-event-info`)
                 .unbind("keydown")
-                .keydown((e) => {
+                .keydown(e => {
                   if (e.code === "Space" || e.code === "Enter")
                     displayEventInfo($(e.currentTarget).data("id"));
                 });
@@ -906,7 +865,9 @@ window.addEventListener("DOMContentLoaded", () => {
 
             calendarUpdating = false;
           },
-          moment().add(selectedOption, "days").startOf("day"),
+          moment()
+            .add(selectedOption, "days")
+            .startOf("day"),
           moment()
             .add(selectedOption + 1, "days")
             .startOf("day")
@@ -914,7 +875,7 @@ window.addEventListener("DOMContentLoaded", () => {
       },
       onUnblock: () => {
         calendarUpdating = false;
-      },
+      }
     });
   }
 
@@ -933,14 +894,14 @@ window.addEventListener("DOMContentLoaded", () => {
         try {
           directorHours = {};
 
-          directorsdb.db().each((director) => {
+          directorsdb.db().each(director => {
             directorHours[director.ID] = { director: director, hours: [] };
           });
 
           // A list of Office Hours for the directors
 
           // Define a comparison function that will order calendar events by start time when we run the iteration
-          var compare = function (a, b) {
+          var compare = function(a, b) {
             try {
               if (moment(a.start).valueOf() < moment(b.start).valueOf()) {
                 return -1;
@@ -959,16 +920,16 @@ window.addEventListener("DOMContentLoaded", () => {
               console.error(e);
               iziToast.show({
                 title: "An error occurred - Please check the logs",
-                message: `Error occurred in the compare function of Calendar.sort in the Calendar[0] call.`,
+                message: `Error occurred in the compare function of Calendar.sort in the Calendar[0] call.`
               });
             }
           };
           calendardb.getEvents(
-            (events) => {
+            events => {
               events
                 .sort(compare)
-                .filter((event) => event.type === "office-hours")
-                .map((event) => {
+                .filter(event => event.type === "office-hours")
+                .map(event => {
                   // null start or end? Use a default to prevent errors.
                   if (!moment(event.start).isValid()) {
                     event.start = moment(meta.meta.time).startOf("day");
@@ -999,7 +960,9 @@ window.addEventListener("DOMContentLoaded", () => {
                   // Update strings if need be, if say, start time was before this day, or end time is after this day.
                   if (
                     moment(event.end).isAfter(
-                      moment(event.start).startOf("day").add(1, "days")
+                      moment(event.start)
+                        .startOf("day")
+                        .add(1, "days")
                     )
                   ) {
                     event.endT = `${moment(event.end).format("MM/DD ")} ${
@@ -1101,19 +1064,21 @@ window.addEventListener("DOMContentLoaded", () => {
               directorsCalendarUpdating = false;
             },
             moment().startOf("day"),
-            moment().add(7, "days").startOf("day")
+            moment()
+              .add(7, "days")
+              .startOf("day")
           );
         } catch (e) {
           iziToast.show({
             title: "An error occurred - Please check the logs",
-            message: "Error occurred during the call of office hours.",
+            message: "Error occurred during the call of office hours."
           });
           console.error(e);
         }
       },
       onUnblock: () => {
         directorsCalendarUpdating = false;
-      },
+      }
     });
   }
 
@@ -1124,8 +1089,8 @@ window.addEventListener("DOMContentLoaded", () => {
    */
   function displayEventInfo(showID) {
     calendardb.getEvents(
-      (events) => {
-        events = events.filter((event) => event.unique === showID);
+      events => {
+        events = events.filter(event => event.unique === showID);
         if (events.length === 0) {
           $(document).Toasts("create", {
             class: "bg-danger",
@@ -1133,7 +1098,7 @@ window.addEventListener("DOMContentLoaded", () => {
             subtitle: showID,
             body:
               "There was an error trying to load that event. Please report this to wwsu4@wright.edu.",
-            icon: "fas fa-skull-crossbones fa-lg",
+            icon: "fas fa-skull-crossbones fa-lg"
           });
           return null;
         }
@@ -1292,13 +1257,13 @@ window.addEventListener("DOMContentLoaded", () => {
 
           $(`#modal-eventinfo-subscribe-all`)
             .off("click")
-            .click((event) => {
+            .click(event => {
               OneSignal.showSlidedownPrompt({ force: true });
               $("#modal-eventinfo").modal("hide");
             });
           $(`#modal-eventinfo-subscribe-all`)
             .off("keydown")
-            .keydown((event) => {
+            .keydown(event => {
               if (event.code === "Enter" || event.code === "Space") {
                 OneSignal.showSlidedownPrompt({ force: true });
                 $("#modal-eventinfo").modal("hide");
@@ -1338,7 +1303,7 @@ window.addEventListener("DOMContentLoaded", () => {
 */
 
   // When a new message is received, process it.
-  socket.on("messages", (data) => {
+  socket.on("messages", data => {
     try {
       for (var key in data) {
         if (Object.prototype.hasOwnProperty.call(data, key)) {
@@ -1377,8 +1342,8 @@ window.addEventListener("DOMContentLoaded", () => {
       //console.log(body);
       try {
         body
-          .filter((message) => messageIDs.indexOf(message.ID) === -1)
-          .map((message) => addMessage(message, firstTime));
+          .filter(message => messageIDs.indexOf(message.ID) === -1)
+          .map(message => addMessage(message, firstTime));
         firstTime = false;
       } catch (e) {
         console.error(e);
@@ -1425,7 +1390,7 @@ window.addEventListener("DOMContentLoaded", () => {
           autohide: true,
           delay: 15000,
           body: data.message,
-          icon: "fas fa-comments fa-lg",
+          icon: "fas fa-comments fa-lg"
         });
       }
       newMessages++;
@@ -1457,7 +1422,7 @@ window.addEventListener("DOMContentLoaded", () => {
           autohide: true,
           delay: 15000,
           body: data.message,
-          icon: "fas fa-comments fa-lg",
+          icon: "fas fa-comments fa-lg"
         });
       }
       newMessages++;
@@ -1490,7 +1455,7 @@ window.addEventListener("DOMContentLoaded", () => {
           autohide: true,
           delay: 15000,
           body: data.message,
-          icon: "fas fa-comments fa-lg",
+          icon: "fas fa-comments fa-lg"
         });
       }
     } else if (data.from === client) {
@@ -1561,7 +1526,7 @@ window.addEventListener("DOMContentLoaded", () => {
         autohide: true,
         delay: 10000,
         body: "You did not type a message to send.",
-        icon: "fas fa-skull-crossbones fa-lg",
+        icon: "fas fa-skull-crossbones fa-lg"
       });
       return null;
     }
@@ -1570,7 +1535,7 @@ window.addEventListener("DOMContentLoaded", () => {
       {
         message: $("#chat-message").val(),
         nickname: $("#chat-nickname").val(),
-        private: privateMsg,
+        private: privateMsg
       },
       function serverResponded(response) {
         try {
@@ -1582,7 +1547,7 @@ window.addEventListener("DOMContentLoaded", () => {
               delay: 15000,
               body:
                 "WWSU rejected your message. This could be because you are sending messages too fast, or you are banned from sending messages.",
-              icon: "fas fa-skull-crossbones fa-lg",
+              icon: "fas fa-skull-crossbones fa-lg"
             });
             return null;
           }
@@ -1594,7 +1559,7 @@ window.addEventListener("DOMContentLoaded", () => {
             title: "Error sending message",
             body:
               "There was an error sending your message. Please report this to wwsu4@wright.edu.",
-            icon: "fas fa-skull-crossbones fa-lg",
+            icon: "fas fa-skull-crossbones fa-lg"
           });
         }
       }
@@ -1612,7 +1577,7 @@ window.addEventListener("DOMContentLoaded", () => {
     socket.post("/songs/get-genres", {}, function serverResponded(response) {
       try {
         var html = `<option value="0">Any Genre</option>`;
-        response.map((subcat) => {
+        response.map(subcat => {
           html += `<option value="${subcat.ID}">${subcat.name}</option>`;
         });
         $("#request-genre").html(html);
@@ -1623,7 +1588,7 @@ window.addEventListener("DOMContentLoaded", () => {
           title: "Error loading genres for request system",
           body:
             "There was an error loading the available genres to filter by in the request system. Please report this to wwsu4@wright.edu.",
-          icon: "fas fa-skull-crossbones fa-lg",
+          icon: "fas fa-skull-crossbones fa-lg"
         });
       }
     });
@@ -1640,9 +1605,11 @@ window.addEventListener("DOMContentLoaded", () => {
       skip: skip,
       limit: 50,
       ignoreDisabled: true,
-      ignoreNonMusic: true,
+      ignoreNonMusic: true
     };
-    var selectedOption = $("#request-genre").children("option:selected").val();
+    var selectedOption = $("#request-genre")
+      .children("option:selected")
+      .val();
     if (selectedOption !== "0") {
       query.genre = parseInt(selectedOption);
     }
@@ -1659,7 +1626,7 @@ window.addEventListener("DOMContentLoaded", () => {
           $("#request-more-none").css("display", "none");
           $("#request-more").css("display", "");
 
-          response.map((track) => {
+          response.map(track => {
             html += `<tr class="${track.enabled !== 1 ? "bg-dark" : ""}">
             <td>${track.artist} - ${track.title}${
               track.enabled !== 1 ? " (DISABLED)" : ""
@@ -1686,12 +1653,12 @@ window.addEventListener("DOMContentLoaded", () => {
             window.requestAnimationFrame(() => {
               $(`.button-request-track`)
                 .unbind("click")
-                .click((e) => {
+                .click(e => {
                   loadTrackInfo(parseInt($(e.currentTarget).data("id")));
                 });
               $(`.button-request-track`)
                 .unbind("keydown")
-                .keydown((e) => {
+                .keydown(e => {
                   if (e.code === "Space" || e.code === "Enter")
                     loadTrackInfo(parseInt($(e.currentTarget).data("id")));
                 });
@@ -1713,7 +1680,7 @@ window.addEventListener("DOMContentLoaded", () => {
           title: "Error loading tracks for request system",
           body:
             "There was an error loading the tracks for the request system. Please report this to wwsu4@wright.edu.",
-          icon: "fas fa-skull-crossbones fa-lg",
+          icon: "fas fa-skull-crossbones fa-lg"
         });
       }
     });
@@ -1753,9 +1720,8 @@ window.addEventListener("DOMContentLoaded", () => {
               ${
                 response[0].limit_action > 0 &&
                 response[0].count_played < response[0].play_limit
-                  ? `<li>Track has ${
-                      response[0].play_limit - response[0].count_played
-                    } spins left</li>`
+                  ? `<li>Track has ${response[0].play_limit -
+                      response[0].count_played} spins left</li>`
                   : ``
               }
               ${
@@ -1793,12 +1759,12 @@ window.addEventListener("DOMContentLoaded", () => {
             window.requestAnimationFrame(() => {
               $(`#track-request-submit`)
                 .unbind("click")
-                .click((e) => {
+                .click(e => {
                   requestTrack(response[0].ID);
                 });
               $(`#track-request-submit`)
                 .unbind("keydown")
-                .keydown((e) => {
+                .keydown(e => {
                   if (e.code === "Space" || e.code === "Enter")
                     requestTrack(response[0].ID);
                 });
@@ -1819,7 +1785,7 @@ window.addEventListener("DOMContentLoaded", () => {
             subtitle: trackID,
             body:
               "There was an error loading track information. Please report this to wwsu4@wright.edu.",
-            icon: "fas fa-skull-crossbones fa-lg",
+            icon: "fas fa-skull-crossbones fa-lg"
           });
         }
       }
@@ -1835,7 +1801,7 @@ window.addEventListener("DOMContentLoaded", () => {
     var data = {
       ID: trackID,
       name: $("#track-request-name").val(),
-      message: $("#track-request-message").val(),
+      message: $("#track-request-message").val()
     };
     if (device !== null) {
       data.device = device;
@@ -1850,7 +1816,7 @@ window.addEventListener("DOMContentLoaded", () => {
             autohide: true,
             delay: 10000,
             body: `Your request has been placed!`,
-            icon: "fas fa-file-audio fa-lg",
+            icon: "fas fa-file-audio fa-lg"
           });
         } else {
           $(document).Toasts("create", {
@@ -1860,7 +1826,7 @@ window.addEventListener("DOMContentLoaded", () => {
             autohide: true,
             delay: 10000,
             body: `WWSU rejected your track request. The track may already be in the queue or might not be requestable at this time.`,
-            icon: "fas fa-file-audio fa-lg",
+            icon: "fas fa-file-audio fa-lg"
           });
         }
         $("#modal-trackinfo").modal("hide");
@@ -1872,7 +1838,7 @@ window.addEventListener("DOMContentLoaded", () => {
           subtitle: trackID,
           body:
             "There was an error placing the track request. Please report this to wwsu4@wright.edu.",
-          icon: "fas fa-skull-crossbones fa-lg",
+          icon: "fas fa-skull-crossbones fa-lg"
         });
       }
     });
@@ -1908,14 +1874,14 @@ window.addEventListener("DOMContentLoaded", () => {
             OneSignal.push(() => {
               OneSignal.init({
                 appId: "150c0123-e224-4e5b-a8b2-fc202d78e2f1",
-                autoResubscribe: true,
+                autoResubscribe: true
               });
 
               notificationsSupported = OneSignal.isPushNotificationsSupported();
 
-              OneSignal.isPushNotificationsEnabled().then((isEnabled) => {
+              OneSignal.isPushNotificationsEnabled().then(isEnabled => {
                 if (isEnabled) {
-                  OneSignal.getUserId().then((userId) => {
+                  OneSignal.getUserId().then(userId => {
                     device = userId;
                     onlineSocket();
                   });
@@ -1925,47 +1891,10 @@ window.addEventListener("DOMContentLoaded", () => {
                 }
               });
 
-              OneSignal.on(
-                "notificationPermissionChange",
-                (permissionChange) => {
-                  var currentPermission = permissionChange.to;
-                  if (currentPermission === "granted" && device === null) {
-                    OneSignal.getUserId().then((userId) => {
-                      $(document).Toasts("create", {
-                        class: "bg-success",
-                        title: "Notifications Enabled",
-                        autohide: true,
-                        delay: 15000,
-                        body:
-                          "<p>You have granted WWSU permission to send you notifications. Now, you can subscribe to your favorite shows to get notified when they air and when their schedule changes.</p>",
-                        icon: "fas fa-bell fa-lg",
-                      });
-                      device = userId;
-                      onlineSocket();
-                    });
-                  } else if (
-                    currentPermission === "denied" &&
-                    device !== null
-                  ) {
-                    $(document).Toasts("create", {
-                      class: "bg-success",
-                      title: "Notifications Disabled",
-                      autohide: true,
-                      delay: 15000,
-                      body:
-                        "<p>You have rejected WWSU permission to send you notifications. You will no longer receive any notifications, including shows you subscribed.</p>",
-                      icon: "fas fa-bell-slash fa-lg",
-                    });
-                    device = null;
-                    onlineSocket();
-                  }
-                }
-              );
-
-              // On changes to web notification subscriptions; update subscriptions and device.
-              OneSignal.on("subscriptionChange", (isSubscribed) => {
-                if (isSubscribed && device === null) {
-                  OneSignal.getUserId().then((userId) => {
+              OneSignal.on("notificationPermissionChange", permissionChange => {
+                var currentPermission = permissionChange.to;
+                if (currentPermission === "granted" && device === null) {
+                  OneSignal.getUserId().then(userId => {
                     $(document).Toasts("create", {
                       class: "bg-success",
                       title: "Notifications Enabled",
@@ -1973,7 +1902,38 @@ window.addEventListener("DOMContentLoaded", () => {
                       delay: 15000,
                       body:
                         "<p>You have granted WWSU permission to send you notifications. Now, you can subscribe to your favorite shows to get notified when they air and when their schedule changes.</p>",
-                      icon: "fas fa-bell fa-lg",
+                      icon: "fas fa-bell fa-lg"
+                    });
+                    device = userId;
+                    onlineSocket();
+                  });
+                } else if (currentPermission === "denied" && device !== null) {
+                  $(document).Toasts("create", {
+                    class: "bg-success",
+                    title: "Notifications Disabled",
+                    autohide: true,
+                    delay: 15000,
+                    body:
+                      "<p>You have rejected WWSU permission to send you notifications. You will no longer receive any notifications, including shows you subscribed.</p>",
+                    icon: "fas fa-bell-slash fa-lg"
+                  });
+                  device = null;
+                  onlineSocket();
+                }
+              });
+
+              // On changes to web notification subscriptions; update subscriptions and device.
+              OneSignal.on("subscriptionChange", isSubscribed => {
+                if (isSubscribed && device === null) {
+                  OneSignal.getUserId().then(userId => {
+                    $(document).Toasts("create", {
+                      class: "bg-success",
+                      title: "Notifications Enabled",
+                      autohide: true,
+                      delay: 15000,
+                      body:
+                        "<p>You have granted WWSU permission to send you notifications. Now, you can subscribe to your favorite shows to get notified when they air and when their schedule changes.</p>",
+                      icon: "fas fa-bell fa-lg"
                     });
                     device = userId;
                     onlineSocket();
@@ -1986,7 +1946,7 @@ window.addEventListener("DOMContentLoaded", () => {
                     delay: 15000,
                     body:
                       "<p>You have rejected WWSU permission to send you notifications. You will no longer receive any notifications, including shows you subscribed.</p>",
-                    icon: "fas fa-bell-slash fa-lg",
+                    icon: "fas fa-bell-slash fa-lg"
                   });
                   device = null;
                   onlineSocket();
