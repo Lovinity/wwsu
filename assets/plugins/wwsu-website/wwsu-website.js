@@ -289,8 +289,8 @@ window.addEventListener("DOMContentLoaded", () => {
     // Mobile devices and web devices where device parameter was passed, start sockets immediately.
     if (isMobile || !firsttime || (!isMobile && device !== null)) {
       discipline.checkDiscipline(() => {
-        likedtracks.init();
         meta.init();
+        likedtracks.init();
         announcements.init();
         directorsdb.init();
         calendardb.init();
@@ -303,8 +303,8 @@ window.addEventListener("DOMContentLoaded", () => {
     } else {
       OneSignal = window.OneSignal || [];
       discipline.checkDiscipline(() => {
-        likedtracks.init();
         meta.init();
+        likedtracks.init();
         announcements.init();
         directorsdb.init();
         calendardb.init();

@@ -26,7 +26,7 @@ class WWSUMeta extends WWSUevents {
 
     // Add meta socket event
     socket.on("meta", (data) => {
-      for (var key in data) {
+      for (let key in data) {
         if (Object.prototype.hasOwnProperty.call(data, key)) {
           this._meta[key] = data[key];
           if (key === "time") {
@@ -43,8 +43,6 @@ class WWSUMeta extends WWSUevents {
       }
       this.emitEvent("newMeta", [data, this._meta]);
     });
-
-    this.init();
   }
 
   // Initialize function; should be called in socket.on('connect').
@@ -53,7 +51,7 @@ class WWSUMeta extends WWSUevents {
       { method: "POST", url: this.endpoint, data: {} },
       (body) => {
         try {
-          for (var key in body) {
+          for (let key in body) {
             if (Object.prototype.hasOwnProperty.call(body, key)) {
               this._meta[key] = body[key];
               if (key === "time") {
@@ -96,6 +94,7 @@ class WWSUMeta extends WWSUevents {
 
   /**
    * Reset the ticker that updates meta.time and fires metaTick every second.
+   * Instead of adding a second each call (setInterval is not exact), determine time difference between system time and station time, as well as system time difference between now and previous timer fire.
    */
   resetTick() {
     var ticker = () => {
