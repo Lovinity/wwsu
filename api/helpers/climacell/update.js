@@ -39,11 +39,11 @@ module.exports = {
       return;
     }
     if (body) {
-      for (var key in body) {
+      for (let key in body) {
         if (Object.prototype.hasOwnProperty.call(body, key)) {
-          var key2 = `realtime-${key.replace("_", "-")}`;
+          let key2 = `realtime-${key.replace("_", "-")}`;
           await new Promise(async (resolve) => {
-            var data = body[key]
+            let data = body[key]
               ? `${body[key].value}${
                   body[key].units ? ` ${body[key].units}` : ``
                 }`
@@ -65,7 +65,7 @@ module.exports = {
                   resolve();
                 }
 
-                var original = records.find(
+                let original = records.find(
                   (record) => record.dataClass === key2
                 );
                 if (!original || original.data !== data) {
@@ -108,12 +108,14 @@ module.exports = {
       return;
     }
     if (body && body.constructor === Array) {
+
       var nowcastMaps = body.map(async (nc, index) => {
-        for (var key in nc) {
+        for (let key in nc) {
           if (Object.prototype.hasOwnProperty.call(nc, key)) {
-            var key2 = `nc-${index}-${key.replace("_", "-")}`;
+            let key2 = `nc-${index}-${key.replace("_", "-")}`;
+            
             await new Promise(async (resolve) => {
-              var data = nc[key]
+              let data = nc[key]
                 ? `${nc[key].value}${nc[key].units ? ` ${nc[key].units}` : ``}`
                 : null;
               sails.models.climacell
@@ -133,7 +135,7 @@ module.exports = {
                     resolve();
                   }
 
-                  var original = records.find(
+                  let original = records.find(
                     (record) => record.dataClass === key2
                   );
                   if (!original || original.data !== data) {
@@ -176,18 +178,22 @@ module.exports = {
         },
       }
     );
+
     if (body.errorCode) {
       sails.log.error(new Error(body));
       return;
     }
+
     if (body && typeof body.constructor === Array) {
+
       var hourlyMaps = body.map(async (hr, index) => {
-        for (var key in hr) {
+        for (let key in hr) {
           if (Object.prototype.hasOwnProperty.call(hr, key)) {
-            var key2 = `hr-${index}-${key.replace("_", "-")}`;
+            let key2 = `hr-${index}-${key.replace("_", "-")}`;
+
             await new Promise(async (resolve) => {
-              var data = hr[key]
-                ? `${hr[key].value}${hr[key].units ? ` ${hr[key].units}` : ``}`
+              let data = hr[key]
+                ? `${hr[key].value || hr[key]}${hr[key].units ? ` ${hr[key].units}` : ``}`
                 : null;
               sails.models.climacell
                 .findOrCreate(
@@ -206,7 +212,7 @@ module.exports = {
                     resolve();
                   }
 
-                  var original = records.find(
+                  let original = records.find(
                     (record) => record.dataClass === key2
                   );
                   if (!original || original.data !== data) {
@@ -224,10 +230,12 @@ module.exports = {
                   resolve();
                 });
             });
+
           }
         }
       });
       await Promise.all(hourlyMaps);
+
     }
   },
 };
