@@ -26,7 +26,11 @@ module.exports = {
       peerId: peerId,
       timestamp: unixTimestamp,
       ttl: 60 * 60 * 24, // 24 hours
-      authToken: calculateAuthToken(peerId, unixTimestamp),
+      authToken: { // TODO: Fix this in DJ Controls; this is a hotfix to prevent needing a new version right away
+        authToken: calculateAuthToken(peerId, unixTimestamp),
+        ttl: 60 * 60 * 24,
+        timestamp: unixTimestamp
+      },
       apiKey: sails.config.custom.skyway.api
     };
 
