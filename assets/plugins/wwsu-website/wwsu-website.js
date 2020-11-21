@@ -59,10 +59,10 @@ window.addEventListener("DOMContentLoaded", () => {
           }, from ${moment.tz(
             record.starts,
             meta.meta ? meta.meta.timezone : moment.tz.guess()
-          )} to ${moment.tz(
+          ).format("lll")} to ${moment.tz(
             record.expires,
             meta.meta ? meta.meta.timezone : moment.tz.guess()
-          )} (station time).`,
+          ).format("lll")} (station time).`,
           icon: "fas fa-bolt fa-lg"
         });
       }
