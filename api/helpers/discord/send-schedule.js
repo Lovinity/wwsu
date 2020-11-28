@@ -42,6 +42,8 @@ module.exports = {
 
     if (inputs.started) return;
 
+    if (!inputs.event || ["show", "remote", "sports", "prerecord", "playlist"].indexOf(inputs.event.type) === -1) return;
+
     if (!inputs.newSchedule && !inputs.removedException) {
       if (
         inputs.event.scheduleType === "updated" ||

@@ -22,6 +22,13 @@ module.exports = {
     const webhook =
       "https://discord.com/api/webhooks/782133813853683712/1qJv5Yc8dnqolO_MK_Dsz6g8axZqX5KmLpm6S8C1jr-sppwjadLFeryC-oJ0lEOT-vAR";
 
+    if (
+      !inputs.event ||
+      ["show", "remote", "sports", "prerecord", "playlist"].indexOf(inputs.event.type) ===
+        -1
+    )
+      return;
+
     return await needle(
       "post",
       webhook,
