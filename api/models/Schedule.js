@@ -191,6 +191,7 @@ module.exports = {
       ) {
         await sails.helpers.onesignal.sendEvent(_event, false, false);
         await sails.helpers.emails.queueEvent(_event, false, false);
+        await sails.helpers.discord.sendSchedule(_event, false, false);
       }
 
       if (
@@ -199,6 +200,7 @@ module.exports = {
       ) {
         await sails.helpers.onesignal.sendEvent(_event, false, false);
         await sails.helpers.emails.queueEvent(_event, false, false);
+        await sails.helpers.discord.sendSchedule(_event, false, false);
 
         // Create cancellation logs
         if (
@@ -328,6 +330,7 @@ module.exports = {
       ) {
         await sails.helpers.onesignal.sendEvent(_event, false, false);
         await sails.helpers.emails.queueEvent(_event, false, false);
+        await sails.helpers.discord.sendSchedule(_event, false, false);
       }
 
       if (
@@ -336,6 +339,7 @@ module.exports = {
       ) {
         await sails.helpers.onesignal.sendEvent(_event, false, false);
         await sails.helpers.emails.queueEvent(_event, false, false);
+        await sails.helpers.discord.sendSchedule(_event, false, false);
 
         // Create cancellation logs
         if (
@@ -464,6 +468,7 @@ module.exports = {
         ) {
           await sails.helpers.onesignal.sendEvent(_event, false, false, true);
           await sails.helpers.emails.queueEvent(_event, false, false, true);
+          await sails.helpers.discord.sendSchedule(_event, false, false, true);
         }
 
         if (
@@ -472,6 +477,7 @@ module.exports = {
         ) {
           await sails.helpers.onesignal.sendEvent(_event, false, false, true);
           await sails.helpers.emails.queueEvent(_event, false, false, true);
+          await sails.helpers.discord.sendSchedule(_event, false, false, true);
 
           // Destroy cancellation records (but only if the main calendar event is still active)
           if (

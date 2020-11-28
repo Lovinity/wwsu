@@ -435,6 +435,7 @@ module.exports = {
 
           // Let subscribers know this show is now on the air
           await sails.helpers.onesignal.sendEvent(eventNow, true);
+          await sails.helpers.discord.sendLive(eventNow);
         }
       }
     }
