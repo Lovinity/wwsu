@@ -24,8 +24,9 @@ module.exports = {
 
     if (
       !inputs.event ||
-      ["show", "remote", "sports", "prerecord", "playlist"].indexOf(inputs.event.type) ===
-        -1
+      ["show", "remote", "sports", "prerecord", "playlist"].indexOf(
+        inputs.event.type
+      ) === -1
     )
       return;
 
@@ -34,8 +35,9 @@ module.exports = {
       webhook,
       {
         username: inputs.event.name,
-        content: `:radio: **Now live on WWSU Radio:** ${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name}.
-${inputs.event.description}
+        content: `:radio: __**Now live on WWSU Radio**__
+**${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name}.**
+${sails.models.meta.memory.topic}
 
 :link: Tune in at https://server.wwsu1069.org or by going in the Radio voice channel.`
       },

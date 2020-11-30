@@ -42,7 +42,13 @@ module.exports = {
 
     if (inputs.started) return;
 
-    if (!inputs.event || ["show", "remote", "sports", "prerecord", "playlist"].indexOf(inputs.event.type) === -1) return;
+    if (
+      !inputs.event ||
+      ["show", "remote", "sports", "prerecord", "playlist"].indexOf(
+        inputs.event.type
+      ) === -1
+    )
+      return;
 
     if (!inputs.newSchedule && !inputs.removedException) {
       if (
@@ -54,9 +60,8 @@ module.exports = {
           webhook,
           {
             username: inputs.event.name,
-            content: `:warning: **One-Time Schedule Change** for ${
-              inputs.event.type
-            }: ${inputs.event.hosts} - ${inputs.event.name}.
+            content: `:warning: __**Broadcast Re-scheduled__**
+**${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name}**
 Original date/time: ${moment(inputs.event.originalTime).format("LLLL")}
 New date/time: **${moment(inputs.event.start).format("LLLL")} - ${moment(
               inputs.event.end
@@ -77,13 +82,12 @@ This re-schedule only applies to the date/time listed above; it does not apply t
           webhook,
           {
             username: inputs.event.name,
-            content: `:no_entry: **Cancellation** for ${inputs.event.type}: ${
-              inputs.event.hosts
-            } - ${inputs.event.name}.
-  Cancelled Date/time: ${moment(inputs.event.originalTime).format("LLLL")}
-  Reason (if specified): ${inputs.event.scheduleReason}
+            content: `:no_entry: __**Broadcast Cancelled**__
+**${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name}**
+Cancelled Date/time: ${moment(inputs.event.originalTime).format("LLLL")}
+Reason (if specified): ${inputs.event.scheduleReason}
   
-  This cancellation only applies to the date/time listed above; it does not apply to future time slots.`
+This cancellation only applies to the date/time listed above; it does not apply to future time slots.`
           },
           { headers: { "Content-Type": "application/json" } }
         );
@@ -99,9 +103,8 @@ This re-schedule only applies to the date/time listed above; it does not apply t
           webhook,
           {
             username: inputs.event.name,
-            content: `:no_entry_sign: :warning: **Re-schedule reversed** for ${
-              inputs.event.type
-            }: ${inputs.event.hosts} - ${inputs.event.name}.
+            content: `:no_entry_sign: :warning: __**Broadcast Re-scheduling Reversed**__
+**${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name}**
 Rescheduled time: ${moment(inputs.event.start).format("LLLL")} - ${moment(
               inputs.event.end
             ).format("LT")}
@@ -121,9 +124,8 @@ Broadcast will now air at its originally scheduled date/time of ${moment(
           webhook,
           {
             username: inputs.event.name,
-            content: `:no_entry_sign: :no_entry: **Cancellation reversed** for ${
-              inputs.event.type
-            }: ${inputs.event.hosts} - ${inputs.event.name}.
+            content: `:no_entry_sign: :no_entry: __**Broadcast Cancellation Reversed**__
+**${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name}**
 Cancelled time: ${moment(inputs.event.originalTime).format("LLLL")}
 Broadcast will now air at its originally scheduled date/time.`
           },
