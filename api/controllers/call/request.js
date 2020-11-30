@@ -7,8 +7,9 @@ module.exports = {
   inputs: {
     ID: {
       type: "number",
-      required: true,
-      description: "The host ID that this DJ Controls wants to call."
+      allowNull: true,
+      description:
+        "The host ID that this DJ Controls wants to call. Null = no longer wishing to call."
     }
   },
 
@@ -29,6 +30,15 @@ module.exports = {
     // Integrity check: Make sure this DJ Controls is allowed to call
     if (!this.req.payload.makeCalls)
       return new Error("This host is not allowed to start audio calls");
+
+      // Null ID = cancel the call request
+    if (!inputs.ID) {
+      await sails.helpers.meta.change.with({
+        hostCalling: null,
+        hostCalled: null
+      });
+      return;
+    }
 
     // Integrity checks: Make sure the host we want to call exists, is authorized, and allowed to be called
     let record = await sails.models.hosts.findOne({ ID: inputs.ID });
