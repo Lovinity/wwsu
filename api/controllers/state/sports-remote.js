@@ -40,7 +40,7 @@ module.exports = {
       // Disallow starting a sports remote broadcast if the host has lockToDJ and there is no scheduled sports broadcast at this time
       if (this.req.payload.lockToDJ !== null) {
         var record = sails.models.calendar.calendardb.whatShouldBePlaying(null, false);
-        record = record.filter((event) => event.type === 'sports' && record.name.startsWith(inputs.sport));
+        record = record.filter((event) => event.type === 'sports' && inputs.name.startsWith(inputs.sport));
         if (record.length < 1) {
           throw 'forbidden';
         }
