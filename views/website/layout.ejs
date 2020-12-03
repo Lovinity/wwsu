@@ -93,10 +93,7 @@
     ></script>
 
     <!--iziModal-->
-    <link
-      rel="stylesheet"
-      href="/plugins/iziModal/css/iziModal.min.css"
-    />
+    <link rel="stylesheet" href="/plugins/iziModal/css/iziModal.min.css" />
     <script src="/plugins/iziModal/js/iziModal.min.js"></script>
 
     <!-- AmplitudeJS -->
@@ -190,6 +187,9 @@
       }
     </style>
     <script src="/plugins/amplitudejs/amplitude.min.js"></script>
+
+    <!-- WidgetBot -->
+    <script src="https://cdn.jsdelivr.net/npm/@widgetbot/html-embed"></script>
 
     <!--WWSU-->
     <script src="/plugins/sails.io/sails.io.js" autoConnect="false"></script>
@@ -326,17 +326,12 @@
                   href="#"
                   class="nav-link"
                   id="nav-chat"
-                  title="Send messages with the DJ or other listeners."
-                  aria-label="Send messages with the DJ or other listeners."
+                  title="Chat with other listeners, DJs, and directors via Discord. Account is not required."
+                  aria-label="Chat with other listeners, DJs, and directors via Discord. Account is not required."
                 >
-                  <i class="nav-icon fas fa-comments" aria-hidden="true"></i>
+                  <i class="nav-icon fab fa-discord" aria-hidden="true"></i>
                   <p>
-                    Chat with DJ
-                    <span
-                      class="badge badge-secondary right chat-newmessages"
-                      title="New Messages"
-                      >0</span
-                    >
+                    Discord Chat
                   </p>
                 </a>
               </li>
@@ -433,7 +428,7 @@
             <div class="container-fluid">
               <div class="row mb-2">
                 <div class="col-12">
-                  <h1 class="m-0 text-dark">Chat with the DJ</h1>
+                  <h1 class="m-0 text-dark">Discord Chat</h1>
                 </div>
                 <!-- /.col -->
               </div>
@@ -449,72 +444,14 @@
               class="card card-sucress cardutline direct-chat direct-chat-success p-1 m-3"
             >
               <div class="card-header">
-                <h2 class="card-title">Chat</h2>
-
-                <div class="card-tools">
-                  <span
-                    data-toggle="tooltip"
-                    title="New Messages"
-                    class="badge bg-secondary chat-newmessages"
-                    >0</span
-                  >
-                </div>
+                <h2 class="card-title">Discord Chat</h2>
               </div>
               <div class="card-body">
-                <div class="callout callout-secondary chat-status">
-                  <p class="h5">Not Connected</p>
-
-                  <p>You are not yet connected to the chat system.</p>
-                </div>
-
-                <div
-                  class="direct-chat-messages"
-                  id="chat-messages"
-                  style="height: 50vh;"
-                >
-                  <!--Chat messages go here-->
-                </div>
-                <div class="input-group m-2">
-                  <label for="chat-nickname">Nickname</label>
-                  <input
-                    type="text"
-                    name="chat-nickname"
-                    id="chat-nickname"
-                    placeholder=""
-                    class="form-control"
-                  />
-                </div>
-                <div class="input-group m-2">
-                  <label for="chat-message">Message</label>
-                  <textarea
-                    name="chat-message"
-                    id="chat-message"
-                    maxlength="1024"
-                    rows="3"
-                    placeholder="Type Message ..."
-                    class="form-control chat-blocker"
-                  ></textarea>
-                </div>
-                <div class="input-group m-2">
-                  <button
-                    type="submit"
-                    id="send-message-public"
-                    class="btn btn-success chat-blocker"
-                    tabindex="0"
-                    title="Send the message publicly; other listeners can also see it."
-                  >
-                    Send Public
-                  </button>
-                  <button
-                    type="submit"
-                    id="send-message-private"
-                    class="btn btn-danger chat-blocker"
-                    tabindex="0"
-                    title="Send this message privately; only the DJ can see it."
-                  >
-                    Send Private
-                  </button>
-                </div>
+                <widgetbot
+                  server="742819639096246383"
+                  channel="782073518606647297"
+                  width="100%"
+                ></widgetbot>
               </div>
               <div class="card-footer">
                 <div class="callout callout-warning">
@@ -523,8 +460,8 @@
                   <p>
                     Do not send any harassing nor threatening messages. You
                     agree your IP address will be logged with every message
-                    sent, and you could be banned from WWSU's website for
-                    sending harmful messages.
+                    sent, and you could be banned from WWSU's website and
+                    Discord for sending harmful messages.
                   </p>
                 </div>
               </div>
