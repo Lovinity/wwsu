@@ -1,107 +1,183 @@
 module.exports = {
+  friendlyName: "State / Sports-remote",
 
-  friendlyName: 'State / Sports-remote',
-
-  description: 'Request to begin a remote sports broadcast.',
+  description: "Request to begin a remote sports broadcast.",
 
   inputs: {
     topic: {
-      type: 'string',
-      defaultsTo: '',
-      description: 'A string containing a short blurb about this sports broadcast.'
+      type: "string",
+      defaultsTo: "",
+      description:
+        "A string containing a short blurb about this sports broadcast."
     },
 
     sport: {
-      type: 'string',
+      type: "string",
       required: true,
       isIn: sails.config.custom.sports,
-      description: 'Name of the sport that is being broadcast.'
+      description: "Name of the sport that is being broadcast."
     },
 
     webchat: {
-      type: 'boolean',
+      type: "boolean",
       defaultsTo: true,
-      description: 'Should the web chat be enabled during this broadcast? Defaults to true.'
+      description:
+        "Should the web chat be enabled during this broadcast? Defaults to true."
     }
   },
 
-  fn: async function (inputs, exits) {
-    sails.log.debug('Controller state/sports-remote called.')
+  fn: async function(inputs, exits) {
+    sails.log.debug("Controller state/sports-remote called.");
 
     try {
       // Do not continue if not in automation mode; client should request automation before requesting sports
-      if (!sails.models.meta.memory.state.startsWith('automation_') && !sails.models.meta.memory.state.startsWith('prerecord_')) {
-        throw 'forbidden';
+      if (
+        !sails.models.meta.memory.state.startsWith("automation_") &&
+        !sails.models.meta.memory.state.startsWith("prerecord_")
+      ) {
+        throw "forbidden";
       }
 
       // Block this request if we are already switching states
-      if (sails.models.meta.memory.changingState !== null) { return exits.error(new Error(`The system is in the process of changing states. The request was blocked to prevent clashes.`)) }
+      if (sails.models.meta.memory.changingState !== null) {
+        return exits.error(
+          new Error(
+            `The system is in the process of changing states. The request was blocked to prevent clashes.`
+          )
+        );
+      }
 
       // Disallow starting a sports remote broadcast if the host has lockToDJ and there is no scheduled sports broadcast at this time
       if (this.req.payload.lockToDJ !== null) {
-        var record = sails.models.calendar.calendardb.whatShouldBePlaying(null, false);
-        record = record.filter((event) => event.type === 'sports' && event.name.startsWith(inputs.sport));
+        var record = sails.models.calendar.calendardb.whatShouldBePlaying(
+          null,
+          false
+        );
+        record = record.filter(
+          event =>
+            event.type === "sports" && event.name.startsWith(inputs.sport)
+        );
         if (record.length < 1) {
-          throw 'forbidden';
+          throw "forbidden";
         }
       }
 
       // Lock so that any other state changing requests are blocked until we are done
-      await sails.helpers.meta.change.with({ changingState: `Switching to sports-remote` })
+      await sails.helpers.meta.change.with({
+        changingState: `Switching to sports-remote`
+      });
 
       // Filter profanity
-      if (inputs.topic !== '') {
-        inputs.topic = await sails.helpers.filterProfane(inputs.topic)
-        inputs.topic = await sails.helpers.sanitize(inputs.topic)
-        inputs.topic = await sails.helpers.truncateText(inputs.topic, 256)
+      if (inputs.topic !== "") {
+        inputs.topic = await sails.helpers.filterProfane(inputs.topic);
+        inputs.topic = await sails.helpers.sanitize(inputs.topic);
+        inputs.topic = await sails.helpers.truncateText(inputs.topic, 256);
       }
 
       // Set meta to prevent accidental messages in DJ Controls
-      sails.helpers.meta.change.with({ host: this.req.payload.ID, show: inputs.sport, topic: inputs.topic, trackStamp: null })
+      sails.helpers.meta.change.with({
+        host: this.req.payload.ID,
+        show: inputs.sport,
+        topic: inputs.topic,
+        trackStamp: null
+      });
 
       // Start the sports broadcast
-      if (!sails.models.meta.memory.state.startsWith('sports')) {
+      if (!sails.models.meta.memory.state.startsWith("sports")) {
         // await sails.helpers.error.count('goLive');
 
         // Operation: Remove all music tracks, queue a station ID, queue an opener if one exists for this sport, and start the next track if current track is music.
-        await sails.helpers.rest.cmd('EnableAutoDJ', 0)
-        await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false, true)
-        await sails.helpers.rest.cmd('EnableAssisted', 1)
-        await sails.helpers.songs.queue(sails.config.custom.subcats.IDs, 'Bottom', 1)
-        sails.models.status.errorCheck.prevID = moment()
-        await sails.helpers.error.count('stationID')
-        await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.sports.start)
+        await sails.helpers.rest.cmd("EnableAutoDJ", 0);
+        await sails.helpers.songs.remove(
+          true,
+          sails.config.custom.subcats.noClearShow,
+          false,
+          true
+        );
+        await sails.helpers.rest.cmd("EnableAssisted", 1);
+        await sails.helpers.songs.queue(
+          sails.config.custom.subcats.IDs,
+          "Bottom",
+          1
+        );
+        sails.models.status.errorCheck.prevID = moment();
+        await sails.helpers.error.count("stationID");
+        await sails.helpers.break.executeArray(
+          sails.config.custom.specialBreaks.sports.start
+        );
 
         // Queue a Sports opener if there is one
-        if (typeof sails.config.custom.sportscats[ inputs.sport ] !== 'undefined') { await sails.helpers.songs.queue([ sails.config.custom.sportscats[ inputs.sport ][ 'Sports Openers' ] ], 'Bottom', 1) }
+        if (
+          typeof sails.config.custom.sportscats[inputs.sport] !== "undefined"
+        ) {
+          await sails.helpers.songs.queue(
+            [sails.config.custom.sportscats[inputs.sport]["Sports Openers"]],
+            "Bottom",
+            1
+          );
+        }
 
-        await sails.helpers.rest.cmd('EnableAssisted', 0)
+        await sails.helpers.rest.cmd("EnableAssisted", 0);
 
-        var queueLength = await sails.helpers.songs.calculateQueueLength()
+        var queueLength = await sails.helpers.songs.calculateQueueLength();
 
         // If the radioDJ queue is unacceptably long, try to reduce it.
         if (queueLength >= sails.config.custom.queueCorrection.sports) {
-          await sails.helpers.rest.cmd('EnableAutoDJ', 0) // Try to Disable autoDJ again in case it was mistakenly still active
+          await sails.helpers.rest.cmd("EnableAutoDJ", 0); // Try to Disable autoDJ again in case it was mistakenly still active
           // await sails.helpers.songs.remove(true, sails.config.custom.subcats.noClearShow, false, false);
-          if ((sails.config.custom.subcats.noClearShow && sails.config.custom.subcats.noClearShow.indexOf(sails.models.meta.memory.trackIDSubcat) === -1)) { await sails.helpers.rest.cmd('PlayPlaylistTrack', 0) } // Skip currently playing track if it is not a noClearShow track
+          if (
+            sails.config.custom.subcats.noClearShow &&
+            sails.config.custom.subcats.noClearShow.indexOf(
+              sails.models.meta.memory.trackIDSubcat
+            ) === -1
+          ) {
+            await sails.helpers.rest.cmd("PlayPlaylistTrack", 0);
+          } // Skip currently playing track if it is not a noClearShow track
 
-          queueLength = await sails.helpers.songs.calculateQueueLength()
+          queueLength = await sails.helpers.songs.calculateQueueLength();
         }
 
         // Change meta
-        await sails.helpers.meta.change.with({ dj: null, cohostDJ1: null, cohostDJ2: null, cohostDJ3: null, queueFinish: moment().add(queueLength, 'seconds').toISOString(true), state: 'automation_sportsremote', show: inputs.sport, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat })
+        await sails.helpers.meta.change.with({
+          dj: null,
+          cohostDJ1: null,
+          cohostDJ2: null,
+          cohostDJ3: null,
+          queueFinish: moment()
+            .add(queueLength, "seconds")
+            .toISOString(true),
+          state: "automation_sportsremote",
+          show: inputs.sport,
+          topic: inputs.topic,
+          trackStamp: null,
+          webchat: inputs.webchat
+        });
       } else {
         // Otherwise, just update metadata but do not do anything else
-        await sails.helpers.meta.change.with({ dj: null, cohostDJ1: null, cohostDJ2: null, cohostDJ3: null, show: inputs.sport, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat })
+        await sails.helpers.meta.change.with({
+          dj: null,
+          cohostDJ1: null,
+          cohostDJ2: null,
+          cohostDJ3: null,
+          show: inputs.sport,
+          topic: inputs.topic,
+          trackStamp: null,
+          webchat: inputs.webchat
+        });
       }
 
-      await sails.helpers.error.reset('automationBreak')
-      await sails.helpers.meta.change.with({ changingState: null })
-      return exits.success()
+      await sails.helpers.error.reset("automationBreak");
+      await sails.helpers.meta.change.with({ changingState: null });
+      return exits.success();
     } catch (e) {
-      await sails.helpers.meta.change.with({ host: null, show: '', topic: '', trackStamp: null, changingState: null })
-      return exits.error(e)
+      await sails.helpers.meta.change.with({
+        host: null,
+        show: "",
+        topic: "",
+        trackStamp: null,
+        changingState: null
+      });
+      return exits.error(e);
     }
   }
-
-}
+};
