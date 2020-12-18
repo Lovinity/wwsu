@@ -1,5 +1,5 @@
 /*!
-FullCalendar v5.3.1
+FullCalendar v5.3.2
 Docs & License: https://fullcalendar.io/
 (c) 2020 Adam Shaw
 */
@@ -17,8 +17,10 @@ var ListViewHeaderRow = /** @class */ (function (_super) {
         var _a = this.props, dayDate = _a.dayDate, todayRange = _a.todayRange;
         var _b = this.context, theme = _b.theme, dateEnv = _b.dateEnv, options = _b.options, viewApi = _b.viewApi;
         var dayMeta = getDateMeta(dayDate, todayRange);
-        var text = options.listDayFormat ? dateEnv.format(dayDate, options.listDayFormat) : ''; // will ever be falsy?
-        var sideText = options.listDaySideFormat ? dateEnv.format(dayDate, options.listDaySideFormat) : ''; // will ever be falsy? also, BAD NAME "alt"
+        // will ever be falsy?
+        var text = options.listDayFormat ? dateEnv.format(dayDate, options.listDayFormat) : '';
+        // will ever be falsy? also, BAD NAME "alt"
+        var sideText = options.listDaySideFormat ? dateEnv.format(dayDate, options.listDaySideFormat) : '';
         var navLinkData = options.navLinks
             ? buildNavLinkData(dayDate)
             : null;
@@ -38,16 +40,14 @@ function renderInnerContent(props) {
         ? { 'data-navlink': props.navLinkData, tabIndex: 0 }
         : {};
     return (createElement(Fragment, null,
-        props.text &&
-            createElement("a", __assign({ className: 'fc-list-day-text' }, navLinkAttrs), props.text),
-        props.sideText &&
-            createElement("a", __assign({ className: 'fc-list-day-side-text' }, navLinkAttrs), props.sideText)));
+        props.text && (createElement("a", __assign({ className: "fc-list-day-text" }, navLinkAttrs), props.text)),
+        props.sideText && (createElement("a", __assign({ className: "fc-list-day-side-text" }, navLinkAttrs), props.sideText))));
 }
 
 var DEFAULT_TIME_FORMAT = createFormatter({
     hour: 'numeric',
     minute: '2-digit',
-    meridiem: 'short'
+    meridiem: 'short',
 });
 var ListViewEventRow = /** @class */ (function (_super) {
     __extends(ListViewEventRow, _super);
@@ -58,11 +58,12 @@ var ListViewEventRow = /** @class */ (function (_super) {
         var _a = this, props = _a.props, context = _a.context;
         var seg = props.seg;
         var timeFormat = context.options.eventTimeFormat || DEFAULT_TIME_FORMAT;
-        return (createElement(EventRoot, { seg: seg, timeText: '' /* BAD. because of all-day content */, disableDragging: true, disableResizing: true, defaultContent: renderEventInnerContent, isPast: props.isPast, isFuture: props.isFuture, isToday: props.isToday, isSelected: props.isSelected, isDragging: props.isDragging, isResizing: props.isResizing, isDateSelecting: props.isDateSelecting }, function (rootElRef, classNames, innerElRef, innerContent, hookProps) { return (createElement("tr", { className: ['fc-list-event', hookProps.event.url ? 'fc-event-forced-url' : ''].concat(classNames).join(' '), ref: rootElRef },
+        return (createElement(EventRoot, { seg: seg, timeText: "" // BAD. because of all-day content
+            , disableDragging: true, disableResizing: true, defaultContent: renderEventInnerContent, isPast: props.isPast, isFuture: props.isFuture, isToday: props.isToday, isSelected: props.isSelected, isDragging: props.isDragging, isResizing: props.isResizing, isDateSelecting: props.isDateSelecting }, function (rootElRef, classNames, innerElRef, innerContent, hookProps) { return (createElement("tr", { className: ['fc-list-event', hookProps.event.url ? 'fc-event-forced-url' : ''].concat(classNames).join(' '), ref: rootElRef },
             buildTimeContent(seg, timeFormat, context),
-            createElement("td", { className: 'fc-list-event-graphic' },
-                createElement("span", { className: 'fc-list-event-dot', style: { borderColor: hookProps.borderColor || hookProps.backgroundColor } })),
-            createElement("td", { className: 'fc-list-event-title', ref: innerElRef }, innerContent))); }));
+            createElement("td", { className: "fc-list-event-graphic" },
+                createElement("span", { className: "fc-list-event-dot", style: { borderColor: hookProps.borderColor || hookProps.backgroundColor } })),
+            createElement("td", { className: "fc-list-event-title", ref: innerElRef }, innerContent))); }));
     };
     return ListViewEventRow;
 }(BaseComponent));
@@ -99,13 +100,11 @@ function buildTimeContent(seg, timeFormat, context) {
         if (doAllDay) {
             var hookProps = {
                 text: context.options.allDayText,
-                view: context.viewApi
+                view: context.viewApi,
             };
             return (createElement(RenderHook, { hookProps: hookProps, classNames: options.allDayClassNames, content: options.allDayContent, defaultContent: renderAllDayInner, didMount: options.allDayDidMount, willUnmount: options.allDayWillUnmount }, function (rootElRef, classNames, innerElRef, innerContent) { return (createElement("td", { className: ['fc-list-event-time'].concat(classNames).join(' '), ref: rootElRef }, innerContent)); }));
         }
-        else {
-            return (createElement("td", { className: 'fc-list-event-time' }, timeText));
-        }
+        return (createElement("td", { className: "fc-list-event-time" }, timeText));
     }
     return null;
 }
@@ -125,7 +124,7 @@ var ListView = /** @class */ (function (_super) {
         _this.setRootEl = function (rootEl) {
             if (rootEl) {
                 _this.context.registerInteractiveComponent(_this, {
-                    el: rootEl
+                    el: rootEl,
                 });
             }
             else {
@@ -140,7 +139,7 @@ var ListView = /** @class */ (function (_super) {
         var extraClassNames = [
             'fc-list',
             context.theme.getClass('table'),
-            context.options.stickyHeaderDates !== false ? 'fc-list-sticky' : ''
+            context.options.stickyHeaderDates !== false ? 'fc-list-sticky' : '',
         ];
         var _b = this.computeDateVars(props.dateProfile), dayDates = _b.dayDates, dayRanges = _b.dayRanges;
         var eventSegs = this.eventStoreToSegs(props.eventStore, props.eventUiBases, dayRanges);
@@ -153,17 +152,17 @@ var ListView = /** @class */ (function (_super) {
         var _a = this.context, options = _a.options, viewApi = _a.viewApi;
         var hookProps = {
             text: options.noEventsText,
-            view: viewApi
+            view: viewApi,
         };
         return (createElement(RenderHook, { hookProps: hookProps, classNames: options.noEventsClassNames, content: options.noEventsContent, defaultContent: renderNoEventsInner, didMount: options.noEventsDidMount, willUnmount: options.noEventsWillUnmount }, function (rootElRef, classNames, innerElRef, innerContent) { return (createElement("div", { className: ['fc-list-empty'].concat(classNames).join(' '), ref: rootElRef },
-            createElement("div", { className: 'fc-list-empty-cushion', ref: innerElRef }, innerContent))); }));
+            createElement("div", { className: "fc-list-empty-cushion", ref: innerElRef }, innerContent))); }));
     };
     ListView.prototype.renderSegList = function (allSegs, dayDates) {
         var _a = this.context, theme = _a.theme, options = _a.options;
         var segsByDay = groupSegsByDay(allSegs); // sparse array
-        return (createElement(NowTimer, { unit: 'day' }, function (nowDate, todayRange) {
+        return (createElement(NowTimer, { unit: "day" }, function (nowDate, todayRange) {
             var innerNodes = [];
-            for (var dayIndex = 0; dayIndex < segsByDay.length; dayIndex++) {
+            for (var dayIndex = 0; dayIndex < segsByDay.length; dayIndex += 1) {
                 var daySegs = segsByDay[dayIndex];
                 if (daySegs) { // sparse array, so might be undefined
                     var dayStr = dayDates[dayIndex].toISOString();
@@ -200,7 +199,7 @@ var ListView = /** @class */ (function (_super) {
         var segRange;
         var seg;
         var segs = [];
-        for (dayIndex = 0; dayIndex < dayRanges.length; dayIndex++) {
+        for (dayIndex = 0; dayIndex < dayRanges.length; dayIndex += 1) {
             segRange = intersectRanges(range, dayRanges[dayIndex]);
             if (segRange) {
                 seg = {
@@ -210,7 +209,7 @@ var ListView = /** @class */ (function (_super) {
                     end: segRange.end,
                     isStart: eventRange.isStart && segRange.start.valueOf() === range.start.valueOf(),
                     isEnd: eventRange.isEnd && segRange.end.valueOf() === range.end.valueOf(),
-                    dayIndex: dayIndex
+                    dayIndex: dayIndex,
                 };
                 segs.push(seg);
                 // detect when range won't go fully into the next day,
@@ -241,7 +240,7 @@ function computeDateVars(dateProfile) {
         dayDates.push(dayStart);
         dayRanges.push({
             start: dayStart,
-            end: addDays(dayStart, 1)
+            end: addDays(dayStart, 1),
         });
         dayStart = addDays(dayStart, 1);
     }
@@ -252,7 +251,7 @@ function groupSegsByDay(segs) {
     var segsByDay = []; // sparse array
     var i;
     var seg;
-    for (i = 0; i < segs.length; i++) {
+    for (i = 0; i < segs.length; i += 1) {
         seg = segs[i];
         (segsByDay[seg.dayIndex] || (segsByDay[seg.dayIndex] = []))
             .push(seg);
@@ -266,8 +265,7 @@ var OPTION_REFINERS = {
     noEventsClassNames: identity,
     noEventsContent: identity,
     noEventsDidMount: identity,
-    noEventsWillUnmount: identity
-    // noEventsText is defined in base options
+    noEventsWillUnmount: identity,
 };
 function createFalsableFormatter(input) {
     return input === false ? null : createFormatter(input);
@@ -279,30 +277,30 @@ var main = createPlugin({
         list: {
             component: ListView,
             buttonTextKey: 'list',
-            listDayFormat: { month: 'long', day: 'numeric', year: 'numeric' } // like "January 1, 2016"
+            listDayFormat: { month: 'long', day: 'numeric', year: 'numeric' },
         },
         listDay: {
             type: 'list',
             duration: { days: 1 },
-            listDayFormat: { weekday: 'long' } // day-of-week is all we need. full date is probably in headerToolbar
+            listDayFormat: { weekday: 'long' },
         },
         listWeek: {
             type: 'list',
             duration: { weeks: 1 },
             listDayFormat: { weekday: 'long' },
-            listDaySideFormat: { month: 'long', day: 'numeric', year: 'numeric' }
+            listDaySideFormat: { month: 'long', day: 'numeric', year: 'numeric' },
         },
         listMonth: {
             type: 'list',
             duration: { month: 1 },
-            listDaySideFormat: { weekday: 'long' } // day-of-week is nice-to-have
+            listDaySideFormat: { weekday: 'long' },
         },
         listYear: {
             type: 'list',
             duration: { year: 1 },
-            listDaySideFormat: { weekday: 'long' } // day-of-week is nice-to-have
-        }
-    }
+            listDaySideFormat: { weekday: 'long' },
+        },
+    },
 });
 
 export default main;

@@ -1,27 +1,26 @@
 {
-  "_from": "mp3-mediarecorder",
+  "_from": "mp3-mediarecorder@^4.0.3",
   "_id": "mp3-mediarecorder@4.0.3",
   "_inBundle": false,
   "_integrity": "sha512-RRAeJ2vmCShbwbkow2ej46ITTnZQjqo0xVw6AokuuE9RbMdx8Px25ymksrMBsK75E18npglKoRGhADAfBNd2vQ==",
   "_location": "/mp3-mediarecorder",
   "_phantomChildren": {},
   "_requested": {
-    "type": "tag",
+    "type": "range",
     "registry": true,
-    "raw": "mp3-mediarecorder",
+    "raw": "mp3-mediarecorder@^4.0.3",
     "name": "mp3-mediarecorder",
     "escapedName": "mp3-mediarecorder",
-    "rawSpec": "",
+    "rawSpec": "^4.0.3",
     "saveSpec": null,
-    "fetchSpec": "latest"
+    "fetchSpec": "^4.0.3"
   },
   "_requiredBy": [
-    "#USER",
     "/"
   ],
   "_resolved": "https://registry.npmjs.org/mp3-mediarecorder/-/mp3-mediarecorder-4.0.3.tgz",
   "_shasum": "8b7bb3cbf6bae288ef3726212587d49fd9a8ff51",
-  "_spec": "mp3-mediarecorder",
+  "_spec": "mp3-mediarecorder@^4.0.3",
   "_where": "C:\\Users\\user\\AdminLTE",
   "author": {
     "name": "Elias Meire"

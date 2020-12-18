@@ -1,28 +1,27 @@
 {
-  "_from": "@fullcalendar/list",
-  "_id": "@fullcalendar/list@5.3.1",
+  "_from": "@fullcalendar/list@^5.3.1",
+  "_id": "@fullcalendar/list@5.4.0",
   "_inBundle": false,
-  "_integrity": "sha512-0wZxRe9xhe61W8I00u7gW+FGxOxew5di+ujIVqoRjQ1JOiXsmClUwyObEtVPc8/5/Z1fFFcnh6tIAJKuVrOP1A==",
+  "_integrity": "sha512-6J/ZeZttjfPhpQ7elVHabvjvdnnvH/ttgRmqx5kYyV4Fpjm3TPD9DJVLsONAvp/wFM9PWoF4t+JkXapXJAYH3Q==",
   "_location": "/@fullcalendar/list",
   "_phantomChildren": {},
   "_requested": {
-    "type": "tag",
+    "type": "range",
     "registry": true,
-    "raw": "@fullcalendar/list",
+    "raw": "@fullcalendar/list@^5.3.1",
     "name": "@fullcalendar/list",
     "escapedName": "@fullcalendar%2flist",
     "scope": "@fullcalendar",
-    "rawSpec": "",
+    "rawSpec": "^5.3.1",
     "saveSpec": null,
-    "fetchSpec": "latest"
+    "fetchSpec": "^5.3.1"
   },
   "_requiredBy": [
-    "#USER",
     "/"
   ],
-  "_resolved": "https://registry.npmjs.org/@fullcalendar/list/-/list-5.3.1.tgz",
-  "_shasum": "bab30270138bc20d22ff79d185cf7ccfd588a570",
-  "_spec": "@fullcalendar/list",
+  "_resolved": "https://registry.npmjs.org/@fullcalendar/list/-/list-5.4.0.tgz",
+  "_shasum": "f6ade6d4a6dc9e61ef8eac155bc2fab94a897c76",
+  "_spec": "@fullcalendar/list@^5.3.1",
   "_where": "C:\\Users\\user\\AdminLTE",
   "author": {
     "name": "Adam Shaw",
@@ -35,16 +34,20 @@
   },
   "bundleDependencies": false,
   "dependencies": {
-    "@fullcalendar/common": "~5.3.1",
-    "tslib": "^2.0.0"
+    "@fullcalendar/common": "~5.4.0",
+    "tslib": "^2.0.3"
   },
   "deprecated": false,
   "description": "View your events as a bulleted list",
+  "devDependencies": {
+    "@fullcalendar/core-preact": "5.4.0"
+  },
   "docs": "https://fullcalendar.io/docs/list-view",
   "homepage": "https://fullcalendar.io/",
   "jsdelivr": "main.global.min.js",
   "license": "MIT",
-  "main": "main.js",
+  "main": "main.cjs.js",
+  "module": "main.js",
   "name": "@fullcalendar/list",
   "repository": {
     "type": "git",
@@ -52,7 +55,6 @@
     "homepage": "https://github.com/fullcalendar/fullcalendar"
   },
   "title": "FullCalendar List View Plugin",
-  "type": "module",
   "types": "main.d.ts",
-  "version": "5.3.1"
+  "version": "5.4.0"
 }

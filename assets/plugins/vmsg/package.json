@@ -1,28 +1,27 @@
 {
-  "_from": "vmsg",
+  "_from": "vmsg@^0.3.6",
   "_id": "vmsg@0.3.6",
   "_inBundle": false,
   "_integrity": "sha512-nDv5WMk+Z3srbrGWwXuMiGo4GugOarsxcKgIjLJu6uRAUrmvSkRG9RxRphDtK+xUk11LqdKFeSjhozTbuqRyXw==",
   "_location": "/vmsg",
   "_phantomChildren": {},
   "_requested": {
-    "type": "tag",
+    "type": "range",
     "registry": true,
-    "raw": "vmsg",
+    "raw": "vmsg@^0.3.6",
     "name": "vmsg",
     "escapedName": "vmsg",
-    "rawSpec": "",
+    "rawSpec": "^0.3.6",
     "saveSpec": null,
-    "fetchSpec": "latest"
+    "fetchSpec": "^0.3.6"
   },
   "_requiredBy": [
-    "#USER",
     "/",
     "/mp3-mediarecorder"
   ],
   "_resolved": "https://registry.npmjs.org/vmsg/-/vmsg-0.3.6.tgz",
   "_shasum": "a1bf0e0de3179918cd7e8a0cc41c6da813860878",
-  "_spec": "vmsg",
+  "_spec": "vmsg@^0.3.6",
   "_where": "C:\\Users\\user\\AdminLTE",
   "author": {
     "name": "Kagami Hiiragi"

@@ -1,37 +1,34 @@
 {
-  "_args": [
-    [
-      "@sweetalert2/theme-bootstrap-4@4.0.0",
-      "C:\\Users\\user\\AdminLTE"
-    ]
-  ],
-  "_from": "@sweetalert2/theme-bootstrap-4@4.0.0",
-  "_id": "@sweetalert2/theme-bootstrap-4@4.0.0",
+  "_from": "@sweetalert2/theme-bootstrap-4@^4.0.1",
+  "_id": "@sweetalert2/theme-bootstrap-4@4.0.1",
   "_inBundle": false,
-  "_integrity": "sha512-ZU0sYNpo783ihs4VHWRswYkwQQ/g+T5dI8c19RhDigHoIXHS6GXqic6atsP1BmVHPbq/LvFJTpgoRJQU3/SMCQ==",
+  "_integrity": "sha512-5yGhEMkn5Rfo2sOiQVui62S5i/TaAnS6PvV3OnDdVFvZptesleDHgM1ci5u+sg4DGuh4ePPKuuTX80C9q2/TJA==",
   "_location": "/@sweetalert2/theme-bootstrap-4",
   "_phantomChildren": {},
   "_requested": {
-    "type": "version",
+    "type": "range",
     "registry": true,
-    "raw": "@sweetalert2/theme-bootstrap-4@4.0.0",
+    "raw": "@sweetalert2/theme-bootstrap-4@^4.0.1",
     "name": "@sweetalert2/theme-bootstrap-4",
     "escapedName": "@sweetalert2%2ftheme-bootstrap-4",
     "scope": "@sweetalert2",
-    "rawSpec": "4.0.0",
+    "rawSpec": "^4.0.1",
     "saveSpec": null,
-    "fetchSpec": "4.0.0"
+    "fetchSpec": "^4.0.1"
   },
   "_requiredBy": [
     "/"
   ],
-  "_resolved": "https://registry.npmjs.org/@sweetalert2/theme-bootstrap-4/-/theme-bootstrap-4-4.0.0.tgz",
-  "_spec": "4.0.0",
+  "_resolved": "https://registry.npmjs.org/@sweetalert2/theme-bootstrap-4/-/theme-bootstrap-4-4.0.1.tgz",
+  "_shasum": "e7144f6bf9f3fd03a726e1d7a462b544c34ae29a",
+  "_spec": "@sweetalert2/theme-bootstrap-4@^4.0.1",
   "_where": "C:\\Users\\user\\AdminLTE",
   "author": "",
   "bugs": {
     "url": "https://github.com/sweetalert2/sweetalert2-themes/issues"
   },
+  "bundleDependencies": false,
+  "deprecated": false,
   "description": "Bootstrap 4 theme for SweetAlert2",
   "files": [
     "*.css",
@@ -53,5 +50,5 @@
     "type": "git",
     "url": "git+https://github.com/sweetalert2/sweetalert2-themes.git"
   },
-  "version": "4.0.0"
+  "version": "4.0.1"
 }

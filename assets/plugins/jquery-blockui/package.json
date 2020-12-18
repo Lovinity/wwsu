@@ -1,27 +1,26 @@
 {
-  "_from": "jquery-blockui",
+  "_from": "jquery-blockui@^2.7.0",
   "_id": "jquery-blockui@2.7.0",
   "_inBundle": false,
   "_integrity": "sha512-lOiCCNYLaqUWMhBZRQ1GkeYAt2/4jX/1g9RvLYRvVtslaplGFnBLltffNAkkavjyPk6VintTj44Ky1yWrqxEzQ==",
   "_location": "/jquery-blockui",
   "_phantomChildren": {},
   "_requested": {
-    "type": "tag",
+    "type": "range",
     "registry": true,
-    "raw": "jquery-blockui",
+    "raw": "jquery-blockui@^2.7.0",
     "name": "jquery-blockui",
     "escapedName": "jquery-blockui",
-    "rawSpec": "",
+    "rawSpec": "^2.7.0",
     "saveSpec": null,
-    "fetchSpec": "latest"
+    "fetchSpec": "^2.7.0"
   },
   "_requiredBy": [
-    "#USER",
     "/"
   ],
   "_resolved": "https://registry.npmjs.org/jquery-blockui/-/jquery-blockui-2.7.0.tgz",
   "_shasum": "912710a9e0fb8be86e83d70b180ffe91317609d5",
-  "_spec": "jquery-blockui",
+  "_spec": "jquery-blockui@^2.7.0",
   "_where": "C:\\Users\\user\\AdminLTE",
   "author": {
     "name": "DTic",

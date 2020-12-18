@@ -1,27 +1,26 @@
 {
-  "_from": "izimodal",
+  "_from": "izimodal@^1.5.1",
   "_id": "izimodal@1.5.1",
   "_inBundle": false,
   "_integrity": "sha512-DqqGUd741tAqJnWZMQRgixlgtSB6tb/HhfddmlsFWE5P7sckF2SmKVyyttpAdBdN5LUzQiF/R/+IjJw0TS5oTA==",
   "_location": "/izimodal",
   "_phantomChildren": {},
   "_requested": {
-    "type": "tag",
+    "type": "range",
     "registry": true,
-    "raw": "izimodal",
+    "raw": "izimodal@^1.5.1",
     "name": "izimodal",
     "escapedName": "izimodal",
-    "rawSpec": "",
+    "rawSpec": "^1.5.1",
     "saveSpec": null,
-    "fetchSpec": "latest"
+    "fetchSpec": "^1.5.1"
   },
   "_requiredBy": [
-    "#USER",
     "/"
   ],
   "_resolved": "https://registry.npmjs.org/izimodal/-/izimodal-1.5.1.tgz",
   "_shasum": "a49145030d8d9edfc60dfc35ae1758e4cf8502f1",
-  "_spec": "izimodal",
+  "_spec": "izimodal@^1.5.1",
   "_where": "C:\\Users\\user\\AdminLTE",
   "author": {
     "name": "Marcelo Dolce",

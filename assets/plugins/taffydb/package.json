@@ -1,27 +1,26 @@
 {
-  "_from": "taffydb",
+  "_from": "taffydb@^2.7.3",
   "_id": "taffydb@2.7.3",
   "_inBundle": false,
   "_integrity": "sha1-KtNxaWKUmPylvIQkMJbTzeDsOjQ=",
   "_location": "/taffydb",
   "_phantomChildren": {},
   "_requested": {
-    "type": "tag",
+    "type": "range",
     "registry": true,
-    "raw": "taffydb",
+    "raw": "taffydb@^2.7.3",
     "name": "taffydb",
     "escapedName": "taffydb",
-    "rawSpec": "",
+    "rawSpec": "^2.7.3",
     "saveSpec": null,
-    "fetchSpec": "latest"
+    "fetchSpec": "^2.7.3"
   },
   "_requiredBy": [
-    "#USER",
     "/"
   ],
   "_resolved": "https://registry.npmjs.org/taffydb/-/taffydb-2.7.3.tgz",
   "_shasum": "2ad37169629498fca5bc84243096d3cde0ec3a34",
-  "_spec": "taffydb",
+  "_spec": "taffydb@^2.7.3",
   "_where": "C:\\Users\\user\\AdminLTE",
   "author": {
     "name": "Ian Smith"

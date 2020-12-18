@@ -1,27 +1,26 @@
 {
-  "_from": "jquery-multiselect",
+  "_from": "jquery-multiselect@^1.0.0",
   "_id": "jquery-multiselect@1.0.0",
   "_inBundle": false,
   "_integrity": "sha1-KzEl/RCb++8dS+VNyEcUNnjHGyw=",
   "_location": "/jquery-multiselect",
   "_phantomChildren": {},
   "_requested": {
-    "type": "tag",
+    "type": "range",
     "registry": true,
-    "raw": "jquery-multiselect",
+    "raw": "jquery-multiselect@^1.0.0",
     "name": "jquery-multiselect",
     "escapedName": "jquery-multiselect",
-    "rawSpec": "",
+    "rawSpec": "^1.0.0",
     "saveSpec": null,
-    "fetchSpec": "latest"
+    "fetchSpec": "^1.0.0"
   },
   "_requiredBy": [
-    "#USER",
     "/"
   ],
   "_resolved": "https://registry.npmjs.org/jquery-multiselect/-/jquery-multiselect-1.0.0.tgz",
   "_shasum": "2b3125fd109bfbef1d4be54dc847143678c71b2c",
-  "_spec": "jquery-multiselect",
+  "_spec": "jquery-multiselect@^1.0.0",
   "_where": "C:\\Users\\user\\AdminLTE",
   "author": {
     "name": "Sahil Gupta",

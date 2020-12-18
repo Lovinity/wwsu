@@ -1,27 +1,26 @@
 {
-  "_from": "animate.css",
+  "_from": "animate.css@^4.1.1",
   "_id": "animate.css@4.1.1",
   "_inBundle": false,
   "_integrity": "sha512-+mRmCTv6SbCmtYJCN4faJMNFVNN5EuCTTprDTAo7YzIGji2KADmakjVA3+8mVDkZ2Bf09vayB35lSQIex2+QaQ==",
   "_location": "/animate.css",
   "_phantomChildren": {},
   "_requested": {
-    "type": "tag",
+    "type": "range",
     "registry": true,
-    "raw": "animate.css",
+    "raw": "animate.css@^4.1.1",
     "name": "animate.css",
     "escapedName": "animate.css",
-    "rawSpec": "",
+    "rawSpec": "^4.1.1",
     "saveSpec": null,
-    "fetchSpec": "latest"
+    "fetchSpec": "^4.1.1"
   },
   "_requiredBy": [
-    "#USER",
     "/"
   ],
   "_resolved": "https://registry.npmjs.org/animate.css/-/animate.css-4.1.1.tgz",
   "_shasum": "614ec5a81131d7e4dc362a58143f7406abd68075",
-  "_spec": "animate.css",
+  "_spec": "animate.css@^4.1.1",
   "_where": "C:\\Users\\user\\AdminLTE",
   "animateConfig": {
     "prefix": "animate__"

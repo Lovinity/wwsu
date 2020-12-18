@@ -188,23 +188,20 @@
     </style>
     <script src="/plugins/amplitudejs/amplitude.min.js"></script>
 
-    <!-- WidgetBot -->
-    <script src="https://cdn.jsdelivr.net/npm/@widgetbot/html-embed"></script>
-
     <!--WWSU-->
     <script src="/plugins/sails.io/sails.io.js" autoConnect="false"></script>
-    <script src="/plugins/wwsu-sails/js/wwsu.js?v=202011191341"></script>
-    <script src="/plugins/wwsu-navigation/js/wwsu-navigation.js?v=202011191341"></script>
-    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-web.js?v=202011191341"></script>
-    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-class.js?v=202011191341"></script>
-    <script src="/plugins/wwsu-meta/js/wwsu-meta.js?v=202011191341"></script>
-    <script src="/plugins/wwsu-directors/js/wwsu-directors.js?v=202011191341"></script>
-    <script src="/plugins/wwsu-subscriptions/js/wwsu-subscriptions.js?v=202011191341"></script>
-    <script src="/plugins/wwsu-likedtracks/js/wwsu-likedtracks.js?v=202011191341"></script>
-    <script src="/plugins/wwsu-announcements/js/wwsu-announcements.js?v=202011191341"></script>
-    <script src="/plugins/wwsu-eas/js/wwsu-eas.js?v=202011191341"></script>
-    <script src="/plugins/wwsu-discipline/js/wwsu-discipline.js?v=202011191341"></script>
-    <script src="/plugins/wwsu-website/wwsu-website.js?v=202011191341"></script>
+    <script src="/plugins/wwsu-sails/js/wwsu.js?v=202012181707"></script>
+    <script src="/plugins/wwsu-navigation/js/wwsu-navigation.js?v=202012181707"></script>
+    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-web.js?v=202012181707"></script>
+    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-class.js?v=202012181707"></script>
+    <script src="/plugins/wwsu-meta/js/wwsu-meta.js?v=202012181707"></script>
+    <script src="/plugins/wwsu-directors/js/wwsu-directors.js?v=202012181707"></script>
+    <script src="/plugins/wwsu-subscriptions/js/wwsu-subscriptions.js?v=202012181707"></script>
+    <script src="/plugins/wwsu-likedtracks/js/wwsu-likedtracks.js?v=202012181707"></script>
+    <script src="/plugins/wwsu-announcements/js/wwsu-announcements.js?v=202012181707"></script>
+    <script src="/plugins/wwsu-eas/js/wwsu-eas.js?v=202012181707"></script>
+    <script src="/plugins/wwsu-discipline/js/wwsu-discipline.js?v=202012181707"></script>
+    <script src="/plugins/wwsu-website/wwsu-website.js?v=202012181707"></script>
   </head>
 
   <body
@@ -424,55 +421,66 @@
         </section>
 
         <section id="section-chat">
-          <div class="content-header">
-            <div class="container-fluid">
-              <div class="row mb-2">
-                <div class="col-12">
-                  <h1 class="m-0 text-dark">Discord Chat</h1>
+          <div
+            class="content-wrapper iframe-mode"
+            data-widget="iframe"
+            id="section-chat-iframe"
+            style="padding-top: 8em;"
+          >
+            <!-- Content Header (Page header) -->
+            <div class="content-header">
+              <div class="container-fluid">
+                <div class="row mb-2">
+                  <div class="col-sm-6">
+                    <h1 class="m-0 text-dark">Discord Chat</h1>
+                  </div>
+                  <!-- /.col -->
                 </div>
-                <!-- /.col -->
+                <!-- /.row -->
               </div>
-              <!-- /.row -->
+              <!-- /.container-fluid -->
             </div>
-            <!-- /.container-fluid -->
-          </div>
+            <!-- /.content-header -->
 
-          <div class="content">
-            <div class="announcements-chat"></div>
-
-            <div
-              class="card card-sucress cardutline direct-chat direct-chat-success p-1 m-3"
-            >
-              <div class="card-header">
-                <h2 class="card-title">Discord Chat</h2>
+            <!-- Main content -->
+            <div class="content">
+              <div
+                class="nav navbar navbar-expand-lg navbar-white navbar-light border-bottom p-0"
+              >
+                <a
+                  class="nav-link bg-danger"
+                  href="#"
+                  data-widget="iframe-close"
+                  >Close</a
+                >
+                <a
+                  class="nav-link bg-primary"
+                  href="https://discord.io/wwsu1069"
+                  target="_blank"
+                  >Join our Discord Server</a
+                >
+                <ul class="navbar-nav" role="tablist"></ul>
               </div>
-              <div class="card-body">
-                <div class="p-3">
-                  <a
-                    class="btn btn-block bg-indigo p-1"
-                    target="_blank"
-                    href="https://discord.gg/cKjtnWXPhz"
-                    >Click to Join our Discord Server!</a
-                  >
+              <div class="tab-content">
+                <div class="tab-empty">
+                  <h2 class="display-4">No tab selected!</h2>
                 </div>
-                <widgetbot
-                  server="742819639096246383"
-                  channel="782073518606647297"
-                  width="100%"
-                  height="600"
-                ></widgetbot>
+                <div class="tab-loading">
+                  <div>
+                    <h2 class="display-4">
+                      Tab is loading <i class="fa fa-sync fa-spin"></i>
+                    </h2>
+                  </div>
+                </div>
               </div>
-              <div class="card-footer">
-                <div class="callout callout-warning">
-                  <p class="h5">IP Addresses are Logged</p>
 
-                  <p>
-                    Do not send any harassing nor threatening messages. You
-                    agree your IP address will be logged with every message
-                    sent, and you could be banned from WWSU's website and
-                    Discord for sending harmful messages.
-                  </p>
-                </div>
+              <div class="callout callout-warning">
+                <h5>You must agree to the #discord-rules</h5>
+                <p>
+                  Breaking any of the rules found in the #discord-rules channel
+                  can result in being banned from the chat or from the WWSU
+                  website.
+                </p>
               </div>
             </div>
           </div>

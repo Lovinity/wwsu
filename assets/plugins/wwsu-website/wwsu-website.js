@@ -56,26 +56,24 @@ window.addEventListener("DOMContentLoaded", () => {
             record.alert
           } is in effect for the WWSU listening area counties of ${
             record.counties
-          }, from ${moment.tz(
-            record.starts,
-            meta.meta ? meta.meta.timezone : moment.tz.guess()
-          ).format("lll")} to ${moment.tz(
-            record.expires,
-            meta.meta ? meta.meta.timezone : moment.tz.guess()
-          ).format("lll")} (station time).`,
+          }, from ${moment
+            .tz(
+              record.starts,
+              meta.meta ? meta.meta.timezone : moment.tz.guess()
+            )
+            .format("lll")} to ${moment
+            .tz(
+              record.expires,
+              meta.meta ? meta.meta.timezone : moment.tz.guess()
+            )
+            .format("lll")} (station time).`,
           icon: "fas fa-bolt fa-lg"
         });
       }
     });
 
     // Discipline
-    var discipline = new WWSUdiscipline(
-      socket,
-      noReq,
-      null,
-      null,
-      meta
-    );
+    var discipline = new WWSUdiscipline(socket, noReq, null, null, meta);
 
     // Add event handlers
     announcements.on("change", "renderer", db => {
@@ -181,13 +179,12 @@ window.addEventListener("DOMContentLoaded", () => {
       false
     );
 
-    // Add change event for chat-nickname
-    $("#chat-nickname").change(function() {
-      socket.post(
-        "/recipients/edit-web",
-        { label: $(this).val() },
-        function serverResponded() {}
-      );
+    // Iframe plugin
+    $("#section-chat-iframe").IFrame({
+      autoIframeMode: false,
+      autoItemActive: false,
+      autoShowNewTab: true,
+      loadingScreen: 750
     });
 
     // Add click events for subscription buttons
@@ -1299,274 +1296,6 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   /*
-    CHAT FUNCTIONS
-*/
-
-  // When a new message is received, process it.
-  socket.on("messages", data => {
-    try {
-      for (var key in data) {
-        if (Object.prototype.hasOwnProperty.call(data, key)) {
-          switch (key) {
-            case "insert":
-              addMessage(data[key], firstTime);
-              break;
-            case "remove":
-              removeMessage(data[key]);
-              break;
-          }
-        }
-      }
-    } catch (unusedE) {}
-  });
-
-  /**
-   * Updates all new message counts with the number of unread DJ messages
-   */
-  function updateNewMessages() {
-    $(".chat-newmessages").html(newMessages);
-    if (newMessages < 1) {
-      $(".chat-newmessages").removeClass("bg-danger");
-      $(".chat-newmessages").addClass("bg-secondary");
-    } else {
-      $(".chat-newmessages").addClass("bg-danger");
-      $(".chat-newmessages").removeClass("bg-secondary");
-    }
-  }
-
-  /**
-   * Hit the messages endpoint and subscribe to receiving messages.
-   */
-  function messagesSocket() {
-    socket.post("/messages/get-web", {}, function serverResponded(body) {
-      //console.log(body);
-      try {
-        body
-          .filter(message => messageIDs.indexOf(message.ID) === -1)
-          .map(message => addMessage(message, firstTime));
-        firstTime = false;
-      } catch (e) {
-        console.error(e);
-        setTimeout(messagesSocket, 10000);
-      }
-    });
-  }
-
-  /**
-   * TODO: Process a new message in the chat and notifications.
-   *
-   * @param {object} data Data object for the message from WWSU
-   * @param {boolean} firsttime Whether or not this message was added on initial load (if true, no toast notification will display)
-   */
-  function addMessage(data, firsttime = false) {
-    // Note the ID; used to determine new messages upon reconnection of a socket disconnect
-    messageIDs.push(data.ID);
-
-    // Private website message
-    if (data.to.startsWith("website-")) {
-      $("#chat-messages").append(`<div class="direct-chat-msg" id="msg-${
-        data.ID
-      }">
-        <div class="direct-chat-infos clearfix">
-          <span class="direct-chat-name float-left">${
-            data.fromFriendly
-          } (Private Message)</span>
-          <span class="direct-chat-timestamp float-right">${moment(
-            data.createdAt
-          ).format("hh:mm A")}</span>
-        </div>
-        <div class="direct-chat-img bg-secondary">${jdenticon.toSvg(
-          data.from,
-          40
-        )}</div>
-        <div class="direct-chat-text bg-danger">
-            ${data.message}
-        </div>
-      </div>`);
-      if (!firsttime) {
-        $(document).Toasts("create", {
-          class: "bg-success",
-          title: "Private Message from WWSU",
-          autohide: true,
-          delay: 15000,
-          body: data.message,
-          icon: "fas fa-comments fa-lg"
-        });
-      }
-      newMessages++;
-      updateNewMessages();
-
-      // Public website message for all visitors
-    } else if (data.to === "website") {
-      $("#chat-messages").append(`<div class="direct-chat-msg" id="msg-${
-        data.ID
-      }">
-        <div class="direct-chat-infos clearfix">
-          <span class="direct-chat-name float-left">${data.fromFriendly}</span>
-          <span class="direct-chat-timestamp float-right">${moment(
-            data.createdAt
-          ).format("hh:mm A")}</span>
-        </div>
-        <div class="direct-chat-img bg-secondary">${jdenticon.toSvg(
-          data.from,
-          40
-        )}</div>
-        <div class="direct-chat-text bg-success">
-            ${data.message}
-        </div>
-      </div>`);
-      if (!firsttime) {
-        $(document).Toasts("create", {
-          class: "bg-success",
-          title: "Message from WWSU",
-          autohide: true,
-          delay: 15000,
-          body: data.message,
-          icon: "fas fa-comments fa-lg"
-        });
-      }
-      newMessages++;
-      updateNewMessages();
-
-      // Private message sent from visitor
-    } else if (data.to === "DJ-private" && data.from !== client) {
-      $("#chat-messages").append(`<div class="direct-chat-msg" id="msg-${
-        data.ID
-      }">
-        <div class="direct-chat-infos clearfix">
-          <span class="direct-chat-name float-left">${data.fromFriendly}</span>
-          <span class="direct-chat-timestamp float-right">${moment(
-            data.createdAt
-          ).format("hh:mm A")}</span>
-        </div>
-        <div class="direct-chat-img bg-secondary">${jdenticon.toSvg(
-          data.from,
-          40
-        )}</div>
-        <div class="direct-chat-text bg-secondary">
-            ${data.message}
-        </div>
-      </div>`);
-      if (!firsttime) {
-        $(document).Toasts("create", {
-          class: "bg-success",
-          title: "Message",
-          subtitle: data.fromFriendly,
-          autohide: true,
-          delay: 15000,
-          body: data.message,
-          icon: "fas fa-comments fa-lg"
-        });
-      }
-    } else if (data.from === client) {
-      $("#chat-messages").append(`<div class="direct-chat-msg right" id="msg-${
-        data.ID
-      }">
-        <div class="direct-chat-infos clearfix">
-          <span class="direct-chat-name float-right">YOU${
-            data.to === "DJ-private" ? ` (Private Message)` : ``
-          }</span>
-          <span class="direct-chat-timestamp float-left">${moment(
-            data.createdAt
-          ).format("hh:mm A")}</span>
-        </div>
-        <div class="direct-chat-img bg-secondary">${jdenticon.toSvg(
-          data.from,
-          40
-        )}</div>
-        <div class="direct-chat-text bg-success">
-            ${data.message}
-        </div>
-      </div>`);
-
-      // All other messages
-    } else {
-      $("#chat-messages").append(`<div class="direct-chat-msg" id="msg-${
-        data.ID
-      }">
-        <div class="direct-chat-infos clearfix">
-          <span class="direct-chat-name float-left">${data.fromFriendly}</span>
-          <span class="direct-chat-timestamp float-right">${moment(
-            data.createdAt
-          ).format("hh:mm A")}</span>
-        </div>
-        <div class="direct-chat-img bg-secondary">${jdenticon.toSvg(
-          data.from,
-          40
-        )}</div>
-        <div class="direct-chat-text bg-secondary">
-            ${data.message}
-        </div>
-      </div>`);
-    }
-  }
-
-  /**
-   * Remove a message if it exists.
-   *
-   * @param {number} ID ID of the message to remove.
-   */
-  function removeMessage(ID) {
-    $(`#msg-${ID}`).remove();
-  }
-
-  /**
-   * Send whatever is in the message box as a message.
-   *
-   * @param {boolean} privateMsg Is this message to be sent privately?
-   */
-  function sendMessage(privateMsg = false) {
-    if (blocked) {
-      return null;
-    }
-    if ($("#chat-message").val().length < 1) {
-      $(document).Toasts("create", {
-        class: "bg-warning",
-        title: "Message Rejected",
-        autohide: true,
-        delay: 10000,
-        body: "You did not type a message to send.",
-        icon: "fas fa-skull-crossbones fa-lg"
-      });
-      return null;
-    }
-    socket.post(
-      "/messages/send-web",
-      {
-        message: $("#chat-message").val(),
-        nickname: $("#chat-nickname").val(),
-        private: privateMsg
-      },
-      function serverResponded(response) {
-        try {
-          if (response !== "OK") {
-            $(document).Toasts("create", {
-              class: "bg-warning",
-              title: "Message Rejected",
-              autohide: true,
-              delay: 15000,
-              body:
-                "WWSU rejected your message. This could be because you are sending messages too fast, or you are banned from sending messages.",
-              icon: "fas fa-skull-crossbones fa-lg"
-            });
-            return null;
-          }
-          $("#chat-message").val("");
-        } catch (e) {
-          console.error(e);
-          $(document).Toasts("create", {
-            class: "bg-danger",
-            title: "Error sending message",
-            body:
-              "There was an error sending your message. Please report this to wwsu4@wright.edu.",
-            icon: "fas fa-skull-crossbones fa-lg"
-          });
-        }
-      }
-    );
-  }
-
-  /*
     REQUEST FUNCTIONS
 */
 
@@ -1860,11 +1589,21 @@ window.addEventListener("DOMContentLoaded", () => {
       function serverResponded(body) {
         try {
           try {
-            $("#chat-nickname").val(
-              body.label.replace("Web ", "").match(/\(([^)]+)\)/)[1]
+            // Discord iframe
+            $("#section-chat-iframe").IFrame("removeActiveTab");
+            $("#section-chat-iframe").IFrame(
+              "createTab",
+              "Discord Chat",
+              `https://titanembeds.com/embed/742819639096246383?defaultchannel=782073518606647297&theme=DiscordDark&username=${body.label
+                .replace("Web ", "")
+                .match(/\(([^)]+)\)/)[1]
+                .replace(/[^a-zA-Z0-9\d\-_\s]+/gi, "")
+                .substring(0, 32)}`,
+              "discord-widget",
+              true
             );
           } catch (e2) {
-            $("#chat-nickname").val(body.label);
+
           }
           client = body.host;
           onlineSocketDone = true;

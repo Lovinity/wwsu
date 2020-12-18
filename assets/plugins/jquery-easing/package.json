@@ -1,27 +1,26 @@
 {
-  "_from": "jquery.easing",
+  "_from": "jquery.easing@^1.4.1",
   "_id": "jquery.easing@1.4.1",
   "_inBundle": false,
   "_integrity": "sha1-R5gsWDa9dY/UhJSSPEoQHvbpPjs=",
   "_location": "/jquery.easing",
   "_phantomChildren": {},
   "_requested": {
-    "type": "tag",
+    "type": "range",
     "registry": true,
-    "raw": "jquery.easing",
+    "raw": "jquery.easing@^1.4.1",
     "name": "jquery.easing",
     "escapedName": "jquery.easing",
-    "rawSpec": "",
+    "rawSpec": "^1.4.1",
     "saveSpec": null,
-    "fetchSpec": "latest"
+    "fetchSpec": "^1.4.1"
   },
   "_requiredBy": [
-    "#USER",
     "/"
   ],
   "_resolved": "https://registry.npmjs.org/jquery.easing/-/jquery.easing-1.4.1.tgz",
   "_shasum": "47982c5836bd758fd48494923c4a101ef6e93e3b",
-  "_spec": "jquery.easing",
+  "_spec": "jquery.easing@^1.4.1",
   "_where": "C:\\Users\\user\\AdminLTE",
   "author": {
     "name": "George McGinley Smith",
