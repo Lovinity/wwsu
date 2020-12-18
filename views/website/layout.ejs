@@ -340,8 +340,8 @@
       </aside>
 
       <!-- Content Wrapper. Contains page content -->
-      <div class="content-wrapper" role="main">
-        <section id="section-nowplaying">
+      <section id="section-nowplaying">
+        <div class="content-wrapper" role="main">
           <div class="content-header">
             <div class="container-fluid">
               <div class="row mb-2">
@@ -418,75 +418,73 @@
               <!-- /.card-body -->
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section id="section-chat">
-          <div
-            class="content-wrapper iframe-mode"
-            data-widget="iframe"
-            id="section-chat-iframe"
-            style="padding-top: 8em;"
-          >
-            <!-- Content Header (Page header) -->
-            <div class="content-header">
-              <div class="container-fluid">
-                <div class="row mb-2">
-                  <div class="col-sm-6">
-                    <h1 class="m-0 text-dark">Discord Chat</h1>
-                  </div>
-                  <!-- /.col -->
+      <section id="section-chat">
+        <div
+          class="content-wrapper iframe-mode"
+          data-widget="iframe"
+          id="section-chat-iframe"
+        >
+          <!-- Content Header (Page header) -->
+          <div class="content-header">
+            <div class="container-fluid">
+              <div class="row mb-2">
+                <div class="col-sm-6">
+                  <h1 class="m-0 text-dark">Discord Chat</h1>
                 </div>
-                <!-- /.row -->
+                <!-- /.col -->
               </div>
-              <!-- /.container-fluid -->
+              <!-- /.row -->
             </div>
-            <!-- /.content-header -->
+            <!-- /.container-fluid -->
+          </div>
+          <!-- /.content-header -->
 
-            <!-- Main content -->
-            <div class="content">
-              <div
-                class="nav navbar navbar-expand-lg navbar-white navbar-light border-bottom p-0"
+          <!-- Main content -->
+          <div class="content">
+            <div
+              class="nav navbar navbar-expand-lg navbar-white navbar-light border-bottom p-0"
+            >
+              <a class="nav-link bg-danger" href="#" data-widget="iframe-close"
+                >Close</a
               >
-                <a
-                  class="nav-link bg-danger"
-                  href="#"
-                  data-widget="iframe-close"
-                  >Close</a
-                >
-                <a
-                  class="nav-link bg-primary"
-                  href="https://discord.io/wwsu1069"
-                  target="_blank"
-                  >Join our Discord Server</a
-                >
-                <ul class="navbar-nav" role="tablist"></ul>
+              <a
+                class="nav-link bg-primary"
+                href="https://discord.io/wwsu1069"
+                target="_blank"
+                >Join our Discord Server</a
+              >
+              <ul class="navbar-nav" role="tablist"></ul>
+            </div>
+            <div class="tab-content">
+              <div class="tab-empty">
+                <h2 class="display-4">No tab selected!</h2>
               </div>
-              <div class="tab-content">
-                <div class="tab-empty">
-                  <h2 class="display-4">No tab selected!</h2>
-                </div>
-                <div class="tab-loading">
-                  <div>
-                    <h2 class="display-4">
-                      Tab is loading <i class="fa fa-sync fa-spin"></i>
-                    </h2>
-                  </div>
+              <div class="tab-loading">
+                <div>
+                  <h2 class="display-4">
+                    Tab is loading <i class="fa fa-sync fa-spin"></i>
+                  </h2>
                 </div>
               </div>
+            </div>
 
-              <div class="callout callout-warning">
-                <h5>You must agree to the #discord-rules</h5>
-                <p>
-                  Breaking any of the rules found in the #discord-rules channel
-                  can result in being banned from the chat or from the WWSU
-                  website.
-                </p>
-              </div>
+            <div class="callout callout-warning">
+              <h5>You must agree to the #discord-rules</h5>
+              <p>
+                Breaking any of the rules found in the #discord-rules channel
+                can result in being banned from the chat or from the WWSU
+                website.
+              </p>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section id="section-schedule">
+      <section id="section-schedule">
+        <div class="content-wrapper" role="main">
           <div class="content-header">
             <div class="container-fluid">
               <div class="row mb-2">
@@ -613,9 +611,11 @@
               <!-- /.modal-dialog -->
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section id="section-hours">
+      <section id="section-hours">
+        <div class="content-wrapper" role="main">
           <div class="content-header">
             <div class="container-fluid">
               <div class="row mb-2">
@@ -646,9 +646,11 @@
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section id="section-request">
+      <section id="section-request">
+        <div class="content-wrapper" role="main">
           <div class="content-header">
             <div class="container-fluid">
               <div class="row mb-2">
@@ -839,33 +841,33 @@
               <!-- /.modal-dialog -->
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <!-- Add padding to the end of the body because of the sticky footer-->
-        <div style="height: 85px;"></div>
-      </div>
-      <!-- /.content-wrapper -->
+      <!-- Add padding to the end of the body because of the sticky footer-->
+      <div style="height: 85px;"></div>
+    </div>
+    <!-- /.content-wrapper -->
 
-      <!-- Main Footer -->
-      <footer class="main-footer">
-        <div id="single-song-player">
-          <div class="bottom-container">
-            <div class="amplitude-visualization"></div>
-            <div class="control-container">
-              <div
-                class="amplitude-play-pause"
-                id="play-pause"
-                tabindex="0"
-              ></div>
-              <div class="meta-container">
-                <span class="nowplaying-line1"></span>
-                <span class="nowplaying-line2"></span>
-              </div>
+    <!-- Main Footer -->
+    <footer class="main-footer">
+      <div id="single-song-player">
+        <div class="bottom-container">
+          <div class="amplitude-visualization"></div>
+          <div class="control-container">
+            <div
+              class="amplitude-play-pause"
+              id="play-pause"
+              tabindex="0"
+            ></div>
+            <div class="meta-container">
+              <span class="nowplaying-line1"></span>
+              <span class="nowplaying-line2"></span>
             </div>
           </div>
         </div>
-      </footer>
-    </div>
+      </div>
+    </footer>
 
     <%- body %>
   </body>
