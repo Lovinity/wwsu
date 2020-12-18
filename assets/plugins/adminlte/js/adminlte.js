@@ -1,5 +1,5 @@
 /*!
- * AdminLTE v3.1.0-pre (https://adminlte.io)
+ * AdminLTE v3.1.0-rc (https://adminlte.io)
  * Copyright 2014-2020 Colorlib <https://colorlib.com>
  * Licensed under MIT (https://github.com/ColorlibHQ/AdminLTE/blob/master/LICENSE)
  */
@@ -432,7 +432,8 @@
   var Default$2 = {
     controlsidebarSlide: true,
     scrollbarTheme: 'os-theme-light',
-    scrollbarAutoHide: 'l'
+    scrollbarAutoHide: 'l',
+    target: SELECTOR_CONTROL_SIDEBAR
   };
   /**
    * Class Definition
@@ -443,8 +444,6 @@
     function ControlSidebar(element, config) {
       this._element = element;
       this._config = config;
-
-      this._init();
     } // Public
 
 
@@ -452,12 +451,13 @@
 
     _proto.collapse = function collapse() {
       var $body = $__default['default']('body');
-      var $html = $__default['default']('html'); // Show the control sidebar
+      var $html = $__default['default']('html');
+      var that = this; // Show the control sidebar
 
       if (this._config.controlsidebarSlide) {
         $html.addClass(CLASS_NAME_CONTROL_SIDEBAR_ANIMATE);
         $body.removeClass(CLASS_NAME_CONTROL_SIDEBAR_SLIDE).delay(300).queue(function () {
-          $__default['default'](SELECTOR_CONTROL_SIDEBAR).hide();
+          $__default['default'](that._config.target).hide();
           $html.removeClass(CLASS_NAME_CONTROL_SIDEBAR_ANIMATE);
           $__default['default'](this).dequeue();
         });
@@ -474,7 +474,7 @@
 
       if (this._config.controlsidebarSlide) {
         $html.addClass(CLASS_NAME_CONTROL_SIDEBAR_ANIMATE);
-        $__default['default'](SELECTOR_CONTROL_SIDEBAR).show().delay(10).queue(function () {
+        $__default['default'](this._config.target).show().delay(10).queue(function () {
           $body.addClass(CLASS_NAME_CONTROL_SIDEBAR_SLIDE).delay(300).queue(function () {
             $html.removeClass(CLASS_NAME_CONTROL_SIDEBAR_ANIMATE);
             $__default['default'](this).dequeue();
@@ -509,6 +509,16 @@
     _proto._init = function _init() {
       var _this = this;
 
+      var $body = $__default['default']('body');
+      var shouldNotHideAll = $body.hasClass(CLASS_NAME_CONTROL_SIDEBAR_OPEN) || $body.hasClass(CLASS_NAME_CONTROL_SIDEBAR_SLIDE);
+
+      if (shouldNotHideAll) {
+        $__default['default'](SELECTOR_CONTROL_SIDEBAR).not(this._config.target).hide();
+        $__default['default'](this._config.target).css('display', 'block');
+      } else {
+        $__default['default'](SELECTOR_CONTROL_SIDEBAR).hide();
+      }
+
       this._fixHeight();
 
       this._fixScrollHeight();
@@ -528,8 +538,19 @@
       });
     };
 
+    _proto._isNavbarFixed = function _isNavbarFixed() {
+      var $body = $__default['default']('body');
+      return $body.hasClass(CLASS_NAME_NAVBAR_FIXED) || $body.hasClass(CLASS_NAME_NAVBAR_SM_FIXED) || $body.hasClass(CLASS_NAME_NAVBAR_MD_FIXED) || $body.hasClass(CLASS_NAME_NAVBAR_LG_FIXED) || $body.hasClass(CLASS_NAME_NAVBAR_XL_FIXED);
+    };
+
+    _proto._isFooterFixed = function _isFooterFixed() {
+      var $body = $__default['default']('body');
+      return $body.hasClass(CLASS_NAME_FOOTER_FIXED) || $body.hasClass(CLASS_NAME_FOOTER_SM_FIXED) || $body.hasClass(CLASS_NAME_FOOTER_MD_FIXED) || $body.hasClass(CLASS_NAME_FOOTER_LG_FIXED) || $body.hasClass(CLASS_NAME_FOOTER_XL_FIXED);
+    };
+
     _proto._fixScrollHeight = function _fixScrollHeight() {
       var $body = $__default['default']('body');
+      var $controlSidebar = $__default['default'](this._config.target);
 
       if (!$body.hasClass(CLASS_NAME_LAYOUT_FIXED)) {
         return;
@@ -545,10 +566,9 @@
         bottom: Math.abs(heights.window + $__default['default'](window).scrollTop() - heights.scroll),
         top: $__default['default'](window).scrollTop()
       };
-      var navbarFixed = ($body.hasClass(CLASS_NAME_NAVBAR_FIXED) || $body.hasClass(CLASS_NAME_NAVBAR_SM_FIXED) || $body.hasClass(CLASS_NAME_NAVBAR_MD_FIXED) || $body.hasClass(CLASS_NAME_NAVBAR_LG_FIXED) || $body.hasClass(CLASS_NAME_NAVBAR_XL_FIXED)) && $__default['default'](SELECTOR_HEADER).css('position') === 'fixed';
-      var footerFixed = ($body.hasClass(CLASS_NAME_FOOTER_FIXED) || $body.hasClass(CLASS_NAME_FOOTER_SM_FIXED) || $body.hasClass(CLASS_NAME_FOOTER_MD_FIXED) || $body.hasClass(CLASS_NAME_FOOTER_LG_FIXED) || $body.hasClass(CLASS_NAME_FOOTER_XL_FIXED)) && $__default['default'](SELECTOR_FOOTER).css('position') === 'fixed';
-      var $controlSidebar = $__default['default'](SELECTOR_CONTROL_SIDEBAR);
-      var $controlsidebarContent = $__default['default'](SELECTOR_CONTROL_SIDEBAR + ", " + SELECTOR_CONTROL_SIDEBAR + " " + SELECTOR_CONTROL_SIDEBAR_CONTENT);
+      var navbarFixed = this._isNavbarFixed() && $__default['default'](SELECTOR_HEADER).css('position') === 'fixed';
+      var footerFixed = this._isFooterFixed() && $__default['default'](SELECTOR_FOOTER).css('position') === 'fixed';
+      var $controlsidebarContent = $__default['default'](this._config.target + ", " + this._config.target + " " + SELECTOR_CONTROL_SIDEBAR_CONTENT);
 
       if (positions.top === 0 && positions.bottom === 0) {
         $controlSidebar.css({
@@ -577,12 +597,22 @@
       } else {
         $controlSidebar.css('top', heights.header);
       }
+
+      if (footerFixed && navbarFixed) {
+        $controlsidebarContent.css('height', '100%');
+        $controlSidebar.css('height', '');
+      } else if (footerFixed || navbarFixed) {
+        $controlsidebarContent.css('height', '100%');
+        $controlsidebarContent.css('height', '');
+      }
     };
 
     _proto._fixHeight = function _fixHeight() {
       var $body = $__default['default']('body');
+      var $controlSidebar = $__default['default'](this._config.target + " " + SELECTOR_CONTROL_SIDEBAR_CONTENT);
 
       if (!$body.hasClass(CLASS_NAME_LAYOUT_FIXED)) {
+        $controlSidebar.attr('style', '');
         return;
       }
 
@@ -593,13 +623,12 @@
       };
       var sidebarHeight = heights.window - heights.header;
 
-      if ($body.hasClass(CLASS_NAME_FOOTER_FIXED) || $body.hasClass(CLASS_NAME_FOOTER_SM_FIXED) || $body.hasClass(CLASS_NAME_FOOTER_MD_FIXED) || $body.hasClass(CLASS_NAME_FOOTER_LG_FIXED) || $body.hasClass(CLASS_NAME_FOOTER_XL_FIXED)) {
+      if (this._isFooterFixed()) {
         if ($__default['default'](SELECTOR_FOOTER).css('position') === 'fixed') {
           sidebarHeight = heights.window - heights.header - heights.footer;
         }
       }
 
-      var $controlSidebar = $__default['default'](SELECTOR_CONTROL_SIDEBAR + " " + SELECTOR_CONTROL_SIDEBAR_CONTENT);
       $controlSidebar.css('height', sidebarHeight);
 
       if (typeof $__default['default'].fn.overlayScrollbars !== 'undefined') {
@@ -647,6 +676,9 @@
     event.preventDefault();
 
     ControlSidebar._jQueryInterface.call($__default['default'](this), 'toggle');
+  });
+  $__default['default'](document).ready(function () {
+    ControlSidebar._jQueryInterface.call($__default['default'](SELECTOR_DATA_TOGGLE), '_init');
   });
   /**
    * jQuery API
@@ -1104,6 +1136,387 @@
 
   /**
    * --------------------------------------------
+   * AdminLTE IFrame.js
+   * License MIT
+   * --------------------------------------------
+   */
+  /**
+   * Constants
+   * ====================================================
+   */
+
+  var NAME$7 = 'IFrame';
+  var DATA_KEY$7 = 'lte.iframe';
+  var JQUERY_NO_CONFLICT$7 = $__default['default'].fn[NAME$7];
+  var SELECTOR_DATA_TOGGLE$3 = '[data-widget="iframe"]';
+  var SELECTOR_DATA_TOGGLE_CLOSE = '[data-widget="iframe-close"]';
+  var SELECTOR_DATA_TOGGLE_SCROLL_LEFT = '[data-widget="iframe-scrollleft"]';
+  var SELECTOR_DATA_TOGGLE_SCROLL_RIGHT = '[data-widget="iframe-scrollright"]';
+  var SELECTOR_DATA_TOGGLE_FULLSCREEN = '[data-widget="iframe-fullscreen"]';
+  var SELECTOR_CONTENT_WRAPPER = '.content-wrapper';
+  var SELECTOR_CONTENT_IFRAME = SELECTOR_CONTENT_WRAPPER + " iframe";
+  var SELECTOR_TAB_NAV = SELECTOR_DATA_TOGGLE$3 + ".iframe-mode .nav";
+  var SELECTOR_TAB_NAVBAR_NAV = SELECTOR_DATA_TOGGLE$3 + ".iframe-mode .navbar-nav";
+  var SELECTOR_TAB_NAVBAR_NAV_ITEM = SELECTOR_TAB_NAVBAR_NAV + " .nav-item";
+  var SELECTOR_TAB_CONTENT = SELECTOR_DATA_TOGGLE$3 + ".iframe-mode .tab-content";
+  var SELECTOR_TAB_EMPTY = SELECTOR_TAB_CONTENT + " .tab-empty";
+  var SELECTOR_TAB_LOADING = SELECTOR_TAB_CONTENT + " .tab-loading";
+  var SELECTOR_SIDEBAR_MENU_ITEM = '.main-sidebar .nav-item > a.nav-link';
+  var SELECTOR_HEADER_MENU_ITEM = '.main-header .nav-item a.nav-link';
+  var SELECTOR_HEADER_DROPDOWN_ITEM = '.main-header a.dropdown-item';
+  var CLASS_NAME_IFRAME_MODE = 'iframe-mode';
+  var CLASS_NAME_FULLSCREEN_MODE = 'iframe-mode-fullscreen';
+  var Default$5 = {
+    onTabClick: function onTabClick(item) {
+      return item;
+    },
+    onTabChanged: function onTabChanged(item) {
+      return item;
+    },
+    onTabCreated: function onTabCreated(item) {
+      return item;
+    },
+    autoIframeMode: true,
+    autoItemActive: true,
+    autoShowNewTab: true,
+    loadingScreen: true,
+    useNavbarItems: true,
+    scrollOffset: 40,
+    scrollBehaviorSwap: false,
+    iconMaximize: 'fa-expand',
+    iconMinimize: 'fa-compress'
+  };
+  /**
+   * Class Definition
+   * ====================================================
+   */
+
+  var IFrame = /*#__PURE__*/function () {
+    function IFrame(element, config) {
+      this._config = config;
+      this._element = element;
+
+      this._init();
+    } // Public
+
+
+    var _proto = IFrame.prototype;
+
+    _proto.onTabClick = function onTabClick(item) {
+      this._config.onTabClick(item);
+    };
+
+    _proto.onTabChanged = function onTabChanged(item) {
+      this._config.onTabChanged(item);
+    };
+
+    _proto.onTabCreated = function onTabCreated(item) {
+      this._config.onTabCreated(item);
+    };
+
+    _proto.createTab = function createTab(title, link, uniqueName, autoOpen) {
+      var _this = this;
+
+      var tabId = "panel-" + uniqueName + "-" + Math.floor(Math.random() * 1000);
+      var navId = "tab-" + uniqueName + "-" + Math.floor(Math.random() * 1000);
+      var newNavItem = "<li class=\"nav-item\" role=\"presentation\"><a class=\"nav-link\" data-toggle=\"row\" id=\"" + navId + "\" href=\"#" + tabId + "\" role=\"tab\" aria-controls=\"" + tabId + "\" aria-selected=\"false\">" + title + "</a></li>";
+      $__default['default'](SELECTOR_TAB_NAVBAR_NAV).append(newNavItem);
+      var newTabItem = "<div class=\"tab-pane fade\" id=\"" + tabId + "\" role=\"tabpanel\" aria-labelledby=\"" + navId + "\"><iframe src=\"" + link + "\"></iframe></div>";
+      $__default['default'](SELECTOR_TAB_CONTENT).append(newTabItem);
+
+      if (autoOpen) {
+        if (this._config.loadingScreen) {
+          var $loadingScreen = $__default['default'](SELECTOR_TAB_LOADING);
+          $loadingScreen.fadeIn();
+          $__default['default'](tabId + " iframe").ready(function () {
+            if (typeof _this._config.loadingScreen === 'number') {
+              _this.switchTab("#" + navId, _this._config.loadingScreen);
+
+              setTimeout(function () {
+                $loadingScreen.fadeOut();
+              }, _this._config.loadingScreen);
+            } else {
+              _this.switchTab("#" + navId, _this._config.loadingScreen);
+
+              $loadingScreen.fadeOut();
+            }
+          });
+        } else {
+          this.switchTab("#" + navId);
+        }
+      }
+
+      this.onTabCreated($__default['default']("#" + navId));
+    };
+
+    _proto.openTabSidebar = function openTabSidebar(item, autoOpen) {
+      if (autoOpen === void 0) {
+        autoOpen = this._config.autoShowNewTab;
+      }
+
+      var $item = $__default['default'](item).clone();
+
+      if ($item.attr('href') === undefined) {
+        $item = $__default['default'](item).parent('a').clone();
+      }
+
+      $item.find('.right').remove();
+      var title = $item.find('p').text();
+
+      if (title === '') {
+        title = $item.text();
+      }
+
+      var link = $item.attr('href');
+
+      if (link === '#' || link === '' || link === undefined) {
+        return;
+      }
+
+      this.createTab(title, link, link.replace('.html', '').replace('./', '').replaceAll('/', '-'), autoOpen);
+    };
+
+    _proto.switchTab = function switchTab(item) {
+      var $item = $__default['default'](item);
+      var tabId = $item.attr('href');
+      $__default['default'](SELECTOR_TAB_EMPTY).hide();
+      $__default['default'](SELECTOR_TAB_NAVBAR_NAV + " .active").tab('dispose').removeClass('active');
+
+      this._fixHeight();
+
+      $item.tab('show');
+      $item.parents('li').addClass('active');
+      this.onTabChanged($item);
+
+      if (this._config.autoItemActive) {
+        this._setItemActive($__default['default'](tabId + " iframe").attr('src'));
+      }
+    };
+
+    _proto.removeActiveTab = function removeActiveTab() {
+      var $navItem = $__default['default'](SELECTOR_TAB_NAVBAR_NAV_ITEM + ".active");
+      var $navItemParent = $navItem.parent();
+      var navItemIndex = $navItem.index();
+      $navItem.remove();
+      $__default['default']('.tab-pane.active').remove();
+
+      if ($__default['default'](SELECTOR_TAB_CONTENT).children().length == $__default['default'](SELECTOR_TAB_EMPTY + ", " + SELECTOR_TAB_LOADING).length) {
+        $__default['default'](SELECTOR_TAB_EMPTY).show();
+      } else {
+        var prevNavItemIndex = navItemIndex - 1;
+        this.switchTab($navItemParent.children().eq(prevNavItemIndex).find('a'));
+      }
+    };
+
+    _proto.toggleFullscreen = function toggleFullscreen() {
+      if ($__default['default']('body').hasClass(CLASS_NAME_FULLSCREEN_MODE)) {
+        $__default['default'](SELECTOR_DATA_TOGGLE_FULLSCREEN + " i").removeClass(this._config.iconMinimize).addClass(this._config.iconMaximize);
+        $__default['default']('body').removeClass(CLASS_NAME_FULLSCREEN_MODE);
+        $__default['default'](SELECTOR_TAB_EMPTY + ", " + SELECTOR_TAB_LOADING).height('auto');
+        $__default['default'](SELECTOR_CONTENT_WRAPPER).height('auto');
+        $__default['default'](SELECTOR_CONTENT_IFRAME).height('auto');
+      } else {
+        $__default['default'](SELECTOR_DATA_TOGGLE_FULLSCREEN + " i").removeClass(this._config.iconMaximize).addClass(this._config.iconMinimize);
+        $__default['default']('body').addClass(CLASS_NAME_FULLSCREEN_MODE);
+      }
+
+      $__default['default'](window).trigger('resize');
+
+      this._fixHeight(true);
+    } // Private
+    ;
+
+    _proto._init = function _init() {
+      if (window.frameElement && this._config.autoIframeMode) {
+        $__default['default']('body').addClass(CLASS_NAME_IFRAME_MODE);
+      } else if ($__default['default'](SELECTOR_CONTENT_WRAPPER).hasClass(CLASS_NAME_IFRAME_MODE)) {
+        this._setupListeners();
+
+        this._fixHeight(true);
+      }
+    };
+
+    _proto._navScroll = function _navScroll(offset) {
+      var leftPos = $__default['default'](SELECTOR_TAB_NAVBAR_NAV).scrollLeft();
+      $__default['default'](SELECTOR_TAB_NAVBAR_NAV).animate({
+        scrollLeft: leftPos + offset
+      }, 250, 'linear');
+    };
+
+    _proto._setupListeners = function _setupListeners() {
+      var _this2 = this;
+
+      $__default['default'](window).on('resize', function () {
+        setTimeout(function () {
+          _this2._fixHeight();
+        }, 1);
+      });
+      $__default['default'](document).on('click', SELECTOR_SIDEBAR_MENU_ITEM, function (e) {
+        e.preventDefault();
+
+        _this2.openTabSidebar(e.target);
+      });
+
+      if (this._config.useNavbarItems) {
+        $__default['default'](document).on('click', SELECTOR_HEADER_MENU_ITEM + ", " + SELECTOR_HEADER_DROPDOWN_ITEM, function (e) {
+          e.preventDefault();
+
+          _this2.openTabSidebar(e.target);
+        });
+      }
+
+      $__default['default'](document).on('click', SELECTOR_TAB_NAVBAR_NAV_ITEM, function (e) {
+        e.preventDefault();
+
+        _this2.onTabClick(e.target);
+
+        _this2.switchTab(e.target);
+      });
+      $__default['default'](document).on('click', SELECTOR_DATA_TOGGLE_CLOSE, function (e) {
+        e.preventDefault();
+
+        _this2.removeActiveTab();
+      });
+      $__default['default'](document).on('click', SELECTOR_DATA_TOGGLE_FULLSCREEN, function (e) {
+        e.preventDefault();
+
+        _this2.toggleFullscreen();
+      });
+      var mousedown = false;
+      var mousedownInterval = null;
+      $__default['default'](document).on('mousedown', SELECTOR_DATA_TOGGLE_SCROLL_LEFT, function (e) {
+        e.preventDefault();
+        clearInterval(mousedownInterval);
+        var scrollOffset = _this2._config.scrollOffset;
+
+        if (!_this2._config.scrollBehaviorSwap) {
+          scrollOffset = -scrollOffset;
+        }
+
+        mousedown = true;
+
+        _this2._navScroll(scrollOffset);
+
+        mousedownInterval = setInterval(function () {
+          _this2._navScroll(scrollOffset);
+        }, 250);
+      });
+      $__default['default'](document).on('mousedown', SELECTOR_DATA_TOGGLE_SCROLL_RIGHT, function (e) {
+        e.preventDefault();
+        clearInterval(mousedownInterval);
+        var scrollOffset = _this2._config.scrollOffset;
+
+        if (_this2._config.scrollBehaviorSwap) {
+          scrollOffset = -scrollOffset;
+        }
+
+        mousedown = true;
+
+        _this2._navScroll(scrollOffset);
+
+        mousedownInterval = setInterval(function () {
+          _this2._navScroll(scrollOffset);
+        }, 250);
+      });
+      $__default['default'](document).on('mouseup', function () {
+        if (mousedown) {
+          mousedown = false;
+          clearInterval(mousedownInterval);
+          mousedownInterval = null;
+        }
+      });
+    };
+
+    _proto._setItemActive = function _setItemActive(href) {
+      $__default['default'](SELECTOR_SIDEBAR_MENU_ITEM + ", " + SELECTOR_HEADER_DROPDOWN_ITEM).removeClass('active');
+      $__default['default'](SELECTOR_HEADER_MENU_ITEM).parent().removeClass('active');
+      var $headerMenuItem = $__default['default'](SELECTOR_HEADER_MENU_ITEM + "[href$=\"" + href + "\"]");
+      var $headerDropdownItem = $__default['default'](SELECTOR_HEADER_DROPDOWN_ITEM + "[href$=\"" + href + "\"]");
+      var $sidebarMenuItem = $__default['default'](SELECTOR_SIDEBAR_MENU_ITEM + "[href$=\"" + href + "\"]");
+      $headerMenuItem.each(function (i, e) {
+        $__default['default'](e).parent().addClass('active');
+      });
+      $headerDropdownItem.each(function (i, e) {
+        $__default['default'](e).addClass('active');
+      });
+      $sidebarMenuItem.each(function (i, e) {
+        $__default['default'](e).addClass('active');
+        $__default['default'](e).parents('.nav-treeview').prevAll('.nav-link').addClass('active');
+      });
+    };
+
+    _proto._fixHeight = function _fixHeight(tabEmpty) {
+      if (tabEmpty === void 0) {
+        tabEmpty = false;
+      }
+
+      if ($__default['default']('body').hasClass(CLASS_NAME_FULLSCREEN_MODE)) {
+        var windowHeight = $__default['default'](window).height();
+        $__default['default'](SELECTOR_TAB_EMPTY + ", " + SELECTOR_TAB_LOADING).height(windowHeight);
+        $__default['default'](SELECTOR_CONTENT_WRAPPER).height(windowHeight);
+        $__default['default'](SELECTOR_CONTENT_IFRAME).height(windowHeight);
+      } else {
+        var contentWrapperHeight = parseFloat($__default['default'](SELECTOR_CONTENT_WRAPPER).css('min-height'));
+        var navbarHeight = $__default['default'](SELECTOR_TAB_NAV).outerHeight();
+
+        if (tabEmpty == true) {
+          setTimeout(function () {
+            $__default['default'](SELECTOR_TAB_EMPTY + ", " + SELECTOR_TAB_LOADING).height(contentWrapperHeight - navbarHeight);
+          }, 50);
+        } else {
+          $__default['default'](SELECTOR_CONTENT_IFRAME).height(contentWrapperHeight - navbarHeight);
+        }
+      }
+    } // Static
+    ;
+
+    IFrame._jQueryInterface = function _jQueryInterface(operation) {
+      var data = $__default['default'](this).data(DATA_KEY$7);
+
+      var _options = $__default['default'].extend({}, Default$5, $__default['default'](this).data());
+
+      if (!data) {
+        data = new IFrame(this, _options);
+        $__default['default'](this).data(DATA_KEY$7, data);
+      }
+
+      if (typeof operation === 'string' && operation.match(/createTab|openTabSidebar|switchTab|removeActiveTab/)) {
+        var _data;
+
+        for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+          args[_key - 1] = arguments[_key];
+        }
+
+        (_data = data)[operation].apply(_data, args);
+      }
+    };
+
+    return IFrame;
+  }();
+  /**
+   * Data API
+   * ====================================================
+   */
+
+
+  $__default['default'](window).on('load', function () {
+    IFrame._jQueryInterface.call($__default['default'](SELECTOR_DATA_TOGGLE$3));
+  });
+  /**
+   * jQuery API
+   * ====================================================
+   */
+
+  $__default['default'].fn[NAME$7] = IFrame._jQueryInterface;
+  $__default['default'].fn[NAME$7].Constructor = IFrame;
+
+  $__default['default'].fn[NAME$7].noConflict = function () {
+    $__default['default'].fn[NAME$7] = JQUERY_NO_CONFLICT$7;
+    return IFrame._jQueryInterface;
+  };
+
+  /**
+   * --------------------------------------------
    * AdminLTE Layout.js
    * License MIT
    * --------------------------------------------
@@ -1113,9 +1526,9 @@
    * ====================================================
    */
 
-  var NAME$7 = 'Layout';
-  var DATA_KEY$7 = 'lte.layout';
-  var JQUERY_NO_CONFLICT$7 = $__default['default'].fn[NAME$7];
+  var NAME$8 = 'Layout';
+  var DATA_KEY$8 = 'lte.layout';
+  var JQUERY_NO_CONFLICT$8 = $__default['default'].fn[NAME$8];
   var SELECTOR_HEADER$1 = '.main-header';
   var SELECTOR_MAIN_SIDEBAR = '.main-sidebar';
   var SELECTOR_SIDEBAR = '.main-sidebar .sidebar';
@@ -1126,14 +1539,16 @@
   var SELECTOR_PUSHMENU_BTN = '[data-widget="pushmenu"]';
   var SELECTOR_LOGIN_BOX = '.login-box';
   var SELECTOR_REGISTER_BOX = '.register-box';
+  var CLASS_NAME_SIDEBAR_COLLAPSED = 'sidebar-collapse';
   var CLASS_NAME_SIDEBAR_FOCUSED = 'sidebar-focused';
   var CLASS_NAME_LAYOUT_FIXED$1 = 'layout-fixed';
   var CLASS_NAME_CONTROL_SIDEBAR_SLIDE_OPEN = 'control-sidebar-slide-open';
   var CLASS_NAME_CONTROL_SIDEBAR_OPEN$1 = 'control-sidebar-open';
-  var Default$5 = {
+  var Default$6 = {
     scrollbarTheme: 'os-theme-light',
     scrollbarAutoHide: 'l',
     panelAutoHeight: true,
+    panelAutoHeightMode: 'min-height',
     loginRegisterAutoHeight: true
   };
   /**
@@ -1161,14 +1576,14 @@
       var controlSidebar = 0;
 
       if ($body.hasClass(CLASS_NAME_CONTROL_SIDEBAR_SLIDE_OPEN) || $body.hasClass(CLASS_NAME_CONTROL_SIDEBAR_OPEN$1) || extra === 'control_sidebar') {
-        controlSidebar = $__default['default'](SELECTOR_CONTROL_SIDEBAR_CONTENT$1).height();
+        controlSidebar = $__default['default'](SELECTOR_CONTROL_SIDEBAR_CONTENT$1).outerHeight();
       }
 
       var heights = {
         window: $__default['default'](window).height(),
-        header: $__default['default'](SELECTOR_HEADER$1).length !== 0 ? $__default['default'](SELECTOR_HEADER$1).outerHeight() : 0,
-        footer: $__default['default'](SELECTOR_FOOTER$1).length !== 0 ? $__default['default'](SELECTOR_FOOTER$1).outerHeight() : 0,
-        sidebar: $__default['default'](SELECTOR_SIDEBAR).length !== 0 ? $__default['default'](SELECTOR_SIDEBAR).height() : 0,
+        header: $__default['default'](SELECTOR_HEADER$1).length > 0 ? $__default['default'](SELECTOR_HEADER$1).outerHeight() : 0,
+        footer: $__default['default'](SELECTOR_FOOTER$1).length > 0 ? $__default['default'](SELECTOR_FOOTER$1).outerHeight() : 0,
+        sidebar: $__default['default'](SELECTOR_SIDEBAR).length > 0 ? $__default['default'](SELECTOR_SIDEBAR).height() : 0,
         controlSidebar: controlSidebar
       };
 
@@ -1184,15 +1599,19 @@
 
       if (offset !== false) {
         if (max === heights.controlSidebar) {
-          $contentSelector.css('min-height', max + offset);
+          $contentSelector.css(this._config.panelAutoHeightMode, max + offset);
         } else if (max === heights.window) {
-          $contentSelector.css('min-height', max + offset - heights.header - heights.footer);
+          $contentSelector.css(this._config.panelAutoHeightMode, max + offset - heights.header - heights.footer);
         } else {
-          $contentSelector.css('min-height', max + offset - heights.header);
+          $contentSelector.css(this._config.panelAutoHeightMode, max + offset - heights.header);
+        }
+
+        if (heights.controlSidebar + heights.footer >= heights.sidebar && heights.controlSidebar != 0) {
+          $contentSelector.css(this._config.panelAutoHeightMode, heights.controlSidebar + offset);
         }
 
         if (this._isFooterFixed()) {
-          $contentSelector.css('min-height', parseFloat($contentSelector.css('min-height')) + heights.footer);
+          $contentSelector.css(this._config.panelAutoHeightMode, parseFloat($contentSelector.css(this._config.panelAutoHeightMode)) + heights.footer);
         }
       }
 
@@ -1201,7 +1620,7 @@
       }
 
       if (offset !== false) {
-        $contentSelector.css('min-height', max + offset - heights.header - heights.footer);
+        $contentSelector.css(this._config.panelAutoHeightMode, max + offset - heights.header - heights.footer);
       }
 
       if (typeof $__default['default'].fn.overlayScrollbars !== 'undefined') {
@@ -1213,6 +1632,8 @@
             clickScrolling: true
           }
         });
+      } else {
+        $__default['default'](SELECTOR_SIDEBAR).css('overflow-y', 'auto');
       }
     };
 
@@ -1226,8 +1647,8 @@
       } else {
         var boxHeight = $selector.height();
 
-        if ($body.css('min-height') !== boxHeight) {
-          $body.css('min-height', boxHeight);
+        if ($body.css(this._config.panelAutoHeightMode) !== boxHeight) {
+          $body.css(this._config.panelAutoHeightMode, boxHeight);
         }
       }
     } // Private
@@ -1248,8 +1669,15 @@
       $__default['default'](SELECTOR_SIDEBAR).on('collapsed.lte.treeview expanded.lte.treeview', function () {
         _this.fixLayoutHeight();
       });
+      $__default['default'](SELECTOR_MAIN_SIDEBAR).on('mouseenter mouseleave', function () {
+        if ($__default['default']('body').hasClass(CLASS_NAME_SIDEBAR_COLLAPSED)) {
+          _this.fixLayoutHeight();
+        }
+      });
       $__default['default'](SELECTOR_PUSHMENU_BTN).on('collapsed.lte.pushmenu shown.lte.pushmenu', function () {
-        _this.fixLayoutHeight();
+        setTimeout(function () {
+          _this.fixLayoutHeight();
+        }, 300);
       });
       $__default['default'](SELECTOR_CONTROL_SIDEBAR_BTN).on('collapsed.lte.controlsidebar', function () {
         _this.fixLayoutHeight();
@@ -1257,6 +1685,9 @@
         _this.fixLayoutHeight('control_sidebar');
       });
       $__default['default'](window).resize(function () {
+        _this.fixLayoutHeight();
+      });
+      $__default['default'](document).ready(function () {
         _this.fixLayoutHeight();
       });
       setTimeout(function () {
@@ -1286,13 +1717,13 @@
       }
 
       return this.each(function () {
-        var data = $__default['default'](this).data(DATA_KEY$7);
+        var data = $__default['default'](this).data(DATA_KEY$8);
 
-        var _options = $__default['default'].extend({}, Default$5, $__default['default'](this).data());
+        var _options = $__default['default'].extend({}, Default$6, $__default['default'](this).data());
 
         if (!data) {
           data = new Layout($__default['default'](this), _options);
-          $__default['default'](this).data(DATA_KEY$7, data);
+          $__default['default'](this).data(DATA_KEY$8, data);
         }
 
         if (config === 'init' || config === '') {
@@ -1325,11 +1756,11 @@
    * ====================================================
    */
 
-  $__default['default'].fn[NAME$7] = Layout._jQueryInterface;
-  $__default['default'].fn[NAME$7].Constructor = Layout;
+  $__default['default'].fn[NAME$8] = Layout._jQueryInterface;
+  $__default['default'].fn[NAME$8].Constructor = Layout;
 
-  $__default['default'].fn[NAME$7].noConflict = function () {
-    $__default['default'].fn[NAME$7] = JQUERY_NO_CONFLICT$7;
+  $__default['default'].fn[NAME$8].noConflict = function () {
+    $__default['default'].fn[NAME$8] = JQUERY_NO_CONFLICT$8;
     return Layout._jQueryInterface;
   };
 
@@ -1344,10 +1775,10 @@
    * ====================================================
    */
 
-  var NAME$8 = 'PushMenu';
-  var DATA_KEY$8 = 'lte.pushmenu';
-  var EVENT_KEY$5 = "." + DATA_KEY$8;
-  var JQUERY_NO_CONFLICT$8 = $__default['default'].fn[NAME$8];
+  var NAME$9 = 'PushMenu';
+  var DATA_KEY$9 = 'lte.pushmenu';
+  var EVENT_KEY$5 = "." + DATA_KEY$9;
+  var JQUERY_NO_CONFLICT$9 = $__default['default'].fn[NAME$9];
   var EVENT_COLLAPSED$3 = "collapsed" + EVENT_KEY$5;
   var EVENT_SHOWN = "shown" + EVENT_KEY$5;
   var SELECTOR_TOGGLE_BUTTON = '[data-widget="pushmenu"]';
@@ -1358,7 +1789,7 @@
   var CLASS_NAME_OPEN = 'sidebar-open';
   var CLASS_NAME_IS_OPENING = 'sidebar-is-opening';
   var CLASS_NAME_CLOSED = 'sidebar-closed';
-  var Default$6 = {
+  var Default$7 = {
     autoCollapseSize: 992,
     enableRemember: false,
     noTransitionAfterReload: true
@@ -1371,7 +1802,7 @@
   var PushMenu = /*#__PURE__*/function () {
     function PushMenu(element, options) {
       this._element = element;
-      this._options = $__default['default'].extend({}, Default$6, options);
+      this._options = $__default['default'].extend({}, Default$7, options);
 
       if ($__default['default'](SELECTOR_OVERLAY).length === 0) {
         this._addOverlay();
@@ -1507,13 +1938,13 @@
 
     PushMenu._jQueryInterface = function _jQueryInterface(operation) {
       return this.each(function () {
-        var data = $__default['default'](this).data(DATA_KEY$8);
+        var data = $__default['default'](this).data(DATA_KEY$9);
 
-        var _options = $__default['default'].extend({}, Default$6, $__default['default'](this).data());
+        var _options = $__default['default'].extend({}, Default$7, $__default['default'](this).data());
 
         if (!data) {
           data = new PushMenu(this, _options);
-          $__default['default'](this).data(DATA_KEY$8, data);
+          $__default['default'](this).data(DATA_KEY$9, data);
         }
 
         if (typeof operation === 'string' && operation.match(/collapse|expand|toggle/)) {
@@ -1548,11 +1979,11 @@
    * ====================================================
    */
 
-  $__default['default'].fn[NAME$8] = PushMenu._jQueryInterface;
-  $__default['default'].fn[NAME$8].Constructor = PushMenu;
+  $__default['default'].fn[NAME$9] = PushMenu._jQueryInterface;
+  $__default['default'].fn[NAME$9].Constructor = PushMenu;
 
-  $__default['default'].fn[NAME$8].noConflict = function () {
-    $__default['default'].fn[NAME$8] = JQUERY_NO_CONFLICT$8;
+  $__default['default'].fn[NAME$9].noConflict = function () {
+    $__default['default'].fn[NAME$9] = JQUERY_NO_CONFLICT$9;
     return PushMenu._jQueryInterface;
   };
 
@@ -1567,9 +1998,9 @@
    * ====================================================
    */
 
-  var NAME$9 = 'SidebarSearch';
-  var DATA_KEY$9 = 'lte.sidebar-search';
-  var JQUERY_NO_CONFLICT$9 = $__default['default'].fn[NAME$9];
+  var NAME$a = 'SidebarSearch';
+  var DATA_KEY$a = 'lte.sidebar-search';
+  var JQUERY_NO_CONFLICT$a = $__default['default'].fn[NAME$a];
   var CLASS_NAME_OPEN$1 = 'sidebar-search-open';
   var CLASS_NAME_ICON_SEARCH = 'fa-search';
   var CLASS_NAME_ICON_CLOSE = 'fa-times';
@@ -1586,7 +2017,7 @@
   var SELECTOR_SEARCH_LIST_GROUP = "." + CLASS_NAME_LIST_GROUP;
   var SELECTOR_SEARCH_RESULTS = "." + CLASS_NAME_SEARCH_RESULTS;
   var SELECTOR_SEARCH_RESULTS_GROUP = SELECTOR_SEARCH_RESULTS + " ." + CLASS_NAME_LIST_GROUP;
-  var Default$7 = {
+  var Default$8 = {
     arrowSign: '->',
     minLength: 3,
     maxResults: 7,
@@ -1604,7 +2035,7 @@
   var SidebarSearch = /*#__PURE__*/function () {
     function SidebarSearch(_element, _options) {
       this.element = _element;
-      this.options = $__default['default'].extend({}, Default$7, _options);
+      this.options = $__default['default'].extend({}, Default$8, _options);
       this.items = [];
     } // Public
 
@@ -1661,7 +2092,7 @@
         this._addNotFound();
       } else {
         endResults.each(function (i, result) {
-          $__default['default'](SELECTOR_SEARCH_RESULTS_GROUP).append(_this2._renderItem(result.name, result.link, result.path));
+          $__default['default'](SELECTOR_SEARCH_RESULTS_GROUP).append(_this2._renderItem(escape(result.name), escape(result.link), result.path));
         });
       }
 
@@ -1725,6 +2156,7 @@
       var _this4 = this;
 
       path = path.join(" " + this.options.arrowSign + " ");
+      name = unescape(name);
 
       if (this.options.highlightName || this.options.highlightPath) {
         var searchValue = $__default['default'](SELECTOR_SEARCH_INPUT).val().toLowerCase();
@@ -1732,18 +2164,29 @@
 
         if (this.options.highlightName) {
           name = name.replace(regExp, function (str) {
-            return "<b class=\"" + _this4.options.highlightClass + "\">" + str + "</b>";
+            return "<strong class=\"" + _this4.options.highlightClass + "\">" + str + "</strong>";
           });
         }
 
         if (this.options.highlightPath) {
           path = path.replace(regExp, function (str) {
-            return "<b class=\"" + _this4.options.highlightClass + "\">" + str + "</b>";
+            return "<strong class=\"" + _this4.options.highlightClass + "\">" + str + "</strong>";
           });
         }
       }
 
-      return "<a href=\"" + link + "\" class=\"list-group-item\">\n        <div class=\"search-title\">\n          " + name + "\n        </div>\n        <div class=\"search-path\">\n          " + path + "\n        </div>\n      </a>";
+      var groupItemElement = $__default['default']('<a/>', {
+        href: link,
+        class: 'list-group-item'
+      });
+      var searchTitleElement = $__default['default']('<div/>', {
+        class: 'search-title'
+      }).html(name);
+      var searchPathElement = $__default['default']('<div/>', {
+        class: 'search-path'
+      }).html(path);
+      groupItemElement.append(searchTitleElement).append(searchPathElement);
+      return groupItemElement;
     };
 
     _proto._addNotFound = function _addNotFound() {
@@ -1752,16 +2195,16 @@
     ;
 
     SidebarSearch._jQueryInterface = function _jQueryInterface(config) {
-      var data = $__default['default'](this).data(DATA_KEY$9);
+      var data = $__default['default'](this).data(DATA_KEY$a);
 
       if (!data) {
         data = $__default['default'](this).data();
       }
 
-      var _options = $__default['default'].extend({}, Default$7, typeof config === 'object' ? config : data);
+      var _options = $__default['default'].extend({}, Default$8, typeof config === 'object' ? config : data);
 
       var plugin = new SidebarSearch($__default['default'](this), _options);
-      $__default['default'](this).data(DATA_KEY$9, typeof config === 'object' ? config : data);
+      $__default['default'](this).data(DATA_KEY$a, typeof config === 'object' ? config : data);
 
       if (typeof config === 'string' && config.match(/init|toggle|close|open|search/)) {
         plugin[config]();
@@ -1796,9 +2239,7 @@
       return;
     }
 
-    var timer = 0;
-    clearTimeout(timer);
-    timer = setTimeout(function () {
+    setTimeout(function () {
       SidebarSearch._jQueryInterface.call($__default['default'](SELECTOR_DATA_WIDGET$1), 'search');
     }, 100);
   });
@@ -1833,12 +2274,117 @@
    * ====================================================
    */
 
-  $__default['default'].fn[NAME$9] = SidebarSearch._jQueryInterface;
-  $__default['default'].fn[NAME$9].Constructor = SidebarSearch;
+  $__default['default'].fn[NAME$a] = SidebarSearch._jQueryInterface;
+  $__default['default'].fn[NAME$a].Constructor = SidebarSearch;
 
-  $__default['default'].fn[NAME$9].noConflict = function () {
-    $__default['default'].fn[NAME$9] = JQUERY_NO_CONFLICT$9;
+  $__default['default'].fn[NAME$a].noConflict = function () {
+    $__default['default'].fn[NAME$a] = JQUERY_NO_CONFLICT$a;
     return SidebarSearch._jQueryInterface;
+  };
+
+  /**
+   * --------------------------------------------
+   * AdminLTE NavbarSearch.js
+   * License MIT
+   * --------------------------------------------
+   */
+  /**
+   * Constants
+   * ====================================================
+   */
+
+  var NAME$b = 'NavbarSearch';
+  var DATA_KEY$b = 'lte.navbar-search';
+  var JQUERY_NO_CONFLICT$b = $__default['default'].fn[NAME$b];
+  var SELECTOR_TOGGLE_BUTTON$1 = '[data-widget="navbar-search"]';
+  var SELECTOR_SEARCH_BLOCK = '.navbar-search-block';
+  var SELECTOR_SEARCH_INPUT$1 = '.navbar-search-block .form-control';
+  var CLASS_NAME_OPEN$2 = 'navbar-search-open';
+  var Default$9 = {
+    resetOnClose: true
+  };
+  /**
+   * Class Definition
+   * ====================================================
+   */
+
+  var NavbarSearch = /*#__PURE__*/function () {
+    function NavbarSearch(_element, _options) {
+      this._element = _element;
+      this._config = $__default['default'].extend({}, Default$9, _options);
+    } // Public
+
+
+    var _proto = NavbarSearch.prototype;
+
+    _proto.open = function open() {
+      $__default['default'](SELECTOR_SEARCH_BLOCK).css('display', 'flex').hide().fadeIn().addClass(CLASS_NAME_OPEN$2);
+      $__default['default'](SELECTOR_SEARCH_INPUT$1).focus();
+    };
+
+    _proto.close = function close() {
+      $__default['default'](SELECTOR_SEARCH_BLOCK).fadeOut().removeClass(CLASS_NAME_OPEN$2);
+
+      if (this._config.resetOnClose) {
+        $__default['default'](SELECTOR_SEARCH_INPUT$1).val('');
+      }
+    };
+
+    _proto.toggle = function toggle() {
+      if ($__default['default'](SELECTOR_SEARCH_BLOCK).hasClass(CLASS_NAME_OPEN$2)) {
+        this.close();
+      } else {
+        this.open();
+      }
+    } // Static
+    ;
+
+    NavbarSearch._jQueryInterface = function _jQueryInterface(options) {
+      return this.each(function () {
+        var data = $__default['default'](this).data(DATA_KEY$b);
+
+        if (!data) {
+          data = new NavbarSearch(this, options);
+          $__default['default'](this).data(DATA_KEY$b, data);
+        }
+
+        if (!/toggle|close|open/.test(options)) {
+          throw new Error("Undefined method " + options);
+        }
+
+        data[options]();
+      });
+    };
+
+    return NavbarSearch;
+  }();
+  /**
+   * Data API
+   * ====================================================
+   */
+
+
+  $__default['default'](document).on('click', SELECTOR_TOGGLE_BUTTON$1, function (event) {
+    event.preventDefault();
+    var button = $__default['default'](event.currentTarget);
+
+    if (button.data('widget') !== 'navbar-search') {
+      button = button.closest(SELECTOR_TOGGLE_BUTTON$1);
+    }
+
+    NavbarSearch._jQueryInterface.call(button, 'toggle');
+  });
+  /**
+   * jQuery API
+   * ====================================================
+   */
+
+  $__default['default'].fn[NAME$b] = NavbarSearch._jQueryInterface;
+  $__default['default'].fn[NAME$b].Constructor = NavbarSearch;
+
+  $__default['default'].fn[NAME$b].noConflict = function () {
+    $__default['default'].fn[NAME$b] = JQUERY_NO_CONFLICT$b;
+    return NavbarSearch._jQueryInterface;
   };
 
   /**
@@ -1852,10 +2398,10 @@
    * ====================================================
    */
 
-  var NAME$a = 'Toasts';
-  var DATA_KEY$a = 'lte.toasts';
-  var EVENT_KEY$6 = "." + DATA_KEY$a;
-  var JQUERY_NO_CONFLICT$a = $__default['default'].fn[NAME$a];
+  var NAME$c = 'Toasts';
+  var DATA_KEY$c = 'lte.toasts';
+  var EVENT_KEY$6 = "." + DATA_KEY$c;
+  var JQUERY_NO_CONFLICT$c = $__default['default'].fn[NAME$c];
   var EVENT_INIT = "init" + EVENT_KEY$6;
   var EVENT_CREATED = "created" + EVENT_KEY$6;
   var EVENT_REMOVED$1 = "removed" + EVENT_KEY$6;
@@ -1871,7 +2417,7 @@
   var POSITION_TOP_LEFT = 'topLeft';
   var POSITION_BOTTOM_RIGHT = 'bottomRight';
   var POSITION_BOTTOM_LEFT = 'bottomLeft';
-  var Default$8 = {
+  var Default$a = {
     position: POSITION_TOP_RIGHT,
     fixed: true,
     autohide: false,
@@ -2017,7 +2563,7 @@
 
     Toasts._jQueryInterface = function _jQueryInterface(option, config) {
       return this.each(function () {
-        var _options = $__default['default'].extend({}, Default$8, config);
+        var _options = $__default['default'].extend({}, Default$a, config);
 
         var toast = new Toasts($__default['default'](this), _options);
 
@@ -2035,11 +2581,11 @@
    */
 
 
-  $__default['default'].fn[NAME$a] = Toasts._jQueryInterface;
-  $__default['default'].fn[NAME$a].Constructor = Toasts;
+  $__default['default'].fn[NAME$c] = Toasts._jQueryInterface;
+  $__default['default'].fn[NAME$c].Constructor = Toasts;
 
-  $__default['default'].fn[NAME$a].noConflict = function () {
-    $__default['default'].fn[NAME$a] = JQUERY_NO_CONFLICT$a;
+  $__default['default'].fn[NAME$c].noConflict = function () {
+    $__default['default'].fn[NAME$c] = JQUERY_NO_CONFLICT$c;
     return Toasts._jQueryInterface;
   };
 
@@ -2054,12 +2600,12 @@
    * ====================================================
    */
 
-  var NAME$b = 'TodoList';
-  var DATA_KEY$b = 'lte.todolist';
-  var JQUERY_NO_CONFLICT$b = $__default['default'].fn[NAME$b];
-  var SELECTOR_DATA_TOGGLE$3 = '[data-widget="todo-list"]';
+  var NAME$d = 'TodoList';
+  var DATA_KEY$d = 'lte.todolist';
+  var JQUERY_NO_CONFLICT$d = $__default['default'].fn[NAME$d];
+  var SELECTOR_DATA_TOGGLE$4 = '[data-widget="todo-list"]';
   var CLASS_NAME_TODO_LIST_DONE = 'done';
-  var Default$9 = {
+  var Default$b = {
     onCheck: function onCheck(item) {
       return item;
     },
@@ -2116,16 +2662,16 @@
 
     TodoList._jQueryInterface = function _jQueryInterface(config) {
       return this.each(function () {
-        var data = $__default['default'](this).data(DATA_KEY$b);
+        var data = $__default['default'](this).data(DATA_KEY$d);
 
         if (!data) {
           data = $__default['default'](this).data();
         }
 
-        var _options = $__default['default'].extend({}, Default$9, typeof config === 'object' ? config : data);
+        var _options = $__default['default'].extend({}, Default$b, typeof config === 'object' ? config : data);
 
         var plugin = new TodoList($__default['default'](this), _options);
-        $__default['default'](this).data(DATA_KEY$b, typeof config === 'object' ? config : data);
+        $__default['default'](this).data(DATA_KEY$d, typeof config === 'object' ? config : data);
 
         if (config === 'init') {
           plugin[config]();
@@ -2142,18 +2688,18 @@
 
 
   $__default['default'](window).on('load', function () {
-    TodoList._jQueryInterface.call($__default['default'](SELECTOR_DATA_TOGGLE$3));
+    TodoList._jQueryInterface.call($__default['default'](SELECTOR_DATA_TOGGLE$4));
   });
   /**
    * jQuery API
    * ====================================================
    */
 
-  $__default['default'].fn[NAME$b] = TodoList._jQueryInterface;
-  $__default['default'].fn[NAME$b].Constructor = TodoList;
+  $__default['default'].fn[NAME$d] = TodoList._jQueryInterface;
+  $__default['default'].fn[NAME$d].Constructor = TodoList;
 
-  $__default['default'].fn[NAME$b].noConflict = function () {
-    $__default['default'].fn[NAME$b] = JQUERY_NO_CONFLICT$b;
+  $__default['default'].fn[NAME$d].noConflict = function () {
+    $__default['default'].fn[NAME$d] = JQUERY_NO_CONFLICT$d;
     return TodoList._jQueryInterface;
   };
 
@@ -2168,10 +2714,10 @@
    * ====================================================
    */
 
-  var NAME$c = 'Treeview';
-  var DATA_KEY$c = 'lte.treeview';
-  var EVENT_KEY$7 = "." + DATA_KEY$c;
-  var JQUERY_NO_CONFLICT$c = $__default['default'].fn[NAME$c];
+  var NAME$e = 'Treeview';
+  var DATA_KEY$e = 'lte.treeview';
+  var EVENT_KEY$7 = "." + DATA_KEY$e;
+  var JQUERY_NO_CONFLICT$e = $__default['default'].fn[NAME$e];
   var EVENT_EXPANDED$3 = "expanded" + EVENT_KEY$7;
   var EVENT_COLLAPSED$4 = "collapsed" + EVENT_KEY$7;
   var EVENT_LOAD_DATA_API = "load" + EVENT_KEY$7;
@@ -2180,10 +2726,10 @@
   var SELECTOR_TREEVIEW_MENU = '.nav-treeview';
   var SELECTOR_OPEN = '.menu-open';
   var SELECTOR_DATA_WIDGET$2 = '[data-widget="treeview"]';
-  var CLASS_NAME_OPEN$2 = 'menu-open';
+  var CLASS_NAME_OPEN$3 = 'menu-open';
   var CLASS_NAME_IS_OPENING$1 = 'menu-is-opening';
-  var CLASS_NAME_SIDEBAR_COLLAPSED = 'sidebar-collapse';
-  var Default$a = {
+  var CLASS_NAME_SIDEBAR_COLLAPSED$1 = 'sidebar-collapse';
+  var Default$c = {
     trigger: SELECTOR_DATA_WIDGET$2 + " " + SELECTOR_LINK,
     animationSpeed: 300,
     accordion: true,
@@ -2223,7 +2769,7 @@
 
       parentLi.addClass(CLASS_NAME_IS_OPENING$1);
       treeviewMenu.stop().slideDown(this._config.animationSpeed, function () {
-        parentLi.addClass(CLASS_NAME_OPEN$2);
+        parentLi.addClass(CLASS_NAME_OPEN$3);
         $__default['default'](_this._element).trigger(expandedEvent);
       });
 
@@ -2236,11 +2782,11 @@
       var _this2 = this;
 
       var collapsedEvent = $__default['default'].Event(EVENT_COLLAPSED$4);
-      parentLi.removeClass(CLASS_NAME_IS_OPENING$1 + " " + CLASS_NAME_OPEN$2);
+      parentLi.removeClass(CLASS_NAME_IS_OPENING$1 + " " + CLASS_NAME_OPEN$3);
       treeviewMenu.stop().slideUp(this._config.animationSpeed, function () {
         $__default['default'](_this2._element).trigger(collapsedEvent);
         treeviewMenu.find(SELECTOR_OPEN + " > " + SELECTOR_TREEVIEW_MENU).slideUp();
-        treeviewMenu.find(SELECTOR_OPEN).removeClass(CLASS_NAME_OPEN$2);
+        treeviewMenu.find(SELECTOR_OPEN).removeClass(CLASS_NAME_OPEN$3);
       });
     };
 
@@ -2261,7 +2807,7 @@
 
       event.preventDefault();
       var parentLi = $relativeTarget.parents(SELECTOR_LI).first();
-      var isOpen = parentLi.hasClass(CLASS_NAME_OPEN$2);
+      var isOpen = parentLi.hasClass(CLASS_NAME_OPEN$3);
 
       if (isOpen) {
         this.collapse($__default['default'](treeviewMenu), parentLi);
@@ -2281,7 +2827,7 @@
     };
 
     _proto._expandSidebar = function _expandSidebar() {
-      if ($__default['default']('body').hasClass(CLASS_NAME_SIDEBAR_COLLAPSED)) {
+      if ($__default['default']('body').hasClass(CLASS_NAME_SIDEBAR_COLLAPSED$1)) {
         $__default['default'](this._config.sidebarButtonSelector).PushMenu('expand');
       }
     } // Static
@@ -2289,13 +2835,13 @@
 
     Treeview._jQueryInterface = function _jQueryInterface(config) {
       return this.each(function () {
-        var data = $__default['default'](this).data(DATA_KEY$c);
+        var data = $__default['default'](this).data(DATA_KEY$e);
 
-        var _options = $__default['default'].extend({}, Default$a, $__default['default'](this).data());
+        var _options = $__default['default'].extend({}, Default$c, $__default['default'](this).data());
 
         if (!data) {
           data = new Treeview($__default['default'](this), _options);
-          $__default['default'](this).data(DATA_KEY$c, data);
+          $__default['default'](this).data(DATA_KEY$e, data);
         }
 
         if (config === 'init') {
@@ -2322,11 +2868,11 @@
    * ====================================================
    */
 
-  $__default['default'].fn[NAME$c] = Treeview._jQueryInterface;
-  $__default['default'].fn[NAME$c].Constructor = Treeview;
+  $__default['default'].fn[NAME$e] = Treeview._jQueryInterface;
+  $__default['default'].fn[NAME$e].Constructor = Treeview;
 
-  $__default['default'].fn[NAME$c].noConflict = function () {
-    $__default['default'].fn[NAME$c] = JQUERY_NO_CONFLICT$c;
+  $__default['default'].fn[NAME$e].noConflict = function () {
+    $__default['default'].fn[NAME$e] = JQUERY_NO_CONFLICT$e;
     return Treeview._jQueryInterface;
   };
 
@@ -2337,7 +2883,9 @@
   exports.Dropdown = Dropdown;
   exports.ExpandableTable = ExpandableTable;
   exports.Fullscreen = Fullscreen;
+  exports.IFrame = IFrame;
   exports.Layout = Layout;
+  exports.NavbarSearch = NavbarSearch;
   exports.PushMenu = PushMenu;
   exports.SidebarSearch = SidebarSearch;
   exports.Toasts = Toasts;

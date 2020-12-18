@@ -1,5 +1,5 @@
 /*!
- *   AdminLTE v3.1.0-pre
+ *   AdminLTE v3.1.0-rc
  *     Only Components
  *   Author: Colorlib
  *   Website: AdminLTE.io <https://adminlte.io>
@@ -2694,7 +2694,30 @@ body.text-sm .input-group-text {
   background-color: transparent;
 }
 
-.dark-mode .form-control,
+.navbar-dark .btn-navbar,
+.navbar-dark .form-control-navbar {
+  background-color: #3f474e;
+  border: 1px solid #56606a;
+  color: white;
+}
+
+.navbar-dark .btn-navbar:hover {
+  background-color: #454d55;
+}
+
+.navbar-dark .btn-navbar:focus {
+  background-color: #4b545c;
+}
+
+.navbar-dark .form-control-navbar + .input-group-prepend > .btn-navbar,
+.navbar-dark .form-control-navbar + .input-group-append > .btn-navbar {
+  background-color: #3f474e;
+  color: #fff;
+  border: 1px solid #56606a;
+  border-left: none;
+}
+
+.dark-mode .form-control:not(.form-control-navbar):not(.form-control-sidebar),
 .dark-mode .custom-select,
 .dark-mode .custom-file-label,
 .dark-mode .custom-file-label::after,
@@ -2704,7 +2727,9 @@ body.text-sm .input-group-text {
   color: #fff;
 }
 
-.dark-mode .form-control:not(.form-control-navbar):not(.is-invalid):not(:focus) {
+.dark-mode .form-control:not(.form-control-navbar):not(.form-control-sidebar):not(.is-invalid):not(:focus),
+.dark-mode .custom-file-label,
+.dark-mode .custom-file-label::after {
   border-color: #6c757d;
 }
 
@@ -2735,28 +2760,6 @@ body.text-sm .input-group-text {
 
 .dark-mode .custom-range::-ms-track {
   background-color: #454d55;
-}
-
-.dark-mode .navbar-dark .btn-navbar,
-.dark-mode .navbar-dark .form-control-navbar {
-  background-color: #343a40;
-  border: 1px solid #6c757d;
-}
-
-.dark-mode .navbar-dark .btn-navbar:hover {
-  background-color: #454d55;
-}
-
-.dark-mode .navbar-dark .btn-navbar:focus {
-  background-color: #4b545c;
-}
-
-.dark-mode .navbar-dark .form-control-navbar + .input-group-prepend > .btn-navbar,
-.dark-mode .navbar-dark .form-control-navbar + .input-group-append > .btn-navbar {
-  background-color: #3f474e;
-  color: #fff;
-  border: 1px solid #6c757d;
-  border-left: none;
 }
 
 .progress {
@@ -5270,15 +5273,22 @@ html.maximized-card {
 }
 
 .modal-dialog .overlay {
-  background-color: #000;
-  display: block;
-  height: 100%;
-  left: 0;
-  opacity: .7;
+  display: -ms-flexbox;
+  display: flex;
   position: absolute;
+  left: 0;
   top: 0;
-  width: 100%;
+  bottom: 0;
+  right: 0;
+  margin: -1px;
   z-index: 1052;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -ms-flex-align: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: #666f76;
+  border-radius: 0.3rem;
 }
 
 .modal-content.bg-warning .modal-header,

@@ -145,11 +145,7 @@ window.addEventListener("DOMContentLoaded", () => {
       "#section-chat",
       "Chat with DJ - WWSU 106.9 FM Listener's Corner",
       "/chat",
-      false,
-      () => {
-        newMessages = 0;
-        updateNewMessages();
-      }
+      false
     );
     navigation.addItem(
       "#nav-schedule",
@@ -294,7 +290,6 @@ window.addEventListener("DOMContentLoaded", () => {
         eas.init();
         loadGenres();
         onlineSocket();
-        messagesSocket();
       });
       // web devices without device parameter, connect to OneSignal first and get the ID, then start sockets.
     } else {
@@ -308,7 +303,6 @@ window.addEventListener("DOMContentLoaded", () => {
         eas.init();
         loadGenres();
         onlineSocket(true);
-        messagesSocket();
       });
     }
   }
@@ -411,9 +405,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
       if ("webchat" in response && !response.webchat) {
         blocked = true;
-        $(".chat-status").html(`<p class="h5">Chat Status: Disabled</p>
-            <p>Either the current DJ disabled the chat for their show, or directors have temporarily disabled the chat globally.</p>`);
-        $(".chat-blocker").prop("disabled", true);
       }
 
       // If a state change was returned, process it by informing the client whether or not there is probably a DJ at the studio to read messages
@@ -423,16 +414,11 @@ window.addEventListener("DOMContentLoaded", () => {
           _meta.state === "unknown"
         ) {
           if (automationpost !== "automation") {
-            $(".chat-status").html(`<p class="h5">Chat Status: Inactive</p>
-                    <p>No shows are airing right now. Your message will likely not be seen.</p>`);
             automationpost = "automation";
           }
         } else if (response.state.startsWith("prerecord_")) {
           if (automationpost !== response.show) {
             automationpost = response.show;
-            $(".chat-status")
-              .html(`<p class="h5">Chat Status: Messages Will be Emailed</p>
-                    <p>The show airing now is prerecorded. There might not be anyone in the studio to see your messages. However, any messages you send will be emailed to the show hosts when the prerecord is finished airing.</p>`);
           }
 
           /* TODO
@@ -482,8 +468,6 @@ window.addEventListener("DOMContentLoaded", () => {
                 */
         } else {
           if (automationpost !== response.show) {
-            $(".chat-status").html(`<p class="h5">Chat Status: Active</p>
-                    <p>Your messages should be received by the hosts. They will also be emailed to the hosts at the end of the broadcast.</p>`);
             automationpost = response.show;
           }
 
@@ -538,7 +522,6 @@ window.addEventListener("DOMContentLoaded", () => {
       // Unblock webchat if chats are allowed
       if (_meta.webchat) {
         blocked = false;
-        $(".chat-blocker").prop("disabled", false);
       }
 
       // If a track ID change was passed, do some stuff in recent tracks
