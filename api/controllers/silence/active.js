@@ -131,10 +131,11 @@ module.exports = {
 
         sails.sockets.broadcast("system-error", "system-error", true);
 
-        // Prepare the radioDJ
-        await sails.helpers.rest.cmd("EnableAutoDJ", 0, 0);
-        await sails.helpers.rest.cmd("EnableAssisted", 1, 0);
-        await sails.helpers.rest.cmd("StopPlayer", 0, 0);
+        // Execute these without awaiting in case RadioDJ is frozen
+        sails.helpers.rest.cmd("EnableAutoDJ", 0, 0).exec(() => {});
+        sails.helpers.rest.cmd("EnableAssisted", 1, 0).exec(() => {});
+        sails.helpers.rest.cmd("StopPlayer", 0, 0).exec(() => {});
+
         var queue = sails.models.meta.automation;
         await sails.helpers.rest.changeRadioDj();
         await sails.helpers.rest.cmd("ClearPlaylist", 1);

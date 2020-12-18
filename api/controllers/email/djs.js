@@ -19,7 +19,7 @@ module.exports = {
 
   exits: {},
 
-  fn: async function(inputs, exits) {
+  fn: async function(inputs) {
     let djs = await sails.models.djs.find({ email: { "!=": null } });
     let sendTo = djs
       .filter(dj => dj.email && dj.email !== "")

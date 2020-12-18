@@ -80,36 +80,53 @@ module.exports = {
         if (criteria.status < 2) {
           loglevel = `danger`;
           // Push notification for danger/critical statuses
-          await sails.helpers.onesignal.sendMass(
-            "emergencies",
-            "Critical Problem Detected",
-            `${criteria.label ||
-              record.label ||
-              criteria.name ||
-              record.name ||
-              `Unknown System`} experienced a critical problem on ${moment().format(
-              "LLL"
-            )}: ${criteria.data ? criteria.data : `Unknown Issue`}`
-          );
-          await sails.helpers.emails.queueEmergencies(
-            `Critical Problem detected for ${criteria.label ||
-              record.label ||
-              criteria.name ||
-              record.name ||
-              `Unknown System`}`,
-            `Directors,<br /><br />
+          if (
+            await sails.models.emails.count(
+              {
+                subject: `Critical Problem detected for ${criteria.label ||
+                  record.label ||
+                  criteria.name ||
+                  record.name ||
+                  `Unknown System`}`,
+                createdAt: {
+                  ">=": moment()
+                    .subtract(1, "hours")
+                    .toISOString(true)
+                }
+              } === 0
+            )
+          ) {
+            await sails.helpers.onesignal.sendMass(
+              "emergencies",
+              "Critical Problem Detected",
+              `${criteria.label ||
+                record.label ||
+                criteria.name ||
+                record.name ||
+                `Unknown System`} experienced a critical problem on ${moment().format(
+                "LLL"
+              )}: ${criteria.data ? criteria.data : `Unknown Issue`}`
+            );
+            await sails.helpers.emails.queueEmergencies(
+              `Critical Problem detected for ${criteria.label ||
+                record.label ||
+                criteria.name ||
+                record.name ||
+                `Unknown System`}`,
+              `Directors,<br /><br />
 
   A critical problem has been detected in the WWSU system with <strong>${criteria.label ||
     record.label ||
     criteria.name ||
     record.name ||
     `Unknown System`}</strong> on ${moment().format(
-              "LLLL"
-            )}. Please fix this issue immediately (if a fix is still needed).<br /><br />
+                "LLLL"
+              )}. Please fix this issue immediately (if a fix is still needed).<br /><br />
   
   Additional information: ${criteria.data ? criteria.data : `Unknown Issue`}`,
-            true
-          );
+              true
+            );
+          }
         } else if (criteria.status < 3) {
           loglevel = `orange`;
         }
