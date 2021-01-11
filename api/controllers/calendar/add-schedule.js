@@ -253,6 +253,8 @@ module.exports = {
     // Add the initial event into the calendar; do this first as some overrides will depend on record.ID
     var record = await sails.models.schedule.create(event).fetch();
 
+    sails.log.error(new Error(JSON.stringify(event)));
+
     // Check for event conflicts. NOTE: should ignore conflicts.errors as it will spit out a duplicate event error due to the above record execution.
     sails.models.calendar.calendardb.checkConflicts(
       async conflicts => {

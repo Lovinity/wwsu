@@ -22,8 +22,6 @@ module.exports = {
     // Populate DJ Names
     try {
       if (
-        !inputs.event.scheduleType ||
-        inputs.event.scheduleType === null ||
         inputs.event.hostDJ !== null ||
         inputs.event.cohostDJ1 !== null ||
         inputs.event.cohostDJ2 !== null ||
@@ -55,7 +53,8 @@ module.exports = {
             "The provided sport name does not exist in the system."
           );
 
-        event.event.name = summary;
+        if (inputs.event.name && inputs.event.name !== null)
+          event.event.name = summary;
         if (
           summary2 &&
           (!event.tempCal.description || event.tempCal.description === null)
@@ -102,7 +101,7 @@ module.exports = {
         });
         if (!director)
           return exits.error(`The provided director ID does not exist.`);
-        event.event.hosts = director.name;
+        if (inputs.event.director !== null) event.event.hosts = director.name;
     }
 
     return exits.success(event.event);
