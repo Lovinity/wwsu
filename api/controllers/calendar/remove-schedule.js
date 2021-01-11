@@ -11,72 +11,35 @@ module.exports = {
     }
   },
 
-  fn: async function(inputs, exits) {
+  fn: async function(inputs) {
     sails.log.debug("Controller calendar/remove-schedule called.");
-    try {
-      /*
-            sails.models.schedule.destroyOne({ ID: inputs.ID }).exec((err, record) => {
-                sails.sockets.broadcast('schedule', 'debug', ['schedule destroy', err, record]);
+
+    // Check for event conflicts
+    sails.models.calendar.calendardb.checkConflicts(
+      async conflicts => {
+        sails.sockets.broadcast("schedule", "upbeat", conflicts);
+
+        // Remove records which should be removed first
+        if (conflicts.removals.length > 0) {
+          await sails.models.schedule
+            .destroy({
+              ID: conflicts.removals.map(removal => removal.scheduleID)
             })
+            .fetch();
+        }
 
-            return exits.success();
-            */
+        // Now, add overrides
+        if (conflicts.additions.length > 0) {
+          let cfMaps = conflicts.additions.map(async override => {
+            await sails.models.schedule.create(override).fetch();
+          });
+          await Promise.all(cfMaps);
+        }
+      },
+      [{ remove: inputs.ID }]
+    );
 
-      // Check for event conflicts
-      sails.models.calendar.calendardb.checkConflicts(
-        async conflicts => {
-          sails.sockets.broadcast("schedule", "upbeat", conflicts);
-
-          // Remove records which should be removed first
-          if (conflicts.removals.length > 0) {
-            sails.models.schedule
-              .destroy({
-                ID: conflicts.removals.map(removal => removal.scheduleID)
-              })
-              .fetch()
-              .exec((err, record) => {
-                sails.sockets.broadcast("schedule", "debug", [
-                  "conflicts destroy",
-                  err,
-                  record
-                ]);
-              });
-          }
-
-          // Now, add overrides
-          if (conflicts.additions.length > 0) {
-            conflicts.additions.map(override => {
-              sails.models.schedule
-                .create(override)
-                .fetch()
-                .exec((err, record) => {
-                  sails.sockets.broadcast("schedule", "debug", [
-                    "conflicts create",
-                    err,
-                    record
-                  ]);
-                });
-            });
-          }
-        },
-        [{ remove: inputs.ID }]
-      );
-
-      // Destroy the schedule event
-      // Note: async does not seem to callback afterDestroy for this model.
-      sails.models.schedule
-        .destroyOne({ ID: inputs.ID })
-        .exec((err, record) => {
-          sails.sockets.broadcast("schedule", "debug", [
-            "schedule destroy",
-            err,
-            record
-          ]);
-        });
-
-      return exits.success();
-    } catch (e) {
-      return exits.error(e);
-    }
+    // Destroy the schedule event
+    await sails.models.schedule.destroyOne({ ID: inputs.ID });
   }
 };

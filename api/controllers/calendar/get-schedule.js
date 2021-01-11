@@ -8,9 +8,8 @@ module.exports = {
 
     },
 
-    fn: async function (inputs, exits) {
+    fn: async function (inputs) {
         sails.log.debug('Controller calendar/get-schedule called.')
-        try {
             var scheduleRecords = await sails.models.schedule.find();
 
             // Subscribe to sockets if applicable
@@ -19,10 +18,7 @@ module.exports = {
                 sails.log.verbose('Request was a socket. Joining schedule.')
             }
 
-            return exits.success(scheduleRecords);
-        } catch (e) {
-            return exits.error(e)
-        }
+            return scheduleRecords;
     }
 
 }

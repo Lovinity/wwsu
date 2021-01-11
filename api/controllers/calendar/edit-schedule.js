@@ -199,118 +199,87 @@ module.exports = {
     }
   },
 
-  fn: async function(inputs, exits) {
+  fn: async function(inputs) {
     sails.log.debug("Controller calendar/add-schedule called.");
+    // Verify the event
+    var event = {
+      scheduleType: inputs.scheduleType,
+      scheduleReason: inputs.scheduleReason,
+      originalTime: inputs.originalTime,
+      type: inputs.type,
+      priority: inputs.priority,
+      hostDJ: inputs.hostDJ,
+      cohostDJ1: inputs.cohostDJ1,
+      cohostDJ2: inputs.cohostDJ2,
+      cohostDJ3: inputs.cohostDJ3,
+      eventID: inputs.eventID,
+      playlistID: inputs.playlistID,
+      director: inputs.director,
+      name: inputs.name,
+      description: inputs.description,
+      logo: inputs.logo,
+      banner: inputs.banner,
+      newTime: inputs.newTime,
+      oneTime: inputs.oneTime,
+      startDate: inputs.startDate,
+      endDate: inputs.endDate,
+      startTime: inputs.startTime,
+      recurrenceRules: inputs.recurrenceRules,
+      recurrenceInterval: inputs.recurrenceInterval,
+      duration: inputs.duration ? inputs.duration : null
+    };
+
+    // Get calendarID and scheduleID and overriddenID from original record
+    var record = await sails.models.schedule.findOne({ ID: inputs.ID });
+    if (!record) return "Record with the provided ID was not found.";
+    event.calendarID = record.calendarID;
+    event.scheduleID = record.scheduleID;
+    event.overriddenID = record.overriddenID;
+
+    // Verify the event
     try {
-      // Verify the event
-      var event = {
-        scheduleType: inputs.scheduleType,
-        scheduleReason: inputs.scheduleReason,
-        originalTime: inputs.originalTime,
-        type: inputs.type,
-        priority: inputs.priority,
-        hostDJ: inputs.hostDJ,
-        cohostDJ1: inputs.cohostDJ1,
-        cohostDJ2: inputs.cohostDJ2,
-        cohostDJ3: inputs.cohostDJ3,
-        eventID: inputs.eventID,
-        playlistID: inputs.playlistID,
-        director: inputs.director,
-        name: inputs.name,
-        description: inputs.description,
-        logo: inputs.logo,
-        banner: inputs.banner,
-        newTime: inputs.newTime,
-        oneTime: inputs.oneTime,
-        startDate: inputs.startDate,
-        endDate: inputs.endDate,
-        startTime: inputs.startTime,
-        recurrenceRules: inputs.recurrenceRules,
-        recurrenceInterval: inputs.recurrenceInterval,
-        duration: inputs.duration ? inputs.duration : null
-      };
-
-      // Get calendarID and scheduleID and overriddenID from original record
-      var record = await sails.models.schedule.findOne({ ID: inputs.ID });
-      if (!record)
-        return exits.success("Record with the provided ID was not found.");
-      event.calendarID = record.calendarID;
-      event.scheduleID = record.scheduleID;
-      event.overriddenID = record.overriddenID;
-
-      // Verify the event
-      try {
-        event = await sails.helpers.calendar.verify(event);
-      } catch (e) {
-        return exits.success(e.message);
-      }
-
-      // Erase like records
-      if (inputs.originalTime && inputs.calendarID) {
-        var query = {};
-        query.originalTime = inputs.originalTime;
-        query.calendarID = inputs.calendarID;
-        if (inputs.scheduleID) query.scheduleID = inputs.scheduleID;
-
-        await sails.models.schedule.destroy(query).fetch();
-      }
-
-      // Check for event conflicts
-      sails.models.calendar.calendardb.checkConflicts(
-        async conflicts => {
-          // Remove records which should be removed first
-          if (conflicts.removals.length > 0) {
-            sails.models.schedule
-              .destroy({
-                ID: conflicts.removals.map(removal => removal.scheduleID)
-              })
-              .fetch()
-              .exec((err, record) => {
-                sails.sockets.broadcast("schedule", "debug", [
-                  "conflict destroy",
-                  err,
-                  record
-                ]);
-              });
-          }
-
-          // Now, add overrides
-          if (conflicts.additions.length > 0) {
-            conflicts.additions.map(override => {
-              override.overriddenID = !override.overriddenID
-                ? inputs.ID
-                : override.overriddenID; // overrideID should be set to the newly created schedule since the new one is overriding this one.
-              sails.models.schedule
-                .create(override)
-                .fetch()
-                .exec((err, record) => {
-                  sails.sockets.broadcast("schedule", "debug", [
-                    "conflict create",
-                    err,
-                    record
-                  ]);
-                });
-            });
-          }
-        },
-        [{ update: event }]
-      );
-
-      // Add the initial event into the calendar
-      sails.models.schedule
-        .updateOne({ ID: inputs.ID }, event)
-        .exec((err, record) => {
-          sails.sockets.broadcast("schedule", "debug", [
-            "updateOne",
-            err,
-            record
-          ]);
-        });
-
-      // Success
-      return exits.success();
+      event = await sails.helpers.calendar.verify(event);
     } catch (e) {
-      return exits.error(e);
+      return e.message;
     }
+
+    // Erase like records
+    if (inputs.originalTime && inputs.calendarID) {
+      var query = {};
+      query.originalTime = inputs.originalTime;
+      query.calendarID = inputs.calendarID;
+      if (inputs.scheduleID) query.scheduleID = inputs.scheduleID;
+
+      await sails.models.schedule.destroy(query).fetch();
+    }
+
+    // Check for event conflicts
+    sails.models.calendar.calendardb.checkConflicts(
+      async conflicts => {
+        // Remove records which should be removed first
+        if (conflicts.removals.length > 0) {
+          await sails.models.schedule
+            .destroy({
+              ID: conflicts.removals.map(removal => removal.scheduleID)
+            })
+            .fetch();
+        }
+
+        // Now, add overrides
+        if (conflicts.additions.length > 0) {
+          let cfMaps = conflicts.additions.map(async override => {
+            override.overriddenID = !override.overriddenID
+              ? inputs.ID
+              : override.overriddenID; // overrideID should be set to the newly created schedule since the new one is overriding this one.
+            await sails.models.schedule.create(override).fetch();
+          });
+          await Promise.all(cfMaps);
+        }
+      },
+      [{ update: event }]
+    );
+
+    // Edit the initial event into the calendar
+    await sails.models.schedule.updateOne({ ID: inputs.ID }, event);
   }
 };
