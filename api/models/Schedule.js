@@ -187,7 +187,7 @@ module.exports = {
       if (
         (event.scheduleType === "updated" ||
           event.scheduleType === "updated-system") &&
-        event.newTime !== null
+        (event.newTime !== null || event.duration !== null)
       ) {
         await sails.helpers.onesignal.sendEvent(_event, false, false);
         await sails.helpers.emails.queueEvent(_event, false, false);
