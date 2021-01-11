@@ -22,8 +22,8 @@ module.exports = {
     // Populate DJ Names
     try {
       if (
-        !event.event.scheduleType ||
-        event.event.scheduleType === null ||
+        !inputs.event.scheduleType ||
+        inputs.event.scheduleType === null ||
         inputs.event.hostDJ !== null ||
         inputs.event.cohostDJ1 !== null ||
         inputs.event.cohostDJ2 !== null ||
