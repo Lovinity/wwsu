@@ -259,11 +259,14 @@ module.exports = {
       async conflicts => {
         // Remove records which should be removed first
         if (conflicts.removals.length > 0) {
+          /*
           await sails.models.schedule
             .destroy({
               ID: conflicts.removals.map(removal => removal.scheduleID)
             })
             .fetch();
+            */
+           // TODO: Fix conflict check bug for removals and then re-enable
         }
 
         // Now, add overrides
@@ -274,6 +277,7 @@ module.exports = {
               : override.overriddenID; // overrideID should be set to the newly created schedule since the new one is overriding this one.
             await sails.models.schedule.create(override).fetch();
           });
+          // TODO: This sometimes creates two overrides of the same thing; one with scheduleID and one without. Fix this in calendar!
           await Promise.all(cfMaps);
         }
       },
