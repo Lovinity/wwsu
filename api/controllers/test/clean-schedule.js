@@ -30,9 +30,10 @@ module.exports = {
           let overrides = await sails.models.schedule.find({
             or: [{ scheduleID: schedule.ID }, { overriddenID: schedule.ID }],
           });
-          overrides.map((override) => {
+          let maps2 = overrides.map(async (override) => {
             await sails.models.schedule.destroy({ ID: override.ID }).fetch();
           });
+          await Promise.all(maps2);
         }
       });
       await Promise.all(maps);
