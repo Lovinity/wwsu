@@ -187,7 +187,8 @@ module.exports = {
       if (
         (event.scheduleType === "updated" ||
           event.scheduleType === "updated-system") &&
-        (event.newTime !== null || event.duration !== null)
+        (event.newTime !== null || event.duration !== null) &&
+        moment().isBefore(_event.end)
       ) {
         await sails.helpers.onesignal.sendEvent(_event, false, false);
         await sails.helpers.emails.queueEvent(_event, false, false);
@@ -198,9 +199,11 @@ module.exports = {
         event.scheduleType === "canceled" ||
         event.scheduleType === "canceled-system"
       ) {
-        await sails.helpers.onesignal.sendEvent(_event, false, false);
-        await sails.helpers.emails.queueEvent(_event, false, false);
-        await sails.helpers.discord.sendSchedule(_event, false, false);
+        if (moment().isBefore(_event.end)) {
+          await sails.helpers.onesignal.sendEvent(_event, false, false);
+          await sails.helpers.emails.queueEvent(_event, false, false);
+          await sails.helpers.discord.sendSchedule(_event, false, false);
+        }
 
         // Create cancellation logs
         if (
@@ -326,7 +329,8 @@ module.exports = {
       if (
         (event.scheduleType === "updated" ||
           event.scheduleType === "updated-system") &&
-        (event.newTime !== null || event.duration !== null)
+        (event.newTime !== null || event.duration !== null) &&
+        moment().isBefore(_event.end)
       ) {
         await sails.helpers.onesignal.sendEvent(_event, false, false);
         await sails.helpers.emails.queueEvent(_event, false, false);
@@ -337,9 +341,11 @@ module.exports = {
         event.scheduleType === "canceled" ||
         event.scheduleType === "canceled-system"
       ) {
-        await sails.helpers.onesignal.sendEvent(_event, false, false);
-        await sails.helpers.emails.queueEvent(_event, false, false);
-        await sails.helpers.discord.sendSchedule(_event, false, false);
+        if (moment().isBefore(_event.end)) {
+          await sails.helpers.onesignal.sendEvent(_event, false, false);
+          await sails.helpers.emails.queueEvent(_event, false, false);
+          await sails.helpers.discord.sendSchedule(_event, false, false);
+        }
 
         // Create cancellation logs
         if (
@@ -464,7 +470,8 @@ module.exports = {
         if (
           (event.scheduleType === "updated" ||
             event.scheduleType === "updated-system") &&
-          (event.newTime !== null || event.duration !== null)
+          (event.newTime !== null || event.duration !== null) &&
+          moment().isBefore(_event.end)
         ) {
           await sails.helpers.onesignal.sendEvent(_event, false, false, true);
           await sails.helpers.emails.queueEvent(_event, false, false, true);
@@ -475,9 +482,16 @@ module.exports = {
           event.scheduleType === "canceled" ||
           event.scheduleType === "canceled-system"
         ) {
-          await sails.helpers.onesignal.sendEvent(_event, false, false, true);
-          await sails.helpers.emails.queueEvent(_event, false, false, true);
-          await sails.helpers.discord.sendSchedule(_event, false, false, true);
+          if (moment().isBefore(_event.end)) {
+            await sails.helpers.onesignal.sendEvent(_event, false, false, true);
+            await sails.helpers.emails.queueEvent(_event, false, false, true);
+            await sails.helpers.discord.sendSchedule(
+              _event,
+              false,
+              false,
+              true
+            );
+          }
 
           // Destroy cancellation records (but only if the main calendar event is still active)
           if (
