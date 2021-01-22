@@ -24,14 +24,16 @@ module.exports = {
           });
         }
 
-        if (moment(sails.config.custom.startOfSemester).isAfter(moment(endTime))) {
+        if (
+          moment(sails.config.custom.startOfSemester).isAfter(moment(endTime))
+        ) {
           toBeRemoved.push(schedule);
-          toBeRemoved = toBeRemoved.concat(
-            await sails.models.schedule.find({ scheduleID: schedule.ID })
-          );
-          toBeRemoved = toBeRemoved.concat(
-            await sails.models.schedule.find({ overriddenID: schedule.ID })
-          );
+          let overrides = await sails.models.schedule.find({
+            or: [{ scheduleID: schedule.ID }, { overriddenID: schedule.ID }],
+          });
+          overrides.map((override) => {
+            toBeRemoved.push(override);
+          });
         }
       });
       await Promise.all(maps);
