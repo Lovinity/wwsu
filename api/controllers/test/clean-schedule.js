@@ -6,8 +6,6 @@ module.exports = {
   inputs: {},
 
   fn: async function (inputs) {
-    let toBeRemoved = [];
-
     let schedules = await sails.models.schedule.find({ scheduleType: null });
 
     if (schedules && schedules.length > 0) {
@@ -27,18 +25,17 @@ module.exports = {
         if (
           moment(sails.config.custom.startOfSemester).isAfter(moment(endTime))
         ) {
-          toBeRemoved.push(schedule);
+          await sails.models.schedule.destroy({ ID: schedule.ID }).fetch();
+
           let overrides = await sails.models.schedule.find({
             or: [{ scheduleID: schedule.ID }, { overriddenID: schedule.ID }],
           });
           overrides.map((override) => {
-            toBeRemoved.push(override);
+            await sails.models.schedule.destroy({ ID: override.ID }).fetch();
           });
         }
       });
       await Promise.all(maps);
     }
-
-    return toBeRemoved;
   },
 };
