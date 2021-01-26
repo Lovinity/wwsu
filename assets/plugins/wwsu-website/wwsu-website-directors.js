@@ -110,7 +110,7 @@ window.addEventListener("DOMContentLoaded", () => {
     headerToolbar: {
       start: "prev,next today",
       center: "title",
-      end: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
+      end: "dayGridMonth,timeGridWeek,timeGridDay,listWeek"
     },
     initialView: "timeGridWeek",
     navLinks: true, // can click day/week names to navigate views
@@ -123,7 +123,7 @@ window.addEventListener("DOMContentLoaded", () => {
     eventResourceEditable: false,
     themeSystem: "bootstrap",
     dayMaxEvents: 5,
-    events: function (info, successCallback, failureCallback) {
+    events: function(info, successCallback, failureCallback) {
       animations.add("calendar-refetch", () => {
         $("#calendar").block({
           message: "<h1>Loading...</h1>",
@@ -131,9 +131,9 @@ window.addEventListener("DOMContentLoaded", () => {
           timeout: 30000,
           onBlock: () => {
             calendar.getEvents(
-              (events) => {
+              events => {
                 events = events
-                  .filter((event) => {
+                  .filter(event => {
                     // Filter out events by filters
                     if (event.scheduleType === "canceled-changed") return false;
                     var temp = document.getElementById(`filter-${event.type}`);
@@ -143,7 +143,7 @@ window.addEventListener("DOMContentLoaded", () => {
                       return false;
                     }
                   })
-                  .map((event) => {
+                  .map(event => {
                     var borderColor;
                     var title = `${event.type}: ${event.hosts} - ${event.name}`;
                     if (
@@ -185,25 +185,27 @@ window.addEventListener("DOMContentLoaded", () => {
                         : "#e6e6e6",
                       borderColor: borderColor,
                       extendedProps: {
-                        event: event,
-                      },
+                        event: event
+                      }
                     };
                   });
                 successCallback(events);
                 fullCalendar.updateSize();
                 $("#calendar").unblock();
               },
-              moment(info.start).subtract(1, "days").toISOString(true),
+              moment(info.start)
+                .subtract(1, "days")
+                .toISOString(true),
               moment(info.end).toISOString(true)
             );
-          },
+          }
         });
       });
     },
 
-    eventClick: function (info) {
+    eventClick: function(info) {
       calendar.showClickedEvent(info.event.extendedProps.event);
-    },
+    }
   });
   fullCalendar.render();
 
@@ -229,11 +231,11 @@ window.addEventListener("DOMContentLoaded", () => {
     "event",
     "onair-booking",
     "prod-booking",
-    "office-hours",
-  ].map((type) => {
+    "office-hours"
+  ].map(type => {
     var temp = document.getElementById(`filter-${type}`);
     if (temp !== null) {
-      temp.addEventListener("click", (e) => {
+      temp.addEventListener("click", e => {
         fullCalendar.refetchEvents();
       });
     }
@@ -246,6 +248,15 @@ window.addEventListener("DOMContentLoaded", () => {
     calTimer = setTimeout(() => {
       fullCalendar.refetchEvents();
     }, 1000);
+  });
+
+  announcements.on("change", "renderer", () => {
+    processAnnouncements();
+  });
+  meta.on("metaTick", "renderer", fullMeta => {
+    if (moment(fullMeta.time).minute() === 0) {
+      processAnnouncements();
+    }
   });
 
   /*
@@ -274,7 +285,7 @@ window.addEventListener("DOMContentLoaded", () => {
     */
 
   // Meta ticker
-  meta.on("metaTick", "renderer", (fullMeta) => {
+  meta.on("metaTick", "renderer", fullMeta => {
     // Update station time
     animations.add("meta-time", () => {
       $(".meta-time").html(moment.parseZone(fullMeta.time).format("llll"));
@@ -285,7 +296,7 @@ window.addEventListener("DOMContentLoaded", () => {
         DIRECTORS
     */
 
-  directors.on("change", "renderer", (db) => {
+  directors.on("change", "renderer", db => {
     animations.add("update-directors", () => {
       // Remove all director sections
       $(`#sections-directors`).html("");
@@ -295,7 +306,7 @@ window.addEventListener("DOMContentLoaded", () => {
       $("#nav-assistants").html("");
 
       // Add sections and menu items for each director
-      db.get().map((director) => {
+      db.get().map(director => {
         $(`#nav-${director.assistant ? "assistants" : "directors"}`).append(`
                 <li class="nav-item">
                     <a
@@ -336,7 +347,7 @@ window.addEventListener("DOMContentLoaded", () => {
                         </div>
 
                         <div class="content">
-
+                            <div class="announcements-timesheet"></div>
                             <div class="card card-widget widget-user-2">
                                 <div class="widget-user-header bg-${
                                   director.present
@@ -446,14 +457,14 @@ window.addEventListener("DOMContentLoaded", () => {
         window.requestAnimationFrame(() => {
           $(`#section-director-${director.ID}-clock`).unbind("click");
           $(`#section-director-${director.ID}-clock`).click(() => {
-            ((_director) => {
+            (_director => {
               timesheets.clockForm(_director.ID);
             })(director);
           });
 
           $(`#section-director-${director.ID}-schedule`).unbind("click");
           $(`#section-director-${director.ID}-schedule`).click(() => {
-            ((_director) => {
+            (_director => {
               let record = calendar.calendar.find(
                 { director: _director.ID },
                 true
@@ -465,6 +476,35 @@ window.addEventListener("DOMContentLoaded", () => {
           });
         });
       });
+
+      window.requestAnimationFrame(() => {
+        processAnnouncements();
+      });
     });
   });
+
+  /**
+   *  Update all announcements for the website.
+   */
+  function processAnnouncements() {
+    animations.add("update-announcements", () => {
+      // Process all announcements
+      var html = "";
+      announcements.db().each(announcement => {
+        if (
+          announcement.type === "timesheet" &&
+          moment(meta.meta.time).isAfter(moment(announcement.starts)) &&
+          moment(meta.meta.time).isBefore(moment(announcement.expires))
+        ) {
+          html += `<div class="alert alert-${announcement.level}">
+                    <p class="h5">${announcement.title}</p>
+                    ${announcement.announcement}
+                  </div>`;
+        }
+      });
+
+      // Display announcements on website
+      $(".announcements-timesheet").html(html);
+    });
+  }
 });
