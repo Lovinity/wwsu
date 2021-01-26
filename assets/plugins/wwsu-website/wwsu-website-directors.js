@@ -347,7 +347,6 @@ window.addEventListener("DOMContentLoaded", () => {
                         </div>
 
                         <div class="content">
-                            <div class="announcements-timesheet"></div>
                             <div class="card card-widget widget-user-2">
                                 <div class="widget-user-header bg-${
                                   director.present
@@ -402,6 +401,28 @@ window.addEventListener("DOMContentLoaded", () => {
 						</div>`
                   : ``
               }
+                            <div class="card card-danger elevation-2">
+                                <div class="card-header">
+                                    <h3 class="card-title">Announcements</h3>
+                                </div>
+                                <!-- /.card-header -->
+                                <div class="card-body">
+                                  <div class="announcements-timesheet"></div>
+                                </div>
+                                <!-- /.card-body -->
+                            </div>
+
+                            <div class="card card-warning elevation-2">
+                                <div class="card-header">
+                                    <h3 class="card-title">Tasks Due</h3>
+                                </div>
+                                <!-- /.card-header -->
+                                <div class="card-body">
+                                  <div class="tasks-director-${director.ID}"></div>
+                                </div>
+                                <!-- /.card-body -->
+                            </div>
+
                             <div class="card card-primary elevation-2">
                                 <div class="card-header">
                                     <h3 class="card-title">Actions</h3>
