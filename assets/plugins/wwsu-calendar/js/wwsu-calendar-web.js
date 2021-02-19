@@ -810,7 +810,14 @@ class CalendarDb {
 					`There is a schedule for calendar ID ${overridden.calendarID} that would overlap another schedule for the same calendar ID. This is not allowed.`
 				);
 			} else {
-				additions.push(newRecord);
+				let duplicate = additions.filter(
+					(rec) =>
+						rec.scheduleID === newRecord.scheduleID &&
+						rec.scheduleType === newRecord.scheduleType &&
+						rec.originalTime === newRecord.originalTime
+				);
+				console.log(duplicate.length);
+				if (duplicate.length < 1) additions.push(newRecord);
 			}
 		};
 
