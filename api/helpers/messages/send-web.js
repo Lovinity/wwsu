@@ -61,12 +61,12 @@ module.exports = {
       // Create and broadcast the message, depending on whether or not it was private
       if (inputs.private) {
         sails.log.verbose(`Sending private message.`)
-        records = await sails.models.messages.create({ status: 'active', from: `website-${theid}`, fromFriendly: `Web (${inputs.nickname})`, fromIP: inputs.fromIP, to: 'DJ-private', toFriendly: 'DJ private', message: inputs.message }).fetch()
+        records = await sails.models.messages.create({ status: 'active', from: `website-${theid}`, fromFriendly: `Web (${inputs.nickname})`, fromIP: inputs.fromIP, to: 'DJ-private', toFriendly: 'Privately to DJ', message: inputs.message }).fetch()
         if (!records) { return exits.error(new Error('Internal Error: Could not save message to the database.')) }
         delete records.fromIP // We do not want to broadcast IP addresses!
       } else {
         sails.log.verbose(`Sending public message.`)
-        records = await sails.models.messages.create({ status: 'active', from: `website-${theid}`, fromFriendly: `Web (${inputs.nickname})`, fromIP: inputs.fromIP, to: 'DJ', toFriendly: 'DJ', message: inputs.message }).fetch()
+        records = await sails.models.messages.create({ status: 'active', from: `website-${theid}`, fromFriendly: `Web (${inputs.nickname})`, fromIP: inputs.fromIP, to: 'DJ', toFriendly: 'Public', message: inputs.message }).fetch()
         if (!records) { return exits.error(new Error('Internal Error: Could not save message to the database')) }
         delete records.fromIP // We do not want to broadcast IP addresses!
       }
