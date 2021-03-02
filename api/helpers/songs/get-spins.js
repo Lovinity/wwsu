@@ -46,7 +46,7 @@ module.exports = {
         var automation = []
         var logged = []
         history.map(record => {
-          automation.push(moment(record.date_played).format('LLL'))
+          automation.push(moment(record.date_played).toISOString(true))
           if (moment(record.date_played).isAfter(lastplayed)) { lastplayed = moment(record.date_played) }
           if (moment(record.date_played).isAfter(moment().subtract(1, 'weeks'))) { spins7 += 1 }
           if (moment(record.date_played).isAfter(moment().subtract(1, 'months'))) { spins30 += 1 }
@@ -54,7 +54,7 @@ module.exports = {
           if (moment(record.date_played).isAfter(moment().startOf('year'))) { spinsYTD += 1 }
         })
         history2.map(record => {
-          logged.push(moment(record.createdAt).format('LLL'))
+          logged.push(moment(record.createdAt).toISOString(true))
           if (moment(record.createdAt).isAfter(lastplayed)) { lastplayed = moment(record.createdAt) }
           if (moment(record.createdAt).isAfter(moment().subtract(1, 'weeks'))) { spins7 += 1 }
           if (moment(record.createdAt).isAfter(moment().subtract(1, 'months'))) { spins30 += 1 }
