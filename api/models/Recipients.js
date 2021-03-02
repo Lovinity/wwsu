@@ -21,7 +21,8 @@ module.exports = {
     },
 
     host: {
-      type: 'string'
+      type: 'string',
+      unique: true
     },
 
     device: {
