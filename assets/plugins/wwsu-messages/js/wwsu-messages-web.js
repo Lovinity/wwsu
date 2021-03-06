@@ -53,6 +53,25 @@ class WWSUmessagesweb extends WWSUdb {
     }, 60000);
 
     this.firstLoad = true;
+
+    // Event handlers
+    this.on("remove", "WWSUmessagesweb", (query, db) => {
+      this.read = this.read.filter(value => value !== query);
+      this.notified = this.notified.filter(value => value !== query);
+    });
+    this.on("change", "WWSUmessagesweb", db => {
+      this.updateMessages();
+    });
+    this.on("newMessage", "WWSUmessagesweb", message => {
+      $(document).Toasts("create", {
+        class: "bg-primary",
+        title: `New Message from ${message.fromFriendly}`,
+        autohide: true,
+        delay: 15000,
+        body: `${message.message}<p><strong>To reply:</strong> Click "Chat with DJ" in the left menu.</p>`,
+        icon: "fas fa-comment fa-lg"
+      });
+    });
   }
 
   /**
@@ -85,6 +104,8 @@ class WWSUmessagesweb extends WWSUdb {
 
     // Generate current chat status HTML
     this.updateChatStatus(this.manager.get("WWSUMeta").meta);
+
+    $(this.chatForm).html(``);
 
     // Generate Alpaca form
     $(this.chatForm).alpaca({
@@ -176,7 +197,10 @@ class WWSUmessagesweb extends WWSUdb {
 
         data: {
           nickname: this.manager.get("WWSUrecipientsweb")
-            ? this.manager.get("WWSUrecipientsweb").recipient.label
+            ? this.manager
+                .get("WWSUrecipientsweb")
+                .recipient.label.replace("Web ", "")
+                .match(/\(([^)]+)\)/)[1]
             : "Unknown Visitor"
         }
       }
@@ -380,5 +404,86 @@ class WWSUmessagesweb extends WWSUdb {
           </div>`);
         }
       });
+  }
+
+  /**
+   * Update messages to be displayed.
+   */
+  updateMessages() {
+    let unreadMessages = 0;
+
+    // Check for and notify of new messages
+    this.find()
+      .filter(
+        msg =>
+          msg.to === "website" ||
+          msg.to.startsWith(
+            this.manager.get("WWSUrecipientsweb").recipient.host
+          )
+      )
+      .forEach(message => {
+        // Count unread messages
+        if (this.read.indexOf(msg.ID) === -1) unreadMessages++;
+
+        // Notify on new messages
+        if (!this.firstLoad && this.notified.indexOf(msg.ID) === -1) {
+          this.notified.push(message.ID);
+          this.emitEvent("newMessage", [message]);
+        }
+      });
+
+    // Update unread messages stuff
+    if (unreadMessages <= 0) {
+      $(this.menuNew).html(`0`);
+      $(this.menuNew).removeClass(`badge-danger`);
+      $(this.menuNew).addClass(`badge-secondary`);
+      $(this.menuIcon).removeClass(`pulse-success`);
+    } else {
+      $(this.menuNew).html(unreadMessages);
+      $(this.menuNew).removeClass(`badge-secondary`);
+      $(this.menuNew).addClass(`badge-danger`);
+      $(this.menuIcon).addClass(`pulse-success`);
+    }
+
+    // Update messages HTML
+    let chatHTML = ``;
+
+    let query = {
+      to: [
+        "website",
+        "DJ",
+        "DJ-private",
+        this.manager.get("WWSUrecipients").recipient.host
+      ]
+    };
+
+    $(this.chatMessages).html(``);
+
+    this.find(query)
+      .sort(
+        (a, b) => moment(a.createdAt).valueOf() - moment(b.createdAt).valueOf()
+      )
+      .map(message => {
+        chatHTML += `<div class="message" id="message-${message.ID}">
+                ${this.messageHTML(message)}
+                </div>`;
+        this.manager
+          .get("WWSUutil")
+          .waitForElement(`#message-${message.ID}`, () => {
+            $(`#message-${message.ID}`).unbind("click");
+
+            $(`#message-${message.ID}`).click(() => {
+              if (this.read.indexOf(message.ID) === -1) {
+                this.read.push(message.ID);
+                this.updateMessages();
+              }
+            });
+          });
+      });
+
+    $(this.chatMessages).html(chatHTML);
+
+    // Mark this is no longer first loaded
+    this.firstLoad = false;
   }
 }

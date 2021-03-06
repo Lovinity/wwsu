@@ -72,15 +72,6 @@ announcements.on("change", "renderer", db => {
   processAnnouncements();
 });
 
-// Messages
-messages.initComponents(
-  ".chat-status",
-  ".chat-messages",
-  ".chat-form",
-  ".chat-new-messages",
-  ".chat-messages-icon"
-);
-
 // Requests
 requests.initTable(
   "#request-table",
@@ -898,8 +889,10 @@ function updateDirectorsCalendar() {
  * @param {string} showID Unique ID of the event to show
  */
 function displayEventInfo(showID) {
+  console.log(`displayEventInfo`);
   calendar.getEvents(
     events => {
+      console.log(`displayEventInfo events returned`);
       let event = events.find(event => event.unique === showID);
       if (!event) {
         $(document).Toasts("create", {
@@ -982,19 +975,25 @@ function onlineSocket(doOneSignal = false) {
     try {
       try {
         // Discord iframe
-        $("#section-chat-iframe").IFrame("removeActiveTab");
-        $("#section-chat-iframe").IFrame(
-          "createTab",
-          "Discord Chat",
+        $("#section-discord-iframe").attr(
+          "src",
           `https://titanembeds.com/embed/742819639096246383?defaultchannel=782073518606647297&theme=DiscordDark&username=${data.label
             .replace("Web ", "")
             .match(/\(([^)]+)\)/)[1]
             .replace(/[^a-zA-Z0-9\d\-_\s]+/gi, "")
-            .substring(0, 32)}`,
-          "discord-widget",
-          true
+            .substring(0, 32)}`
         );
       } catch (e2) {}
+
+      // Initialize Messages
+      messages.initComponents(
+        ".chat-status",
+        ".chat-messages",
+        ".chat-form",
+        ".chat-new-messages",
+        ".chat-messages-icon"
+      );
+
       onlineSocketDone = true;
       automationpost = ``;
       meta.meta = { webchat: meta.meta.webchat, state: meta.meta.state };

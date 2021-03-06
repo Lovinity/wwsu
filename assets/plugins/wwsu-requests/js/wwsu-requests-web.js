@@ -59,7 +59,7 @@ class WWSUrequestsweb extends WWSUevents {
         .get("WWSUutil")
         .waitForElement(`#section-requests-track-table`, () => {
           // Generate table
-          this.requestTable = $(`#section-requests-track-table`).DataTable({
+          this.table = $(`#section-requests-track-table`).DataTable({
             paging: true,
             data: [],
             columns: [{ title: "Artist - Title" }, { title: "View / Request" }],
@@ -88,13 +88,11 @@ class WWSUrequestsweb extends WWSUevents {
 
     // Add click handlers for buttons
     $(this.searchButton).click((e) => {
-      console.log(`Searching tracks`);
       this.clearTable();
       this.populateTable();
     });
 
     $(this.loadMoreButton).click((e) => {
-      console.log(`Loading more tracks`);
       this.populateTable();
     });
   }
