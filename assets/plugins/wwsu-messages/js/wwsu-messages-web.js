@@ -115,7 +115,6 @@ class WWSUmessagesweb extends WWSUdb {
           nickname: {
             type: "string",
             title: "Nickname",
-            required: true
           },
           message: {
             type: "string",
@@ -127,7 +126,7 @@ class WWSUmessagesweb extends WWSUdb {
       options: {
         fields: {
           nickname: {
-            helper: "This is the name the DJ and other listeners will see you."
+            helper: "This is the name the DJ and other listeners will see you. If you leave blank, a random name will be given to you."
           },
           message: {
             type: "tinymce",
@@ -155,9 +154,16 @@ class WWSUmessagesweb extends WWSUdb {
                 value.private = false; // Public message
 
                 // Update nickname
-                this.manager
-                  .get("WWSUrecipientsweb")
-                  .editRecipientWeb(value.nickname);
+                if (value.nickname && value.nickname !== "") {
+                  this.manager
+                    .get("WWSUrecipientsweb")
+                    .editRecipientWeb(value.nickname);
+                } else {
+                  value.nickname = this.manager
+                    .get("WWSUrecipientsweb")
+                    .recipients.label.replace("Web ", "")
+                    .match(/\(([^)]+)\)/)[1];
+                }
 
                 // Send message
                 this.send(value, success => {
@@ -180,9 +186,16 @@ class WWSUmessagesweb extends WWSUdb {
                 value.private = true; // Private message
 
                 // Update nickname
-                this.manager
-                  .get("WWSUrecipientsweb")
-                  .editRecipientWeb(value.nickname);
+                if (value.nickname && value.nickname !== "") {
+                  this.manager
+                    .get("WWSUrecipientsweb")
+                    .editRecipientWeb(value.nickname);
+                } else {
+                  value.nickname = this.manager
+                    .get("WWSUrecipientsweb")
+                    .recipients.label.replace("Web ", "")
+                    .match(/\(([^)]+)\)/)[1];
+                }
 
                 // Send message
                 this.send(value, success => {
@@ -421,14 +434,14 @@ class WWSUmessagesweb extends WWSUdb {
             this.manager.get("WWSUrecipientsweb").recipient.host
           )
       )
-      .forEach(message => {
+      .forEach(msg => {
         // Count unread messages
         if (this.read.indexOf(msg.ID) === -1) unreadMessages++;
 
         // Notify on new messages
         if (!this.firstLoad && this.notified.indexOf(msg.ID) === -1) {
-          this.notified.push(message.ID);
-          this.emitEvent("newMessage", [message]);
+          this.notified.push(msg.ID);
+          this.emitEvent("newMessage", [msg]);
         }
       });
 
