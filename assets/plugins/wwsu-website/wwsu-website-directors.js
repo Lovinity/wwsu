@@ -65,7 +65,7 @@ wwsumodules
 var navigation = wwsumodules.get("WWSUNavigation"); // Navigation must be global so it can be accessed by other ejs scripts
 
 let animations = wwsumodules.get("WWSUanimations");
-let wwsuutil = wwsumodules.get("WWSUutil");
+let util = wwsumodules.get("WWSUutil");
 let meta = wwsumodules.get("WWSUMeta");
 let directors = wwsumodules.get("WWSUdirectors");
 let djs = wwsumodules.get("WWSUdjs");
@@ -198,7 +198,7 @@ var fullCalendar = new FullCalendar.Calendar(calendarEl, {
                       ) === -1
                         ? event.color
                         : "#161616",
-                    textColor: wwsuutil.getContrastYIQ(event.color)
+                    textColor: util.getContrastYIQ(event.color)
                       ? "#161616"
                       : "#e6e6e6",
                     borderColor: borderColor,
@@ -290,7 +290,6 @@ socket.on("connect", () => {
     djs.init();
     calendar.init();
     announcements.init();
-    _version.init();
   });
 });
 

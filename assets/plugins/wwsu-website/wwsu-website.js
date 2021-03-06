@@ -137,7 +137,7 @@ let viewingEvent = {};
 
 // oneSignal Variables
 let onlineSocketDone = false;
-let device = wwsuutil.getUrlParameter(`device`);
+let device = util.getUrlParameter(`device`);
 let isMobile = device !== null;
 let notificationsSupported = false;
 
