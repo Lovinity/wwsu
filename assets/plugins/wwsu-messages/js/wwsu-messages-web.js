@@ -161,7 +161,7 @@ class WWSUmessagesweb extends WWSUdb {
                 } else {
                   value.nickname = this.manager
                     .get("WWSUrecipientsweb")
-                    .recipients.label.replace("Web ", "")
+                    .recipient.label.replace("Web ", "")
                     .match(/\(([^)]+)\)/)[1];
                 }
 
@@ -193,7 +193,7 @@ class WWSUmessagesweb extends WWSUdb {
                 } else {
                   value.nickname = this.manager
                     .get("WWSUrecipientsweb")
-                    .recipients.label.replace("Web ", "")
+                    .recipient.label.replace("Web ", "")
                     .match(/\(([^)]+)\)/)[1];
                 }
 
