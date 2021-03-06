@@ -76,7 +76,7 @@ module.exports = {
           host: find,
           device: inputs.device,
           group: inputs.group,
-          label: inputs.label,
+          label: inputs.group === "website" ? `Web (${inputs.label})` : inputs.label,
           status: 5,
           answerCalls: answerCalls,
           makeCalls: makeCalls,

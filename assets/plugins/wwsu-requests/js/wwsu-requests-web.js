@@ -111,7 +111,7 @@ class WWSUrequestsweb extends WWSUevents {
         .request(
           { dom: dom, method: "post", url: this.endpoints.place, data },
           (response) => {
-            if (response !== "OK") {
+            if (!response || !response.requested) {
               $(document).Toasts("create", {
                 class: "bg-danger",
                 title: "Error placing request",
@@ -138,6 +138,7 @@ class WWSUrequestsweb extends WWSUevents {
           }
         );
     } catch (e) {
+      console.error(e);
       $(document).Toasts("create", {
         class: "bg-danger",
         title: "Error placing request",
@@ -150,7 +151,6 @@ class WWSUrequestsweb extends WWSUevents {
       if (typeof cb === "function") {
         cb(false);
       }
-      console.error(e);
     }
   }
 
@@ -205,9 +205,9 @@ class WWSUrequestsweb extends WWSUevents {
                   "There are no more tracks to load for your search.",
               });
           }
-        });
 
-        this.table.draw();
+          this.table.draw();
+        });
       }
     });
   }

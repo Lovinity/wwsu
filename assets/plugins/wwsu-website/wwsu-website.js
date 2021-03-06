@@ -889,16 +889,16 @@ function updateDirectorsCalendar() {
  * @param {string} showID Unique ID of the event to show
  */
 function displayEventInfo(showID) {
-  console.log(`displayEventInfo`);
   calendar.getEvents(
     events => {
-      console.log(`displayEventInfo events returned`);
       let event = events.find(event => event.unique === showID);
       if (!event) {
         $(document).Toasts("create", {
           class: "bg-danger",
           title: "calendar error",
           subtitle: showID,
+          autohide: true,
+          delay: 15000,
           body:
             "There was an error trying to load that event. Please report this to wwsu4@wright.edu.",
           icon: "fas fa-skull-crossbones fa-lg"
@@ -906,7 +906,8 @@ function displayEventInfo(showID) {
         return null;
       }
 
-      calendar.generateFullEventCard(event); // TODO: Not entirely accurate. Find a more effective means than displayEventInfo.
+      calendar.eventModal.body = calendar.generateFullEventCard(event); // TODO: Not entirely accurate. Find a more effective means than displayEventInfo.
+      calendar.eventModal.iziModal("open");
     },
     undefined,
     moment().add(14, "days")

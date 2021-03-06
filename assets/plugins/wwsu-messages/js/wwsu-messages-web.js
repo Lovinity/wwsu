@@ -453,7 +453,7 @@ class WWSUmessagesweb extends WWSUdb {
         "website",
         "DJ",
         "DJ-private",
-        this.manager.get("WWSUrecipients").recipient.host
+        this.manager.get("WWSUrecipientsweb").recipient.host
       ]
     };
 

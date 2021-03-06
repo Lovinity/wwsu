@@ -26,7 +26,7 @@ module.exports = {
       var host = sh.unique(fromIP + sails.config.custom.hostSecret)
 
       // Mark the client as online and retrieve their nickname
-      var response = await sails.helpers.recipients.add(sails.sockets.getId(this.req), `website-${host}`, 'website', `Web (${await sails.helpers.recipients.generateNick()})`, inputs.device)
+      var response = await sails.helpers.recipients.add(sails.sockets.getId(this.req), `website-${host}`, 'website', await sails.helpers.recipients.generateNick(), inputs.device)
 
       // Return the nickname of this client as a label object
       return exits.success(response)
