@@ -18,6 +18,7 @@ let wwsumodules = new WWSUmodules(socket);
 wwsumodules
   .add("WWSUanimations", WWSUanimations)
   .add(`WWSUutil`, WWSUutil)
+  .add("WWSUhosts", WWSUhosts)
   .add("WWSUNavigation", WWSUNavigation)
   .add("noReq", WWSUreq, { host: null })
   .add("WWSUMeta", WWSUMeta)
