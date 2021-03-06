@@ -168,13 +168,6 @@ navigation
     false
   )
   .addItem(
-    "#nav-call",
-    "#section-call",
-    "Call the DJ - WWSU 106.9 FM Listener's Corner",
-    "/call",
-    false
-  )
-  .addItem(
     "#nav-schedule",
     "#section-schedule",
     "Schedule - WWSU 106.9 FM Listener's Corner",
