@@ -88,11 +88,13 @@ class WWSUrequestsweb extends WWSUevents {
 
     // Add click handlers for buttons
     $(this.searchButton).click((e) => {
+      console.log(`Searching tracks`);
       this.clearTable();
       this.populateTable();
     });
 
     $(this.loadMoreButton).click((e) => {
+      console.log(`Loading more tracks`);
       this.populateTable();
     });
   }

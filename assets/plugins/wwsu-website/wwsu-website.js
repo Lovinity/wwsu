@@ -23,8 +23,8 @@ wwsumodules
       "website-chat",
       "website-schedule",
       "website-request",
-      "website-directors",
-    ],
+      "website-directors"
+    ]
   })
   .add("WWSUcalendar", WWSUcalendar)
   .add("WWSUsubscriptions", WWSUsubscriptions)
@@ -68,7 +68,7 @@ likedtracks.initTable(`#section-nowplaying-history`);
 
 // Announcements
 let announcementsToastIDs = [];
-announcements.on("change", "renderer", (db) => {
+announcements.on("change", "renderer", db => {
   processAnnouncements();
 });
 
@@ -91,7 +91,7 @@ requests.initTable(
 );
 
 // EAS
-eas.on("newAlert", "renderer", (record) => {
+eas.on("newAlert", "renderer", record => {
   $(document).Toasts("create", {
     class: `bg-${record.severity === "Extreme" ? `danger` : `warning`}`,
     title: record.alert,
@@ -107,7 +107,7 @@ eas.on("newAlert", "renderer", (record) => {
       .format("lll")} to ${moment
       .tz(record.expires, meta.meta ? meta.meta.timezone : moment.tz.guess())
       .format("lll")} (station time).`,
-    icon: "fas fa-bolt fa-lg",
+    icon: "fas fa-bolt fa-lg"
   });
 });
 
@@ -118,7 +118,7 @@ let directorHours = {};
     CALENDAR / SCHEDULE FUNCTIONS
 */
 
-calendar.on("calendarUpdated", "renderer", (db) => {
+calendar.on("calendarUpdated", "renderer", db => {
   updateCalendar();
   updateDirectorsCalendar();
 });
@@ -147,9 +147,9 @@ if (document.querySelector("#single-song-player")) {
     songs: [
       {
         url: "https://server.wwsu1069.org/stream",
-        live: true,
-      },
-    ],
+        live: true
+      }
+    ]
   });
 }
 
@@ -364,7 +364,7 @@ meta.on("newMeta", "renderer", (response, _meta) => {
           "automation_on",
           "automation_break",
           "automation_genre",
-          "automation_playlist",
+          "automation_playlist"
         ].indexOf(_meta.state) === -1
       ) {
         $(".nowplaying-icon").html(
@@ -428,9 +428,9 @@ function processAnnouncements() {
     chat: ``,
     schedule: ``,
     request: ``,
-    directors: ``,
+    directors: ``
   };
-  announcements.db().each((announcement) => {
+  announcements.db().each(announcement => {
     if (
       moment(meta.meta.time).isAfter(moment(announcement.starts)) &&
       moment(meta.meta.time).isBefore(moment(announcement.expires))
@@ -449,7 +449,7 @@ function processAnnouncements() {
             autohide: true,
             delay: announcement.displayTime * 1000 || 15000,
             body: announcement.announcement,
-            icon: "fas fa-bullhorn fa-lg",
+            icon: "fas fa-bullhorn fa-lg"
           });
         } else {
           html[type] += `<div class="alert alert-${announcement.level}">
@@ -498,18 +498,18 @@ function updateCalendar() {
 
       // Process events for the next 7 days
       calendar.getEvents(
-        (events) => {
+        events => {
           var html = "";
 
           // Run through every event in memory and add appropriate ones into our formatted calendar variable.
           events
             .filter(
-              (event) =>
+              event =>
                 [
                   "event",
                   "onair-booking",
                   "prod-booking",
-                  "office-hours",
+                  "office-hours"
                 ].indexOf(event.type) === -1 &&
                 moment(event.start).isSameOrBefore(
                   moment(meta.meta.time)
@@ -522,7 +522,7 @@ function updateCalendar() {
                     .add(selectedOption, `days`)
                 )
             )
-            .map((event) => {
+            .map(event => {
               try {
                 var colorClass = `secondary`;
                 var iconClass = "far fa-calendar-alt";
@@ -643,7 +643,7 @@ function updateCalendar() {
                   title: "calendar error",
                   body:
                     "There was an error in the updateCalendar function, event mapping. Please report this to wwsu4@wright.edu.",
-                  icon: "fas fa-skull-crossbones fa-lg",
+                  icon: "fas fa-skull-crossbones fa-lg"
                 });
               }
             });
@@ -654,12 +654,15 @@ function updateCalendar() {
           window.requestAnimationFrame(() => {
             $(`.button-event-info`)
               .unbind("click")
-              .click((e) => {
+              .click(e => {
+                console.log(
+                  `Getting more info for event ${$(e.currentTarget).data("id")}`
+                );
                 displayEventInfo($(e.currentTarget).data("id"));
               });
             $(`.button-event-info`)
               .unbind("keydown")
-              .keydown((e) => {
+              .keydown(e => {
                 if (e.code === "Space" || e.code === "Enter")
                   displayEventInfo($(e.currentTarget).data("id"));
               });
@@ -667,7 +670,9 @@ function updateCalendar() {
 
           calendarUpdating = false;
         },
-        moment().add(selectedOption, "days").startOf("day"),
+        moment()
+          .add(selectedOption, "days")
+          .startOf("day"),
         moment()
           .add(selectedOption + 1, "days")
           .startOf("day")
@@ -675,7 +680,7 @@ function updateCalendar() {
     },
     onUnblock: () => {
       calendarUpdating = false;
-    },
+    }
   });
 }
 
@@ -694,14 +699,14 @@ function updateDirectorsCalendar() {
       try {
         directorHours = {};
 
-        directors.db().each((director) => {
+        directors.db().each(director => {
           directorHours[director.ID] = { director: director, hours: [] };
         });
 
         // A list of Office Hours for the directors
 
         // Define a comparison function that will order calendar events by start time when we run the iteration
-        var compare = function (a, b) {
+        var compare = function(a, b) {
           try {
             if (moment(a.start).valueOf() < moment(b.start).valueOf()) {
               return -1;
@@ -724,16 +729,16 @@ function updateDirectorsCalendar() {
               subtitle: trackID,
               autohide: true,
               delay: 10000,
-              body: `There was a problem in the calendar sort function. Please report this to the engineer at wwsu4@wright.edu.`,
+              body: `There was a problem in the calendar sort function. Please report this to the engineer at wwsu4@wright.edu.`
             });
           }
         };
         calendar.getEvents(
-          (events) => {
+          events => {
             events
               .sort(compare)
-              .filter((event) => event.type === "office-hours")
-              .map((event) => {
+              .filter(event => event.type === "office-hours")
+              .map(event => {
                 // null start or end? Use a default to prevent errors.
                 if (!moment(event.start).isValid()) {
                   event.start = moment(meta.meta.time).startOf("day");
@@ -764,7 +769,9 @@ function updateDirectorsCalendar() {
                 // Update strings if need be, if say, start time was before this day, or end time is after this day.
                 if (
                   moment(event.end).isAfter(
-                    moment(event.start).startOf("day").add(1, "days")
+                    moment(event.start)
+                      .startOf("day")
+                      .add(1, "days")
                   )
                 ) {
                   event.endT = `${moment(event.end).format("MM/DD ")} ${
@@ -863,7 +870,9 @@ function updateDirectorsCalendar() {
             directorsCalendarUpdating = false;
           },
           moment().startOf("day"),
-          moment().add(7, "days").startOf("day")
+          moment()
+            .add(7, "days")
+            .startOf("day")
         );
       } catch (e) {
         console.error(e);
@@ -873,13 +882,13 @@ function updateDirectorsCalendar() {
           subtitle: trackID,
           autohide: true,
           delay: 10000,
-          body: `There was a problem loading director office hours. Please report this to the engineer at wwsu4@wright.edu.`,
+          body: `There was a problem loading director office hours. Please report this to the engineer at wwsu4@wright.edu.`
         });
       }
     },
     onUnblock: () => {
       directorsCalendarUpdating = false;
-    },
+    }
   });
 }
 
@@ -890,8 +899,8 @@ function updateDirectorsCalendar() {
  */
 function displayEventInfo(showID) {
   calendar.getEvents(
-    (events) => {
-      let event = events.find((event) => event.unique === showID);
+    events => {
+      let event = events.find(event => event.unique === showID);
       if (!event) {
         $(document).Toasts("create", {
           class: "bg-danger",
@@ -899,7 +908,7 @@ function displayEventInfo(showID) {
           subtitle: showID,
           body:
             "There was an error trying to load that event. Please report this to wwsu4@wright.edu.",
-          icon: "fas fa-skull-crossbones fa-lg",
+          icon: "fas fa-skull-crossbones fa-lg"
         });
         return null;
       }
@@ -939,10 +948,10 @@ function unsubscribe(ID, event) {
  * Re-load the available genres to filter by in the track request system.
  */
 function loadGenres() {
-  songs.getGenres({}, (response) => {
+  songs.getGenres({}, response => {
     try {
       var html = `<option value="0">Any Genre</option>`;
-      response.map((subcat) => {
+      response.map(subcat => {
         html += `<option value="${subcat.ID}">${subcat.name}</option>`;
       });
       $("#request-genre").html(html);
@@ -953,7 +962,7 @@ function loadGenres() {
         title: "Error loading genres for request system",
         body:
           "There was an error loading the available genres to filter by in the request system. Please report this to wwsu4@wright.edu.",
-        icon: "fas fa-skull-crossbones fa-lg",
+        icon: "fas fa-skull-crossbones fa-lg"
       });
     }
   });
@@ -969,7 +978,7 @@ function loadGenres() {
  * @param {boolean} doOneSignal Should we initialize OneSignal?
  */
 function onlineSocket(doOneSignal = false) {
-  recipients.addRecipientWeb(device, (data) => {
+  recipients.addRecipientWeb(device, data => {
     try {
       try {
         // Discord iframe

@@ -78,9 +78,9 @@ class WWSUlikedtracks extends WWSUevents {
             pageLength: 100,
             drawCallback: () => {
               // Action button click events
-              $(".btn-nowplaying-history-like").unbind("click");
+              $(".button-track-like").unbind("click");
 
-              $(".btn-nowplaying-history-like").click((e) => {
+              $(".button-track-like").click((e) => {
                 this.likeTrack(
                   $(e.currentTarget).data("id")
                     ? parseInt($(e.currentTarget).data("id"))
