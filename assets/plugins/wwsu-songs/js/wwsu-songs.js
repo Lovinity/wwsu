@@ -71,7 +71,10 @@ class WWSUsongs extends WWSUevents {
 			  </tr>
 			  <tr>
 				<td>Spins</td>
-				<td><div id="song-info-spins" class="bg-info" style="height: 20vh; overflow-y: scroll;"></div></td>
+				<td>
+        <div id="song-info-spins-numbers"></div>
+        <div id="song-info-spins" class="bg-info" style="height: 20vh; overflow-y: scroll;"></div>
+        </td>
 			  </tr>
 			</tbody>
 		  </table>`,
@@ -257,8 +260,15 @@ class WWSUsongs extends WWSUevents {
                   )
                   .join("<br />")}`
               );
+              $("#song-info-spins-numbers").html(`<ul>
+              <li id="song-info-spins-7"><strong>Last 7 Days:</strong> ${track.spins[7]}</li>
+              <li id="song-info-spins-30"><strong>Last 30 Days:</strong> ${track.spins[30]}</li>
+              <li id="song-info-spins-YTD"><strong>Year to Date:</strong> ${track.spins.YTD}</li>
+              <li id="song-info-spins-365"><strong>Last 365 Days:</strong> ${track.spins[365]}</li>
+            </ul>`)
             } else {
               $("#song-info-spins").html(``);
+              $("#song-info-spins-numbers").html(``);
             }
 
             if (requestForm) {
