@@ -190,7 +190,8 @@ class WWSUlikedtracks extends WWSUevents {
                 icon: "fas fa-music fa-lg",
               });
             }
-          } catch (unusedE) {
+          } catch (e) {
+            console.error(e);
             $(document).Toasts("create", {
               class: "bg-danger",
               title: "Track Liking Error",

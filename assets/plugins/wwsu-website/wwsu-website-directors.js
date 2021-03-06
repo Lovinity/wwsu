@@ -2,6 +2,7 @@
 
 // Machine ID
 var machineID = null;
+let hosts = false;
 $(".connecting-id").html(machineID);
 
 // Connection
