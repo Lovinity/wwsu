@@ -282,7 +282,7 @@ module.exports.bootstrap = async function(done) {
         insertRecords.push({
           host: record.from,
           group: "website",
-          label: record.from_friendly,
+          label: record.fromFriendly,
           status: 0,
           time: record.createdAt
         });
