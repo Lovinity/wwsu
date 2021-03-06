@@ -74,7 +74,7 @@ class WWSUlikedtracks extends WWSUevents {
               { title: "Artist - Title" },
               { title: "Actions" },
             ],
-            columnDefs: [{ responsivePriority: 1, targets: 3 }],
+            columnDefs: [{ responsivePriority: 1, targets: 2 }],
             pageLength: 100,
             drawCallback: () => {
               // Action button click events
