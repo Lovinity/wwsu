@@ -62,9 +62,10 @@ wwsumodules
   .add("WWSUmessages", WWSUmessages);
 
 // Reference modules to variables
+var navigation = wwsumodules.get("WWSUNavigation"); // Navigation must be global so it can be accessed by other ejs scripts
+
 let animations = wwsumodules.get("WWSUanimations");
 let wwsuutil = wwsumodules.get("WWSUutil");
-let navigation = wwsumodules.get("WWSUNavigation");
 let meta = wwsumodules.get("WWSUMeta");
 let directors = wwsumodules.get("WWSUdirectors");
 let djs = wwsumodules.get("WWSUdjs");

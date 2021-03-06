@@ -4,6 +4,8 @@
 io.sails.url = "https://server.wwsu1069.org";
 let socket = io.sails.connect();
 
+let machineID = null;
+
 // Add WWSU modules
 let wwsumodules = new WWSUmodules(socket);
 wwsumodules
@@ -34,9 +36,10 @@ wwsumodules
   .add("WWSUlikedtracks", WWSUlikedtracks);
 
 // Reference modules to variables
+var navigation = wwsumodules.get("WWSUNavigation"); // Navigation must be global so it can be accessed by other ejs scripts
+
 let animations = wwsumodules.get("WWSUanimations");
 let util = wwsumodules.get("WWSUutil");
-let navigation = wwsumodules.get("WWSUNavigation");
 let meta = wwsumodules.get("WWSUMeta");
 let noReq = wwsumodules.get("noReq");
 let eas = wwsumodules.get("WWSUeas");
