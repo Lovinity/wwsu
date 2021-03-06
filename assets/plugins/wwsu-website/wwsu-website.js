@@ -694,7 +694,7 @@ function updateDirectorsCalendar() {
       try {
         directorHours = {};
 
-        directorsdb.db().each((director) => {
+        directors.db().each((director) => {
           directorHours[director.ID] = { director: director, hours: [] };
         });
 
@@ -718,9 +718,13 @@ function updateDirectorsCalendar() {
             return 0;
           } catch (e) {
             console.error(e);
-            iziToast.show({
-              title: "An error occurred - Please check the logs",
-              message: `Error occurred in the compare function of Calendar.sort in the Calendar[0] call.`,
+            $(document).Toasts("create", {
+              class: "bg-danger",
+              title: "Calendar sort error",
+              subtitle: trackID,
+              autohide: true,
+              delay: 10000,
+              body: `There was a problem in the calendar sort function. Please report this to the engineer at wwsu4@wright.edu.`,
             });
           }
         };
@@ -862,11 +866,15 @@ function updateDirectorsCalendar() {
           moment().add(7, "days").startOf("day")
         );
       } catch (e) {
-        iziToast.show({
-          title: "An error occurred - Please check the logs",
-          message: "Error occurred during the call of office hours.",
-        });
         console.error(e);
+        $(document).Toasts("create", {
+          class: "bg-danger",
+          title: "Directors Calendar Error",
+          subtitle: trackID,
+          autohide: true,
+          delay: 10000,
+          body: `There was a problem loading director office hours. Please report this to the engineer at wwsu4@wright.edu.`,
+        });
       }
     },
     onUnblock: () => {
