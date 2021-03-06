@@ -114,7 +114,7 @@ class WWSUmessagesweb extends WWSUdb {
         properties: {
           nickname: {
             type: "string",
-            title: "Nickname",
+            title: "Nickname"
           },
           message: {
             type: "string",
@@ -126,7 +126,8 @@ class WWSUmessagesweb extends WWSUdb {
       options: {
         fields: {
           nickname: {
-            helper: "This is the name the DJ and other listeners will see you. If you leave blank, a random name will be given to you."
+            helper:
+              "This is the name the DJ and other listeners will see you. If you leave blank, a random name will be given to you."
           },
           message: {
             type: "tinymce",
@@ -218,6 +219,8 @@ class WWSUmessagesweb extends WWSUdb {
         }
       }
     });
+
+    this.updateMessages();
   }
 
   // Initialize connection. Call this on socket connect event.
@@ -424,6 +427,8 @@ class WWSUmessagesweb extends WWSUdb {
    */
   updateMessages() {
     let unreadMessages = 0;
+
+    if (!this.manager.get("WWSUrecipientsweb").recipient.host) return;
 
     // Check for and notify of new messages
     this.find()
