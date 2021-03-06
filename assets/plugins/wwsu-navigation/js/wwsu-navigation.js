@@ -1,10 +1,13 @@
+'use strict';
+
 // This class manages the sidebar navigation menu on WWSU pages using AdminLTE
 
 class WWSUNavigation {
 	/**
 	 * Construct the class
 	 */
-	constructor() {
+	constructor(manager, options) {
+		this.manager = manager;
 		this.elements = [];
 		this.activeMenu = ``;
 
@@ -26,9 +29,9 @@ class WWSUNavigation {
 	 * @param {function} callback Function with no parameters called when this menu becomes active. Defaults to empty function.
 	 */
 	addItem(dom, section, title, url, defaultItem = false, callback = () => {}) {
-        // Remove item if it already exists
-        this.elements = this.elements.filter((ele) => ele.dom !== dom);
-        
+		// Remove item if it already exists
+		this.elements = this.elements.filter((ele) => ele.dom !== dom);
+
 		this.elements.push({ dom, section, title, url, callback });
 
 		if (defaultItem) {
@@ -37,14 +40,14 @@ class WWSUNavigation {
 		} else {
 			$(dom).removeClass("active");
 			$(section).css("display", "none");
-        }
-        
-        $(dom).unbind("click");
+		}
+
+		$(dom).unbind("click");
 		$(dom).click((event) => {
 			this.processMenu(dom);
-        });
+		});
 
-        $(dom).unbind("keypress");
+		$(dom).unbind("keypress");
 		$(dom).keypress((event) => {
 			if (event.which === 13) {
 				this.processMenu(dom);
@@ -54,16 +57,19 @@ class WWSUNavigation {
 		if (this.activeMenu === dom) {
 			this.processMenu(dom);
 		}
-    }
-    
-    /**
-     * Remove the provided nav element from the WWSUnavigation manager.
-     * 
-     * @param {string} dom The DOM query string that was provided in addItem for this element to be removed.
-     */
-    removeItem(dom) {
-        this.elements = this.elements.filter((ele) => ele.dom !== dom);
-    }
+
+		return this;
+	}
+
+	/**
+	 * Remove the provided nav element from the WWSUnavigation manager.
+	 *
+	 * @param {string} dom The DOM query string that was provided in addItem for this element to be removed.
+	 */
+	removeItem(dom) {
+		this.elements = this.elements.filter((ele) => ele.dom !== dom);
+		return this;
+	}
 
 	/**
 	 * Activate the menu page provided.
@@ -97,5 +103,10 @@ class WWSUNavigation {
 				}
 				element.callback();
 			});
+
+		// Manually trigger resize event
+		window.requestAnimationFrame(() => {
+			window.dispatchEvent(new Event('resize'));
+		});
 	}
 }

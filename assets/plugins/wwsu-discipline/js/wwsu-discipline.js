@@ -1,20 +1,21 @@
+"use strict";
+
 /* global WWSUdb */
 
 // This class manages discipline.
+
+// REQUIRES these WWSUmodules: noReq (WWSUreq), hostReq (WWSUreq) (if using DJ Controls), directorReq (WWSUreq) (if managing discipline), WWSUMeta, WWSUutil, WWSUanimations
 class WWSUdiscipline extends WWSUdb {
 	/**
 	 * Construct the directors.
 	 *
-	 * @param {sails.io} socket The socket connection to WWSU
-	 * @param {WWSUreq} noReq A request with no authorization
-	 * @param {WWSUreq} noReq A request with host authorization (if using DJ Controls)
-	 * @param {WWSUreq} directorReq A request with director authorization (only provide if this client is allowed to manage discipline)
-	 * @param {WWSUmeta} meta The WWSUmeta class
+	 * @param {WWSUmodules} manager The modules class which initiated this module
+	 * @param {object} options Options to be passed to this module
 	 */
-	constructor(socket, noReq, hostReq, directorReq, meta) {
+	constructor(manager, options) {
 		super(); // Create the db
 
-		this.meta = meta;
+		this.manager = manager;
 
 		this.endpoints = {
 			acknowledge: "/discipline/acknowledge",
@@ -28,31 +29,30 @@ class WWSUdiscipline extends WWSUdb {
 			getWeb: {},
 			get: {},
 		};
-		this.requests = {
-			no: noReq,
-			host: hostReq,
-			director: directorReq,
-		};
-
-		this.animations = new WWSUanimations();
 
 		this.table;
 
 		// Discipline socket event for managing discipline
-		this.assignSocketEvent("discipline", socket);
+		this.assignSocketEvent("discipline", this.manager.socket);
 
 		this.on("change", "WWSUdiscipline", () => {
 			this.updateTable();
 		});
 
 		// This event is called when the client gets issued discipline
-		socket.on("discipline-add", (discipline) => {
-			var activeDiscipline =
+		this.manager.socket.on("discipline-add", (discipline) => {
+			let activeDiscipline =
 				discipline.active &&
 				(discipline.action !== "dayban" ||
 					moment(discipline.createdAt)
 						.add(1, "days")
-						.isAfter(moment(this.meta ? this.meta.meta.time : undefined)));
+						.isAfter(
+							moment(
+								this.manager.get("WWSUMeta")
+									? this.manager.get("WWSUMeta").meta.time
+									: undefined
+							)
+						));
 			if (activeDiscipline || !discipline.acknowledged) {
 				this.addDiscipline(discipline);
 			}
@@ -103,20 +103,22 @@ class WWSUdiscipline extends WWSUdb {
 
 		this.modals.discipline.footer = `<button type="button" class="btn btn-success" id="modal-${this.modals.discipline.id}-acknowledge">Acknowledge</button>`;
 
-		var util = new WWSUutil();
-		util.waitForElement(
-			`#modal-${this.modals.discipline.id}-acknowledge`,
-			() => {
+		this.manager
+			.get("WWSUutil")
+			.waitForElement(`#modal-${this.modals.discipline.id}-acknowledge`, () => {
 				$(`#modal-${this.modals.discipline.id}-acknowledge`).click(() => {
 					this.acknowledgeDiscipline(this.activeDiscipline);
 				});
-			}
-		);
+			});
 	}
 
 	// Initialize ONLY if this client will be allowed to manage discipline.
 	init() {
-		this.replaceData(this.requests.host, this.endpoints.get, this.data.get);
+		this.replaceData(
+			this.manager.get("hostReq"),
+			this.endpoints.get,
+			this.data.get
+		);
 	}
 
 	/**
@@ -126,33 +128,39 @@ class WWSUdiscipline extends WWSUdb {
 	 */
 	checkDiscipline(cb) {
 		try {
-			this.requests.no.request(
-				{ method: "post", url: this.endpoints.getWeb, data: {} },
-				(body) => {
-					var docb = true;
-					if (body.length > 0) {
-						body.map((discipline) => {
-							var activeDiscipline =
-								discipline.active &&
-								(discipline.action !== "dayban" ||
-									moment(discipline.createdAt)
-										.add(1, "days")
-										.isAfter(
-											moment(this.meta ? this.meta.meta.time : undefined)
-										));
-							if (activeDiscipline) {
-								docb = false;
-							}
-							if (activeDiscipline || !discipline.acknowledged) {
-								this.addDiscipline(discipline);
-							}
-						});
+			this.manager
+				.get("noReq")
+				.request(
+					{ method: "post", url: this.endpoints.getWeb, data: {} },
+					(body) => {
+						let docb = true;
+						if (body.length > 0) {
+							body.map((discipline) => {
+								let activeDiscipline =
+									discipline.active &&
+									(discipline.action !== "dayban" ||
+										moment(discipline.createdAt)
+											.add(1, "days")
+											.isAfter(
+												moment(
+													this.manager.get("WWSUMeta")
+														? this.manager.get("WWSUMeta").meta.time
+														: undefined
+												)
+											));
+								if (activeDiscipline) {
+									docb = false;
+								}
+								if (activeDiscipline || !discipline.acknowledged) {
+									this.addDiscipline(discipline);
+								}
+							});
+						}
+						if (docb) {
+							cb();
+						}
 					}
-					if (docb) {
-						cb();
-					}
-				}
-			);
+				);
 		} catch (e) {
 			console.error(e);
 			$(document).Toasts("create", {
@@ -176,12 +184,18 @@ class WWSUdiscipline extends WWSUdb {
 		let state = this.modals.discipline.iziModal("getState");
 
 		// Skip if the discipline was already acknowledged
-		var activeDiscipline =
+		let activeDiscipline =
 			discipline.active &&
 			(discipline.action !== "dayban" ||
 				moment(discipline.createdAt)
 					.add(1, "days")
-					.isAfter(moment(this.meta ? this.meta.meta.time : undefined)));
+					.isAfter(
+						moment(
+							this.manager.get("WWSUMeta")
+								? this.manager.get("WWSUMeta").meta.time
+								: undefined
+						)
+					));
 
 		if (discipline.acknowledged && !activeDiscipline) return;
 
@@ -198,12 +212,18 @@ class WWSUdiscipline extends WWSUdb {
 	 * @param {object} discipline The discipline record returned from WWSU.
 	 */
 	showDiscipline(discipline) {
-		var activeDiscipline =
+		let activeDiscipline =
 			discipline.active &&
 			(discipline.action !== "dayban" ||
 				moment(discipline.createdAt)
 					.add(1, "days")
-					.isAfter(moment(this.meta ? this.meta.meta.time : undefined)));
+					.isAfter(
+						moment(
+							this.manager.get("WWSUMeta")
+								? this.manager.get("WWSUMeta").meta.time
+								: undefined
+						)
+					));
 
 		this.modals.discipline.title = `Disciplinary action ${
 			activeDiscipline
@@ -237,7 +257,7 @@ class WWSUdiscipline extends WWSUdb {
 	 */
 	acknowledgeDiscipline(ID, cb) {
 		try {
-			this.requests.no.request(
+			this.manager.get("noReq").request(
 				{
 					dom: `#modal-${this.modals.discipline.id}`,
 					method: "post",
@@ -293,7 +313,7 @@ class WWSUdiscipline extends WWSUdb {
 	 */
 	add(dom, data, cb) {
 		try {
-			this.requests.host.request(
+			this.manager.get("hostReq").request(
 				{
 					dom: dom,
 					method: "post",
@@ -347,7 +367,7 @@ class WWSUdiscipline extends WWSUdb {
 	 */
 	edit(dom, data, cb) {
 		try {
-			this.requests.director.request(
+			this.manager.get("directorReq").request(
 				{
 					dom: dom,
 					method: "post",
@@ -401,7 +421,7 @@ class WWSUdiscipline extends WWSUdb {
 	 */
 	remove(data, cb) {
 		try {
-			this.requests.director.request(
+			this.manager.get("directorReq").request(
 				{
 					method: "post",
 					url: this.endpoints.remove,
@@ -452,17 +472,17 @@ class WWSUdiscipline extends WWSUdb {
 	 * @param {string} table The DOM query string of the div container that should house the table.
 	 */
 	initTable(table) {
-		this.animations.add("bans-init-table", () => {
-			var util = new WWSUutil();
-
+		this.manager.get("WWSUanimations").add("bans-init-table", () => {
 			// Init html
 			$(table).html(
 				`<p class="wwsumeta-timezone-display">Times are shown in the timezone ${
-					this.meta ? this.meta.meta.timezone : moment.tz.guess()
+					this.manager.get("WWSUMeta")
+						? this.manager.get("WWSUMeta").meta.timezone
+						: moment.tz.guess()
 				}.</p><p><button type="button" class="btn btn-block btn-success btn-bans-new">New Ban / Discipline</button></p><table id="section-bans-table" class="table table-striped display responsive" style="width: 100%;"></table>`
 			);
 
-			util.waitForElement(`#section-bans-table`, () => {
+			this.manager.get("WWSUutil").waitForElement(`#section-bans-table`, () => {
 				// Generate table
 				this.table = $(`#section-bans-table`).DataTable({
 					paging: true,
@@ -484,14 +504,15 @@ class WWSUdiscipline extends WWSUdb {
 					],
 					columnDefs: [{ responsivePriority: 1, targets: 7 }],
 					order: [[1, "desc"]],
-					pageLength: 25,
+					pageLength: 100,
+					buttons: ["copy", "csv", "excel", "pdf", "print", "colvis"],
 					drawCallback: () => {
 						// Action button click events
 						$(".btn-bans-edit").unbind("click");
 						$(".btn-bans-delete").unbind("click");
 
 						$(".btn-bans-edit").click((e) => {
-							var ban = this.find().find(
+							let ban = this.find().find(
 								(ban) => ban.ID === parseInt($(e.currentTarget).data("id"))
 							);
 							if (ban) {
@@ -500,11 +521,10 @@ class WWSUdiscipline extends WWSUdb {
 						});
 
 						$(".btn-bans-delete").click((e) => {
-							var util = new WWSUutil();
-							var ban = this.find().find(
+							let ban = this.find().find(
 								(ban) => ban.ID === parseInt($(e.currentTarget).data("id"))
 							);
-							util.confirmDialog(
+							this.manager.get("WWSUutil").confirmDialog(
 								`Are you sure you want to <strong>permanently</strong> remove the discipline ID ${ban.ID}?
                                 <ul>
                                     <li>You should instead edit and uncheck "active" if you still want this discipline for the records.</li>
@@ -519,6 +539,11 @@ class WWSUdiscipline extends WWSUdb {
 					},
 				});
 
+				this.table
+					.buttons()
+					.container()
+					.appendTo(`#section-bans-table_wrapper .col-md-6:eq(0)`);
+
 				// Additional info rows
 				let format = (d) => {
 					return `<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">
@@ -532,8 +557,8 @@ class WWSUdiscipline extends WWSUdb {
 					"click",
 					"td.details-control",
 					(e) => {
-						var tr = $(e.target).closest("tr");
-						var row = this.table.row(tr);
+						let tr = $(e.target).closest("tr");
+						let row = this.table.row(tr);
 
 						if (row.child.isShown()) {
 							// This row is already open - close it
@@ -583,7 +608,9 @@ class WWSUdiscipline extends WWSUdb {
 							createdAt: moment
 								.tz(
 									record.createdAt,
-									this.meta ? this.meta.meta.timezone : moment.tz.guess()
+									this.manager.get("WWSUMeta")
+										? this.manager.get("WWSUMeta").meta.timezone
+										: moment.tz.guess()
 								)
 								.format("LLL"),
 							actions: `<div class="btn-group">
@@ -677,10 +704,9 @@ class WWSUdiscipline extends WWSUdb {
 									form.focus();
 									return;
 								}
-								var value = form.getValue();
-								var util = new WWSUutil();
+								let value = form.getValue();
 								if (!data) {
-									util.confirmDialog(
+									this.manager.get("WWSUutil").confirmDialog(
 										`Are you sure you want to add this discipline?
                                     
                                     <ul>
@@ -764,7 +790,7 @@ class WWSUdiscipline extends WWSUdb {
 									form.focus();
 									return;
 								}
-								var value = form.getValue();
+								let value = form.getValue();
 								this.add(
 									`#modal-${this.modals.mute.id}`,
 									{
@@ -831,7 +857,7 @@ class WWSUdiscipline extends WWSUdb {
 									form.focus();
 									return;
 								}
-								var value = form.getValue();
+								let value = form.getValue();
 								this.add(
 									`#modal-${this.modals.ban.id}`,
 									{

@@ -1,435 +1,575 @@
+"use strict";
+
 // This class manages messages/chat from a host level
 // NOTE: event also supports 'newMessage' emitted when a new message is received that should be notified.
 
+// REQUIRES these WWSUmodules: WWSUrecipients, WWSUMeta, WWSUhosts, hostReq (WWSUreq), WWSUutil, WWSUanimations
 class WWSUmessages extends WWSUdb {
+	/**
+	 * The class constructor.
+	 *
+	 * @param {WWSUmodules} manager The modules class which initiated this module
+	 * @param {object} options Options to be passed to this module
+	 */
+	constructor(manager, options) {
+		super();
 
-    /**
-     * The class constructor.
-     * 
-     * @param {sails.io} socket The sails.io socket connected to the WWSU API.
-     * @param {WWSUrecipients} recipients Initialized WWSUrecipients class
-     * @param {WWSUmeta} meta initialized WWSU meta class
-     * @param {WWSUhosts} hosts initialized hosts class
-     * @param {WWSUdiscipline} discipline initialized discipline class
-     * @param {WWSUreq} hostReq Request with host authorization
-     */
-    constructor(socket, recipients, meta, hosts, discipline, hostReq) {
-        super();
+		this.manager = manager;
 
-        this.endpoints = {
-            get: '/messages/get',
-            remove: '/messages/remove',
-            send: '/messages/send'
-        };
-        this.data = {
-            get: {}
-        };
-        this.requests = {
-            host: hostReq,
-        };
+		this.endpoints = {
+			get: "/messages/get",
+			remove: "/messages/remove",
+			send: "/messages/send",
+		};
+		this.data = {
+			get: {},
+		};
 
-        this.recipients = recipients;
-        this.meta = meta;
-        this.hosts = hosts;
-        this.discipline = discipline;
+		this.assignSocketEvent("messages", this.manager.socket);
 
-        this.assignSocketEvent('messages', socket);
+		this.chatActiveRecipient;
+		this.chatStatus;
+		this.chatMessages;
+		this.chatForm;
+		this.chatMute;
+		this.chatBan;
+		this.menuNew;
+		this.menuIcon;
 
-        this.chatActiveRecipient;
-        this.chatStatus;
-        this.chatMessages;
-        this.chatForm;
-        this.chatMute;
-        this.chatBan;
-        this.menuNew;
-        this.menuIcon;
+		this.read = [];
+		this.notified = [];
 
-        this.read = [];
-        this.notified = [];
+		// Prune old messages (over 1 hour old) every minute.
+		this.prune = setInterval(() => {
+			this.find().forEach((message) => {
+				if (
+					moment(
+						this.manager.get("WWSUMeta")
+							? this.manager.get("WWSUMeta").meta.time
+							: undefined
+					)
+						.subtract(1, "hours")
+						.isAfter(moment(message.createdAt))
+				) {
+					this.query({ remove: message.ID });
+				}
+			});
+		}, 60000);
 
-        // Prune old messages (over 1 hour old) every minute.
-        this.prune = setInterval(() => {
-            this.find().forEach((message) => {
-                if (moment(this.meta ? this.meta.meta.time : undefined).subtract(1, 'hours').isAfter(moment(message.createdAt))) {
-                    this.query({ remove: message.ID });
-                }
-            });
-        }, 60000);
+		this.firstLoad = true;
+	}
 
-        this.animations = new WWSUanimations();
+	/**
+	 * Initialize chat components. This should be called before init (eg. on DOM ready).
+	 *
+	 * @param {string} chatActiveRecipient DOM query string of the chat header where active recipient will be shown.
+	 * @param {string} chatStatus DOM query string where the chat status info box is contained.
+	 * @param {string} chatMessages DOM query string where chat messages should be displayed.
+	 * @param {string} chatForm DOM query string where the Alpaca form for sending messages should be generated.
+	 * @param {string} chatMute DOM query string of the chat mute action button
+	 * @param {string} chatBan DOM query string of the chat ban action button
+	 * @param {string} menuNew DOM query string of the badge containing number of unread messages
+	 * @param {string} menuIcon DOM query string of the menu icon to flash green when an unread message is present
+	 */
+	initComponents(
+		chatActiveRecipient,
+		chatStatus,
+		chatMessages,
+		chatForm,
+		chatMute,
+		chatBan,
+		menuNew,
+		menuIcon
+	) {
+		// Set properties
+		this.chatActiveRecipient = chatActiveRecipient;
+		this.chatStatus = chatStatus;
+		this.chatMessages = chatMessages;
+		this.chatForm = chatForm;
+		this.chatMute = chatMute;
+		this.chatBan = chatBan;
+		this.menuNew = menuNew;
+		this.menuIcon = menuIcon;
 
-        this.firstLoad = true;
-    }
+		// Generate Alpaca form
+		$(this.chatForm).alpaca({
+			schema: {
+				type: "object",
+				properties: {
+					message: {
+						type: "string",
+						title: "Message",
+						default: "",
+						required: true,
+					},
+				},
+			},
+			options: {
+				fields: {
+					message: {
+						type: "tinymce",
+						options: {
+							toolbar:
+								"undo redo | bold italic underline strikethrough | fontselect fontsizeselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | fullscreen preview | link | ltr rtl",
+							plugins:
+								"autoresize preview paste searchreplace autolink save directionality visualblocks visualchars fullscreen link table hr pagebreak nonbreaking toc insertdatetime advlist lists wordcount textpattern noneditable help",
+							menubar: "file edit view insert format tools table help",
+						},
+					},
+				},
+				form: {
+					buttons: {
+						submit: {
+							title: "Send Message",
+							click: (form, e) => {
+								form.refreshValidationState(true);
+								if (!form.isValid(true)) {
+									form.focus();
+									return;
+								}
 
-    /**
-     * Initialize chat components. This should be called before init (eg. on DOM ready).
-     * 
-     * @param {string} chatActiveRecipient DOM query string of the chat header where active recipient will be shown.
-     * @param {string} chatStatus DOM query string where the chat status info box is contained.
-     * @param {string} chatMessages DOM query string where chat messages should be displayed.
-     * @param {string} chatForm DOM query string where the Alpaca form for sending messages should be generated.
-     * @param {string} chatMute DOM query string of the chat mute action button
-     * @param {string} chatBan DOM query string of the chat ban action button
-     * @param {string} menuNew DOM query string of the badge containing number of unread messages
-     * @param {string} menuIcon DOM query string of the menu icon to flash green when an unread message is present
-     */
-    initComponents (chatActiveRecipient, chatStatus, chatMessages, chatForm, chatMute, chatBan, menuNew, menuIcon) {
-        // Set properties
-        this.chatActiveRecipient = chatActiveRecipient;
-        this.chatStatus = chatStatus;
-        this.chatMessages = chatMessages;
-        this.chatForm = chatForm;
-        this.chatMute = chatMute;
-        this.chatBan = chatBan;
-        this.menuNew = menuNew;
-        this.menuIcon = menuIcon;
+								if (!this.manager.get("WWSUrecipients").activeRecipient) {
+									$(document).Toasts("create", {
+										class: "bg-warning",
+										title: "Error sending message",
+										body:
+											"You must select a recipient before you can send a message.",
+										autoHide: true,
+										delay: 10000,
+										icon: "",
+									});
+									return;
+								}
 
-        // Generate Alpaca form
-        $(this.chatForm).alpaca({
-            "schema": {
-                "type": "object",
-                "properties": {
-                    "message": {
-                        "type": "string",
-                        "title": "Message",
-                        "default": "",
-                        "required": true
-                    },
-                }
-            },
-            "options": {
-                "fields": {
-                    "message": {
-                        "type": "tinymce",
-                        "options": {
-                            "toolbar": 'undo redo | bold italic underline strikethrough | fontselect fontsizeselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | fullscreen preview | link | ltr rtl',
-                            "plugins": 'autoresize preview paste searchreplace autolink save directionality visualblocks visualchars fullscreen link table hr pagebreak nonbreaking toc insertdatetime advlist lists wordcount textpattern noneditable help',
-                            "menubar": 'file edit view insert format tools table help'
-                        },
-                    },
-                },
-                "form": {
-                    "buttons": {
-                        "submit": {
-                            "title": "Send Message",
-                            "click": (form, e) => {
-                                form.refreshValidationState(true);
-                                if (!form.isValid(true)) {
-                                    form.focus();
-                                    return;
-                                }
+								let value = form.getValue();
+								value.to = this.manager.get(
+									"WWSUrecipients"
+								).activeRecipient.host;
+								value.toFriendly = this.manager.get(
+									"WWSUrecipients"
+								).activeRecipient.label;
 
-                                if (!this.recipients.activeRecipient) {
-                                    $(document).Toasts('create', {
-                                        class: 'bg-warning',
-                                        title: 'Error sending message',
-                                        body: 'You must select a recipient before you can send a message.',
-                                        autoHide: true,
-                                        delay: 10000,
-                                        icon: '',
-                                    });
-                                    return;
-                                }
+								this.send(value, (success) => {
+									if (success) {
+										form.clear();
+									}
+								});
+							},
+						},
+					},
+				},
+			},
+		});
+	}
 
-                                var value = form.getValue();
-                                value.to = this.recipients.activeRecipient.host;
-                                value.toFriendly = this.recipients.activeRecipient.label;
+	// Initialize connection. Call this on socket connect event.
+	init() {
+		this.replaceData(
+			this.manager.get("hostReq"),
+			this.endpoints.get,
+			this.data.get
+		);
+	}
 
-                                this.send(value, (success) => {
-                                    if (success) {
-                                        form.clear();
-                                    }
-                                });
-                            }
-                        }
-                    }
-                }
-            },
-        });
-    }
+	/**
+	 * Send a message via WWSU API.
+	 *
+	 * @param {object} data Data to pass to WWSU API
+	 * @param {?function} cb Callback function after request is completed.
+	 */
+	send(data, cb) {
+		try {
+			this.manager
+				.get("hostReq")
+				.request(
+					{ method: "post", url: this.endpoints.send, data },
+					(response) => {
+						if (response !== "OK") {
+							$(document).Toasts("create", {
+								class: "bg-danger",
+								title: "Error sending message",
+								body:
+									"There was an error sending the message. Your DJ Controls might not be allowed to send messages to website visitors or display signs when you are not on the air. If this is not the case, please contact the engineer.",
+								autoHide: true,
+								delay: 15000,
+								icon: "fas fa-skull-crossbones fa-lg",
+							});
+							if (typeof cb === "function") {
+								cb(false);
+							}
+						} else {
+							if (typeof cb === "function") {
+								cb(true);
+							}
+						}
+					}
+				);
+		} catch (e) {
+			$(document).Toasts("create", {
+				class: "bg-danger",
+				title: "Error sending message",
+				body:
+					"There was an error sending the message. Please report this to the engineer.",
+				autoHide: true,
+				delay: 10000,
+				icon: "fas fa-skull-crossbones fa-lg",
+			});
+			if (typeof cb === "function") {
+				cb(false);
+			}
+			console.error(e);
+		}
+	}
 
-    // Initialize connection. Call this on socket connect event.
-    init () {
-        this.replaceData(this.requests.host, this.endpoints.get, this.data.get);
-    }
+	/**
+	 * Remove a message via WWSU API.
+	 *
+	 * @param {object} data Data to pass to WWSU API
+	 * @param {?function} cb Callback function after request is completed.
+	 */
+	remove(data, cb) {
+		try {
+			this.manager
+				.get("hostReq")
+				.request(
+					{ method: "post", url: this.endpoints.remove, data },
+					(response) => {
+						if (response !== "OK") {
+							$(document).Toasts("create", {
+								class: "bg-danger",
+								title: "Error removing message",
+								body:
+									"There was an error removing the message. Your DJ Controls might not be allowed to remove messages when you are not on the air. If this is not the case, please contact the engineer.",
+								autoHide: true,
+								delay: 15000,
+								icon: "fas fa-skull-crossbones fa-lg",
+							});
+							if (typeof cb === "function") {
+								cb(false);
+							}
+						} else {
+							if (typeof cb === "function") {
+								cb(true);
+							}
+						}
+					}
+				);
+		} catch (e) {
+			$(document).Toasts("create", {
+				class: "bg-danger",
+				title: "Error removing message",
+				body:
+					"There was an error removing the message. Please report this to the engineer.",
+				autoHide: true,
+				delay: 10000,
+				icon: "fas fa-skull-crossbones fa-lg",
+			});
+			if (typeof cb === "function") {
+				cb(false);
+			}
+			console.error(e);
+		}
+	}
 
-    /**
-     * Send a message via WWSU API.
-     * 
-     * @param {object} data Data to pass to WWSU API
-     * @param {?function} cb Callback function after request is completed.
-     */
-    send (data, cb) {
-        try {
-            this.requests.host.request({ method: 'post', url: this.endpoints.send, data }, (response) => {
-                if (response !== 'OK') {
-                    $(document).Toasts('create', {
-                        class: 'bg-danger',
-                        title: 'Error sending message',
-                        body: 'There was an error sending the message. Your DJ Controls might not be allowed to send messages to website visitors or display signs when you are not on the air. If this is not the case, please contact the engineer.',
-                        autoHide: true,
-                        delay: 15000,
-                        icon: 'fas fa-skull-crossbones fa-lg',
-                    });
-                    if (typeof cb === 'function') {
-                        cb(false);
-                    }
-                } else {
-                    if (typeof cb === 'function') {
-                        cb(true);
-                    }
-                }
-            })
-        } catch (e) {
-            $(document).Toasts('create', {
-                class: 'bg-danger',
-                title: 'Error sending message',
-                body: 'There was an error sending the message. Please report this to the engineer.',
-                autoHide: true,
-                delay: 10000,
-                icon: 'fas fa-skull-crossbones fa-lg',
-            });
-            if (typeof cb === 'function') {
-                cb(false);
-            }
-            console.error(e);
-        }
-    }
+	// Call WWSUrecipients._updateTable but provide number of unread messages.
+	updateRecipientsTable() {
+		let recipients = [];
+		let unreadMessages = 0;
 
-    /**
-     * Remove a message via WWSU API.
-     * 
-     * @param {object} data Data to pass to WWSU API
-     * @param {?function} cb Callback function after request is completed.
-     */
-    remove (data, cb) {
-        try {
-            this.requests.host.request({ method: 'post', url: this.endpoints.remove, data }, (response) => {
-                if (response !== 'OK') {
-                    $(document).Toasts('create', {
-                        class: 'bg-danger',
-                        title: 'Error removing message',
-                        body: 'There was an error removing the message. Your DJ Controls might not be allowed to remove messages when you are not on the air. If this is not the case, please contact the engineer.',
-                        autoHide: true,
-                        delay: 15000,
-                        icon: 'fas fa-skull-crossbones fa-lg',
-                    });
-                    if (typeof cb === 'function') {
-                        cb(false);
-                    }
-                } else {
-                    if (typeof cb === 'function') {
-                        cb(true);
-                    }
-                }
-            })
-        } catch (e) {
-            $(document).Toasts('create', {
-                class: 'bg-danger',
-                title: 'Error removing message',
-                body: 'There was an error removing the message. Please report this to the engineer.',
-                autoHide: true,
-                delay: 10000,
-                icon: 'fas fa-skull-crossbones fa-lg',
-            });
-            if (typeof cb === 'function') {
-                cb(false);
-            }
-            console.error(e);
-        }
-    }
+		// Check number of unread messages for each recipient
+		this.manager
+			.get("WWSUrecipients")
+			.find()
+			.forEach((recipient) => {
+				recipient.unreadMessages = 0;
+				this.find({ from: recipient.host, status: "active" }).forEach(
+					(message) => {
+						if (
+							(message.to === "DJ" ||
+								message.to === "DJ-private" ||
+								message.to ===
+									this.manager.get("WWSUrecipients").recipient.host) &&
+							this.read.indexOf(message.ID) === -1
+						) {
+							recipient.unreadMessages++;
+							unreadMessages++;
 
-    // Call WWSUrecipients._updateTable but provide number of unread messages.
-    updateRecipientsTable () {
-        var recipients = [];
-        var unreadMessages = 0;
+							// Notify new messages
+							if (!this.firstLoad && this.notified.indexOf(message.ID) === -1) {
+								this.notified.push(message.ID);
+								this.emitEvent("newMessage", [message]);
+							}
+						}
+					}
+				);
+				recipients.push(recipient);
+			});
 
-        // Check number of unread messages for each recipient
-        this.recipients.find().forEach((recipient) => {
-            recipient.unreadMessages = 0;
-            this.find({ from: recipient.host, status: 'active' }).forEach((message) => {
-                if ((message.to === 'DJ' || message.to === 'DJ-private' || message.to === this.hosts.recipient.host) && this.read.indexOf(message.ID) === -1) {
-                    recipient.unreadMessages++;
-                    unreadMessages++;
+		// Update table
+		this.manager.get("WWSUrecipients")._updateTable(recipients);
 
-                    // Notify new messages
-                    if (!this.firstLoad && this.notified.indexOf(message.ID) === -1) {
-                        this.notified.push(message.ID);
-                        this.emitEvent('newMessage', [ message ]);
-                    }
-                }
-            });
-            recipients.push(recipient);
-        });
+		// Update unread messages stuff
+		if (unreadMessages <= 0) {
+			$(this.menuNew).html(`0`);
+			$(this.menuNew).removeClass(`badge-danger`);
+			$(this.menuNew).addClass(`badge-secondary`);
+			$(this.menuIcon).removeClass(`pulse-success`);
+		} else {
+			$(this.menuNew).html(unreadMessages);
+			$(this.menuNew).removeClass(`badge-secondary`);
+			$(this.menuNew).addClass(`badge-danger`);
+			$(this.menuIcon).addClass(`pulse-success`);
+		}
+		this.firstLoad = false;
+	}
 
-        // Update table
-        this.recipients._updateTable(recipients);
-
-        // Update unread messages stuff
-        if (unreadMessages <= 0) {
-            $(this.menuNew).html(`0`);
-            $(this.menuNew).removeClass(`badge-danger`);
-            $(this.menuNew).addClass(`badge-secondary`);
-            $(this.menuIcon).removeClass(`pulse-success`);
-        } else {
-            $(this.menuNew).html(unreadMessages);
-            $(this.menuNew).removeClass(`badge-secondary`);
-            $(this.menuNew).addClass(`badge-danger`);
-            $(this.menuIcon).addClass(`pulse-success`);
-        }
-        this.firstLoad = false;
-    }
-
-    /**
-     * Call this whenever recipientChanged is emitted from WWSUrecipients.
-     * 
-     * @param {?object} recipient The recipient that was selected (null: no recipient)
-     */
-    changeRecipient (recipient) {
-        var util = new WWSUutil();
-        this.animations.add('change-recipient', () => {
-            if (!recipient) {
-                $(this.chatActiveRecipient).html(`(Select a recipient)`);
-                $(this.chatStatus).html(`<h5>Select a Recipient</h5>
+	/**
+	 * Call this whenever recipientChanged is emitted from WWSUrecipients.
+	 *
+	 * @param {?object} recipient The recipient that was selected (null: no recipient)
+	 */
+	changeRecipient(recipient) {
+		this.manager.get("WWSUanimations").add("change-recipient", () => {
+			if (!recipient) {
+				$(this.chatActiveRecipient).html(`(Select a recipient)`);
+				$(this.chatStatus).html(`<h5>Select a Recipient</h5>
             <p>Please select a recipient to send a message.</p>`);
 
-                $(this.chatMessages).html(``);
+				$(this.chatMessages).html(``);
 
-                $(this.chatMute).addClass('d-none');
-                $(this.chatBan).addClass('d-none');
-            } else {
-                $(this.chatActiveRecipient).html(`${jdenticon.toSvg(recipient.host, 24)} ${recipient.label}`);
-                $(this.chatStatus).html(`<div class="row">
+				$(this.chatMute).addClass("d-none");
+				$(this.chatBan).addClass("d-none");
+			} else {
+				$(this.chatActiveRecipient).html(
+					`${jdenticon.toSvg(recipient.host, 24)} ${recipient.label}`
+				);
+				$(this.chatStatus).html(`<div class="row">
             <div class="col-6 col-md-4 col-lg-3">
             ${jdenticon.toSvg(recipient.host, 48)}
             </div>
             <div class="col-6 col-md-8 col-lg-9">
             <h5>${recipient.label}</h5>
             <p>
-            ${recipient.group === 'website'
-                        ?
-                        `${recipient.host === 'website'
-                            ? `${this.meta.meta.webchat
-                                ? `Web messages are active; visitors can send you messages.<br />Messages you send to "Web Public" will be visible by all visitors.`
-                                : `Web messages are NOT active; visitors cannot send you messages.`
-                            }`
-                            : `${this.meta.meta.webchat
-                                ? `${recipient.status !== 0
-                                    ? `Visitor is currently online and should receive your message.<br />Messages you send will only be visible to this visitor.`
-                                    : `Visitor is offline and was last seen ${moment.tz(recipient.time, this.meta ? this.meta.meta.timezone : moment.tz.guess()).format('llll')}. They will not receive your message unless they come back online within an hour of you sending your message.<br />Messages you send will only be visible to this visitor.`
-                                }`
-                                : `Web messages are NOT active; visitors cannot send you messages.`
-                            }`
-                        }`
-                        : `${recipient.status !== 0
-                            ? `Computer/host is online. However, this does not necessarily mean someone is around and will see your message.`
-                            : `Computer/host is offline and was last seen ${moment.tz(recipient.time, this.meta ? this.meta.meta.timezone : moment.tz.guess()).format('llll')}. They will not receive your message unless they come back online within an hour of you sending your message.`
-                        }`
-                    }</p>
+            ${
+							recipient.group === "website"
+								? `${
+										recipient.host === "website"
+											? `${
+													this.manager.get("WWSUMeta").meta.webchat
+														? `Web messages are active; visitors can send you messages.<br />Messages you send to "Web Public" will be visible by all visitors.`
+														: `Web messages are NOT active; visitors cannot send you messages.`
+											  }`
+											: `${
+													this.manager.get("WWSUMeta").meta.webchat
+														? `${
+																recipient.status !== 0
+																	? `Visitor is currently online and should receive your message.<br />Messages you send will only be visible to this visitor.`
+																	: `Visitor is offline and was last seen ${moment
+																			.tz(
+																				recipient.time,
+																				this.manager.get("WWSUMeta")
+																					? this.manager.get("WWSUMeta").meta
+																							.timezone
+																					: moment.tz.guess()
+																			)
+																			.format(
+																				"llll"
+																			)}. They will not receive your message unless they come back online within an hour of you sending your message.<br />Messages you send will only be visible to this visitor.`
+														  }`
+														: `Web messages are NOT active; visitors cannot send you messages.`
+											  }`
+								  }`
+								: `${
+										recipient.status !== 0
+											? `Computer/host is online. However, this does not necessarily mean someone is around and will see your message.`
+											: `Computer/host is offline and was last seen ${moment
+													.tz(
+														recipient.time,
+														this.manager.get("WWSUMeta")
+															? this.manager.get("WWSUMeta").meta.timezone
+															: moment.tz.guess()
+													)
+													.format(
+														"llll"
+													)}. They will not receive your message unless they come back online within an hour of you sending your message.`
+								  }`
+						}</p>
             </div>`);
 
-                var chatHTML = ``;
+				let chatHTML = ``;
 
-                var query = [ { from: recipient.host, to: [ this.hosts.client.host, 'DJ', 'DJ-private', this.recipients.recipient.host ] }, { to: recipient.host } ]
-                if (recipient.host === 'website') {
-                    query = [ { to: [ 'DJ', 'website' ] } ]
-                }
+				let query = [
+					{
+						from: recipient.host,
+						to: [
+							this.manager.get("WWSUhosts").client.host,
+							"DJ",
+							"DJ-private",
+							this.manager.get("WWSUrecipients").recipient.host,
+						],
+					},
+					{ to: recipient.host },
+				];
+				if (recipient.host === "website") {
+					query = [{ to: ["DJ", "website"] }];
+				}
 
-                $(this.chatMessages).html(``);
+				$(this.chatMessages).html(``);
 
-                this.find(query).sort((a, b) => moment(a.createdAt).valueOf() - moment(b.createdAt).valueOf()).map((message) => {
-                    chatHTML += `<div class="message" id="message-${message.ID}">
+				this.find(query)
+					.sort(
+						(a, b) =>
+							moment(a.createdAt).valueOf() - moment(b.createdAt).valueOf()
+					)
+					.map((message) => {
+						chatHTML += `<div class="message" id="message-${message.ID}">
                 ${this.messageHTML(message)}
                 </div>`;
-                    util.waitForElement(`#message-${message.ID}`, () => {
-                        $(`#message-${message.ID}`).unbind('click');
+						this.manager
+							.get("WWSUutil")
+							.waitForElement(`#message-${message.ID}`, () => {
+								$(`#message-${message.ID}`).unbind("click");
 
-                        $(`#message-${message.ID}`).click(() => {
-                            if (this.read.indexOf(message.ID) === -1) {
-                                this.read.push(message.ID);
-                                this.updateRecipient();
-                                this.updateRecipientsTable();
-                            }
-                        });
-                    });
+								$(`#message-${message.ID}`).click(() => {
+									if (this.read.indexOf(message.ID) === -1) {
+										this.read.push(message.ID);
+										this.updateRecipient();
+										this.updateRecipientsTable();
+									}
+								});
+							});
 
-                    util.waitForElement(`#message-delete-${message.ID}`, () => {
-                        $(`#message-delete-${message.ID}`).unbind('click');
+						this.manager
+							.get("WWSUutil")
+							.waitForElement(`#message-delete-${message.ID}`, () => {
+								$(`#message-delete-${message.ID}`).unbind("click");
 
-                        $(`#message-delete-${message.ID}`).click(() => {
-                            util.confirmDialog(`Are you sure you want to permanently delete this message? It will be removed from everyone's messenger window.`, null, () => {
-                                this.remove({ ID: message.ID });
-                            });
-                        });
-                    });
+								$(`#message-delete-${message.ID}`).click(() => {
+									this.manager
+										.get("WWSUutil")
+										.confirmDialog(
+											`Are you sure you want to permanently delete this message? It will be removed from everyone's messenger window.`,
+											null,
+											() => {
+												this.remove({ ID: message.ID });
+											}
+										);
+								});
+							});
+					});
 
-                });
+				$(this.chatMessages).html(chatHTML);
 
-                $(this.chatMessages).html(chatHTML);
+				if (recipient.host.startsWith("website-")) {
+					$(this.chatMute).removeClass("d-none");
+					$(this.chatBan).removeClass("d-none");
+				} else {
+					$(this.chatMute).addClass("d-none");
+					$(this.chatBan).addClass("d-none");
+				}
+			}
+		});
+	}
 
-                if (recipient.host.startsWith("website-")) {
-                    $(this.chatMute).removeClass('d-none');
-                    $(this.chatBan).removeClass('d-none');
-                } else {
-                    $(this.chatMute).addClass('d-none');
-                    $(this.chatBan).addClass('d-none');
-                }
-            }
-        });
-    }
-
-    /**
-     * Generate an HTML block for a message.
-     * NOTE: This does NOT return the direct-chat-msg container; you must construct this first.
-     * 
-     * @param {object} message The message
-     * @returns {string} The HTML for this message
-     */
-    messageHTML (message) {
-
-        // Message was from this host
-        if (message.from === this.recipients.recipient.host) {
-            return `<div class="direct-chat-msg right">
+	/**
+	 * Generate an HTML block for a message.
+	 * NOTE: This does NOT return the direct-chat-msg container; you must construct this first.
+	 *
+	 * @param {object} message The message
+	 * @returns {string} The HTML for this message
+	 */
+	messageHTML(message) {
+		// Message was from this host
+		if (message.from === this.manager.get("WWSUrecipients").recipient.host) {
+			return `<div class="direct-chat-msg right">
             <div class="direct-chat-infos clearfix">
-              <span class="direct-chat-name float-right">YOU -> ${message.toFriendly}</span>
-              <span class="direct-chat-timestamp float-left">${moment.tz(message.createdAt, this.meta ? this.meta.meta.timezone : moment.tz.guess()).format('hh:mm A')} <i class="fas fa-trash" id="message-delete-${message.ID}"></i></span>
+              <span class="direct-chat-name float-right">YOU -> ${
+								message.toFriendly
+							}</span>
+              <span class="direct-chat-timestamp float-left">${moment
+								.tz(
+									message.createdAt,
+									this.manager.get("WWSUMeta")
+										? this.manager.get("WWSUMeta").meta.timezone
+										: moment.tz.guess()
+								)
+								.format(
+									"hh:mm A"
+								)} <i class="fas fa-trash" id="message-delete-${
+				message.ID
+			}"></i></span>
             </div>
-            <div class="direct-chat-img bg-secondary">${jdenticon.toSvg(message.from, 40)}</div>
+            <div class="direct-chat-img bg-secondary">${jdenticon.toSvg(
+							message.from,
+							40
+						)}</div>
             <div class="direct-chat-text bg-success">
                 ${message.message}
             </div>
-        </div>`
-        } else {
-            // Unread message
-            if (this.read.indexOf(message.ID) === -1) {
-                return `<div class="direct-chat-msg">
+        </div>`;
+		} else {
+			// Unread message
+			if (this.read.indexOf(message.ID) === -1) {
+				return `<div class="direct-chat-msg">
                 <div class="direct-chat-infos clearfix">
-                  <span class="direct-chat-name float-left">${message.fromFriendly} -> ${message.toFriendly}</span>
-                  <span class="direct-chat-timestamp float-right">${moment.tz(message.createdAt, this.meta ? this.meta.meta.timezone : moment.tz.guess()).format('hh:mm A')} <i class="fas fa-trash" id="message-delete-${message.ID}"></i></span></span>
+                  <span class="direct-chat-name float-left">${
+										message.fromFriendly
+									} -> ${message.toFriendly}</span>
+                  <span class="direct-chat-timestamp float-right">${moment
+										.tz(
+											message.createdAt,
+											this.manager.get("WWSUMeta")
+												? this.manager.get("WWSUMeta").meta.timezone
+												: moment.tz.guess()
+										)
+										.format(
+											"hh:mm A"
+										)} <i class="fas fa-trash" id="message-delete-${
+					message.ID
+				}"></i></span></span>
                 </div>
-                <div class="direct-chat-img bg-secondary">${jdenticon.toSvg(message.from, 40)}</div>
+                <div class="direct-chat-img bg-secondary">${jdenticon.toSvg(
+									message.from,
+									40
+								)}</div>
                 <div class="direct-chat-text bg-danger">
                     ${message.message}
                 </div>
-            </div>`
-                // Read message
-            } else {
-                return `<div class="direct-chat-msg">
+            </div>`;
+				// Read message
+			} else {
+				return `<div class="direct-chat-msg">
                 <div class="direct-chat-infos clearfix">
-                  <span class="direct-chat-name float-left">${message.fromFriendly} -> ${message.toFriendly}</span>
-                  <span class="direct-chat-timestamp float-right">${moment.tz(message.createdAt, this.meta ? this.meta.meta.timezone : moment.tz.guess()).format('hh:mm A')} <i class="fas fa-trash" id="message-delete-${message.ID}"></i></span></span>
+                  <span class="direct-chat-name float-left">${
+										message.fromFriendly
+									} -> ${message.toFriendly}</span>
+                  <span class="direct-chat-timestamp float-right">${moment
+										.tz(
+											message.createdAt,
+											this.manager.get("WWSUMeta")
+												? this.manager.get("WWSUMeta").meta.timezone
+												: moment.tz.guess()
+										)
+										.format(
+											"hh:mm A"
+										)} <i class="fas fa-trash" id="message-delete-${
+					message.ID
+				}"></i></span></span>
                 </div>
-                <div class="direct-chat-img bg-secondary">${jdenticon.toSvg(message.from, 40)}</div>
+                <div class="direct-chat-img bg-secondary">${jdenticon.toSvg(
+									message.from,
+									40
+								)}</div>
                 <div class="direct-chat-text bg-secondary">
                     ${message.message}
                 </div>
-            </div>`
-            }
-        }
-    }
+            </div>`;
+			}
+		}
+	}
 
-    // Call this on any changes to messages or the active recipient
-    updateRecipient () {
-        this.changeRecipient(this.recipients.activeRecipient);
-    }
+	// Call this on any changes to messages or the active recipient
+	updateRecipient() {
+		this.changeRecipient(this.manager.get("WWSUrecipients").activeRecipient);
+	}
 }

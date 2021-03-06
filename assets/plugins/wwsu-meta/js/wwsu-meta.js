@@ -1,13 +1,18 @@
+'use strict';
+
 // This class handles WWSU metadata
+
+// REQUIRES these WWSUmodules: noReq (WWSUreq)
 class WWSUMeta extends WWSUevents {
   /**
    * Construct the class
    *
-   * @param {sails.io} socket Socket connection to WWSU
-   * @param {WWSUreq} request Request with no authorization
+   * @param {WWSUmodules} manager The modules class which initiated this module
+   * @param {object} options Options to be passed to this module
    */
-  constructor(socket, request) {
+  constructor(manager, options) {
     super();
+    this.manager = manager;
     this.endpoint = "/meta/get";
 
     this._meta = {
@@ -17,7 +22,6 @@ class WWSUMeta extends WWSUevents {
       webchat: true,
       state: "unknown",
     };
-    this.request = request;
 
     // Tick this.meta.time every second
     this.tick;
@@ -25,7 +29,7 @@ class WWSUMeta extends WWSUevents {
     this.resetTick();
 
     // Add meta socket event
-    socket.on("meta", (data) => {
+    this.manager.socket.on("meta", (data) => {
       for (let key in data) {
         if (Object.prototype.hasOwnProperty.call(data, key)) {
           this._meta[key] = data[key];
@@ -47,7 +51,7 @@ class WWSUMeta extends WWSUevents {
 
   // Initialize function; should be called in socket.on('connect').
   init() {
-    this.request.request(
+    this.manager.get("noReq").request(
       { method: "POST", url: this.endpoint, data: {} },
       (body) => {
         try {
@@ -97,8 +101,8 @@ class WWSUMeta extends WWSUevents {
    * Instead of adding a second each call (setInterval is not exact), determine time difference between system time and station time, as well as system time difference between now and previous timer fire.
    */
   resetTick() {
-    var ticker = () => {
-      var diff = moment().diff(this.prevTime);
+    const ticker = () => {
+      let diff = moment().diff(this.prevTime);
       this._meta.time = moment
         .parseZone(this._meta.time)
         .add(diff, "milliseconds")

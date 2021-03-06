@@ -1,3 +1,5 @@
+"use strict";
+
 /* global moment, TAFFY */
 
 /**
@@ -17,7 +19,7 @@ class WWSUevents {
 	 */
 	emitEvent(event, args) {
 		if (typeof this.events[event] === "object") {
-			for (var scope in this.events[event]) {
+			for (let scope in this.events[event]) {
 				if (
 					Object.prototype.hasOwnProperty.call(this.events[event], scope) &&
 					typeof this.events[event][scope].fn === "function"
@@ -77,7 +79,7 @@ class WWSUevents {
  *
  * @class WWSUdb
  */
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line no-unused-lets
 class WWSUdb extends WWSUevents {
 	/**
 	 *Creates an instance of WWSUdb.
@@ -107,17 +109,17 @@ class WWSUdb extends WWSUevents {
 	 * @memberof WWSUdb
 	 */
 	query(_query, replace = false) {
-		var query = _.cloneDeep(_query);
+		let query = _.cloneDeep(_query);
 		if (replace) {
 			if (query.constructor === Array) {
 				this._db().remove();
 				this._db.insert(query);
 				this.emitEvent("replace", [this._db()]);
-				this.emitEvent("change", [this._db()]);
+				this.emitEvent("change", [this._db(), query]);
 			}
 			return null;
 		} else {
-			for (var key in query) {
+			for (let key in query) {
 				if (Object.prototype.hasOwnProperty.call(query, key)) {
 					switch (key) {
 						case "insert":
@@ -133,7 +135,7 @@ class WWSUdb extends WWSUevents {
 							this.emitEvent("remove", [query[key], this._db()]);
 							break;
 					}
-					this.emitEvent("change", [this._db()]);
+					this.emitEvent("change", [this._db(), query]);
 				}
 			}
 		}
@@ -146,13 +148,13 @@ class WWSUdb extends WWSUevents {
 	 * @returns {array|?object} Array of matching records if first = false, or single object (null: none found) of the first found record if true
 	 */
 	find(_query, first = false) {
-		var query;
+		let query;
 		if (typeof _query === "object") {
 			query = _.cloneDeep(_query);
 		} else {
 			query = _query;
 		}
-		var records;
+		let records;
 		if (!first) {
 			records = this._db(query).get();
 		} else {
@@ -192,36 +194,30 @@ class WWSUdb extends WWSUevents {
 }
 
 // Class for managing requests and authorization to WWSU's API
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line no-unused-lets
 
 class WWSUreq {
 	/**
 	 * Construct the class
 	 *
-	 * @param {sails.io} socket WWSU socket connection
-	 * @param {string} host Host name of this client
-	 * @param {?WWSUdb} db Reference to the WWSUdb containing records of those that can authorize with this request, if applicable
-	 * @param {?object} filter Filter applicable records that can authorize in the WWSUdb by this TAFFY query object, if applicable
-	 * @param {?string} usernameField Name of the database column containing names for authorization, if applicable
-	 * @param {?string} authPath URL path in WWSU's API for authorization and getting a token, if applicable
-	 * @param {?string} authName Human friendly name of the type of person (eg. "Director") that must authorize themselves for this request
+	 * @param {WWSUmodules} manager The WWSU modules that initiated this module
+	 * @param {object} options Object of options passed in the manager.add method
+	 * @param {string} options.host Host name of this client
+	 * @param {string} options.db Name of the WWSU module containing the WWSUdb containing records of those that can authorize with this request, if applicable
+	 * @param {?object} options.filter Filter applicable records that can authorize in the WWSUdb by this TAFFY query object, if applicable
+	 * @param {?string} options.usernameField Name of the database column containing names for authorization, if applicable
+	 * @param {?string} options.authPath URL path in WWSU's API for authorization and getting a token, if applicable
+	 * @param {?string} options.authName Human friendly name of the type of person (eg. "Director") that must authorize themselves for this request
 	 */
-	constructor(
-		socket,
-		host,
-		db = null,
-		filter = null,
-		usernameField = null,
-		authPath = null,
-		authName = null
-	) {
-		this.socket = socket;
-		this.host = host;
-		this.db = db;
-		this.filter = filter;
-		this.authPath = authPath;
-		this.authName = authName;
-		this.usernameField = usernameField;
+	constructor(manager, options) {
+		this.manager = manager;
+		this.socket = this.manager.socket;
+		this.host = options.host || null;
+		this.db = options.db || null;
+		this.filter = options.filter || null;
+		this.authPath = options.authPath || null;
+		this.authName = options.authName || null;
+		this.usernameField = options.usernameField || null;
 		this.loginID = null;
 
 		// Storing authorization tokens in memory
@@ -273,7 +269,7 @@ class WWSUreq {
 	 */
 	request(opts, cb) {
 		// Called after logging in and getting a token
-		var step2 = (username, password) => {
+		const step2 = (username, password) => {
 			this._authorize(username, password, (token) => {
 				if (token === 0) {
 					$(document).Toasts("create", {
@@ -363,7 +359,7 @@ class WWSUreq {
 				}
 			}
 
-			var doRequest = (cb2) => {
+			const doRequest = (cb2) => {
 				this.socket.request(opts, (body) => {
 					cb2();
 					if (!body) {
@@ -444,11 +440,11 @@ class WWSUreq {
 	 * @param {function} cb Function called after user completes the prompt. Contains (username, password) as parameters.
 	 */
 	_promptLogin(cb) {
-		var fdb;
+		let fdb;
 		if (typeof this.filter === "object") {
-			fdb = this.db.db(this.filter);
+			fdb = this.manager.get(this.db).db(this.filter);
 		} else {
-			fdb = this.db.db();
+			fdb = this.manager.get(this.db).db();
 		}
 		if (!fdb || fdb.length < 1) {
 			$(document).Toasts("create", {
@@ -474,9 +470,6 @@ class WWSUreq {
 			return null;
 		}
 
-		var username = ``;
-		var password = ``;
-
 		let tempModal = new WWSUmodal(
 			`${this.authName} Authorization Required`,
 			`bg-danger`,
@@ -501,7 +494,7 @@ class WWSUreq {
 
 		tempModal.iziModal("open");
 
-		var util = new WWSUutil();
+		let util = new WWSUutil();
 		util.waitForElement(`#modal-${tempModal.id}-form`, () => {
 			$(`#modal-${tempModal.id}-form`).alpaca({
 				schema: {
@@ -532,7 +525,7 @@ class WWSUreq {
 										form.focus();
 										return;
 									}
-									var value = form.getValue();
+									let value = form.getValue();
 									tempModal.iziModal("close");
 									cb(value.username, value.password);
 								},
@@ -573,12 +566,12 @@ class WWSUScriptLoader {
 	_loadScript(filename, filetype) {
 		if (filetype === "js") {
 			//if filename is a external JavaScript file
-			var fileref = document.createElement("script");
+			let fileref = document.createElement("script");
 			fileref.setAttribute("type", "text/javascript");
 			fileref.setAttribute("src", filename);
 		} else if (filetype === "css") {
 			//if filename is an external CSS file
-			var fileref = document.createElement("link");
+			let fileref = document.createElement("link");
 			fileref.setAttribute("rel", "stylesheet");
 			fileref.setAttribute("type", "text/css");
 			fileref.setAttribute("href", filename);
@@ -598,8 +591,8 @@ class WWSUutil {
 	getUrlParameter(name) {
 		try {
 			name = name.replace(/[[]/, "\\[").replace(/[\]]/, "\\]");
-			var regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
-			var results = regex.exec(window.location.search);
+			let regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
+			let results = regex.exec(window.location.search);
 			return results === null
 				? null
 				: decodeURIComponent(results[1].replace(/\+/g, " "));
@@ -626,11 +619,11 @@ class WWSUutil {
 	 */
 	hexRgb(hex, options = {}) {
 		// function-specific values
-		var hexChars = "a-f\\d";
-		var match3or4Hex = `#?[${hexChars}]{3}[${hexChars}]?`;
-		var match6or8Hex = `#?[${hexChars}]{6}([${hexChars}]{2})?`;
-		var nonHexChars = new RegExp(`[^#${hexChars}]`, "gi");
-		var validHexSize = new RegExp(`^${match3or4Hex}$|^${match6or8Hex}$`, "i");
+		let hexChars = "a-f\\d";
+		let match3or4Hex = `#?[${hexChars}]{3}[${hexChars}]?`;
+		let match6or8Hex = `#?[${hexChars}]{6}([${hexChars}]{2})?`;
+		let nonHexChars = new RegExp(`[^#${hexChars}]`, "gi");
+		let validHexSize = new RegExp(`^${match3or4Hex}$|^${match6or8Hex}$`, "i");
 
 		try {
 			if (
@@ -687,7 +680,7 @@ class WWSUutil {
 	 * @returns {boolean} True if text should be black, false if it should be white.
 	 */
 	getContrastYIQ(hex) {
-		var r = parseInt(hex.substr(1, 2), 16),
+		let r = parseInt(hex.substr(1, 2), 16),
 			g = parseInt(hex.substr(3, 2), 16),
 			b = parseInt(hex.substr(5, 2), 16),
 			yiq = (r * 299 + g * 587 + b * 114) / 1000;
@@ -700,7 +693,7 @@ class WWSUutil {
 	 * @param {string} str The HTML to escape
 	 */
 	escapeHTML(str) {
-		var div = document.createElement("div");
+		let div = document.createElement("div");
 		div.appendChild(document.createTextNode(str));
 		return div.innerHTML;
 	}
@@ -724,11 +717,11 @@ class WWSUutil {
 	 * Create a UUID
 	 */
 	createUUID() {
-		var dt = new Date().getTime();
-		var uuid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+		let dt = new Date().getTime();
+		let uuid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
 			/[xy]/g,
 			function (c) {
-				var r = (dt + Math.random() * 16) % 16 | 0;
+				let r = (dt + Math.random() * 16) % 16 | 0;
 				dt = Math.floor(dt / 16);
 				return (c == "x" ? r : (r & 0x3) | 0x8).toString(16);
 			}
@@ -762,7 +755,7 @@ class WWSUutil {
 
 		tempModal.iziModal("open");
 
-		var util = new WWSUutil();
+		let util = new WWSUutil();
 		util.waitForElement(`#modal-${tempModal.id}-form`, () => {
 			$(`#modal-${tempModal.id}-form`).alpaca({
 				schema: {
@@ -782,7 +775,7 @@ class WWSUutil {
 							helper: `Please type <strong>${confirmText}</strong> to confirm your action (case sensitive).`,
 							hidden: confirmText ? false : true,
 							validator: function (callback) {
-								var value = this.getValue();
+								let value = this.getValue();
 								if (confirmText && value !== confirmText) {
 									callback({
 										status: false,
@@ -829,38 +822,71 @@ class WWSUutil {
 			});
 		});
 	}
+
+	/**
+	 * Truncate a string to the specified length.
+	 *
+	 * @param {string} str String to truncate
+	 * @param {number} strLength Number of characters the returned string should contain at maximum (including ending string)
+	 * @param {string} ending What should be appended to the end when the string is truncated
+	 */
+	truncateText(str, strLength = 256, ending = "...") {
+		if (str === null) return "";
+
+		if (str.length > strLength) {
+			return `${str.substring(0, strLength - ending.length)}${ending}`;
+		} else {
+			return str;
+		}
+	}
 }
 
 class WWSUqueue {
 	constructor() {
 		this.timer = null;
-		this.queue = [];
+		this.taskList = [];
+	}
+
+	idleCallback(handler) {
+		let startTime = Date.now();
+
+		return setTimeout(() => {
+			handler({
+				didTimeout: false,
+				timeRemaining: () => {
+					return Math.max(0, 50.0 - (Date.now() - startTime));
+				},
+			});
+		}, 1);
+	}
+
+	handleTaskQueue(deadline) {
+		while (
+			(deadline.timeRemaining() > 0 || deadline.didTimeout) &&
+			this.taskList.length
+		) {
+			let task = this.taskList.shift();
+			task();
+		}
+
+		if (this.taskList.length) {
+			this.timer = this.idleCallback((deadline) => {
+				this.handleTaskQueue(deadline);
+			});
+		} else {
+			this.timer = undefined;
+		}
 	}
 
 	add(fn, time) {
-		var setTimer = (time) => {
-			this.timer = setTimeout(() => {
-				time = this.add();
-				if (this.queue.length) {
-					setTimer(time);
-				}
-			}, time || 2);
-		};
-
 		if (fn) {
-			this.queue.push([fn, time]);
-			if (this.queue.length == 1) {
-				setTimer(time);
+			this.taskList.push(fn);
+			if (this.taskList.length === 1 || !this.timer) {
+				this.timer = this.idleCallback((deadline) => {
+					this.handleTaskQueue(deadline);
+				});
 			}
-			return;
 		}
-
-		var next = this.queue.shift();
-		if (!next) {
-			return 0;
-		}
-		next[0]();
-		return next[1];
 	}
 }
 
@@ -882,11 +908,11 @@ class WWSUmodal {
 		closeButton = true,
 		modalOptions = {}
 	) {
+		this.util = new WWSUutil();
 		if ($.fn.iziModal) {
-			var util = new WWSUutil();
-			this.id = util.createUUID();
+			this.id = this.util.createUUID();
 
-			util.waitForElement("body", () => {
+			this.util.waitForElement("body", () => {
 				// Append the model
 				$("body").append(`<div class="modal" id="modal-${
 					this.id
@@ -914,7 +940,7 @@ class WWSUmodal {
   </div>`);
 
 				// Initialize the model once loaded in the DOM
-				util.waitForElement(`#modal-${this.id}`, () => {
+				this.util.waitForElement(`#modal-${this.id}`, () => {
 					this.izi = $(`#modal-${this.id}`).iziModal(modalOptions);
 				});
 			});
@@ -926,8 +952,7 @@ class WWSUmodal {
 	}
 
 	set title(value) {
-		var util = new WWSUutil();
-		util.waitForElement(`#modal-${this.id}-title`, () => {
+		this.util.waitForElement(`#modal-${this.id}-title`, () => {
 			$(`#modal-${this.id}-title`).html(value);
 		});
 	}
@@ -937,8 +962,7 @@ class WWSUmodal {
 	}
 
 	set body(value) {
-		var util = new WWSUutil();
-		util.waitForElement(`#modal-${this.id}-body`, () => {
+		this.util.waitForElement(`#modal-${this.id}-body`, () => {
 			$(`#modal-${this.id}-body`).html(value);
 		});
 	}
@@ -948,15 +972,13 @@ class WWSUmodal {
 	}
 
 	set footer(value) {
-		var util = new WWSUutil();
-		util.waitForElement(`#modal-${this.id}-footer`, () => {
+		this.util.waitForElement(`#modal-${this.id}-footer`, () => {
 			$(`#modal-${this.id}-footer`).html(value);
 		});
 	}
 
 	addEvent(event, fn) {
-		var util = new WWSUutil();
-		util.waitForElement(`#modal-${this.id}`, () => {
+		this.util.waitForElement(`#modal-${this.id}`, () => {
 			$(document).on(event, `#modal-${this.id}`, function (e) {
 				fn(e);
 			});
@@ -978,8 +1000,10 @@ class WWSUmodal {
  *  it freeze the UI momentarily, but it is unnecessary; we only need to process the most recently queued
  *  frame of each animation, which is what this class does.
  */
-class WWSUanimations {
+class WWSUanimations extends WWSUevents {
 	constructor() {
+		super();
+
 		// Hidden window detection
 		this.hidden;
 		if (typeof document.hidden !== "undefined") {
@@ -994,17 +1018,32 @@ class WWSUanimations {
 		// Animation queue object: key is animation id, value is function to process the animation.
 		this.animations = {};
 
-		// Process queued animations every second
-		setInterval(() => {
-			if (!document[this.hidden]) {
-				for (var key in this.animations) {
-					if (Object.prototype.hasOwnProperty.call(this.animations, key)) {
-						this.animations[key]();
-						delete this.animations[key];
-					}
-				}
+		this.processed = true;
+		this.processing = false;
+	}
+
+	processAnimations() {
+		let processedAnimation = false;
+		for (let key in this.animations) {
+			if (Object.prototype.hasOwnProperty.call(this.animations, key)) {
+				if (this.animations[key]) this.animations[key]();
+				delete this.animations[key];
+				if (!this.processing) this.emitEvent("updateStatus", [true]);
+				this.processing = true;
+				processedAnimation = true;
+				break;
 			}
-		}, 1000);
+		}
+		if (!processedAnimation) {
+			if (this.processing) this.emitEvent("updateStatus", [false]);
+			this.processing = false;
+			this.processed = true;
+			this.animations = {};
+		} else {
+			window.requestAnimationFrame(() => {
+				this.processAnimations();
+			});
+		}
 	}
 
 	/**
@@ -1015,10 +1054,17 @@ class WWSUanimations {
 	 */
 	add(name, fn) {
 		if (!document[this.hidden]) {
+			delete this.animations[name]; // In case we are running the animation queue; don't accidentally process an older frame
 			fn();
 		} else {
 			// If a function for the same name is already queued, it is overwritten; we only need to process the most recent frame.
 			this.animations[name] = fn;
+			if (this.processed) {
+				this.processed = false;
+				window.requestAnimationFrame(() => {
+					this.processAnimations();
+				});
+			}
 		}
 	}
 }

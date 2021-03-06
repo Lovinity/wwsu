@@ -86,11 +86,27 @@
     <script src="/plugins/moment-timezone/moment-timezone-with-data.js"></script>
     <!-- Jdenticon -->
     <script src="/plugins/jdenticon/jdenticon.min.js"></script>
-    <!--OneSignal-->
-    <script
-      src="https://cdn.onesignal.com/sdks/OneSignalSDK.js"
-      async=""
-    ></script>
+
+    <!-- Handlebars -->
+    <script src="/plugins/handlebars/handlebars.min.js"></script>
+    <!-- Alpaca (custom build) -->
+    <script src="/plugins/alpaca-wwsu/alpaca.js"></script>
+    <link rel="stylesheet" href="/plugins/alpaca-wwsu/alpaca.min.css" />
+
+    <!-- Datatables -->
+    <script src="/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css"
+    />
+    <!-- Datatables Responsive -->
+    <script src="/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="/plugins/datatables-responsive/css/responsive.bootstrap4.min.css"
+    />
 
     <!--iziModal-->
     <link rel="stylesheet" href="/plugins/iziModal/css/iziModal.min.css" />
@@ -201,7 +217,10 @@
     <script src="/plugins/wwsu-announcements/js/wwsu-announcements.js?v=202012181726"></script>
     <script src="/plugins/wwsu-eas/js/wwsu-eas.js?v=202012181726"></script>
     <script src="/plugins/wwsu-discipline/js/wwsu-discipline.js?v=202012181726"></script>
-    <script src="/plugins/wwsu-website/wwsu-website.js?v=202012181726"></script>
+    <script src="/plugins/wwsu-recipients/js/wwsu-recipients-web.js?v=202012181726"></script>
+    <script src="/plugins/wwsu-requests/js/wwsu-requests-web.js?v=202012181726"></script>
+    <script src="/plugins/wwsu-messages/js/wwsu-messages-web.js?v=202012181726"></script>
+    <script src="/plugins/wwsu-songs/js/wwsu-songs.js?v=202012181726"></script>
   </head>
 
   <body
@@ -238,7 +257,7 @@
             src="images/logo_round.png"
             alt="WWSU Logo"
             class="brand-image img-circle bg-white elevation-3"
-            style="opacity: 0.8;"
+            style="opacity: 0.8"
           />
           <span class="brand-text font-weight-light">WWSU 106.9 FM</span>
         </a>
@@ -263,9 +282,7 @@
                   aria-label="See what is currently on the air. Like/report recently played tracks."
                 >
                   <i class="nav-icon fas fa-play-circle" aria-hidden="true"></i>
-                  <p>
-                    Now Playing
-                  </p>
+                  <p>Now Playing</p>
                 </a>
               </li>
 
@@ -278,9 +295,7 @@
                   aria-label="Request a track to be played on the air."
                 >
                   <i class="nav-icon fas fa-file-audio" aria-hidden="true"></i>
-                  <p>
-                    Request a Track
-                  </p>
+                  <p>Request a Track</p>
                 </a>
               </li>
 
@@ -297,9 +312,7 @@
                     class="nav-icon far fa-calendar-alt"
                     aria-hidden="true"
                   ></i>
-                  <p>
-                    Program Schedule
-                  </p>
+                  <p>Program Schedule</p>
                 </a>
               </li>
               <li class="nav-item">
@@ -311,9 +324,7 @@
                   aria-label="Check when the directors will be in for hours up to 7 days in advance."
                 >
                   <i class="nav-icon fas fa-user-clock" aria-hidden="true"></i>
-                  <p>
-                    Office Hours
-                  </p>
+                  <p>Office Hours</p>
                 </a>
               </li>
 
@@ -323,13 +334,39 @@
                   href="#"
                   class="nav-link"
                   id="nav-chat"
+                  title="Send and receive messages with the DJ and other listeners."
+                  aria-label="Send and receive messages with the DJ and other listeners."
+                >
+                  <i
+                    class="nav-icon fas fa-comments chat-messages-icon"
+                    aria-hidden="true"
+                  ></i>
+                  <p>
+                    Chat with DJ
+                    <span class="badge badge-secondary right chat-new-messages"
+                      >0</span
+                    >
+                  </p>
+                </a>
+                <a
+                  href="#"
+                  class="nav-link"
+                  id="nav-call"
+                  title="Call the DJ on the telephone or using your computer microphone."
+                  aria-label="Call the DJ on the telephone or using your computer microphone."
+                >
+                  <i class="nav-icon fas fa-call" aria-hidden="true"></i>
+                  <p>Call the DJ</p>
+                </a>
+                <a
+                  href="#"
+                  class="nav-link"
+                  id="nav-discord"
                   title="Chat with other listeners, DJs, and directors via Discord. Account is not required."
                   aria-label="Chat with other listeners, DJs, and directors via Discord. Account is not required."
                 >
                   <i class="nav-icon fab fa-discord" aria-hidden="true"></i>
-                  <p>
-                    Discord Chat
-                  </p>
+                  <p>Discord</p>
                 </a>
               </li>
             </ul>
@@ -363,7 +400,7 @@
               <div class="card-body box-profile">
                 <div
                   class="text-center nowplaying-icon"
-                  style="font-size: 5rem;"
+                  style="font-size: 5rem"
                 >
                   <i
                     class="profile-user-img img-fluid img-circle fas fa-play-circle bg-primary"
@@ -399,21 +436,7 @@
                 <h2 class="card-title">Recently Played</h2>
               </div>
               <div class="card-body p-0">
-                <table class="table table-striped projects">
-                  <thead>
-                    <tr>
-                      <th style="width: 75%;">
-                        Track Name
-                      </th>
-                      <th style="width: 25%;">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody class="nowplaying-recentlyplayed">
-                    <!-- Recent tracks are populated here-->
-                  </tbody>
-                </table>
+                <div id="section-nowplaying-history"></div>
               </div>
               <!-- /.card-body -->
             </div>
@@ -422,11 +445,53 @@
       </section>
 
       <section id="section-chat">
-        <div
-          class="content-wrapper iframe-mode"
-          data-widget="iframe"
-          id="section-chat-iframe"
-        >
+        <div class="content-wrapper">
+          <div class="content-header">
+            <div class="container-fluid">
+              <div class="row mb-2">
+                <div class="col-12">
+                  <h1 class="m-0 text-dark">Messages / Chat</h1>
+                </div>
+                <!-- /.col -->
+              </div>
+              <!-- /.row -->
+            </div>
+            <!-- /.container-fluid -->
+          </div>
+
+          <div class="content">
+            <div class="card card-success card-outline p-1 m-3">
+              <div class="card-body">
+                <div class="chat-status"></div>
+                <p>
+                  Unread messages are in red. Click a message to mark as read.
+                  Sending a message marks all messages as read.
+                </p>
+                <div
+                  class="chat-messages"
+                  style="height: 50vh; overflow-x: auto"
+                >
+                  <!--Chat messages go here-->
+                </div>
+                <div class="chat-form">
+                  <!--Chat Alpaca form goes here-->
+                </div>
+              </div>
+              <div class="card-footer">
+                <button type="button" class="btn btn-warning chat-mute d-none">
+                  Mute
+                </button>
+                <button type="button" class="btn btn-danger chat-ban d-none">
+                  Ban
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="section-discord">
+        <div class="content-wrapper" role="main">
           <!-- Content Header (Page header) -->
           <div class="content-header">
             <div class="container-fluid">
@@ -452,33 +517,13 @@
                 website.
               </p>
             </div>
-            <div
-              class="nav navbar navbar-expand-lg navbar-white navbar-light border-bottom p-0"
-            >
-              <a class="nav-link bg-danger" href="#" data-widget="iframe-close"
-                >Close</a
-              >
-              <a
-                class="nav-link bg-primary"
-                href="https://discord.io/wwsu1069"
-                target="_blank"
-                >Join our Discord Server</a
-              >
-              <ul class="navbar-nav" role="tablist"></ul>
+            <div class="embed-responsive embed-responsive-16by9">
+              <iframe
+                class="embed-responsive-item"
+                id="section-discord-iframe"
+                src=""
+              ></iframe>
             </div>
-            <div class="tab-content">
-              <div class="tab-empty">
-                <h2 class="display-4">No tab selected!</h2>
-              </div>
-              <div class="tab-loading">
-                <div>
-                  <h2 class="display-4">
-                    Tab is loading <i class="fa fa-sync fa-spin"></i>
-                  </h2>
-                </div>
-              </div>
-            </div>
-
           </div>
         </div>
       </section>
@@ -511,9 +556,7 @@
             <!-- Schedule Date Selector-->
             <div class="card p-1 m-3">
               <div class="card-header">
-                <p class="card-title h3">
-                  Choose a Date
-                </p>
+                <p class="card-title h3">Choose a Date</p>
               </div>
               <!-- /.card-header -->
               <div class="card-body">
@@ -551,7 +594,7 @@
               class="modal fade"
               id="modal-eventinfo"
               aria-hidden="true"
-              style="display: none;"
+              style="display: none"
             >
               <div class="modal-dialog">
                 <div class="modal-content">
@@ -600,7 +643,7 @@
                       class="btn btn-danger"
                       title="Do not receive any push notifications for this event anymore."
                       id="modal-eventinfo-unsubscribe"
-                      style="display: none;"
+                      style="display: none"
                     >
                       Unsubscribe All Times
                     </button>
@@ -706,28 +749,12 @@
                     </div>
                   </div>
                 </div>
-
-                <table class="table table-striped">
-                  <thead>
-                    <tr>
-                      <th>Artist - Title</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody id="request-table"></tbody>
-                </table>
-                <button
-                  type="button"
-                  class="btn btn-outline-danger disabled"
-                  id="request-more-none"
-                >
-                  No More Tracks
-                </button>
+                <div id="request-table"></div>
                 <button
                   type="button"
                   class="btn btn-primary"
                   id="request-more"
-                  style="display: none;"
+                  style="display: none"
                   tabindex="0"
                 >
                   Load More Tracks
@@ -763,89 +790,12 @@
                 </div>
               </div>
             </div>
-
-            <div
-              class="modal fade"
-              id="modal-trackinfo"
-              aria-hidden="true"
-              style="display: none;"
-            >
-              <div class="modal-dialog">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <p class="modal-title h1">Track Information</p>
-                    <button
-                      type="button"
-                      class="close"
-                      data-dismiss="modal"
-                      aria-label="Close"
-                    >
-                      <span aria-hidden="true">×</span>
-                    </button>
-                  </div>
-                  <div class="modal-body">
-                    <table class="table table-striped">
-                      <thead>
-                        <tr>
-                          <th scope="col"><strong>Name</strong></th>
-                          <th scope="col"><strong>Value</strong></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td>Track ID</td>
-                          <td id="track-info-ID"></td>
-                        </tr>
-                        <tr>
-                          <td>Status</td>
-                          <td id="track-info-status"></td>
-                        </tr>
-                        <tr>
-                          <td>Artist</td>
-                          <td id="track-info-artist"></td>
-                        </tr>
-                        <tr>
-                          <td>Title</td>
-                          <td id="track-info-title"></td>
-                        </tr>
-                        <tr>
-                          <td>Album</td>
-                          <td id="track-info-album"></td>
-                        </tr>
-                        <tr>
-                          <td>Genre</td>
-                          <td id="track-info-genre"></td>
-                        </tr>
-                        <tr>
-                          <td>Duration</td>
-                          <td id="track-info-duration"></td>
-                        </tr>
-                        <tr>
-                          <td>Date Last Played</td>
-                          <td id="track-info-lastplayed"></td>
-                        </tr>
-                        <tr>
-                          <td>Track Limits</td>
-                          <td id="track-info-limits"></td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                  <div
-                    class="modal-footer justify-content-between"
-                    id="track-info-request"
-                  ></div>
-                </div>
-                <!-- /.modal-content -->
-              </div>
-              <!-- /.modal-dialog -->
-            </div>
           </div>
         </div>
       </section>
 
       <!-- Add padding to the end of the body because of the sticky footer-->
-      <div style="height: 85px;"></div>
+      <div style="height: 85px"></div>
       <!-- /.content-wrapper -->
 
       <!-- Main Footer -->
@@ -868,6 +818,9 @@
         </div>
       </footer>
     </div>
+
+    <!-- Load website script last so the DOM is ready immediately -->
+    <script src="/plugins/wwsu-website/wwsu-website.js?v=202012181726"></script>
 
     <%- body %>
   </body>

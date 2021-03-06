@@ -1,27 +1,22 @@
+'use strict';
+
 /**
  * This class manages raw API queries to WWSU.
  * @requires $ jQuery
  * @requires $.alpaca Alpaca forms custom WWSU build
  */
+
+ // REQUIRES these WWSUmodules (via WWSUreq): noReq, hostReq, djReq, directorReq, adminDirectorReq
 class WWSUapi {
 
     /**
      * Construct the class.
      * 
-     * @param {WWSUreq} noReq A request with no authorization
-     * @param {WWSUreq} hostReq A request with host authorization
-     * @param {WWSUreq} djReq A request with DJ authorization
-     * @param {WWSUreq} directorReq A request with director authorization
-     * @param {WWSUreq} adminDirectorReq A request with admin director authorization
+	 * @param {WWSUmodules} manager The modules class which initiated this module
+	 * @param {object} options Options to be passed to this module
      */
-    constructor(noReq, hostReq, djReq, directorReq, adminDirectorReq) {
-        this.requests = {
-            no: noReq,
-            host: hostReq,
-            dj: djReq,
-            director: directorReq,
-            adminDirector: adminDirectorReq
-        };
+    constructor(manager, options) {
+        this.manager = manager;
 
         this.dom; // The DOM string of the API form will be stored here when initialized.
     }
@@ -36,7 +31,7 @@ class WWSUapi {
      */
     query (path, req, data, cb) {
         try {
-            this.requests[ req ].request({ dom: this.dom, method: 'post', url: path, data }, (response) => {
+            this.manager.get(req).request({ dom: this.dom, method: 'post', url: path, data }, (response) => {
                 if (typeof cb === 'function') {
                     cb(response);
                 }
@@ -73,7 +68,7 @@ class WWSUapi {
                     "req": {
                         "type": "string",
                         "title": "Authorization to use",
-                        "enum": [ 'Select One', 'no', 'host', 'dj', 'director', 'adminDirector' ],
+                        "enum": ['noReq', 'hostReq', 'djReq', 'directorReq', 'adminDirectorReq' ],
                         "required": true
                     },
                     "data": {
@@ -108,7 +103,7 @@ class WWSUapi {
                                     form.focus();
                                     return;
                                 }
-                                var value = form.getValue();
+                                let value = form.getValue();
                                 this.query(value.path, value.req, value.data, (response) => {
                                     form.setValue({ path: value.path, req: value.req, data: value.data, response: JSON.stringify(response) })
                                 });

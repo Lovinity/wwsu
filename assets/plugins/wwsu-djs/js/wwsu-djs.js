@@ -1,19 +1,21 @@
+"use strict";
+
 /* global WWSUdb */
 
 // This class manages DJs from WWSU.
+
+// REQUIRES these WWSUmodules: noReq (WWSUreq), directorReq (WWSUreq), hostReq (WWSUreq), WWSUlogs, WWSUMeta, WWSUutil, WWSUanimations
 class WWSUdjs extends WWSUdb {
 	/**
 	 * Construct the class
 	 *
-	 * @param {sails.io} socket Socket connection to WWSU
-	 * @param {WWSUreq} noReq Request with no authorization
-	 * @param {WWSUreq} directorReq Request with director authorization
-	 * @param {WWSUreq} hostReq Request with host authorization
-	 * @param {WWSUlogs} logs Reference to the initialized WWSUlogs class
-	 * @param {WWSUmeta} meta The WWSUmeta class
+	 * @param {WWSUmodules} manager The modules class which initiated this module
+	 * @param {object} options Options to be passed to this module
 	 */
-	constructor(socket, noReq, directorReq, hostReq, logs, meta) {
+	constructor(manager, options) {
 		super(); // Create the db
+
+		this.manager = manager;
 
 		this.endpoints = {
 			get: "/djs/get",
@@ -24,16 +26,8 @@ class WWSUdjs extends WWSUdb {
 		this.data = {
 			get: {},
 		};
-		this.requests = {
-			no: noReq,
-			director: directorReq,
-			host: hostReq,
-		};
 
-		this.logs = logs;
-		this.meta = meta;
-
-		this.assignSocketEvent("djs", socket);
+		this.assignSocketEvent("djs", this.manager.socket);
 
 		this.table;
 
@@ -60,15 +54,15 @@ class WWSUdjs extends WWSUdb {
 			overlayClose: false,
 			zindex: 1110,
 		});
-
-		this.animations = new WWSUanimations();
-
-		this.util = new WWSUutil();
 	}
 
 	// Initialize connection. Call this on socket connect event.
 	init() {
-		this.replaceData(this.requests.no, this.endpoints.get, this.data.get);
+		this.replaceData(
+			this.manager.get("noReq"),
+			this.endpoints.get,
+			this.data.get
+		);
 	}
 
 	/**
@@ -77,19 +71,23 @@ class WWSUdjs extends WWSUdb {
 	 */
 	showDJs() {
 		this.djsModal.body = `<p class="wwsumeta-timezone-display">Times are shown in the timezone ${
-			this.meta ? this.meta.meta.timezone : moment.tz.guess()
+			this.manager.get("WWSUMeta")
+				? this.manager.get("WWSUMeta").meta.timezone
+				: moment.tz.guess()
 		}</p><table id="modal-${
 			this.djsModal.id
 		}-table" class="table table-striped" style="min-width: 100%;"></table>`;
 		// Generate new DJ button
 		this.djsModal.footer = `<button type="button" class="btn btn-outline-success" id="modal-${this.djsModal.id}-new" data-dismiss="modal">New DJ</button>`;
 
-		this.util.waitForElement(`#modal-${this.djsModal.id}-new`, () => {
-			$(`#modal-${this.djsModal.id}-new`).unbind("click");
-			$(`#modal-${this.djsModal.id}-new`).click(() => {
-				this.showDJForm();
+		this.this.manager
+			.get("WWSUutil")
+			.waitForElement(`#modal-${this.djsModal.id}-new`, () => {
+				$(`#modal-${this.djsModal.id}-new`).unbind("click");
+				$(`#modal-${this.djsModal.id}-new`).click(() => {
+					this.showDJForm();
+				});
 			});
-		});
 
 		this.djsModal.iziModal("open");
 
@@ -98,9 +96,9 @@ class WWSUdjs extends WWSUdb {
 			css: { border: "3px solid #a00" },
 			timeout: 30000,
 			onBlock: () => {
-				var table = $(`#modal-${this.djsModal.id}-table`).DataTable({
+				let table = $(`#modal-${this.djsModal.id}-table`).DataTable({
 					scrollCollapse: true,
-					paging: false,
+					paging: true,
 					data: [],
 					columns: [
 						{ title: "DJ Name" },
@@ -108,7 +106,7 @@ class WWSUdjs extends WWSUdb {
 						{ title: "Last Seen" },
 					],
 					order: [[0, "asc"]],
-					pageLength: 10,
+					pageLength: 100,
 				});
 				this.find().forEach((dj) => {
 					table.rows.add([
@@ -118,7 +116,9 @@ class WWSUdjs extends WWSUdb {
 							moment
 								.tz(
 									dj.lastSeen,
-									this.meta ? this.meta.meta.timezone : moment.tz.guess()
+									this.manager.get("WWSUMeta")
+										? this.manager.get("WWSUMeta").meta.timezone
+										: moment.tz.guess()
 								)
 								.format("LLL"),
 						],
@@ -141,7 +141,7 @@ class WWSUdjs extends WWSUdb {
 
 		this.newDjModal.iziModal("open");
 
-		var _djs = this.find().map((dj) => dj.name);
+		let _djs = this.find().map((dj) => dj.name);
 
 		$(this.newDjModal.body).alpaca({
 			schema: {
@@ -185,7 +185,7 @@ class WWSUdjs extends WWSUdb {
 						helper:
 							"This is the name that appears publicly on shows, the website, etc. You may not use the same DJ name twice.",
 						validator: function (callback) {
-							var value = this.getValue();
+							let value = this.getValue();
 							if (
 								(!data || data.name !== value) &&
 								_djs.indexOf(value) !== -1
@@ -232,7 +232,7 @@ class WWSUdjs extends WWSUdb {
 									form.focus();
 									return;
 								}
-								var value = form.getValue();
+								let value = form.getValue();
 								if (data) {
 									this.editDJ(value, (success) => {
 										if (success) {
@@ -265,7 +265,7 @@ class WWSUdjs extends WWSUdb {
 	 */
 	addDJ(data, cb) {
 		try {
-			this.requests.director.request(
+			this.manager.get("directorReq").request(
 				{
 					dom: `#modal-${this.newDjModal.id}`,
 					method: "post",
@@ -317,7 +317,7 @@ class WWSUdjs extends WWSUdb {
 	 */
 	editDJ(data, cb) {
 		try {
-			this.requests.director.request(
+			this.manager.get("directorReq").request(
 				{
 					dom: `#modal-${this.newDjModal.id}`,
 					method: "post",
@@ -370,7 +370,7 @@ class WWSUdjs extends WWSUdb {
 	 */
 	removeDJ(data, cb) {
 		try {
-			this.requests.director.request(
+			this.manager.get("directorReq").request(
 				{
 					dom: `#modal-${this.newDjModal.id}`,
 					method: "post",
@@ -418,24 +418,24 @@ class WWSUdjs extends WWSUdb {
 
 	/**
 	 * Initialize the table for managing DJs.
-	 * 
+	 *
 	 * @param {string} table The DOM query string for the div container to place the table.
 	 */
 	initTable(table) {
-		this.animations.add("djs-init-table", () => {
-			var util = new WWSUutil();
-
+		this.manager.get("WWSUanimations").add("djs-init-table", () => {
 			// Init html
 			$(table).html(
 				`<p class="wwsumeta-timezone-display">Times are shown in the timezone ${
-					this.meta ? this.meta.meta.timezone : moment.tz.guess()
+					this.manager.get("WWSUMeta")
+						? this.manager.get("WWSUMeta").meta.timezone
+						: moment.tz.guess()
 				}.</p><p><button type="button" class="btn btn-block btn-success btn-dj-new">New DJ</button></p><table id="section-djs-table" class="table table-striped display responsive" style="width: 100%;"></table>`
 			);
 
-			util.waitForElement(`#section-djs-table`, () => {
+			this.manager.get("WWSUutil").waitForElement(`#section-djs-table`, () => {
 				// Generate table
 				this.table = $(`#section-djs-table`).DataTable({
-					paging: false,
+					paging: true,
 					data: [],
 					columns: [
 						{ title: "DJ Handle" },
@@ -449,7 +449,8 @@ class WWSUdjs extends WWSUdb {
 						[0, "asc"],
 						[1, "asc"],
 					],
-					pageLength: 10,
+					pageLength: 100,
+					buttons: ["copy", "csv", "excel", "pdf", "print", "colvis"],
 					drawCallback: () => {
 						// Action button click events
 						$(".btn-dj-logs").unbind("click");
@@ -458,32 +459,31 @@ class WWSUdjs extends WWSUdb {
 						$(".btn-dj-delete").unbind("click");
 
 						$(".btn-dj-analytics").click((e) => {
-							var dj = this.find().find(
+							let dj = this.find().find(
 								(dj) => dj.ID === parseInt($(e.currentTarget).data("id"))
 							);
 							this.showDJAnalytics(dj);
 						});
 
 						$(".btn-dj-logs").click((e) => {
-							var dj = this.find().find(
+							let dj = this.find().find(
 								(dj) => dj.ID === parseInt($(e.currentTarget).data("id"))
 							);
 							this.showDJLogs(dj);
 						});
 
 						$(".btn-dj-edit").click((e) => {
-							var dj = this.find().find(
+							let dj = this.find().find(
 								(dj) => dj.ID === parseInt($(e.currentTarget).data("id"))
 							);
 							this.showDJForm(dj);
 						});
 
 						$(".btn-dj-delete").click((e) => {
-							var util = new WWSUutil();
-							var dj = this.find().find(
+							let dj = this.find().find(
 								(dj) => dj.ID === parseInt($(e.currentTarget).data("id"))
 							);
-							util.confirmDialog(
+							this.manager.get("WWSUutil").confirmDialog(
 								`Are you sure you want to <strong>permanently</strong> remove the DJ "${dj.name}"?
                             <ul>
                             <li><strong>Do NOT permanently remove a DJ until you no longer need their analytics, and they are no longer with WWSU and will not be returning.</strong></li>
@@ -501,6 +501,11 @@ class WWSUdjs extends WWSUdb {
 					},
 				});
 
+				this.table
+					.buttons()
+					.container()
+					.appendTo(`#section-djs-table_wrapper .col-md-6:eq(0)`);
+
 				// Add click event for new DJ button
 				$(".btn-dj-new").unbind("click");
 				$(".btn-dj-new").click(() => {
@@ -517,22 +522,34 @@ class WWSUdjs extends WWSUdb {
 	 * Update the DJ management table if it exists
 	 */
 	updateTable() {
-		this.animations.add("djs-update-table", () => {
+		this.manager.get("WWSUanimations").add("djs-update-table", () => {
 			if (this.table) {
 				this.table.clear();
 				this.find().forEach((dj) => {
-					var icon = `secondary`;
+					let icon = `secondary`;
 					if (
 						!dj.lastSeen ||
 						moment(dj.lastSeen)
 							.add(30, "days")
-							.isBefore(moment(this.meta ? this.meta.meta.time : undefined))
+							.isBefore(
+								moment(
+									this.manager.get("WWSUMeta")
+										? this.manager.get("WWSUMeta").meta.time
+										: undefined
+								)
+							)
 					) {
 						icon = `danger`;
 					} else if (
 						moment(dj.lastSeen)
 							.add(7, "days")
-							.isBefore(moment(this.meta ? this.meta.meta.time : undefined))
+							.isBefore(
+								moment(
+									this.manager.get("WWSUMeta")
+										? this.manager.get("WWSUMeta").meta.time
+										: undefined
+								)
+							)
 					) {
 						icon = `warning`;
 					} else {
@@ -546,7 +563,9 @@ class WWSUdjs extends WWSUdb {
 							? moment
 									.tz(
 										dj.lastSeen,
-										this.meta ? this.meta.meta.timezone : moment.tz.guess()
+										this.manager.get("WWSUMeta")
+											? this.manager.get("WWSUMeta").meta.timezone
+											: moment.tz.guess()
 									)
 									.format("LLLL")
 							: "Unknown / Long Ago",
@@ -571,21 +590,27 @@ class WWSUdjs extends WWSUdb {
 
 		this.djInfoModal.iziModal("open");
 
-		this.logs.getShowtime(
+		this.manager.get("WWSUlogs").getShowtime(
 			`#modal-${this.djInfoModal.id}`,
 			{
 				djs: [dj.ID],
-				start: moment(this.meta ? this.meta.meta.time : undefined)
+				start: moment(
+					this.manager.get("WWSUMeta")
+						? this.manager.get("WWSUMeta").meta.time
+						: undefined
+				)
 					.subtract(1, "years")
 					.toISOString(true),
-				end: moment(this.meta ? this.meta.meta.time : undefined).toISOString(
-					true
-				),
+				end: moment(
+					this.manager.get("WWSUMeta")
+						? this.manager.get("WWSUMeta").meta.time
+						: undefined
+				).toISOString(true),
 			},
 			(analytics) => {
 				if (!analytics) return;
-				var analytic = analytics[0][dj.ID];
-				var html = `<div class="card card-widget widget-user-2 p-1">
+				let analytic = analytics[0][dj.ID];
+				let html = `<div class="card card-widget widget-user-2 p-1">
             <div class="widget-user-header bg-info">
               <h3 class="widget-user-username">DJ Analytics</h3>
               <h5 class="widget-user-desc"><span class="badge bg-success">Lifetime</span> <span class="badge bg-primary">365 days</span> <span class="badge bg-warning">Semester</span> <span class="badge bg-danger">Week</span></h5>
@@ -817,10 +842,10 @@ class WWSUdjs extends WWSUdb {
             </div>
           </div>`;
 
-				for (var show in analytics[1]) {
+				for (let show in analytics[1]) {
 					if (show > 0) {
 						if (Object.prototype.hasOwnProperty.call(analytics[1], show)) {
-							var analytic = analytics[1][show];
+							let analytic = analytics[1][show];
 							html += `<div class="card card-widget widget-user-2 p-1">
             <div class="widget-user-header bg-secondary">
               <h3 class="widget-user-username">Show Analytics (${
@@ -1068,273 +1093,284 @@ class WWSUdjs extends WWSUdb {
 	 * @param {object} dj The DJ record to view attendance records
 	 */
 	showDJLogs(dj) {
-		var util = new WWSUutil();
-
 		this.djInfoModal.title = `Attendance Logs for ${dj.name} (${
 			dj.realName || `Unknown Person`
 		})`;
 		this.djInfoModal.body = `<p class="wwsumeta-timezone-display">Times are shown in the timezone ${
-			this.meta ? this.meta.meta.timezone : moment.tz.guess()
+			this.manager.get("WWSUMeta")
+				? this.manager.get("WWSUMeta").meta.timezone
+				: moment.tz.guess()
 		}.</p><table id="section-djs-table-logs" class="table table-striped display responsive" style="width: 100%;"></table>`;
 
 		this.djInfoModal.iziModal("open");
 
-		util.waitForElement(`#section-djs-table-logs`, () => {
-			this.logs.getAttendance(
-				`#modal-${this.djInfoModal.id}`,
-				{ dj: dj.ID },
-				(logs) => {
-					$(`#section-djs-table-logs`).DataTable({
-						paging: true,
-						data:
-							!logs || typeof logs.map !== "function"
-								? []
-								: logs.map((record) => {
-										var theClass = "secondary";
-										if (
-											record.event.toLowerCase().startsWith("show: ") ||
-											record.event.toLowerCase().startsWith("prerecord: ")
-										) {
-											theClass = "danger";
-										} else if (
-											record.event.toLowerCase().startsWith("sports: ")
-										) {
-											theClass = "success";
-										} else if (
-											record.event.toLowerCase().startsWith("remote: ")
-										) {
-											theClass = "purple";
-										} else if (
-											record.event.toLowerCase().startsWith("genre: ") ||
-											record.event.toLowerCase().startsWith("playlist: ")
-										) {
-											theClass = "primary";
-										}
-										if (
-											record.actualStart !== null &&
-											record.actualEnd !== null &&
-											record.happened === 1
-										) {
-											return [
-												record.ID,
-												moment
-													.tz(
-														record.actualStart,
-														this.meta
-															? this.meta.meta.timezone
-															: moment.tz.guess()
-													)
-													.format("L"),
-												`<span class="text-${theClass}"><i class="fas fa-dot-circle"></i></span>`,
-												record.event,
-												moment
-													.tz(
-														record.actualStart,
-														this.meta
-															? this.meta.meta.timezone
-															: moment.tz.guess()
-													)
-													.format("h:mm A"),
-												moment
-													.tz(
-														record.actualEnd,
-														this.meta
-															? this.meta.meta.timezone
-															: moment.tz.guess()
-													)
-													.format("h:mm A"),
-												`<button class="btn btn-sm btn-primary btn-logs-view" data-id="${record.ID}" title="View this log"><i class="fas fa-eye"></i></button>`,
-											];
-										} else if (
-											record.actualStart !== null &&
-											record.actualEnd === null &&
-											record.happened === 1
-										) {
-											return [
-												record.ID,
-												moment
-													.tz(
-														record.actualStart,
-														this.meta
-															? this.meta.meta.timezone
-															: moment.tz.guess()
-													)
-													.format("L"),
-												`<span class="text-${theClass}"><i class="fas fa-dot-circle"></i></span>`,
-												record.event,
-												moment
-													.tz(
-														record.actualStart,
-														this.meta
-															? this.meta.meta.timezone
-															: moment.tz.guess()
-													)
-													.format("h:mm A"),
-												`ONGOING`,
-												`<button class="btn btn-sm btn-primary btn-logs-view" data-id="${record.ID}" title="View this log"><i class="fas fa-eye"></i></button>`,
-											];
-										} else if (
-											record.actualStart === null &&
-											record.actualEnd === null &&
-											record.happened === -1
-										) {
-											return [
-												record.ID,
-												moment
-													.tz(
-														record.scheduledStart,
-														this.meta
-															? this.meta.meta.timezone
-															: moment.tz.guess()
-													)
-													.format("L"),
-												`<span class="text-${theClass}"><i class="fas fa-dot-circle"></i></span>`,
-												record.event,
-												`CANCELED (${moment
-													.tz(
-														record.scheduledStart,
-														this.meta
-															? this.meta.meta.timezone
-															: moment.tz.guess()
-													)
-													.format("h:mm A")})`,
-												`CANCELED (${moment
-													.tz(
-														record.scheduledEnd,
-														this.meta
-															? this.meta.meta.timezone
-															: moment.tz.guess()
-													)
-													.format("h:mm A")})`,
-												``,
-											];
-										} else if (
-											record.actualStart === null &&
-											record.actualEnd === null &&
-											record.happened === 0
-										) {
-											return [
-												record.ID,
-												moment
-													.tz(
-														record.scheduledStart,
-														this.meta
-															? this.meta.meta.timezone
-															: moment.tz.guess()
-													)
-													.format("L"),
-												`<span class="text-${theClass}"><i class="fas fa-dot-circle"></i></span>`,
-												record.event,
-												`ABSENT (${moment
-													.tz(
-														record.scheduledStart,
-														this.meta
-															? this.meta.meta.timezone
-															: moment.tz.guess()
-													)
-													.format("h:mm A")})`,
-												`ABSENT (${moment
-													.tz(
-														record.scheduledEnd,
-														this.meta
-															? this.meta.meta.timezone
-															: moment.tz.guess()
-													)
-													.format("h:mm A")})`,
-												``,
-											];
-										} else if (
-											record.actualStart !== null &&
-											record.actualEnd !== null
-										) {
-											return [
-												record.ID,
-												moment
-													.tz(
-														record.actualStart,
-														this.meta
-															? this.meta.meta.timezone
-															: moment.tz.guess()
-													)
-													.format("L"),
-												`<span class="text-${theClass}"><i class="fas fa-dot-circle"></i></span>`,
-												record.event,
-												moment
-													.tz(
-														record.actualStart,
-														this.meta
-															? this.meta.meta.timezone
-															: moment.tz.guess()
-													)
-													.format("h:mm A"),
-												record.actualEnd !== null
-													? moment
+		this.manager
+			.get("WWSUutil")
+			.waitForElement(`#section-djs-table-logs`, () => {
+				this.manager
+					.get("WWSUlogs")
+					.getAttendance(
+						`#modal-${this.djInfoModal.id}`,
+						{ dj: dj.ID },
+						(logs) => {
+							let table = $(`#section-djs-table-logs`).DataTable({
+								paging: true,
+								data:
+									!logs || typeof logs.map !== "function"
+										? []
+										: logs.map((record) => {
+												let theClass = "secondary";
+												if (
+													record.event.toLowerCase().startsWith("show: ") ||
+													record.event.toLowerCase().startsWith("prerecord: ")
+												) {
+													theClass = "danger";
+												} else if (
+													record.event.toLowerCase().startsWith("sports: ")
+												) {
+													theClass = "success";
+												} else if (
+													record.event.toLowerCase().startsWith("remote: ")
+												) {
+													theClass = "purple";
+												} else if (
+													record.event.toLowerCase().startsWith("genre: ") ||
+													record.event.toLowerCase().startsWith("playlist: ")
+												) {
+													theClass = "primary";
+												}
+												if (
+													record.actualStart !== null &&
+													record.actualEnd !== null &&
+													record.happened === 1
+												) {
+													return [
+														record.ID,
+														moment
 															.tz(
-																record.actualEnd,
-																this.meta
-																	? this.meta.meta.timezone
+																record.actualStart,
+																this.manager.get("WWSUMeta")
+																	? this.manager.get("WWSUMeta").meta.timezone
 																	: moment.tz.guess()
 															)
-															.format("h:mm A")
-													: `ONGOING`,
-												`<button class="btn btn-sm btn-primary btn-logs-view" data-id="${record.ID}" title="View this log"><i class="fas fa-eye"></i></button>`,
-											];
-										} else {
-											return [
-												record.ID,
-												moment
-													.tz(
-														record.scheduledStart,
-														this.meta
-															? this.meta.meta.timezone
-															: moment.tz.guess()
-													)
-													.format("L"),
-												`<span class="text-${theClass}"><i class="fas fa-dot-circle"></i></span>`,
-												record.event,
-												`SCHEDULED (${moment
-													.tz(
-														record.scheduledStart,
-														this.meta
-															? this.meta.meta.timezone
-															: moment.tz.guess()
-													)
-													.format("h:mm A")})`,
-												`SCHEDULED (${moment
-													.tz(
-														record.scheduledEnd,
-														this.meta
-															? this.meta.meta.timezone
-															: moment.tz.guess()
-													)
-													.format("h:mm A")})`,
-												``,
-											];
-										}
-								  }),
-						columns: [
-							{ title: "ID" },
-							{ title: "Date" },
-							{ title: "Icon" },
-							{ title: "Event" },
-							{ title: "Start" },
-							{ title: "End" },
-							{ title: "Actions" },
-						],
-						columnDefs: [{ responsivePriority: 1, targets: 6 }],
-						order: [[0, "desc"]],
-						pageLength: 25,
-						drawCallback: () => {
-							// Add log buttons click event
-							$(".btn-logs-view").unbind("click");
-							$(".btn-logs-view").click((e) => {
-								var id = parseInt($(e.currentTarget).data("id"));
-								this.logs.viewLog(id);
+															.format("L"),
+														`<span class="text-${theClass}"><i class="fas fa-dot-circle"></i></span>`,
+														record.event,
+														moment
+															.tz(
+																record.actualStart,
+																this.manager.get("WWSUMeta")
+																	? this.manager.get("WWSUMeta").meta.timezone
+																	: moment.tz.guess()
+															)
+															.format("h:mm A"),
+														moment
+															.tz(
+																record.actualEnd,
+																this.manager.get("WWSUMeta")
+																	? this.manager.get("WWSUMeta").meta.timezone
+																	: moment.tz.guess()
+															)
+															.format("h:mm A"),
+														`<button class="btn btn-sm btn-primary btn-logs-view" data-id="${record.ID}" title="View this log"><i class="fas fa-eye"></i></button>`,
+													];
+												} else if (
+													record.actualStart !== null &&
+													record.actualEnd === null &&
+													record.happened === 1
+												) {
+													return [
+														record.ID,
+														moment
+															.tz(
+																record.actualStart,
+																this.manager.get("WWSUMeta")
+																	? this.manager.get("WWSUMeta").meta.timezone
+																	: moment.tz.guess()
+															)
+															.format("L"),
+														`<span class="text-${theClass}"><i class="fas fa-dot-circle"></i></span>`,
+														record.event,
+														moment
+															.tz(
+																record.actualStart,
+																this.manager.get("WWSUMeta")
+																	? this.manager.get("WWSUMeta").meta.timezone
+																	: moment.tz.guess()
+															)
+															.format("h:mm A"),
+														`ONGOING`,
+														`<button class="btn btn-sm btn-primary btn-logs-view" data-id="${record.ID}" title="View this log"><i class="fas fa-eye"></i></button>`,
+													];
+												} else if (
+													record.actualStart === null &&
+													record.actualEnd === null &&
+													record.happened === -1
+												) {
+													return [
+														record.ID,
+														moment
+															.tz(
+																record.scheduledStart,
+																this.manager.get("WWSUMeta")
+																	? this.manager.get("WWSUMeta").meta.timezone
+																	: moment.tz.guess()
+															)
+															.format("L"),
+														`<span class="text-${theClass}"><i class="fas fa-dot-circle"></i></span>`,
+														record.event,
+														`CANCELED (${moment
+															.tz(
+																record.scheduledStart,
+																this.manager.get("WWSUMeta")
+																	? this.manager.get("WWSUMeta").meta.timezone
+																	: moment.tz.guess()
+															)
+															.format("h:mm A")})`,
+														`CANCELED (${moment
+															.tz(
+																record.scheduledEnd,
+																this.manager.get("WWSUMeta")
+																	? this.manager.get("WWSUMeta").meta.timezone
+																	: moment.tz.guess()
+															)
+															.format("h:mm A")})`,
+														``,
+													];
+												} else if (
+													record.actualStart === null &&
+													record.actualEnd === null &&
+													record.happened === 0
+												) {
+													return [
+														record.ID,
+														moment
+															.tz(
+																record.scheduledStart,
+																this.manager.get("WWSUMeta")
+																	? this.manager.get("WWSUMeta").meta.timezone
+																	: moment.tz.guess()
+															)
+															.format("L"),
+														`<span class="text-${theClass}"><i class="fas fa-dot-circle"></i></span>`,
+														record.event,
+														`ABSENT (${moment
+															.tz(
+																record.scheduledStart,
+																this.manager.get("WWSUMeta")
+																	? this.manager.get("WWSUMeta").meta.timezone
+																	: moment.tz.guess()
+															)
+															.format("h:mm A")})`,
+														`ABSENT (${moment
+															.tz(
+																record.scheduledEnd,
+																this.manager.get("WWSUMeta")
+																	? this.manager.get("WWSUMeta").meta.timezone
+																	: moment.tz.guess()
+															)
+															.format("h:mm A")})`,
+														``,
+													];
+												} else if (
+													record.actualStart !== null &&
+													record.actualEnd !== null
+												) {
+													return [
+														record.ID,
+														moment
+															.tz(
+																record.actualStart,
+																this.manager.get("WWSUMeta")
+																	? this.manager.get("WWSUMeta").meta.timezone
+																	: moment.tz.guess()
+															)
+															.format("L"),
+														`<span class="text-${theClass}"><i class="fas fa-dot-circle"></i></span>`,
+														record.event,
+														moment
+															.tz(
+																record.actualStart,
+																this.manager.get("WWSUMeta")
+																	? this.manager.get("WWSUMeta").meta.timezone
+																	: moment.tz.guess()
+															)
+															.format("h:mm A"),
+														record.actualEnd !== null
+															? moment
+																	.tz(
+																		record.actualEnd,
+																		this.manager.get("WWSUMeta")
+																			? this.manager.get("WWSUMeta").meta
+																					.timezone
+																			: moment.tz.guess()
+																	)
+																	.format("h:mm A")
+															: `ONGOING`,
+														`<button class="btn btn-sm btn-primary btn-logs-view" data-id="${record.ID}" title="View this log"><i class="fas fa-eye"></i></button>`,
+													];
+												} else {
+													return [
+														record.ID,
+														moment
+															.tz(
+																record.scheduledStart,
+																this.manager.get("WWSUMeta")
+																	? this.manager.get("WWSUMeta").meta.timezone
+																	: moment.tz.guess()
+															)
+															.format("L"),
+														`<span class="text-${theClass}"><i class="fas fa-dot-circle"></i></span>`,
+														record.event,
+														`SCHEDULED (${moment
+															.tz(
+																record.scheduledStart,
+																this.manager.get("WWSUMeta")
+																	? this.manager.get("WWSUMeta").meta.timezone
+																	: moment.tz.guess()
+															)
+															.format("h:mm A")})`,
+														`SCHEDULED (${moment
+															.tz(
+																record.scheduledEnd,
+																this.manager.get("WWSUMeta")
+																	? this.manager.get("WWSUMeta").meta.timezone
+																	: moment.tz.guess()
+															)
+															.format("h:mm A")})`,
+														``,
+													];
+												}
+										  }),
+								columns: [
+									{ title: "ID" },
+									{ title: "Date" },
+									{ title: "Icon" },
+									{ title: "Event" },
+									{ title: "Start" },
+									{ title: "End" },
+									{ title: "Actions" },
+								],
+								columnDefs: [{ responsivePriority: 1, targets: 6 }],
+								order: [[0, "desc"]],
+								pageLength: 50,
+								buttons: ["copy", "csv", "excel", "pdf", "print", "colvis"],
+								drawCallback: () => {
+									// Add log buttons click event
+									$(".btn-logs-view").unbind("click");
+									$(".btn-logs-view").click((e) => {
+										let id = parseInt($(e.currentTarget).data("id"));
+										this.manager.get("WWSUlogs").viewLog(id);
+									});
+								},
 							});
-						},
-					});
-				}
-			);
-		});
+
+							table
+								.buttons()
+								.container()
+								.appendTo(`#section-djs-table-logs_wrapper .col-md-6:eq(0)`);
+						}
+					);
+			});
 	}
 }

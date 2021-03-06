@@ -1,18 +1,20 @@
+"use strict";
+
 // This class manages director timesheets from WWSU.
 // NOTE: unlike most other WWSU models, this does not use traditional WWSUdb extends. Otherwise, memory can be quickly eaten up by timesheets.
+
+// REQUIRES these WWSUmodules: noReq (WWSUreq), directorReq (WWSUreq), adminDirectorReq (WWSUreq), WWSUMeta, WWSUhosts, WWSUutil, WWSUanimations
 class WWSUtimesheet extends WWSUevents {
 	/**
 	 * Construct the class.
 	 *
-	 * @param {sails.io} socket WWSU socket connection
-	 * @param {WWSUreq} noReq Request without authorization
-	 * @param {WWSUreq} directorReq Request with director authorization
-	 * @param {WWSUreq} adminDirectorReq Request with admin director authorization
-	 * @param {WWSUmeta} meta WWSUmeta class
-	 * @param {WWSUhosts} hosts WWSUhosts class for the timesheet computer only
+	 * @param {WWSUmodules} manager The modules class which initiated this module
+	 * @param {object} options Options to be passed to this module
 	 */
-	constructor(socket, noReq, directorReq, adminDirectorReq, meta, hosts) {
+	constructor(manager, options) {
 		super();
+
+		this.manager = manager;
 
 		this.endpoints = {
 			add: "/timesheet/add",
@@ -26,15 +28,12 @@ class WWSUtimesheet extends WWSUevents {
 			edit: {},
 			remove: {},
 		};
-		this.requests = {
-			no: noReq,
-			director: directorReq,
-			admin: adminDirectorReq,
-		};
+
 		this.tables = {
 			hours: undefined,
 			records: undefined,
 		};
+
 		this.modals = {
 			edit: new WWSUmodal(`Edit Timesheet`, null, ``, true, {
 				headerColor: "",
@@ -46,18 +45,14 @@ class WWSUtimesheet extends WWSUevents {
 				zindex: 1100,
 			}),
 		};
+
 		this.fields = {
 			start: undefined,
 			end: undefined,
 			browse: undefined,
 		};
 
-		this.meta = meta;
-		this.hosts = hosts;
-
-		this.animations = new WWSUanimations();
-
-		socket.on("timesheet", (data) => {
+		this.manager.socket.on("timesheet", (data) => {
 			this.updateTables();
 		});
 
@@ -71,11 +66,13 @@ class WWSUtimesheet extends WWSUevents {
 	 */
 	clockForm(directorID) {
 		// Find the director
-		let director = this.requests.director.db.find({ ID: directorID }, true);
+		let director = this.manager.get(this.manager.get("directorReq").db).find({ ID: directorID }, true);
 
 		this.modals.clock.title = `${director.name} - Clock ${
 			!director.present
-				? this.hosts && this.hosts.client && this.hosts.client.authorized
+				? this.manager.get("WWSUhosts") &&
+				  this.manager.get("WWSUhosts").client &&
+				  this.manager.get("WWSUhosts").client.authorized
 					? `In`
 					: `In Remotely`
 				: `Out`
@@ -89,7 +86,9 @@ class WWSUtimesheet extends WWSUevents {
 			schema: {
 				title: `Clock ${
 					!director.present
-						? this.hosts && this.hosts.client && this.hosts.client.authorized
+						? this.manager.get("WWSUhosts") &&
+						  this.manager.get("WWSUhosts").client &&
+						  this.manager.get("WWSUhosts").client.authorized
 							? `In`
 							: `In Remotely`
 						: `Out`
@@ -126,7 +125,11 @@ class WWSUtimesheet extends WWSUevents {
 					},
 					timestamp: {
 						dateFormat: `YYYY-MM-DDTHH:mm:[00]${moment
-							.parseZone(this.meta ? this.meta.meta.time : undefined)
+							.parseZone(
+								this.manager.get("WWSUMeta")
+									? this.manager.get("WWSUMeta").meta.time
+									: undefined
+							)
 							.format("Z")}`,
 						picker: {
 							inline: true,
@@ -152,9 +155,9 @@ class WWSUtimesheet extends WWSUevents {
 						submit: {
 							title: `Clock ${
 								!director.present
-									? this.hosts &&
-									  this.hosts.client &&
-									  this.hosts.client.authorized
+									? this.manager.get("WWSUhosts") &&
+									  this.manager.get("WWSUhosts").client &&
+									  this.manager.get("WWSUhosts").client.authorized
 										? `In`
 										: `In Remotely`
 									: `Out`
@@ -165,8 +168,8 @@ class WWSUtimesheet extends WWSUevents {
 									form.focus();
 									return;
 								}
-								var value = form.getValue();
-								this.requests.director._authorize(
+								let value = form.getValue();
+								this.manager.get("directorReq")._authorize(
 									value.name,
 									value.password,
 									(body) => {
@@ -180,7 +183,7 @@ class WWSUtimesheet extends WWSUevents {
 												autoHide: true,
 											});
 										} else {
-											this.requests.director._tryRequest(
+											this.manager.get("directorReq")._tryRequest(
 												{
 													method: "POST",
 													url: "/timesheet/add",
@@ -190,9 +193,9 @@ class WWSUtimesheet extends WWSUevents {
 														),
 														notes: value.notes,
 														remote:
-															!this.hosts ||
-															!this.hosts.client ||
-															!this.hosts.client.authorized,
+															!this.manager.get("WWSUhosts") ||
+															!this.manager.get("WWSUhosts").client ||
+															!this.manager.get("WWSUhosts").client.authorized,
 													},
 												},
 												(body2) => {
@@ -250,7 +253,7 @@ class WWSUtimesheet extends WWSUevents {
 	 */
 	edit(data, cb) {
 		try {
-			this.requests.admin.request(
+			this.manager.get("adminDirectorReq").request(
 				{ method: "post", url: this.endpoints.edit, data },
 				(response) => {
 					if (response !== "OK") {
@@ -305,7 +308,7 @@ class WWSUtimesheet extends WWSUevents {
 	 */
 	remove(data, cb) {
 		try {
-			this.requests.admin.request(
+			this.manager.get("adminDirectorReq").request(
 				{ method: "post", url: this.endpoints.remove, data },
 				(response) => {
 					if (response !== "OK") {
@@ -362,9 +365,7 @@ class WWSUtimesheet extends WWSUevents {
 	 * @param {string} browseButton DOM query for the browse button to load timesheet records in the tables
 	 */
 	init(hoursTable, recordsTable, startField, endField, browseButton) {
-		this.animations.add("timesheet-init-tables", () => {
-			var util = new WWSUutil();
-
+		this.manager.get("WWSUanimations").add("timesheet-init-tables", () => {
 			// Set fields
 			this.fields.start = startField;
 			this.fields.end = endField;
@@ -381,118 +382,142 @@ class WWSUtimesheet extends WWSUevents {
 			);
 			$(recordsTable).html(
 				`<p class="wwsumeta-timezone-display">Times are shown in the timezone ${
-					this.meta ? this.meta.meta.timezone : moment.tz.guess()
+					this.manager.get("WWSUMeta")
+						? this.manager.get("WWSUMeta").meta.timezone
+						: moment.tz.guess()
 				}.</p><table id="section-timesheets-records-table" class="table table-striped display responsive" style="width: 100%;"></table>`
 			);
 
 			// Setup hours table
-			util.waitForElement(`#section-timesheets-hours-table`, () => {
-				this.tables.hours = $(`#section-timesheets-hours-table`).DataTable({
-					paging: false,
-					data: [],
-					columns: [
-						{ title: "Director" },
-						{ title: "Scheduled Hours" },
-						{ title: "In-Office Hours" },
-						{ title: "Remote Hours" },
-						{ title: "Total Hours" },
-					],
-					order: [[0, "asc"]],
+			this.manager
+				.get("WWSUutil")
+				.waitForElement(`#section-timesheets-hours-table`, () => {
+					this.tables.hours = $(`#section-timesheets-hours-table`).DataTable({
+						paging: false,
+						data: [],
+						columns: [
+							{ title: "Director" },
+							{ title: "Scheduled Hours" },
+							{ title: "In-Office Hours" },
+							{ title: "Remote Hours" },
+							{ title: "Total Hours" },
+						],
+						order: [[0, "asc"]],
+						buttons: ["copy", "csv", "excel", "pdf", "print", "colvis"],
+					});
+
+					this.tables.hours
+						.buttons()
+						.container()
+						.appendTo(
+							$(`#section-timesheets-hours-table_wrapper .col-md-6:eq(0)`)
+						);
 				});
-			});
 
 			// Setup records table
-			util.waitForElement(`#section-timesheets-records-table`, () => {
-				// Extra information
-				let format = (d) => {
-					return `<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">
+			this.manager
+				.get("WWSUutil")
+				.waitForElement(`#section-timesheets-records-table`, () => {
+					// Extra information
+					const format = (d) => {
+						return `<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">
 					<tr>
 						<td>Accomplishments / Notes:</td>
 						<td>${d.notes}</td>
 					</tr>
 					</table>`;
-				};
-				this.tables.records = $(`#section-timesheets-records-table`).DataTable({
-					paging: true,
-					data: [],
-					columns: [
-						{
-							className: "details-control",
-							orderable: false,
-							data: null,
-							defaultContent: "",
-						},
-						{ title: "ID", data: "ID" },
-						{ title: "Director", data: "director" },
-						{ title: "Status", data: "status" },
-						{ title: "Clock In", data: "clockIn" },
-						{ title: "Clock Out", data: "clockOut" },
-						{ title: "Actions", data: "actions" },
-					],
-					columnDefs: [{ responsivePriority: 1, targets: 6 }],
-					order: [[1, "asc"]],
-					pageLength: 25,
-					drawCallback: () => {
-						// Action button click events
-						$(".btn-timesheet-edit").unbind("click");
-						$(".btn-timesheet-delete").unbind("click");
+					};
+					this.tables.records = $(
+						`#section-timesheets-records-table`
+					).DataTable({
+						paging: true,
+						data: [],
+						columns: [
+							{
+								className: "details-control",
+								orderable: false,
+								data: null,
+								defaultContent: "",
+							},
+							{ title: "ID", data: "ID" },
+							{ title: "Director", data: "director" },
+							{ title: "Status", data: "status" },
+							{ title: "Clock In", data: "clockIn" },
+							{ title: "Clock Out", data: "clockOut" },
+							{ title: "Actions", data: "actions" },
+						],
+						columnDefs: [{ responsivePriority: 1, targets: 6 }],
+						order: [[1, "asc"]],
+						pageLength: 100,
+						buttons: ["copy", "csv", "excel", "pdf", "print", "colvis"],
+						drawCallback: () => {
+							// Action button click events
+							$(".btn-timesheet-edit").unbind("click");
+							$(".btn-timesheet-delete").unbind("click");
 
-						$(".btn-timesheet-edit").click((e) => {
-							var id = parseInt($(e.currentTarget).data("id"));
-							var record = this.cache.find((rec) => rec.ID === id);
-							if (record) {
-								this.timesheetForm(record);
-							} else {
-								$(document).Toasts("create", {
-									class: "bg-danger",
-									title: "Error accessing timesheet edit form",
-									body:
-										"There was an error loading the form to edit that timesheet. Please report this to the engineer.",
-									autoHide: true,
-									delay: 10000,
-									icon: "fas fa-skull-crossbones fa-lg",
-								});
-							}
-						});
-
-						$(".btn-timesheet-delete").click((e) => {
-							var id = parseInt($(e.currentTarget).data("id"));
-							util.confirmDialog(
-								`<p>Are you sure you want to <strong>permanently</strong> remove the timesheet record ${id}?</p>
-                                <p>This will remove the timesheet record, and its logged hours will no longer tally.</p>`,
-								null,
-								() => {
-									this.remove({ ID: id }, (success) => {
-										if (success) {
-											this.getRecords();
-										}
+							$(".btn-timesheet-edit").click((e) => {
+								let id = parseInt($(e.currentTarget).data("id"));
+								let record = this.cache.find((rec) => rec.ID === id);
+								if (record) {
+									this.timesheetForm(record);
+								} else {
+									$(document).Toasts("create", {
+										class: "bg-danger",
+										title: "Error accessing timesheet edit form",
+										body:
+											"There was an error loading the form to edit that timesheet. Please report this to the engineer.",
+										autoHide: true,
+										delay: 10000,
+										icon: "fas fa-skull-crossbones fa-lg",
 									});
 								}
-							);
-						});
-					},
-				});
+							});
 
-				// Additional info rows
-				$("#section-timesheets-records-table tbody").on(
-					"click",
-					"td.details-control",
-					(e) => {
-						var tr = $(e.target).closest("tr");
-						var row = this.tables.records.row(tr);
+							$(".btn-timesheet-delete").click((e) => {
+								let id = parseInt($(e.currentTarget).data("id"));
+								this.manager.get("WWSUutil").confirmDialog(
+									`<p>Are you sure you want to <strong>permanently</strong> remove the timesheet record ${id}?</p>
+                                <p>This will remove the timesheet record, and its logged hours will no longer tally.</p>`,
+									null,
+									() => {
+										this.remove({ ID: id }, (success) => {
+											if (success) {
+												this.getRecords();
+											}
+										});
+									}
+								);
+							});
+						},
+					});
 
-						if (row.child.isShown()) {
-							// This row is already open - close it
-							row.child.hide();
-							tr.removeClass("shown");
-						} else {
-							// Open this row
-							row.child(format(row.data())).show();
-							tr.addClass("shown");
+					this.tables.records
+						.buttons()
+						.container()
+						.appendTo(
+							$(`#section-timesheets-records-table_wrapper .col-md-6:eq(0)`)
+						);
+
+					// Additional info rows
+					$("#section-timesheets-records-table tbody").on(
+						"click",
+						"td.details-control",
+						(e) => {
+							let tr = $(e.target).closest("tr");
+							let row = this.tables.records.row(tr);
+
+							if (row.child.isShown()) {
+								// This row is already open - close it
+								row.child.hide();
+								tr.removeClass("shown");
+							} else {
+								// Open this row
+								row.child(format(row.data())).show();
+								tr.addClass("shown");
+							}
 						}
-					}
-				);
-			});
+					);
+				});
 		});
 	}
 
@@ -504,7 +529,7 @@ class WWSUtimesheet extends WWSUevents {
 	 * @param {?function} cb Callback function to execute with records
 	 */
 	getRecords(cb) {
-		this.requests.no.request(
+		this.manager.get("noReq").request(
 			{
 				method: "post",
 				url: this.endpoints.get,
@@ -601,7 +626,7 @@ class WWSUtimesheet extends WWSUevents {
 
 						// Update table
 						this.tables.hours.clear();
-						for (var director in directors) {
+						for (let director in directors) {
 							if (Object.prototype.hasOwnProperty.call(directors, director)) {
 								this.tables.hours.rows.add([
 									[
@@ -732,8 +757,8 @@ class WWSUtimesheet extends WWSUevents {
 											? moment
 													.tz(
 														record.scheduledIn,
-														this.meta
-															? this.meta.meta.timezone
+														this.manager.get("WWSUMeta")
+															? this.manager.get("WWSUMeta").meta.timezone
 															: moment.tz.guess()
 													)
 													.format("YYYY-MM-DD h:mm A")
@@ -744,8 +769,8 @@ class WWSUtimesheet extends WWSUevents {
 												? moment
 														.tz(
 															record.timeIn,
-															this.meta
-																? this.meta.meta.timezone
+															this.manager.get("WWSUMeta")
+																? this.manager.get("WWSUMeta").meta.timezone
 																: moment.tz.guess()
 														)
 														.format("YYYY-MM-DD h:mm A")
@@ -758,8 +783,8 @@ class WWSUtimesheet extends WWSUevents {
 											? moment
 													.tz(
 														record.scheduledOut,
-														this.meta
-															? this.meta.meta.timezone
+														this.manager.get("WWSUMeta")
+															? this.manager.get("WWSUMeta").meta.timezone
 															: moment.tz.guess()
 													)
 													.format("YYYY-MM-DD h:mm A")
@@ -770,8 +795,8 @@ class WWSUtimesheet extends WWSUevents {
 												? moment
 														.tz(
 															record.timeOut,
-															this.meta
-																? this.meta.meta.timezone
+															this.manager.get("WWSUMeta")
+																? this.manager.get("WWSUMeta").meta.timezone
 																: moment.tz.guess()
 														)
 														.format("YYYY-MM-DD h:mm A")
@@ -782,7 +807,7 @@ class WWSUtimesheet extends WWSUevents {
 										</ul>`,
 									actions: `<div class="btn-group">
                                     <button class="btn btn-sm btn-warning btn-timesheet-edit" data-id="${record.ID}" title="Edit Timesheet Record"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-danger btn-timesheet-delete" data-id="${record.ID}" title="Remove Timesheet record"><i class="fas fa-trash"></i></button></div>`,
-									};
+								};
 							})
 						);
 						this.tables.records.draw();
@@ -856,13 +881,21 @@ class WWSUtimesheet extends WWSUevents {
 					},
 					scheduledIn: {
 						dateFormat: `YYYY-MM-DDTHH:mm:[00]${moment
-							.parseZone(this.meta ? this.meta.meta.time : undefined)
+							.parseZone(
+								this.manager.get("WWSUMeta")
+									? this.manager.get("WWSUMeta").meta.time
+									: undefined
+							)
 							.format("Z")}`,
 						helper: "The date/time the director was scheduled to clock in.",
 					},
 					scheduledOut: {
 						dateFormat: `YYYY-MM-DDTHH:mm:[00]${moment
-							.parseZone(this.meta ? this.meta.meta.time : undefined)
+							.parseZone(
+								this.manager.get("WWSUMeta")
+									? this.manager.get("WWSUMeta").meta.time
+									: undefined
+							)
 							.format("Z")}`,
 						helper: "The date/time the director was scheduled to clock out.",
 					},
@@ -876,7 +909,11 @@ class WWSUtimesheet extends WWSUevents {
 					},
 					timeIn: {
 						dateFormat: `YYYY-MM-DDTHH:mm:[00]${moment
-							.parseZone(this.meta ? this.meta.meta.time : undefined)
+							.parseZone(
+								this.manager.get("WWSUMeta")
+									? this.manager.get("WWSUMeta").meta.time
+									: undefined
+							)
 							.format("Z")}`,
 						picker: {
 							inline: true,
@@ -885,8 +922,8 @@ class WWSUtimesheet extends WWSUevents {
 						helper:
 							"The date/time the director clocked in. Field required for approved hours and unapproved hours approval statuses.",
 						validator: function (callback) {
-							var value = this.getValue();
-							var approved = this.getParent().childrenByPropertyId[
+							let value = this.getValue();
+							let approved = this.getParent().childrenByPropertyId[
 								"approved"
 							].getValue();
 							if (
@@ -907,7 +944,11 @@ class WWSUtimesheet extends WWSUevents {
 					},
 					timeOut: {
 						dateFormat: `YYYY-MM-DDTHH:mm:[00]${moment
-							.parseZone(this.meta ? this.meta.meta.time : undefined)
+							.parseZone(
+								this.manager.get("WWSUMeta")
+									? this.manager.get("WWSUMeta").meta.time
+									: undefined
+							)
 							.format("Z")}`,
 						picker: {
 							inline: true,
@@ -939,7 +980,7 @@ class WWSUtimesheet extends WWSUevents {
 									form.focus();
 									return;
 								}
-								var value = form.getValue();
+								let value = form.getValue();
 								this.edit(value, (success) => {
 									if (success) {
 										this.modals.edit.iziModal("close");

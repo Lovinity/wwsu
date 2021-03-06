@@ -6,286 +6,286 @@ module.exports = {
   inputs: {
     state: {
       type: "string",
-      description: "State of the WWSU system"
+      description: "State of the WWSU system",
     },
     host: {
       type: "number",
       allowNull: true,
-      description: "The ID of the host currently controlling the broadcast."
+      description: "The ID of the host currently controlling the broadcast.",
     },
     dj: {
       type: "number",
       allowNull: true,
       description:
-        "The ID of the DJ currently on the air, or null if not applicable."
+        "The ID of the DJ currently on the air, or null if not applicable.",
     },
     cohostDJ1: {
       type: "number",
       allowNull: true,
       description:
-        "The ID of the first cohost DJ on the air, or null if not applicable."
+        "The ID of the first cohost DJ on the air, or null if not applicable.",
     },
     cohostDJ2: {
       type: "number",
       allowNull: true,
       description:
-        "The ID of the second cohost DJ on the air, or null if not applicable."
+        "The ID of the second cohost DJ on the air, or null if not applicable.",
     },
     cohostDJ3: {
       type: "number",
       allowNull: true,
       description:
-        "The ID of the third cohost DJ on the air, or null if not applicable."
+        "The ID of the third cohost DJ on the air, or null if not applicable.",
     },
     attendanceID: {
       type: "number",
       allowNull: true,
       description:
-        "The ID of the Attendance record the system is currently running under"
+        "The ID of the Attendance record the system is currently running under",
     },
     attendanceChecked: {
       type: "string",
       allowNull: true,
       description: "ISO timestamp of when calendar attendance was last checked",
-      custom: function(value) {
+      custom: function (value) {
         return moment(value).isValid();
-      }
+      },
     },
     scheduledStart: {
       type: "string",
       allowNull: true,
       description:
         "ISO timestamp of when the current programming was scheduled to start",
-      custom: function(value) {
+      custom: function (value) {
         return moment(value).isValid();
-      }
+      },
     },
     scheduledEnd: {
       type: "string",
       allowNull: true,
       description:
         "ISO timestamp of when the current programming is scheduled to end",
-      custom: function(value) {
+      custom: function (value) {
         return moment(value).isValid();
-      }
+      },
     },
     show: {
       type: "string",
       description:
-        "If someone is on the air, host name - show name, or name of sports for sports broadcasts"
+        "If someone is on the air, host name - show name, or name of sports for sports broadcasts",
     },
     showLogo: {
       type: "string",
       allowNull: true,
       description:
-        "File name of the logo of the current broadcast (assets/uploads/calendar/logo)"
+        "File name of the logo of the current broadcast (assets/uploads/calendar/logo)",
     },
     track: {
       type: "string",
       description:
-        "Currently playing track either in automation or manually logged"
+        "Currently playing track either in automation or manually logged",
     },
     trackID: {
       type: "number",
-      description: "The ID of the track currently playing"
+      description: "The ID of the track currently playing",
     },
     trackIDSubcat: {
       type: "number",
       description:
-        "The ID of the subcategory the currently playing track falls in"
+        "The ID of the subcategory the currently playing track falls in",
     },
     trackArtist: {
       type: "string",
       allowNull: true,
-      description: "The artist of the currently playing track"
+      description: "The artist of the currently playing track",
     },
     trackTitle: {
       type: "string",
       allowNull: true,
-      description: "The title of the currently playing track"
+      description: "The title of the currently playing track",
     },
     trackAlbum: {
       type: "string",
       allowNull: true,
-      description: "The album of the currently playing track"
+      description: "The album of the currently playing track",
     },
     trackLabel: {
       type: "string",
       allowNull: true,
-      description: "The label of the currently playing track"
+      description: "The label of the currently playing track",
     },
     trackStamp: {
       type: "string",
       allowNull: true,
       description: "ISO timestamp of when manual track meta was added",
-      custom: function(value) {
+      custom: function (value) {
         return moment(value).isValid();
-      }
+      },
     },
     requested: {
       type: "boolean",
-      description: "Whether or not this track was requested"
+      description: "Whether or not this track was requested",
     },
     requestedBy: {
       type: "string",
-      description: "The user who requested this track, if requested"
+      description: "The user who requested this track, if requested",
     },
     requestedMessage: {
       type: "string",
-      description: "The provided message for this track request, if requested"
+      description: "The provided message for this track request, if requested",
     },
     calendarUnique: {
       type: "string",
       allowNull: true,
-      description: "Calendar unique ID of the current program."
+      description: "Calendar unique ID of the current program.",
     },
     genre: {
       type: "string",
       description:
-        "Name of the genre or rotation currently being played, if any"
+        "Name of the genre or rotation currently being played, if any",
     },
     calendarID: {
       type: "number",
       allowNull: true,
-      description: "The ID of the calendar event currently being played."
+      description: "The ID of the calendar event currently being played.",
     },
     playlistID: {
       type: "number",
       allowNull: true,
-      description: "ID of the playlist currently running"
+      description: "ID of the playlist currently running",
     },
     playlist: {
       type: "string",
       allowNull: true,
-      description: "Name of the playlist we are currently airing"
+      description: "Name of the playlist we are currently airing",
     },
     playlistPosition: {
       type: "number",
-      description: "Current position within the playlist"
+      description: "Current position within the playlist",
     },
     playlistPlayed: {
       type: "string",
       allowNull: true,
       description: "ISO timestamp of when the playlist was started",
-      custom: function(value) {
+      custom: function (value) {
         return moment(value).isValid();
-      }
+      },
     },
     topic: {
       type: "string",
-      description: "If the DJ specified a show topic, this is the topic."
+      description: "If the DJ specified a show topic, this is the topic.",
     },
     stream: {
       type: "string",
-      description: "sails.models.meta for the internet radio stream"
+      description: "sails.models.meta for the internet radio stream",
     },
     radiodj: {
       type: "string",
-      description: "REST IP of the RadioDJ instance currently in control"
+      description: "REST IP of the RadioDJ instance currently in control",
     },
     line1: {
       type: "string",
-      description: "First line of meta for display signs"
+      description: "First line of meta for display signs",
     },
     line2: {
       type: "string",
-      description: "Second line of meta for display signs"
+      description: "Second line of meta for display signs",
     },
     time: {
       type: "string",
       description:
         "ISO string of the current WWSU time. NOTE: time is only pushed periodically in websockets. Clients should keep their own time ticker in sync with this value.",
-      custom: function(value) {
+      custom: function (value) {
         return moment(value).isValid();
-      }
+      },
     },
     listeners: {
       type: "number",
-      description: "Number of current online listeners"
+      description: "Number of current online listeners",
     },
     queueFinish: {
       type: "string",
       allowNull: true,
       description:
         "An ISO timestamp of when the queue is expected to finish. NOTE: To conserve data, this is only pushed through websockets when the expected finish time changes by more than 1 second. Also, this will be null when not playing anything.",
-      custom: function(value) {
+      custom: function (value) {
         return moment(value).isValid();
-      }
+      },
     },
     queueCalculating: {
       type: "boolean",
       description:
-        "If true, do not consider queueFinish as accurate until this changes to false."
+        "If true, do not consider queueFinish as accurate until this changes to false.",
     },
     trackFinish: {
       type: "string",
       allowNull: true,
       description:
         "An ISO timestamp of when the current track is expected to finish. NOTE: To conserve data, this is only pushed through websockets when the expected finish time changes by more than 1 second. Also, this will be null when not playing anything.",
-      custom: function(value) {
+      custom: function (value) {
         return moment(value).isValid();
-      }
+      },
     },
     countdown: {
       type: "string",
       allowNull: true,
       description:
         "An ISO timestamp which to count down on the display signs for shows.",
-      custom: function(value) {
+      custom: function (value) {
         return moment(value).isValid();
-      }
+      },
     },
     queueMusic: {
       type: "boolean",
       description:
-        "If returning from break, or going live, and there are music tracks in the queue not counted towards queueFinish, this will be true"
+        "If returning from break, or going live, and there are music tracks in the queue not counted towards queueFinish, this will be true",
     },
     playing: {
       type: "boolean",
       description:
-        "Whether or not something is currently playing in the active RadioDJ"
+        "Whether or not something is currently playing in the active RadioDJ",
     },
     changingState: {
       type: "string",
       allowNull: true,
       description:
-        "If not null, all clients should lock out of any state-changing (state/*) API hits until this is null again. Will be state changing string otherwise."
+        "If not null, all clients should lock out of any state-changing (state/*) API hits until this is null again. Will be state changing string otherwise.",
     },
     lastID: {
       type: "string",
       allowNull: true,
       description:
         "An ISO timestamp of when the last top of hour ID break was aired.",
-      custom: function(value) {
+      custom: function (value) {
         return moment(value).isValid();
-      }
+      },
     },
     delaySystem: {
       type: "number",
       allowNull: true,
       description:
-        "Number of seconds currently on the delay system. Null means delay system might be offline or delay system is in bypass mode."
+        "Number of seconds currently on the delay system. Null means delay system might be offline or delay system is in bypass mode.",
     },
     webchat: {
       type: "boolean",
       description:
-        "Set to false to restrict the ability to send chat messages through the website"
+        "Set to false to restrict the ability to send chat messages through the website",
     },
     hostCalling: {
       type: "number",
       allowNull: true,
       description:
-        "The host ID who initiated the remote broadcast call (null: no calls in progress)"
+        "The host ID who initiated the remote broadcast call (null: no calls in progress)",
     },
     hostCalled: {
       type: "number",
       allowNull: true,
       description:
-        "The host ID who was called for the remote broadcast (null: no calls in progress)"
-    }
+        "The host ID who was called for the remote broadcast (null: no calls in progress)",
+    },
   },
 
-  fn: async function(inputs, exits) {
+  fn: async function (inputs, exits) {
     sails.log.debug("Helper meta.change called.");
     try {
       var push = {};
@@ -437,15 +437,15 @@ module.exports = {
               push2.percent = 0;
             } else {
               push2.line1 = await sails.helpers.filterProfane(
-                `${sails.config.custom.meta.prefix.automation}${sails.models
-                  .meta.memory.trackArtist || "Unknown Artist"} - ${sails.models
-                  .meta.memory.trackTitle || "Unknown Title"}`
+                `${sails.config.custom.meta.prefix.automation}${
+                  sails.models.meta.memory.trackArtist || "Unknown Artist"
+                } - ${sails.models.meta.memory.trackTitle || "Unknown Title"}`
               );
               push2.line2 = push2.requested
                 ? await sails.helpers.filterProfane(
-                    `${
-                      sails.config.custom.meta.prefix.request
-                    }${push2.requestedBy || "Anonymous"}`
+                    `${sails.config.custom.meta.prefix.request}${
+                      push2.requestedBy || "Anonymous"
+                    }`
                   )
                 : "";
               push2.stream = await sails.helpers.filterProfane(
@@ -453,9 +453,9 @@ module.exports = {
                   sails.models.meta.memory.trackTitle
                 } ${
                   push2.requested
-                    ? `(${
-                        sails.config.custom.meta.prefix.request
-                      }${push2.requestedBy || "Anonymous"})`
+                    ? `(${sails.config.custom.meta.prefix.request}${
+                        push2.requestedBy || "Anonymous"
+                      })`
                     : ``
                 }`
               );
@@ -476,15 +476,15 @@ module.exports = {
               push2.percent = 0;
             } else {
               push2.line1 = await sails.helpers.filterProfane(
-                `${sails.config.custom.meta.prefix.automation}${sails.models
-                  .meta.memory.trackArtist || "Unknown Artist"} - ${sails.models
-                  .meta.memory.trackTitle || "Unknown Title"}`
+                `${sails.config.custom.meta.prefix.automation}${
+                  sails.models.meta.memory.trackArtist || "Unknown Artist"
+                } - ${sails.models.meta.memory.trackTitle || "Unknown Title"}`
               );
               push2.line2 = push2.requested
                 ? await sails.helpers.filterProfane(
-                    `${
-                      sails.config.custom.meta.prefix.request
-                    }${push2.requestedBy || "Anonymous"}`
+                    `${sails.config.custom.meta.prefix.request}${
+                      push2.requestedBy || "Anonymous"
+                    }`
                   )
                 : `${sails.config.custom.meta.prefix.playlist}${sails.models.meta.memory.show}`;
               push2.stream = await sails.helpers.filterProfane(
@@ -492,9 +492,9 @@ module.exports = {
                   sails.models.meta.memory.trackTitle
                 } ${
                   push2.requested
-                    ? `(${
-                        sails.config.custom.meta.prefix.request
-                      }${push2.requestedBy || "Anonymous"})`
+                    ? `(${sails.config.custom.meta.prefix.request}${
+                        push2.requestedBy || "Anonymous"
+                      })`
                     : ``
                 }`
               );
@@ -515,15 +515,15 @@ module.exports = {
               push2.percent = 0;
             } else {
               push2.line1 = await sails.helpers.filterProfane(
-                `${sails.config.custom.meta.prefix.automation}${sails.models
-                  .meta.memory.trackArtist || "Unknown Artist"} - ${sails.models
-                  .meta.memory.trackTitle || "Unknown Title"}`
+                `${sails.config.custom.meta.prefix.automation}${
+                  sails.models.meta.memory.trackArtist || "Unknown Artist"
+                } - ${sails.models.meta.memory.trackTitle || "Unknown Title"}`
               );
               push2.line2 = push2.requested
                 ? await sails.helpers.filterProfane(
-                    `${
-                      sails.config.custom.meta.prefix.request
-                    }${push2.requestedBy || "Anonymous"}`
+                    `${sails.config.custom.meta.prefix.request}${
+                      push2.requestedBy || "Anonymous"
+                    }`
                   )
                 : `${sails.config.custom.meta.prefix.genre}${sails.models.meta.memory.genre}`;
               push2.stream = await sails.helpers.filterProfane(
@@ -531,9 +531,9 @@ module.exports = {
                   sails.models.meta.memory.trackTitle
                 } ${
                   push2.requested
-                    ? `(${
-                        sails.config.custom.meta.prefix.genre
-                      }${push2.requestedBy || "Anonymous"})`
+                    ? `(${sails.config.custom.meta.prefix.genre}${
+                        push2.requestedBy || "Anonymous"
+                      })`
                     : ``
                 }`
               );
@@ -555,24 +555,24 @@ module.exports = {
             } else {
               push2.line1 = `${sails.config.custom.meta.prefix.live}${sails.models.meta.memory.show}`;
               push2.line2 = await sails.helpers.filterProfane(
-                `${sails.config.custom.meta.prefix.playing}${sails.models.meta
-                  .memory.trackArtist || "Unknown Artist"} - ${sails.models.meta
-                  .memory.trackTitle || "Unknown Title"} ${
+                `${sails.config.custom.meta.prefix.playing}${
+                  sails.models.meta.memory.trackArtist || "Unknown Artist"
+                } - ${sails.models.meta.memory.trackTitle || "Unknown Title"} ${
                   push2.requested
-                    ? `(${
-                        sails.config.custom.meta.prefix.request
-                      }${push2.requestedBy || "Anonymous"})`
+                    ? `(${sails.config.custom.meta.prefix.request}${
+                        push2.requestedBy || "Anonymous"
+                      })`
                     : ``
                 }`
               );
               push2.stream = await sails.helpers.filterProfane(
-                `${sails.models.meta.memory.trackArtist ||
-                  "Unknown Artist"} - ${sails.models.meta.memory.trackTitle ||
-                  "Unknown Title"} ${
+                `${
+                  sails.models.meta.memory.trackArtist || "Unknown Artist"
+                } - ${sails.models.meta.memory.trackTitle || "Unknown Title"} ${
                   push2.requested
-                    ? `(${
-                        sails.config.custom.meta.prefix.request
-                      }${push2.requestedBy || "Anonymous"})`
+                    ? `(${sails.config.custom.meta.prefix.request}${
+                        push2.requestedBy || "Anonymous"
+                      })`
                     : ``
                 }`
               );
@@ -594,24 +594,24 @@ module.exports = {
             } else {
               push2.line1 = `${sails.config.custom.meta.prefix.prerecord}${sails.models.meta.memory.show}`;
               push2.line2 = await sails.helpers.filterProfane(
-                `${sails.config.custom.meta.prefix.playing}${sails.models.meta
-                  .memory.trackArtist || "Unknown Artist"} - ${sails.models.meta
-                  .memory.trackTitle || "Unknown Title"} ${
+                `${sails.config.custom.meta.prefix.playing}${
+                  sails.models.meta.memory.trackArtist || "Unknown Artist"
+                } - ${sails.models.meta.memory.trackTitle || "Unknown Title"} ${
                   push2.requested
-                    ? `(${
-                        sails.config.custom.meta.prefix.request
-                      }${push2.requestedBy || "Anonymous"})`
+                    ? `(${sails.config.custom.meta.prefix.request}${
+                        push2.requestedBy || "Anonymous"
+                      })`
                     : ``
                 }`
               );
               push2.stream = await sails.helpers.filterProfane(
-                `${sails.models.meta.memory.trackArtist ||
-                  "Unknown Artist"} - ${sails.models.meta.memory.trackTitle ||
-                  "Unknown Title"} ${
+                `${
+                  sails.models.meta.memory.trackArtist || "Unknown Artist"
+                } - ${sails.models.meta.memory.trackTitle || "Unknown Title"} ${
                   push2.requested
-                    ? `(${
-                        sails.config.custom.meta.prefix.request
-                      }${push2.requestedBy || "Anonymous"})`
+                    ? `(${sails.config.custom.meta.prefix.request}${
+                        push2.requestedBy || "Anonymous"
+                      })`
                     : ``
                 }`
               );
@@ -633,24 +633,24 @@ module.exports = {
             } else {
               push2.line1 = `${sails.config.custom.meta.prefix.remote}${sails.models.meta.memory.show}`;
               push2.line2 = await sails.helpers.filterProfane(
-                `${sails.config.custom.meta.prefix.playing}${sails.models.meta
-                  .memory.trackArtist || "Unknown Artist"} - ${sails.models.meta
-                  .memory.trackTitle || "Unknown Title"} ${
+                `${sails.config.custom.meta.prefix.playing}${
+                  sails.models.meta.memory.trackArtist || "Unknown Artist"
+                } - ${sails.models.meta.memory.trackTitle || "Unknown Title"} ${
                   push2.requested
-                    ? `(${
-                        sails.config.custom.meta.prefix.request
-                      }${push2.requestedBy || "Anonymous"})`
+                    ? `(${sails.config.custom.meta.prefix.request}${
+                        push2.requestedBy || "Anonymous"
+                      })`
                     : ``
                 }`
               );
               push2.stream = await sails.helpers.filterProfane(
-                `${sails.models.meta.memory.trackArtist ||
-                  "Unknown Artist"} - ${sails.models.meta.memory.trackTitle ||
-                  "Unknown Title"} ${
+                `${
+                  sails.models.meta.memory.trackArtist || "Unknown Artist"
+                } - ${sails.models.meta.memory.trackTitle || "Unknown Title"} ${
                   push2.requested
-                    ? `(${
-                        sails.config.custom.meta.prefix.request
-                      }${push2.requestedBy || "Anonymous"})`
+                    ? `(${sails.config.custom.meta.prefix.request}${
+                        push2.requestedBy || "Anonymous"
+                      })`
                     : ``
                 }`
               );
@@ -706,7 +706,7 @@ module.exports = {
                 trackArtist: sails.models.meta.memory.trackArtist || null,
                 trackTitle: sails.models.meta.memory.trackTitle || null,
                 trackAlbum: sails.models.meta.memory.trackAlbum || null,
-                trackLabel: sails.models.meta.memory.trackLabel || null
+                trackLabel: sails.models.meta.memory.trackLabel || null,
               })
               .fetch()
               .tolerate(() => {});
@@ -725,9 +725,10 @@ module.exports = {
                   (sails.models.meta.memory.trackArtist || "Unknown Artist") +
                   " - " +
                   (sails.models.meta.memory.trackTitle || "Unknown Title"),
-                likable: true
+                likable: true,
+                time: moment().toISOString(true),
               });
-              push2.history = push2.history.slice(0, 3);
+              push2.history = push2.history.slice(0, 5);
             }
 
             // If this track is an ID, update lastID
@@ -762,7 +763,7 @@ module.exports = {
                   (sails.models.meta.memory.trackArtist || "Unknown Artist") +
                   " - " +
                   (sails.models.meta.memory.trackTitle || "Unknown Title"),
-                likable: false
+                likable: false,
               });
               push2.history = push2.history.slice(0, 3);
             }
@@ -779,16 +780,16 @@ module.exports = {
             push2.line1 = `${sails.config.custom.meta.prefix.live}${sails.models.meta.memory.show}`;
             push2.line2 = manual
               ? await sails.helpers.filterProfane(
-                  `${sails.config.custom.meta.prefix.playing}${sails.models.meta
-                    .memory.trackArtist || "Unknown Artist"} - ${sails.models
-                    .meta.memory.trackTitle || "Unknown Title"}`
+                  `${sails.config.custom.meta.prefix.playing}${
+                    sails.models.meta.memory.trackArtist || "Unknown Artist"
+                  } - ${sails.models.meta.memory.trackTitle || "Unknown Title"}`
                 )
               : ``;
             push2.stream = manual
               ? await sails.helpers.filterProfane(
-                  `${sails.models.meta.memory.trackArtist ||
-                    "Unknown Artist"} - ${sails.models.meta.memory.trackTitle ||
-                    "Unknown Title"}`
+                  `${
+                    sails.models.meta.memory.trackArtist || "Unknown Artist"
+                  } - ${sails.models.meta.memory.trackTitle || "Unknown Title"}`
                 )
               : await sails.helpers.filterProfane(
                   `${sails.models.meta.memory.show} (LIVE)`
@@ -807,16 +808,16 @@ module.exports = {
             push2.line1 = `${sails.config.custom.meta.prefix.remote}${sails.models.meta.memory.show}`;
             push2.line2 = manual
               ? await sails.helpers.filterProfane(
-                  `${sails.config.custom.meta.prefix.playing}${sails.models.meta
-                    .memory.trackArtist || "Unknown Artist"} - ${sails.models
-                    .meta.memory.trackTitle || "Unknown Title"}`
+                  `${sails.config.custom.meta.prefix.playing}${
+                    sails.models.meta.memory.trackArtist || "Unknown Artist"
+                  } - ${sails.models.meta.memory.trackTitle || "Unknown Title"}`
                 )
               : ``;
             push2.stream = manual
               ? await sails.helpers.filterProfane(
-                  `${sails.models.meta.memory.trackArtist ||
-                    "Unknown Artist"} - ${sails.models.meta.memory.trackTitle ||
-                    "Unknown Title"}`
+                  `${
+                    sails.models.meta.memory.trackArtist || "Unknown Artist"
+                  } - ${sails.models.meta.memory.trackTitle || "Unknown Title"}`
                 )
               : await sails.helpers.filterProfane(
                   `${sails.models.meta.memory.show} (LIVE)`
@@ -839,7 +840,9 @@ module.exports = {
             .destroy({ type: `request`, subtype: requested[0].ID })
             .fetch();
           var devices = [];
-          subscriptions.map(subscription => devices.push(subscription.device));
+          subscriptions.map((subscription) =>
+            devices.push(subscription.device)
+          );
           if (devices.length > 0) {
             await sails.helpers.onesignal.send(
               devices,
@@ -892,8 +895,6 @@ module.exports = {
 
           // If we're changing stream meta, push to history array, and send an API call to the stream to update the meta on the stream.
           if (key3 === "stream") {
-            sails.models.meta.history.unshift(push[key3]);
-            sails.models.meta.history = sails.models.meta.history.slice(0, 5);
             // TODO: Put stream metadata updating API query here
           }
         }
@@ -907,7 +908,7 @@ module.exports = {
         !sails.config.custom.lofi ||
         sails.models.status.errorCheck.waitForGoodRadioDJ
       ) {
-        await sails.models.meta.update({ ID: 1 }, criteria).tolerate(err => {
+        await sails.models.meta.update({ ID: 1 }, criteria).tolerate((err) => {
           sails.log.error(err);
         });
       }
@@ -925,5 +926,5 @@ module.exports = {
       sails.log.error(e);
       return exits.success();
     }
-  }
+  },
 };

@@ -34,6 +34,8 @@ module.exports = {
   },
 
   fn: async function (inputs, exits) {
+    return; // Disable onesignal push notifications
+    
     try {
       // TODO: add configuration for this
       var categories = {

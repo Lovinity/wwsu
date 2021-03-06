@@ -1,25 +1,32 @@
+'use strict';
+
 /* global TAFFY */
 
 // This class manages calendar subscriptions
 
 // TODO: fix removal to allow removing unique or ID individually.
 // TODO: Extend with WWSUdb. (??)
+
+// REQUIRES these WWSUmodules: noReq (WWSUreq)
 class WWSUsubscriptions extends WWSUevents {
 
     /**
      * Construct the class.
      * 
-     * @param {sails.io} socket WWSU socket connection
-     * @param {WWSUreq} request Request without authorization
+	 * @param {WWSUmodules} manager The modules class which initiated this module
+	 * @param {object} options Options to be passed to this module
      */
-    constructor(socket, request) {
+    constructor(manager, options) {
         super();
+
+        this.manager = manager;
+
         this.endpoints = {
             get: '/subscribers/get-web',
             subscribe: '/subscribers/add',
             unsubscribe: '/subscribers/remove'
         };
-        this.request = request;
+
         this.device = null;
 
         this.subscriptions = TAFFY();
@@ -28,7 +35,7 @@ class WWSUsubscriptions extends WWSUevents {
     // Initialize subscriptions with the provided device ID, or null if no device.
     init (device = null) {
         this.device = device;
-        this.request.request({ method: 'POST', url: this.endpoints.get, data: { device: device } }, (body) => {
+        this.manager.get("noReq").request({ method: 'POST', url: this.endpoints.get, data: { device: device } }, (body) => {
             try {
                 this.subscriptions = TAFFY()
                 this.subscriptions.insert(body)
@@ -57,7 +64,7 @@ class WWSUsubscriptions extends WWSUevents {
      * @param {string} subtype occurrence unique string for calendar-once type, or calendar ID for calendar-all type
      */
     subscribe (type, subtype) {
-        this.request.request({ method: 'POST', url: this.endpoints.subscribe, data: { device: this.device, type, subtype } }, (response) => {
+        this.manager.get("noReq").request({ method: 'POST', url: this.endpoints.subscribe, data: { device: this.device, type, subtype } }, (response) => {
             try {
                 if (response !== 'OK') {
                     $(document).Toasts('create', {
@@ -101,7 +108,7 @@ class WWSUsubscriptions extends WWSUevents {
      * @param {string} event Calendar ID to unsubscribe all events
      */
     unsubscribe (ID, event) {
-        this.request.request({ method: 'POST', url: this.endpoints.unsubscribe, data: { device: this.device, type: `calendar-once`, subtype: ID } }, (response) => {
+        this.manager.get("noReq").request({ method: 'POST', url: this.endpoints.unsubscribe, data: { device: this.device, type: `calendar-once`, subtype: ID } }, (response) => {
             try {
                 if (response !== 'OK') {
                     $(document).Toasts('create', {
@@ -113,7 +120,7 @@ class WWSUsubscriptions extends WWSUevents {
                         icon: 'fas fa-skull-crossbones fa-lg',
                     });
                 } else {
-                    this.request.request({ method: 'POST', url: this.endpoints.unsubscribe, data: { device: this.device, type: `calendar-all`, subtype: event } }, (response2) => {
+                    this.manager.get("noReq").request({ method: 'POST', url: this.endpoints.unsubscribe, data: { device: this.device, type: `calendar-all`, subtype: event } }, (response2) => {
                         try {
                             if (response !== 'OK') {
                                 $(document).Toasts('create', {

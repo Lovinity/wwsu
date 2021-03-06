@@ -1,6 +1,8 @@
+"use strict";
+
 /**
  * This class extends CalendarDb to use WWSU's calendar API and build the calendar interface.
- * @requires WWSUutil WWSU utility class
+ * @requires WWSUthis.manager.get("WWSUutil") WWSU this.manager.get("WWSUutil")ity class
  * @requires CalendarDb Base WWSU calendar class for processing data into calendar events
  * @requires WWSUmodal iziModal wrapper
  * @requires WWSUevents WWSU event emitter
@@ -9,20 +11,20 @@
  * @requires $.DataTable DataTables.js
  * @requires $.alpaca Alpaca forms custom WWSU build
  */
+
+// REQUIRES the following WWSUmodules: noReq (WWSUreq), directorReq (WWSUreq) (only if managing calendar), djReq (WWSUreq) (Only on DJ web panel), WWSUMeta, WWSUthis.manager.get("WWSUutil")
+// WWSUMeta MUST be loaded before WWSUcalendar is loaded!
 class WWSUcalendar extends CalendarDb {
 	/**
 	 * Create the calendar class.
 	 *
-	 * @param {sails.io} socket Socket connection to WWSU.
-	 * @param {WWSUmeta} meta WWSUmeta initialized class
-	 * @param {WWSUreq} noReq WWSU request with no authorization
-	 * @param {WWSUreq} directorReq WWSU request with director authorization
-	 * @param {WWSUreq} djReq WWSU request with DJ authorization
+	 * @param {WWSUmodules} manager The modules class which initiated this module
+	 * @param {object} options Options to be passed to this module
 	 */
-	constructor(socket, meta, noReq, directorReq, djReq) {
-		super([], [], [], meta); // Create the db
+	constructor(manager, options) {
+		super([], [], [], manager.get("WWSUMeta")); // Create the db
 
-		this.meta = meta;
+		this.manager = manager;
 
 		this.endpoints = {
 			add: "/calendar/add",
@@ -48,18 +50,13 @@ class WWSUcalendar extends CalendarDb {
 			remove: {},
 			removeSchedule: {},
 		};
-		this.requests = {
-			no: noReq,
-			director: directorReq,
-			dj: djReq,
-		};
 
 		this.events = new WWSUevents();
 
 		// Assign socket events
-		this.calendar.assignSocketEvent("calendar", socket);
-		this.schedule.assignSocketEvent("schedule", socket);
-		this.clockwheels.assignSocketEvent("clockwheels", socket);
+		this.calendar.assignSocketEvent("calendar", this.manager.socket);
+		this.schedule.assignSocketEvent("schedule", this.manager.socket);
+		this.clockwheels.assignSocketEvent("clockwheels", this.manager.socket);
 
 		// Emit calendarUpdated whenever a change is made to the calendar.
 		this.calendar.on("change", "WWSUcalendar", () => {
@@ -70,6 +67,15 @@ class WWSUcalendar extends CalendarDb {
 		});
 		this.clockwheels.on("change", "WWSUcalendar", () => {
 			this.calendarUpdated();
+		});
+
+		this.calendar.on("change", "stoopid", (db, query) => {
+			console.log(`Calendar change`);
+			console.dir(query);
+		});
+		this.schedule.on("change", "stoopid", (db, query) => {
+			console.log(`schedule change`);
+			console.dir(query);
 		});
 
 		// Generate a modal for displaying event conflicts
@@ -111,6 +117,11 @@ class WWSUcalendar extends CalendarDb {
 
 		// Generate other modals
 		this.occurrenceModal = new WWSUmodal(``, null, ``, true, {
+			headerColor: "",
+			zindex: 1100,
+			// openFullscreen: true,
+		});
+		this.newOccurrenceModal = new WWSUmodal(``, null, ``, true, {
 			headerColor: "",
 			zindex: 1100,
 			// openFullscreen: true,
@@ -193,17 +204,17 @@ class WWSUcalendar extends CalendarDb {
 	// Initialize the calendar. Call this on socket connect event.
 	init() {
 		this.calendar.replaceData(
-			this.requests.no,
+			this.manager.get("noReq"),
 			this.endpoints.get,
 			this.data.get
 		);
 		this.schedule.replaceData(
-			this.requests.no,
+			this.manager.get("noReq"),
 			this.endpoints.getSchedule,
 			this.data.getSchedule
 		);
 		this.clockwheels.replaceData(
-			this.requests.no,
+			this.manager.get("noReq"),
 			this.endpoints.getClockwheels,
 			this.data.getClockwheels
 		);
@@ -243,8 +254,8 @@ class WWSUcalendar extends CalendarDb {
 			timeout: 30000,
 			onBlock: () => {
 				// Generate the data table
-				var table = $(`#modal-${this.eventsModal.id}-table`).DataTable({
-					paging: false,
+				let table = $(`#modal-${this.eventsModal.id}-table`).DataTable({
+					paging: true,
 					data: [],
 					columns: [
 						{ title: "Type" },
@@ -264,7 +275,7 @@ class WWSUcalendar extends CalendarDb {
 
 						// Edit event
 						$(".btn-event-edit").click((e) => {
-							var event = this.calendar
+							let event = this.calendar
 								.find()
 								.find(
 									(event) =>
@@ -282,14 +293,13 @@ class WWSUcalendar extends CalendarDb {
 
 						// Confirm before deleting when someone wants to delete an event
 						$(".btn-event-delete").click((e) => {
-							var util = new WWSUutil();
-							var event = this.calendar
+							let event = this.calendar
 								.find()
 								.find(
 									(event) =>
 										event.ID === parseInt($(e.currentTarget).data("calendarid"))
 								);
-							util.confirmDialog(
+							this.manager.get("WWSUutil").confirmDialog(
 								`<p>Are you sure you want to <b>permanently</b> remove ${
 									event.type
 								}: ${event.name}?</p>
@@ -351,7 +361,7 @@ class WWSUcalendar extends CalendarDb {
 				});
 
 				// Populate the data table with data.
-				var drawRows = () => {
+				let drawRows = () => {
 					this.calendar.find().forEach((calendar) => {
 						table.rows.add([
 							[
@@ -407,12 +417,12 @@ class WWSUcalendar extends CalendarDb {
 			timeout: 30000,
 			onBlock: () => {
 				// Generate the table
-				var table = $(`#modal-${this.schedulesModal.id}-table`).DataTable({
+				let table = $(`#modal-${this.schedulesModal.id}-table`).DataTable({
 					scrollCollapse: true,
-					paging: false,
+					paging: true,
 					data: [],
 					columns: [{ title: "Schedule" }, { title: "Actions" }],
-					pageLength: 10,
+					pageLength: 25,
 					drawCallback: () => {
 						// Action button click events
 						$(".btn-schedule-edit").unbind("click");
@@ -420,18 +430,17 @@ class WWSUcalendar extends CalendarDb {
 
 						// Edit a schedule
 						$(".btn-schedule-edit").click((e) => {
-							var schedule = this.schedule.find(
+							let schedule = this.schedule.find(
 								{ ID: parseInt($(e.currentTarget).data("scheduleid")) },
 								true
 							);
-							var calendarID = parseInt($(e.currentTarget).data("calendarid"));
+							let calendarID = parseInt($(e.currentTarget).data("calendarid"));
 							this.showScheduleForm(schedule, calendarID);
 						});
 
 						// Prompt before deleting a schedule
 						$(".btn-schedule-delete").click((e) => {
-							var util = new WWSUutil();
-							util.confirmDialog(
+							this.manager.get("WWSUutil").confirmDialog(
 								`<p>Are you sure you want to delete that schedule?</p>
                         <ul>
                             <li>Please <strong>do not</strong> delete schedules to cancel a specific date/time; click the occurrence on the calendar and elect to cancel it.</li>
@@ -462,7 +471,7 @@ class WWSUcalendar extends CalendarDb {
                         </ul>`,
 								null,
 								() => {
-									var scheduleID = parseInt(
+									let scheduleID = parseInt(
 										$(e.currentTarget).data("scheduleid")
 									);
 									this.removeSchedule(
@@ -483,7 +492,7 @@ class WWSUcalendar extends CalendarDb {
 				});
 
 				// Populate the table with data
-				var drawRows = () => {
+				let drawRows = () => {
 					this.schedule.find({ calendarID: calendarID }).forEach((schedule) => {
 						// Skip all schedule entries that are unauthorized or specify an update/cancellation; these should be managed via the calendar.
 						if (schedule.scheduleType !== null) {
@@ -525,25 +534,27 @@ class WWSUcalendar extends CalendarDb {
 	 */
 	getEventsPlaylists(cb) {
 		try {
-			this.requests.no.request(
-				{ method: "post", url: this.endpoints.getEventsPlaylists, data: {} },
-				(response) => {
-					if (!response.playlists || !response.events) {
-						$(document).Toasts("create", {
-							class: "bg-danger",
-							title: "Error loading events and playlists",
-							body:
-								"There was an error loading events and playlists. Please report this to the engineer.",
-							autoHide: true,
-							delay: 10000,
-							icon: "fas fa-skull-crossbones fa-lg",
-						});
-						cb([], []);
-					} else {
-						cb(response.events, response.playlists);
+			this.manager
+				.get("noReq")
+				.request(
+					{ method: "post", url: this.endpoints.getEventsPlaylists, data: {} },
+					(response) => {
+						if (!response.playlists || !response.events) {
+							$(document).Toasts("create", {
+								class: "bg-danger",
+								title: "Error loading events and playlists",
+								body:
+									"There was an error loading events and playlists. Please report this to the engineer.",
+								autoHide: true,
+								delay: 10000,
+								icon: "fas fa-skull-crossbones fa-lg",
+							});
+							cb([], []);
+						} else {
+							cb(response.events, response.playlists);
+						}
 					}
-				}
-			);
+				);
 		} catch (e) {
 			$(document).Toasts("create", {
 				class: "bg-danger",
@@ -569,7 +580,7 @@ class WWSUcalendar extends CalendarDb {
 	addSchedule(modal, data, cb) {
 		this.doConflictCheck(modal, data, "insert", () => {
 			try {
-				this.requests.director.request(
+				this.manager.get("directorReq").request(
 					{
 						dom: `#modal-${modal.id}`,
 						method: "post",
@@ -626,7 +637,7 @@ class WWSUcalendar extends CalendarDb {
 	editSchedule(modal, data, cb) {
 		this.doConflictCheck(modal, data, "update", () => {
 			try {
-				this.requests.director.request(
+				this.manager.get("directorReq").request(
 					{
 						dom: `#modal-${modal.id}`,
 						method: "post",
@@ -681,8 +692,9 @@ class WWSUcalendar extends CalendarDb {
 	 * @param {function} cb Function called after the request. True = success, false = failure.
 	 */
 	removeSchedule(modal, data, cb) {
+		let schedule;
 		try {
-			var schedule = this.schedule.find({ ID: data.ID }, true);
+			schedule = this.schedule.find({ ID: data.ID }, true);
 		} catch (e) {
 			$(document).Toasts("create", {
 				class: "bg-danger",
@@ -694,10 +706,11 @@ class WWSUcalendar extends CalendarDb {
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
 			cb(false);
+			return;
 		}
 		this.doConflictCheck(modal, schedule, "remove", () => {
 			try {
-				this.requests.director.request(
+				this.manager.get("directorReq").request(
 					{
 						dom: `#modal-${modal.id}`,
 						method: "post",
@@ -754,7 +767,7 @@ class WWSUcalendar extends CalendarDb {
 	addCalendar(modal, data, cb) {
 		// No conflict check necessary because new calendar events will never have a schedule immediately on creation.
 		try {
-			this.requests.director.request(
+			this.manager.get("directorReq").request(
 				{
 					dom: `#modal-${modal.id}`,
 					method: "post",
@@ -811,7 +824,7 @@ class WWSUcalendar extends CalendarDb {
 		// Editing a calendar event requires conflict checking because it may affect the priority of its schedules using default values.
 		this.doConflictCheck(modal, data, "updateCalendar", () => {
 			try {
-				this.requests.director.request(
+				this.manager.get("directorReq").request(
 					{
 						dom: `#modal-${modal.id}`,
 						method: "post",
@@ -867,10 +880,10 @@ class WWSUcalendar extends CalendarDb {
 	 */
 	removeCalendar(modal, data, cb) {
 		// We need to determine if the removal of this calendar (and thus all its schedules) will affect other events
-		var calendar = this.calendar.find({ ID: data.ID }, true);
+		let calendar = this.calendar.find({ ID: data.ID }, true);
 		this.doConflictCheck(modal, calendar, "removeCalendar", () => {
 			try {
-				this.requests.director.request(
+				this.manager.get("directorReq").request(
 					{
 						dom: `#modal-${modal.id}`,
 						method: "post",
@@ -926,11 +939,10 @@ class WWSUcalendar extends CalendarDb {
 		this.occurrenceModal.title = `${event.type}: ${event.hosts} - ${event.name}`;
 		this.occurrenceModal.body = this.generateFullEventCard(event);
 
-		// Initialize utilities
-		var util = new WWSUutil();
+		// Initialize this.manager.get("WWSUutil")ities
 
 		// Initialize choices / actions that can be performed on the event.
-		var choices = ["Do Nothing"];
+		let choices = ["Do Nothing"];
 
 		// Determine what else can be done
 		if (event.scheduleType === "updated") {
@@ -1001,13 +1013,13 @@ class WWSUcalendar extends CalendarDb {
 									form.focus();
 									return;
 								}
-								var value = form.getValue();
+								let value = form.getValue();
 
 								// Determine what to do based on selected action
 								switch (value.action) {
 									// Confirm whether or not to reverse schedule changes
 									case `Occurrence: Reverse / discard changes`:
-										util.confirmDialog(
+										this.manager.get("WWSUutil").confirmDialog(
 											`<p>Are you sure you want to reverse updates made for ${
 												event.type
 											}: ${event.name} on ${moment(event.start).format(
@@ -1062,7 +1074,7 @@ class WWSUcalendar extends CalendarDb {
 
 									// Confirm whether or not to reverse a cancellation
 									case `Occurrence: Un-cancel`:
-										util.confirmDialog(
+										this.manager.get("WWSUutil").confirmDialog(
 											`<p>Are you sure you want to reverse the cancellation of ${
 												event.type
 											}: ${event.name} on ${moment(event.start).format(
@@ -1116,7 +1128,7 @@ class WWSUcalendar extends CalendarDb {
 
 									// Confirm whether or not to permanently remove an event
 									case `Event: Delete (and all schedules)`:
-										util.confirmDialog(
+										this.manager.get("WWSUutil").confirmDialog(
 											`<p>Are you sure you want to <b>permanently</b> remove ${
 												event.type
 											}: ${event.name}?</p>
@@ -1180,7 +1192,7 @@ class WWSUcalendar extends CalendarDb {
 										break;
 
 									case `Event: Edit defaults`:
-										var _calendar = this.calendar
+										let _calendar = this.calendar
 											.find()
 											.find((_event) => _event.ID === event.calendarID);
 										this.showEventForm(_calendar);
@@ -1212,8 +1224,8 @@ class WWSUcalendar extends CalendarDb {
 	 */
 	generateFullEventCard(event) {
 		// Get color and icon for the event
-		var colorClass = this.getColorClass(event);
-		var iconClass = this.getIconClass(event);
+		let colorClass = this.getColorClass(event);
+		let iconClass = this.getIconClass(event);
 
 		// Use dark color instead if this event was canceled
 		if (
@@ -1225,7 +1237,7 @@ class WWSUcalendar extends CalendarDb {
 		}
 
 		// Determine if we should show a badge indicating a changed status of the event
-		var badgeInfo;
+		let badgeInfo;
 		if (["canceled-changed"].indexOf(event.scheduleType) !== -1) {
 			badgeInfo = `<span class="badge-warning" style="font-size: 1em;">RESCHEDULED</span>`;
 		}
@@ -1298,9 +1310,6 @@ class WWSUcalendar extends CalendarDb {
 	 * @param {object} event CalendarDb event
 	 */
 	showCancelForm(event) {
-		// Initialize utilities
-		var util = new WWSUutil();
-
 		this.occurrenceActionModal.title = `Cancel ${event.type}: ${
 			event.hosts
 		} - ${event.name} on ${moment(event.start).format("LLLL")}`;
@@ -1337,10 +1346,10 @@ class WWSUcalendar extends CalendarDb {
 									form.focus();
 									return;
 								}
-								var value = form.getValue();
+								let value = form.getValue();
 
 								// Confirm if we want to really cancel
-								util.confirmDialog(
+								this.manager.get("WWSUutil").confirmDialog(
 									`<p>Are you sure you want to cancel ${event.type}: ${
 										event.hosts
 									} - ${event.name} on ${moment(event.start).format(
@@ -1448,9 +1457,9 @@ class WWSUcalendar extends CalendarDb {
 
 		// We need to get the events and playlists we can choose from
 		this.getEventsPlaylists((events, playlists) => {
-			var _djs = this.requests.dj.db.find();
+			let _djs = this.manager.get(this.manager.get("djReq").db).find();
 
-			var calendarEvents = this.calendar.find().map((_event) => _event.name);
+			let calendarEvents = this.calendar.find().map((_event) => _event.name);
 
 			// Generate the form
 			$(this.eventModal.body).alpaca({
@@ -1528,7 +1537,7 @@ class WWSUcalendar extends CalendarDb {
 						name: {
 							helper: "Event may not share the name of another event",
 							validator: function (callback) {
-								var value = this.getValue();
+								let value = this.getValue();
 								if (value.includes(" -")) {
 									callback({
 										status: false,
@@ -1565,8 +1574,8 @@ class WWSUcalendar extends CalendarDb {
 							helper:
 								"The DJ who signed up for this show, or the official WWSU producer for shows run by non-WWSU people. This field is required for show, remote, and prerecord events.",
 							validator: function (callback) {
-								var value = this.getValue();
-								var type = this.getParent().childrenByPropertyId[
+								let value = this.getValue();
+								let type = this.getParent().childrenByPropertyId[
 									"type"
 								].getValue();
 								if (
@@ -1608,8 +1617,8 @@ class WWSUcalendar extends CalendarDb {
 							optionLabels: playlists.map((playlist) => playlist.name),
 							helper: "Required for prerecords and playlists only.",
 							validator: function (callback) {
-								var value = this.getValue();
-								var type = this.getParent().childrenByPropertyId[
+								let value = this.getValue();
+								let type = this.getParent().childrenByPropertyId[
 									"type"
 								].getValue();
 								if (
@@ -1633,8 +1642,8 @@ class WWSUcalendar extends CalendarDb {
 							optionLabels: events.map((eventb) => eventb.name),
 							helper: "Required for genres only.",
 							validator: function (callback) {
-								var value = this.getValue();
-								var type = this.getParent().childrenByPropertyId[
+								let value = this.getValue();
+								let type = this.getParent().childrenByPropertyId[
 									"type"
 								].getValue();
 								if (
@@ -1664,9 +1673,9 @@ class WWSUcalendar extends CalendarDb {
 										form.focus();
 										return;
 									}
-									var value = form.getValue();
+									let value = form.getValue();
 
-									var _event = this.verify(value); // Verify the event is valid first just to be extra sure
+									let _event = this.verify(value); // Verify the event is valid first just to be extra sure
 
 									if (!_event.event) {
 										$(document).Toasts("create", {
@@ -1714,16 +1723,17 @@ class WWSUcalendar extends CalendarDb {
 	 * Show form to edit an occurrence.
 	 *
 	 * @param {object} event Original event data
+	 * @param {?string} newStart Pre-fill a new start date/time for the reschedule
+	 * @param {?number} newDuration Pre-fill a new duration for the reschedule
 	 */
-	showOccurrenceForm(event) {
+	showOccurrenceForm(event, newStart, newDuration) {
 		this.occurrenceActionModal.title = `Edit occurrence ${event.type}: ${
 			event.hosts
 		} - ${event.name} on ${moment(event.start).format("LLLL")}`;
 		this.occurrenceActionModal.footer = "";
 		this.occurrenceActionModal.body = "";
 
-		var validTypes = [];
-		var util = new WWSUutil();
+		let validTypes = [];
 
 		// Limit the types we can switch to for this occurrence depending on the type of the original event.
 		switch (event.type) {
@@ -1753,11 +1763,11 @@ class WWSUcalendar extends CalendarDb {
 
 		// Get events and playlist we can select
 		this.getEventsPlaylists((events, playlists) => {
-			var _djs = this.requests.dj.db.find();
+			let _djs = this.manager.get(this.manager.get("djReq").db).find();
 
-			var calendarEvents = this.calendar.find().map((event) => event.name);
+			let calendarEvents = this.calendar.find().map((event) => event.name);
 
-			var sportsEvents = this.calendar
+			let sportsEvents = this.calendar
 				.find()
 				.filter((event) => event.type === "sports")
 				.map((event) => event.name);
@@ -1894,7 +1904,7 @@ class WWSUcalendar extends CalendarDb {
 						name: {
 							helper: `If changing the name of this occurrence, specify it here. The current name is <strong>${event.name}</strong>. This field is ignored for bookings and office-hours.`,
 							validator: function (callback) {
-								var value = this.getValue();
+								let value = this.getValue();
 								if (value.includes(" -")) {
 									callback({
 										status: false,
@@ -1903,7 +1913,7 @@ class WWSUcalendar extends CalendarDb {
 									return;
 								}
 
-								var type = this.getParent().childrenByPropertyId[
+								let type = this.getParent().childrenByPropertyId[
 									"type"
 								].getValue();
 								if (event.type === "sports") value = value.split(" vs.")[0];
@@ -1956,8 +1966,8 @@ class WWSUcalendar extends CalendarDb {
 									: `--NONE--`
 							}</strong>`,
 							validator: function (callback) {
-								var value = this.getValue();
-								var type = this.getParent().childrenByPropertyId[
+								let value = this.getValue();
+								let type = this.getParent().childrenByPropertyId[
 									"type"
 								].getValue();
 								if (
@@ -2019,8 +2029,8 @@ class WWSUcalendar extends CalendarDb {
 									: `--NONE--`
 							}</strong>`,
 							validator: function (callback) {
-								var value = this.getValue();
-								var type = this.getParent().childrenByPropertyId[
+								let value = this.getValue();
+								let type = this.getParent().childrenByPropertyId[
 									"type"
 								].getValue();
 								if (
@@ -2052,8 +2062,8 @@ class WWSUcalendar extends CalendarDb {
 									: `--NONE--`
 							}</strong>`,
 							validator: function (callback) {
-								var value = this.getValue();
-								var type = this.getParent().childrenByPropertyId[
+								let value = this.getValue();
+								let type = this.getParent().childrenByPropertyId[
 									"type"
 								].getValue();
 								if (
@@ -2085,12 +2095,12 @@ class WWSUcalendar extends CalendarDb {
 										form.focus();
 										return;
 									}
-									var value = form.getValue();
+									let value = form.getValue();
 
 									// Change duration from hours to minutes.
 									value.duration *= 60;
 
-									var _event = this.verify(value); // Verify the event just to be safe
+									let _event = this.verify(value); // Verify the event just to be safe
 									if (!_event.event) {
 										$(document).Toasts("create", {
 											class: "bg-warning",
@@ -2104,7 +2114,7 @@ class WWSUcalendar extends CalendarDb {
 									}
 
 									// Confirm if we really want to edit
-									util.confirmDialog(
+									this.manager.get("WWSUutil").confirmDialog(
 										`<p>Are you sure you want to edit occurrence ${
 											event.type
 										}: ${event.hosts} - ${event.name} on ${moment(
@@ -2169,6 +2179,8 @@ class WWSUcalendar extends CalendarDb {
 					scheduleID: event.scheduleID,
 					scheduleType: "updated",
 					originalTime: moment.parseZone(event.start).toISOString(true),
+					newTime: newStart,
+					duration: newDuration / 60
 				},
 			});
 
@@ -2183,18 +2195,17 @@ class WWSUcalendar extends CalendarDb {
 	 * @param {number} calendarID The ID of the calendar record pertaining to this schedule
 	 */
 	showScheduleForm(schedule, calendarID) {
-		var event = this.calendar.db({ ID: calendarID }, true).first();
+		let event = this.calendar.db({ ID: calendarID }, true).first();
 
 		this.scheduleModal.title = `${
-			schedule
+			schedule && schedule.ID
 				? `Edit schedule ${event.type}: ${event.hosts} - ${event.name}`
 				: `New schedule for ${event.type}: ${event.hosts} - ${event.name}`
 		}`;
 		this.scheduleModal.footer = ``;
 		this.scheduleModal.body = ``;
 
-		var validTypes = [];
-		var util = new WWSUutil();
+		let validTypes = [];
 
 		// Limit the types we can change to depending on the main event type.
 		switch (event.type) {
@@ -2224,10 +2235,10 @@ class WWSUcalendar extends CalendarDb {
 
 		// Get the events and playlists we can select from
 		this.getEventsPlaylists((events, playlists) => {
-			var _djs = this.requests.dj.db.find();
+			let _djs = this.manager.get(this.manager.get("djReq").db).find();
 
-			var calendarEvents = this.calendar.find().map((event) => event.name);
-			var sportsEvents = this.calendar
+			let calendarEvents = this.calendar.find().map((event) => event.name);
+			let sportsEvents = this.calendar
 				.find()
 				.filter((event) => event.type === "sports")
 				.map((event) => event.name);
@@ -2264,7 +2275,6 @@ class WWSUcalendar extends CalendarDb {
 						},
 						endDate: {
 							title: "End Date",
-							required: true,
 							format: "date",
 						},
 						recurDW: {
@@ -2408,7 +2418,7 @@ class WWSUcalendar extends CalendarDb {
 							type: "hidden",
 						},
 						oneTime: {
-							helper: `Specify specific non-recurring dates/times you would like the event to occur. Note that all oneTime occurrences use the same duration you provide. Also, times you provide are in the station timezone (${
+							helper: `Specify specific non-recurring dates/times you would like the event to occur. Note that all oneTime occurrences use the same duration and overrides you provide below. Also, times you provide are in the station timezone (${
 								this.meta ? this.meta.meta.timezone : "Unknown zone"
 							}) by default.`,
 							fields: {
@@ -2465,6 +2475,23 @@ class WWSUcalendar extends CalendarDb {
 								inline: true,
 								sideBySide: true,
 							},
+							validator: function (callback) {
+								let value = this.getValue();
+								let startTime = this.getParent().childrenByPropertyId[
+									"startTime"
+								].getValue();
+
+								if ((!value || value === "") && startTime && startTime !== "") {
+									callback({
+										status: false,
+										message: "endDate is required for recurring schedules.",
+									});
+									return;
+								}
+								callback({
+									status: true,
+								});
+							},
 						},
 						recurDW: {
 							helper:
@@ -2514,14 +2541,14 @@ class WWSUcalendar extends CalendarDb {
 								sideBySide: true,
 							},
 							validator: function (callback) {
-								var value = this.getValue();
-								var dm = this.getParent().childrenByPropertyId[
+								let value = this.getValue();
+								let dm = this.getParent().childrenByPropertyId[
 									"recurDM"
 								].getValue();
-								var wm = this.getParent().childrenByPropertyId[
+								let wm = this.getParent().childrenByPropertyId[
 									"recurWM"
 								].getValue();
-								var dw = this.getParent().childrenByPropertyId[
+								let dw = this.getParent().childrenByPropertyId[
 									"recurDW"
 								].getValue();
 
@@ -2552,7 +2579,7 @@ class WWSUcalendar extends CalendarDb {
 						name: {
 							helper: `Specify an event name that should be used for this schedule if different from the event default of <strong>${event.name}</strong>. This field is ignored for bookings and office-hours.`,
 							validator: function (callback) {
-								var value = this.getValue();
+								let value = this.getValue();
 								if (value.includes(" -")) {
 									callback({
 										status: false,
@@ -2561,7 +2588,7 @@ class WWSUcalendar extends CalendarDb {
 									return;
 								}
 								if (event.type === "sports") value = value.split(" vs.")[0];
-								var type = this.getParent().childrenByPropertyId[
+								let type = this.getParent().childrenByPropertyId[
 									"type"
 								].getValue();
 								if (
@@ -2614,8 +2641,8 @@ class WWSUcalendar extends CalendarDb {
 									: `--NONE--`
 							}</strong>`,
 							validator: function (callback) {
-								var value = this.getValue();
-								var type = this.getParent().childrenByPropertyId[
+								let value = this.getValue();
+								let type = this.getParent().childrenByPropertyId[
 									"type"
 								].getValue();
 								if (
@@ -2677,8 +2704,8 @@ class WWSUcalendar extends CalendarDb {
 									: `--NONE--`
 							}</strong>`,
 							validator: function (callback) {
-								var value = this.getValue();
-								var type = this.getParent().childrenByPropertyId[
+								let value = this.getValue();
+								let type = this.getParent().childrenByPropertyId[
 									"type"
 								].getValue();
 								if (
@@ -2710,8 +2737,8 @@ class WWSUcalendar extends CalendarDb {
 									: `--NONE--`
 							}</strong>`,
 							validator: function (callback) {
-								var value = this.getValue();
-								var type = this.getParent().childrenByPropertyId[
+								let value = this.getValue();
+								let type = this.getParent().childrenByPropertyId[
 									"type"
 								].getValue();
 								if (
@@ -2736,19 +2763,40 @@ class WWSUcalendar extends CalendarDb {
 					form: {
 						buttons: {
 							submit: {
-								title: `${schedule ? `Edit` : `Add`} Schedule`,
+								title: `${schedule && schedule.ID ? `Edit` : `Add`} Schedule`,
 								click: (form, e) => {
 									form.refreshValidationState(true);
 									if (!form.isValid(true)) {
 										form.focus();
 										return;
 									}
-									var value = form.getValue();
+									let value = form.getValue();
 
 									// Map recurring rules to an array
 									value.recurDM = value.recurDM.map((val) => val.value);
 									value.recurWM = value.recurWM.map((val) => val.value);
 									value.recurDW = value.recurDW.map((val) => val.value);
+
+									// Determine latest one-time and set endDate to that +2 days if not provided
+									if (
+										value.oneTime &&
+										value.oneTime.length > 0 &&
+										(!value.endDate || value.endDate === "")
+									) {
+										let oneTimes = value.oneTime
+											.map((ot) => moment(ot).valueOf())
+											.sort((a, b) => b - a);
+
+										value.endDate = moment
+											.tz(
+												oneTimes[0],
+												this.manager.get("WWSUMeta")
+													? this.manager.get("WWSUMeta").meta.timezone
+													: moment.tz.guess()
+											)
+											.add(2, "days")
+											.toISOString(true);
+									}
 
 									// Prepare fields for database
 									value = Object.assign(
@@ -2763,7 +2811,7 @@ class WWSUcalendar extends CalendarDb {
 									// Convert duration from hours to minutes
 									value.duration *= 60;
 
-									var _event = this.verify(value); // Verify the event just to be safe
+									let _event = this.verify(value); // Verify the event just to be safe
 									if (!_event.event) {
 										$(document).Toasts("create", {
 											class: "bg-warning",
@@ -2777,7 +2825,7 @@ class WWSUcalendar extends CalendarDb {
 									}
 
 									// Add or edit the schedule
-									if (!schedule) {
+									if (!schedule || !schedule.ID) {
 										this.addSchedule(this.scheduleModal, value, (success) => {
 											if (success) {
 												this.scheduleModal.iziModal("close");
@@ -2804,9 +2852,10 @@ class WWSUcalendar extends CalendarDb {
 					},
 				},
 
-				data: schedule
-					? Object.assign(schedule, this.recurrenceRulesToFields(schedule))
-					: { calendarID: calendarID },
+				data:
+					schedule && schedule.ID
+						? Object.assign(schedule, this.recurrenceRulesToFields(schedule))
+						: Object.assign(schedule || {}, { calendarID: calendarID }),
 			});
 
 			this.scheduleModal.iziModal("open");
@@ -2840,7 +2889,7 @@ class WWSUcalendar extends CalendarDb {
 					});
 					return;
 				}
-				var query = {};
+				let query = {};
 				query[action] =
 					action === "remove" || action === "removeCalendar"
 						? event.event.ID
@@ -2860,7 +2909,7 @@ class WWSUcalendar extends CalendarDb {
 							return;
 						}
 
-						var actions = [];
+						let actions = [];
 
 						conflicts.errors.map((error) => {
 							actions.push(`<li><strong>ERROR: </strong>${error}</li>`);
@@ -3005,13 +3054,13 @@ class WWSUcalendar extends CalendarDb {
 	}
 
 	/**
-	 * Utility function to convert schedule fields into moment.recur recurrence rules.
+	 * this.manager.get("WWSUutil")ity function to convert schedule fields into moment.recur recurrence rules.
 	 *
 	 * @param {object} record The form record to check
 	 * @returns {object} properties recurrenceRules and recurrenceInterval to use in the database.
 	 */
 	fieldsToRecurrenceRules(record) {
-		var criteria = { recurrenceRules: null, recurrenceInterval: null };
+		let criteria = { recurrenceRules: null, recurrenceInterval: null };
 
 		if (record.startTime) {
 			criteria.recurrenceRules = [];
@@ -3052,13 +3101,13 @@ class WWSUcalendar extends CalendarDb {
 	}
 
 	/**
-	 * Utility function to convert recurrenceRules and recurrenceInterval into form fields.
+	 * this.manager.get("WWSUutil")ity function to convert recurrenceRules and recurrenceInterval into form fields.
 	 *
 	 * @param {object} record The event record.
 	 * @returns {object} recurDM, recurWM, recurDW, and recurEveryWeeks.
 	 */
 	recurrenceRulesToFields(record) {
-		var criteria = {
+		let criteria = {
 			recurDM: null,
 			recurWM: null,
 			recurDW: null,
@@ -3093,5 +3142,116 @@ class WWSUcalendar extends CalendarDb {
 		}
 
 		return criteria;
+	}
+
+	newOccurrence(start, end) {
+		let duration = moment(end).diff(start, "minutes");
+
+		// Duration check; do not allow events more than 1 day long
+		if (duration > 60 * 24) {
+			$(document).Toasts("create", {
+				class: "bg-warning",
+				title: "Multi-day Events Not Allowed",
+				body:
+					"Occurrences may not last more than 24 hours. Consider setting up a recurring schedule.",
+				autoHide: true,
+				delay: 15000,
+			});
+			return;
+		}
+
+		this.newOccurrenceModal.title = `New Occurrence`;
+		this.newOccurrenceModal.footer = `${moment(start).format("lll")} - ${moment(
+			end
+		).format("lll")}`;
+		this.newOccurrenceModal.body = ``;
+
+		$(this.newOccurrenceModal.body).alpaca({
+			schema: {
+				type: "object",
+				properties: {
+					event: {
+						title: "Choose Event",
+						type: "number",
+						required: true,
+						enum: this.calendar
+							.db()
+							.get()
+							.map((cal) => cal.ID),
+					},
+					recur: {
+						type: "boolean",
+						title: "Recurs / Repeats?",
+					},
+				},
+			},
+			options: {
+				fields: {
+					event: {
+						type: "select",
+						optionLabels: this.calendar
+							.db()
+							.get()
+							.map((cal) => `${cal.type}: ${cal.hosts} - ${cal.name}`),
+						helper:
+							"If the event you want is not listed, you may need to add it first under the Manage Events button on the calendar.",
+					},
+					recur: {
+						rightLabel: "Yes",
+						helpers: [
+							`If unchecked, the time of ${moment(start).format(
+								"lll"
+							)} - ${moment(end).format(
+								"lll"
+							)} will be filled in as a one-time occurrence on the next screen.`,
+							`If checked, the time of ${moment(start).format(
+								"dddd h:mm A"
+							)} - ${moment(end).format(
+								"dddd h:mm A"
+							)} will be filled in as a weekly recurring schedule on the next screen (but you can change recurrence settings).`,
+						],
+					},
+				},
+
+				form: {
+					buttons: {
+						submit: {
+							title: `Continue`,
+							click: (form, e) => {
+								form.refreshValidationState(true);
+								if (!form.isValid(true)) {
+									form.focus();
+									return;
+								}
+								let value = form.getValue();
+
+								if (value.recur) {
+									this.showScheduleForm(
+										{
+											recurDW: parseInt(moment(start).format("e")),
+											startDate: moment(start).subtract(1, "days"),
+											startTime: moment(start).format("HH:mm"),
+											duration: duration,
+										},
+										value.event
+									);
+								} else {
+									this.showScheduleForm(
+										{
+											oneTime: [moment(start).toISOString(true)],
+											startDate: moment(start).subtract(1, "days"),
+											duration: duration,
+										},
+										value.event
+									);
+								}
+							},
+						},
+					},
+				},
+			},
+		});
+
+		this.newOccurrenceModal.iziModal("open");
 	}
 }

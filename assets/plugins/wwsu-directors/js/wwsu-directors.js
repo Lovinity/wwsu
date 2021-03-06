@@ -1,16 +1,19 @@
-/* global WWSUdb */
+"use strict";
 
 // This class manages directors from WWSU.
+
+// REQUIRED WWSUmodules: noReq (WWSUreq), adminDirectorReq (WWSUreq), masterDirectorReq (WWSUreq), WWSUMeta, WWSUutil, WWSUanimations
 class WWSUdirectors extends WWSUdb {
 	/**
 	 * Construct the directors.
 	 *
-	 * @param {sails.io} socket The socket connection to WWSU
-	 * @param {WWSUreq} noReq A request with no authorization
-	 * @param {string} machineID host ID string
+	 * @param {WWSUmodules} manager The modules class which initiated this module
+	 * @param {object} options Options to be passed to this module
 	 */
-	constructor(socket, noReq, machineID) {
+	constructor(manager, options) {
 		super(); // Create the db
+
+		this.manager = manager;
 
 		this.endpoints = {
 			get: "/directors/get",
@@ -21,35 +24,10 @@ class WWSUdirectors extends WWSUdb {
 		this.data = {
 			get: {},
 		};
-		this.requests = {
-			no: noReq,
-
-			// We are creating our own WWSUreq inside WWSUdirectors because this req depends on WWSUdirectors, thereby making a circular reference problem.
-			adminDirector: new WWSUreq(
-				socket,
-				machineID,
-				this,
-				{ admin: true },
-				"name",
-				"/auth/admin-director",
-				"Administrator Director"
-			),
-			masterDirector: new WWSUreq(
-				socket,
-				machineID,
-				this,
-				{ ID: 0 },
-				"name",
-				"/auth/admin-director",
-				"Master Director"
-			),
-		};
 
 		this.table;
 
-		this.animations = new WWSUanimations();
-
-		this.assignSocketEvent("directors", socket);
+		this.assignSocketEvent("directors", this.manager.socket);
 
 		this.newDirectorModal = new WWSUmodal(`New Director`, null, ``, true, {
 			headerColor: "",
@@ -60,7 +38,11 @@ class WWSUdirectors extends WWSUdb {
 
 	// Initialize the directors class. Call this on socket connect event.
 	init() {
-		this.replaceData(this.requests.no, this.endpoints.get, this.data.get);
+		this.replaceData(
+			this.manager.get("noReq"),
+			this.endpoints.get,
+			this.data.get
+		);
 	}
 
 	/**
@@ -71,7 +53,7 @@ class WWSUdirectors extends WWSUdb {
 	 */
 	addDirector(data, cb) {
 		try {
-			this.requests.adminDirector.request(
+			this.manager.get("adminDirectorReq").request(
 				{
 					dom: `#modal-${this.newDirectorModal.id}`,
 					method: "post",
@@ -123,36 +105,38 @@ class WWSUdirectors extends WWSUdb {
 	 */
 	editDirector(data, cb) {
 		try {
-			this.requests[data.ID === 0 ? "masterDirector" : "adminDirector"].request(
-				{
-					dom: `#modal-${this.newDirectorModal.id}`,
-					method: "post",
-					url: this.endpoints.edit,
-					data: data,
-				},
-				(response) => {
-					if (response !== "OK") {
-						$(document).Toasts("create", {
-							class: "bg-warning",
-							title: "Error editing director",
-							body:
-								"There was an error editing the Director. Please make sure you filled all fields correctly.",
-							delay: 10000,
-						});
-						console.log(response);
-						if (typeof cb === "function") cb(false);
-					} else {
-						$(document).Toasts("create", {
-							class: "bg-success",
-							title: "Director Edited",
-							autohide: true,
-							delay: 10000,
-							body: `Director has been edited`,
-						});
-						if (typeof cb === "function") cb(true);
+			this.manager
+				.get(data.ID === 1 ? "masterDirectorReq" : "adminDirectorReq")
+				.request(
+					{
+						dom: `#modal-${this.newDirectorModal.id}`,
+						method: "post",
+						url: this.endpoints.edit,
+						data: data,
+					},
+					(response) => {
+						if (response !== "OK") {
+							$(document).Toasts("create", {
+								class: "bg-warning",
+								title: "Error editing director",
+								body:
+									"There was an error editing the Director. Please make sure you filled all fields correctly.",
+								delay: 10000,
+							});
+							console.log(response);
+							if (typeof cb === "function") cb(false);
+						} else {
+							$(document).Toasts("create", {
+								class: "bg-success",
+								title: "Director Edited",
+								autohide: true,
+								delay: 10000,
+								body: `Director has been edited`,
+							});
+							if (typeof cb === "function") cb(true);
+						}
 					}
-				}
-			);
+				);
 		} catch (e) {
 			$(document).Toasts("create", {
 				class: "bg-danger",
@@ -176,7 +160,7 @@ class WWSUdirectors extends WWSUdb {
 	 */
 	removeDirector(data, cb) {
 		try {
-			this.requests.adminDirector.request(
+			this.manager.get("adminDirectorReq").request(
 				{
 					method: "post",
 					url: this.endpoints.remove,
@@ -227,66 +211,68 @@ class WWSUdirectors extends WWSUdb {
 	 * @param {string} table The DOM query string of the div container that should house the table.
 	 */
 	initTable(table) {
-		this.animations.add("directors-init-table", () => {
-			var util = new WWSUutil();
-
+		this.manager.get("WWSUanimations").add("directors-init-table", () => {
 			// Init html
 			$(table).html(
 				`<p class="wwsumeta-timezone-display">Times are shown in the timezone ${
-					this.meta ? this.meta.meta.timezone : moment.tz.guess()
+					this.manager.get("WWSUMeta")
+						? this.manager.get("WWSUMeta").meta.timezone
+						: moment.tz.guess()
 				}.</p><p><button type="button" class="btn btn-block btn-success btn-director-new">New Director</button></p><table id="section-directors-table" class="table table-striped display responsive" style="width: 100%;"></table>`
 			);
 
-			util.waitForElement(`#section-directors-table`, () => {
-				// Generate table
-				this.table = $(`#section-directors-table`).DataTable({
-					paging: false,
-					data: [],
-					columns: [
-						{ title: "Name" },
-						{ title: "Position" },
-						{ title: "Clocked In?" },
-						{ title: "Admin?" },
-						{ title: "Assistant?" },
-						{ title: "Emails" },
-						{ title: "Actions" },
-					],
-					columnDefs: [{ responsivePriority: 1, targets: 4 }],
-					order: [[0, "asc"]],
-					pageLength: 10,
-					drawCallback: () => {
-						// Action button click events
-						$(".btn-director-edit").unbind("click");
-						$(".btn-director-delete").unbind("click");
+			this.manager
+				.get("WWSUutil")
+				.waitForElement(`#section-directors-table`, () => {
+					// Generate table
+					this.table = $(`#section-directors-table`).DataTable({
+						paging: true,
+						data: [],
+						columns: [
+							{ title: "Name" },
+							{ title: "Position" },
+							{ title: "Clocked In?" },
+							{ title: "Admin?" },
+							{ title: "Assistant?" },
+							{ title: "Emails" },
+							{ title: "Actions" },
+						],
+						columnDefs: [{ responsivePriority: 1, targets: 4 }],
+						order: [[0, "asc"]],
+						buttons: ["copy", "csv", "excel", "pdf", "print", "colvis"],
+						pageLength: 100,
+						drawCallback: () => {
+							// Action button click events
+							$(".btn-director-edit").unbind("click");
+							$(".btn-director-delete").unbind("click");
 
-						$(".btn-director-edit").click((e) => {
-							var director = this.find().find(
-								(director) =>
-									director.ID === parseInt($(e.currentTarget).data("id"))
-							);
-							if (director.ID === 0) {
-								util.confirmDialog(
-									`<p>Are you sure you want to edit the <strong>Master Director</strong>?</p>
+							$(".btn-director-edit").click((e) => {
+								let director = this.find().find(
+									(director) =>
+										director.ID === parseInt($(e.currentTarget).data("id"))
+								);
+								if (director.ID === 1) {
+									this.manager.get("WWSUutil").confirmDialog(
+										`<p>Are you sure you want to edit the <strong>Master Director</strong>?</p>
 									<p>Please be aware that <strong>only the master director may edit the master director</strong>.</p>
 									<p>If the master director forgot their password, it must be reset. Please contact Patrick Schmalstig at xanaftp@gmail.com.</p>`,
-									null,
-									() => {
-										this.showDirectorForm(director);
-									}
-								);
-							} else {
-								this.showDirectorForm(director);
-							}
-						});
+										null,
+										() => {
+											this.showDirectorForm(director);
+										}
+									);
+								} else {
+									this.showDirectorForm(director);
+								}
+							});
 
-						$(".btn-director-delete").click((e) => {
-							var util = new WWSUutil();
-							var director = this.find().find(
-								(director) =>
-									director.ID === parseInt($(e.currentTarget).data("id"))
-							);
-							util.confirmDialog(
-								`Are you sure you want to <strong>permanently</strong> remove the director "${director.name}"?
+							$(".btn-director-delete").click((e) => {
+								let director = this.find().find(
+									(director) =>
+										director.ID === parseInt($(e.currentTarget).data("id"))
+								);
+								this.manager.get("WWSUutil").confirmDialog(
+									`Are you sure you want to <strong>permanently</strong> remove the director "${director.name}"?
                                 <ul>
                                 <li><strong>Do NOT permanently remove a director unless they are no longer working for WWSU.</strong></li>
                                 <li>This removes the director from the system, including WWSU timesheets application and anywhere office hours and directors are posted.</li>
@@ -296,24 +282,29 @@ class WWSUdirectors extends WWSUdb {
                                 <li>This will delete tasks created by this director.</li>
                                 <li>The timesheet records for the director will remain in the system and can still be viewed. But the director cannot clock in/out anymore.</li>
                                 </ul>`,
-								director.name,
-								() => {
-									this.removeDirector({ ID: director.ID });
-								}
-							);
-						});
-					},
-				});
+									director.name,
+									() => {
+										this.removeDirector({ ID: director.ID });
+									}
+								);
+							});
+						},
+					});
 
-				// Add click event for new DJ button
-				$(".btn-director-new").unbind("click");
-				$(".btn-director-new").click(() => {
-					this.showDirectorForm();
-				});
+					this.table
+						.buttons()
+						.container()
+						.appendTo(`#section-directors-table_wrapper .col-md-6:eq(0)`);
 
-				// Update with information
-				this.updateTable();
-			});
+					// Add click event for new DJ button
+					$(".btn-director-new").unbind("click");
+					$(".btn-director-new").click(() => {
+						this.showDirectorForm();
+					});
+
+					// Update with information
+					this.updateTable();
+				});
 		});
 	}
 
@@ -321,7 +312,7 @@ class WWSUdirectors extends WWSUdb {
 	 * Update the Director management table if it exists
 	 */
 	updateTable() {
-		this.animations.add("directors-update-table", () => {
+		this.manager.get("WWSUanimations").add("directors-update-table", () => {
 			if (this.table) {
 				this.table.clear();
 				this.find().forEach((director) => {
@@ -359,7 +350,7 @@ class WWSUdirectors extends WWSUdb {
 						}" title="Edit director"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-danger btn-director-delete" data-id="${
 							director.ID
 						}" ${
-							director.ID === 0
+							director.ID === 1
 								? `title="Cannot remove the master director" disabled`
 								: `title="Remove Director"`
 						}><i class="fas fa-trash"></i></button></div>`,
@@ -403,7 +394,7 @@ class WWSUdirectors extends WWSUdb {
 					admin: {
 						type: "boolean",
 						title: "Is Admin Director?",
-						readonly: data && data.ID === 0,
+						readonly: data && data.ID === 1,
 					},
 					assistant: {
 						type: "boolean",
@@ -490,7 +481,7 @@ class WWSUdirectors extends WWSUdb {
 									form.focus();
 									return;
 								}
-								var value = form.getValue();
+								let value = form.getValue();
 								if (data) {
 									this.editDirector(value, (success) => {
 										if (success) {

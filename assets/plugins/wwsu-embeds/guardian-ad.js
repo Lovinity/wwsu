@@ -1,9 +1,11 @@
-var audio = document.querySelector('#player')
-var playButton = document.querySelector('#play')
-var pauseButton = document.querySelector('#pause')
-var metaBox = document.querySelector('#meta')
-var Meta = { line1: '', line2: '' }
-var displayingLine1 = true
+'use strict';
+
+let audio = document.querySelector('#player')
+let playButton = document.querySelector('#play')
+let pauseButton = document.querySelector('#pause')
+let metaBox = document.querySelector('#meta')
+let Meta = { line1: '', line2: '' }
+let displayingLine1 = true
 
 
 
@@ -57,7 +59,7 @@ waitFor(() => {
 
     io.socket.on('meta', (data) => {
         try {
-            for (var key in data) {
+            for (let key in data) {
                 if (Object.prototype.hasOwnProperty.call(data, key)) {
                     Meta[ key ] = data[ key ]
                 }
@@ -72,7 +74,7 @@ waitFor(() => {
 function doSockets () {
     io.socket.post('/meta/get', {}, function serverResponded (body) {
         try {
-            for (var key in body) {
+            for (let key in body) {
                 if (Object.prototype.hasOwnProperty.call(body, key)) {
                     Meta[ key ] = body[ key ]
                 }

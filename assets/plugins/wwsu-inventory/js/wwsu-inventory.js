@@ -1,15 +1,19 @@
+"use strict";
+
 // This class manages the WWSU inventory and checking equipment in/out.
+
+// REQUIRES these WWSUmodules: WWSUMeta, hostReq (WWSureq), directorReq (WWSUreq), WWSUutil, WWSUanimations
 class WWSUinventory extends WWSUdb {
 	/**
 	 * Construct the class
 	 *
-	 * @param {sails.io} socket The socket connection to WWSU
-	 * @param {WWSUmeta} meta Initialized WWSUmeta class
-	 * @param {WWSUreq} hostReq Request with host authorization
-	 * @param {WWSUreq} directorReq Request with Director authorization
+	 * @param {WWSUmodules} manager The modules class which initiated this module
+	 * @param {object} options Options to be passed to this module
 	 */
-	constructor(socket, meta, hostReq, directorReq) {
+	constructor(manager, options) {
 		super(); // Create the db
+
+		this.manager = manager;
 
 		this.endpoints = {
 			add: "/inventory/add",
@@ -21,20 +25,14 @@ class WWSUinventory extends WWSUdb {
 			removeCheckout: "/inventory/remove-checkout",
 			remove: "/inventory/remove",
 		};
-		this.requests = {
-			host: hostReq,
-			director: directorReq,
-		};
+
 		this.data = {
 			get: {},
 		};
-		this.meta = meta;
-
-		this.animations = new WWSUanimations();
 
 		this.table;
 
-		this.assignSocketEvent("items", socket);
+		this.assignSocketEvent("items", this.manager.socket);
 
 		this.on("change", "WWSUinventory", () => {
 			this.updateTable();
@@ -62,7 +60,11 @@ class WWSUinventory extends WWSUdb {
 
 	// Initialize connection. Call this on socket connect event.
 	init() {
-		this.replaceData(this.requests.host, this.endpoints.get, this.data.get);
+		this.replaceData(
+			this.manager.get("hostReq"),
+			this.endpoints.get,
+			this.data.get
+		);
 	}
 
 	/**
@@ -71,82 +73,90 @@ class WWSUinventory extends WWSUdb {
 	 * @param {string} table DOM query string where the table should be created (should be a div).
 	 */
 	initTable(table) {
-		this.animations.add("inventory-init-table", () => {
-			var util = new WWSUutil();
-
+		this.manager.get("WWSUanimations").add("inventory-init-table", () => {
 			// Init html
 			$(table).html(
 				`<p class="wwsumeta-timezone-display">Times are shown in the timezone ${
-					this.meta ? this.meta.meta.timezone : moment.tz.guess()
+					this.manager.get("WWSUMeta")
+						? this.manager.get("WWSUMeta").meta.timezone
+						: moment.tz.guess()
 				}.</p><p><button type="button" class="btn btn-block btn-success btn-inventory-new">New Item</button></p><table id="section-inventory-table" class="table table-striped display responsive" style="width: 100%;"></table>`
 			);
 
-			util.waitForElement(`#section-inventory-table`, () => {
-				// Generate table
-				this.table = $(`#section-inventory-table`).DataTable({
-					paging: false,
-					data: [],
-					columns: [
-						{ title: "ID" },
-						{ title: "Item" },
-						{ title: "Make / Model" },
-						{ title: "Location / Bin" },
-						{ title: "Quantity" },
-						{ title: "Condition" },
-						{ title: "Actions" },
-					],
-					columnDefs: [{ responsivePriority: 1, targets: 6 }],
-					order: [
-						[3, "asc"],
-						[1, "asc"],
-					],
-					scrollCollapse: true,
-					drawCallback: () => {
-						// Action button click events
-						$(".btn-inventory-checkout").unbind("click");
-						$(".btn-inventory-edit").unbind("click");
-						$(".btn-inventory-delete").unbind("click");
+			this.manager
+				.get("WWSUutil")
+				.waitForElement(`#section-inventory-table`, () => {
+					// Generate table
+					this.table = $(`#section-inventory-table`).DataTable({
+						paging: true,
+						pageLength: 50,
+						data: [],
+						columns: [
+							{ title: "ID" },
+							{ title: "Item" },
+							{ title: "Make / Model" },
+							{ title: "Location / Bin" },
+							{ title: "Quantity" },
+							{ title: "Condition" },
+							{ title: "Actions" },
+						],
+						columnDefs: [{ responsivePriority: 1, targets: 6 }],
+						order: [
+							[3, "asc"],
+							[1, "asc"],
+						],
+						scrollCollapse: true,
+						buttons: ["copy", "csv", "excel", "pdf", "print", "colvis"],
+						drawCallback: () => {
+							// Action button click events
+							$(".btn-inventory-checkout").unbind("click");
+							$(".btn-inventory-edit").unbind("click");
+							$(".btn-inventory-delete").unbind("click");
 
-						$(".btn-inventory-checkout").click((e) => {
-							this.showItem(parseInt($(e.currentTarget).data("id")));
-						});
+							$(".btn-inventory-checkout").click((e) => {
+								this.showItem(parseInt($(e.currentTarget).data("id")));
+							});
 
-						$(".btn-inventory-edit").click((e) => {
-							var item = this.find().find(
-								(item) => item.ID === parseInt($(e.currentTarget).data("id"))
-							);
-							this.showItemForm(item);
-						});
+							$(".btn-inventory-edit").click((e) => {
+								let item = this.find().find(
+									(item) => item.ID === parseInt($(e.currentTarget).data("id"))
+								);
+								this.showItemForm(item);
+							});
 
-						$(".btn-inventory-delete").click((e) => {
-							var util = new WWSUutil();
-							var item = this.find().find(
-								(item) => item.ID === parseInt($(e.currentTarget).data("id"))
-							);
-							util.confirmDialog(
-								`Are you sure you want to <strong>permanently</strong> remove the item "${item.name}" in ${item.location} / ${item.subLocation} (ID: ${item.ID})?
+							$(".btn-inventory-delete").click((e) => {
+								let item = this.find().find(
+									(item) => item.ID === parseInt($(e.currentTarget).data("id"))
+								);
+								this.manager.get("WWSUutil").confirmDialog(
+									`Are you sure you want to <strong>permanently</strong> remove the item "${item.name}" in ${item.location} / ${item.subLocation} (ID: ${item.ID})?
                             <ul>
                             <li><strong>Do NOT permanently remove an item unless it is no longer in WWSU's possession permanently.</strong></li>
                             <li>Removing this item will also remove all its check-in and check-out records permanently.</li>
                             </ul>`,
-								item.name,
-								() => {
-									this.remove({ ID: item.ID });
-								}
-							);
-						});
-					},
-				});
+									item.name,
+									() => {
+										this.remove({ ID: item.ID });
+									}
+								);
+							});
+						},
+					});
 
-				// Add click event for new item button
-				$(".btn-inventory-new").unbind("click");
-				$(".btn-inventory-new").click(() => {
-					this.showItemForm();
-				});
+					this.table
+						.buttons()
+						.container()
+						.appendTo(`#section-inventory-table_wrapper .col-md-6:eq(0)`);
 
-				// Update with information
-				this.updateTable();
-			});
+					// Add click event for new item button
+					$(".btn-inventory-new").unbind("click");
+					$(".btn-inventory-new").click(() => {
+						this.showItemForm();
+					});
+
+					// Update with information
+					this.updateTable();
+				});
 		});
 	}
 
@@ -158,7 +168,7 @@ class WWSUinventory extends WWSUdb {
 	 */
 	add(data, cb) {
 		try {
-			this.requests.director.request(
+			this.manager.get("directorReq").request(
 				{
 					dom: `#modal-${this.newItemModal.id}`,
 					method: "post",
@@ -210,7 +220,7 @@ class WWSUinventory extends WWSUdb {
 	 */
 	checkIn(data, cb) {
 		try {
-			this.requests.director.request(
+			this.manager.get("directorReq").request(
 				{
 					dom: `#modal-${this.checkInOutModal.id}`,
 					method: "post",
@@ -286,7 +296,7 @@ class WWSUinventory extends WWSUdb {
 	 */
 	checkOut(data, cb) {
 		try {
-			this.requests.director.request(
+			this.manager.get("directorReq").request(
 				{
 					dom: `#modal-${this.checkInOutModal.id}`,
 					method: "post",
@@ -373,7 +383,7 @@ class WWSUinventory extends WWSUdb {
 	 */
 	edit(data, cb) {
 		try {
-			this.requests.director.request(
+			this.manager.get("directorReq").request(
 				{
 					dom: `#modal-${this.newItemModal.id}`,
 					method: "post",
@@ -425,7 +435,7 @@ class WWSUinventory extends WWSUdb {
 	 */
 	editCheckout(data, cb) {
 		try {
-			this.requests.director.request(
+			this.manager.get("directorReq").request(
 				{
 					dom: `#modal-${this.checkoutModal.id}`,
 					method: "post",
@@ -477,7 +487,7 @@ class WWSUinventory extends WWSUdb {
 	 */
 	get(data, cb) {
 		try {
-			this.requests.host.request(
+			this.manager.get("hostReq").request(
 				{
 					method: "post",
 					url: this.endpoints.get,
@@ -523,7 +533,7 @@ class WWSUinventory extends WWSUdb {
 	 */
 	remove(data, cb) {
 		try {
-			this.requests.director.request(
+			this.manager.get("directorReq").request(
 				{
 					method: "post",
 					url: this.endpoints.remove,
@@ -576,7 +586,7 @@ class WWSUinventory extends WWSUdb {
 	 */
 	removeCheckout(data, cb) {
 		try {
-			this.requests.director.request(
+			this.manager.get("directorReq").request(
 				{
 					method: "post",
 					url: this.endpoints.removeCheckout,
@@ -668,7 +678,7 @@ class WWSUinventory extends WWSUdb {
 	 * Update the inventory table if it exists
 	 */
 	updateTable() {
-		this.animations.add("inventory-update-table", () => {
+		this.manager.get("WWSUanimations").add("inventory-update-table", () => {
 			if (this.table) {
 				this.table.clear();
 				this.find().forEach((item) => {
@@ -795,7 +805,7 @@ class WWSUinventory extends WWSUdb {
 									form.focus();
 									return;
 								}
-								var value = form.getValue();
+								let value = form.getValue();
 								if (data) {
 									this.edit(value, (success) => {
 										if (success) {
@@ -829,8 +839,6 @@ class WWSUinventory extends WWSUdb {
 		this.itemInfoModal.iziModal("open");
 		this.get({ ID: item }, (response) => {
 			if (response) {
-				var util = new WWSUutil();
-
 				this.itemInfoModal.title = `Item ${response.name} (${response.ID})`;
 				this.itemInfoModal.body = `<table class="table table-striped">
 				<thead>
@@ -888,15 +896,19 @@ class WWSUinventory extends WWSUdb {
 			</table>
 			<h2>Check-out Records</h2>
 				<p class="wwsumeta-timezone-display">Times are shown in the timezone ${
-					this.meta ? this.meta.meta.timezone : moment.tz.guess()
+					this.manager.get("WWSUMeta")
+						? this.manager.get("WWSUMeta").meta.timezone
+						: moment.tz.guess()
 				}.</p><table id="section-inventory-checkout-table" class="table table-striped display responsive" style="width: 100%;"></table>`;
 
-				util.waitForElement(`#section-inventory-checkout-table`, () => {
-					// Generate table
+				this.manager
+					.get("WWSUutil")
+					.waitForElement(`#section-inventory-checkout-table`, () => {
+						// Generate table
 
-					// Extra information
-					let format = (d) => {
-						return `<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">
+						// Extra information
+						let format = (d) => {
+							return `<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">
 						<tr>
 							<td>Condition when checked out:</td>
 							<td>${this.generateConditionProgress(d.checkOutCondition)}</td>
@@ -916,7 +928,9 @@ class WWSUinventory extends WWSUdb {
 									? moment
 											.tz(
 												d.checkInDue,
-												this.meta ? this.meta.meta.timezone : moment.tz.guess()
+												this.manager.get("WWSUMeta")
+													? this.manager.get("WWSUMeta").meta.timezone
+													: moment.tz.guess()
 											)
 											.format("llll")
 									: `Not Set`
@@ -939,111 +953,122 @@ class WWSUinventory extends WWSUdb {
 							<td>${d.checkInNotes || `N/A`}</td>
 						</tr>
 						</table>`;
-					};
-					let table = $(`#section-inventory-checkout-table`).DataTable({
-						paging: true,
-						data: response.checkoutRecords.map((record) => {
-							record.checkOutDate = moment
-								.tz(
-									record.checkOutDate,
-									this.meta ? this.meta.meta.timezone : moment.tz.guess()
-								)
-								.format("lll");
-							record.checkInDate = record.checkInDate
-								? moment
-										.tz(
-											record.checkInDate,
-											this.meta ? this.meta.meta.timezone : moment.tz.guess()
-										)
-										.format("lll")
-								: `Checked Out`;
-							// TODO: Add edit button
-							record.actions = `<div class="btn-group">${
-								record.checkInDate === "Checked Out"
-									? `<button class="btn btn-sm btn-success btn-inventory-checkout-checkin" data-id="${record.ID}" data-itemid="${record.item}" title="Check the item back in"><i class="fas fa-clipboard-check"></i></button>`
-									: ``
-							}<button class="btn btn-sm btn-danger btn-inventory-checkout-delete" data-id="${
-								record.ID
-							}" data-itemid="${
-								record.item
-							}" title="Remove Checkout Record"><i class="fas fa-trash"></i></button></div>`;
-							return record;
-						}),
-						columns: [
-							{
-								className: "details-control",
-								orderable: false,
-								data: null,
-								defaultContent: "",
-							},
-							{ title: "ID", data: "ID" },
-							{ title: "Name", data: "name" },
-							{ title: "Checked Out", data: "checkOutDate" },
-							{ title: "Checked In", data: "checkInDate" },
-							{ title: "Actions", data: "actions" },
-						],
-						columnDefs: [{ responsivePriority: 1, targets: 5 }],
-						order: [[1, "asc"]],
-						pageLength: 25,
-						drawCallback: () => {
-							// Action button click events
-							$(".btn-inventory-checkout-checkin").unbind("click");
-							$(".btn-inventory-checkout-delete").unbind("click");
+						};
+						let table = $(`#section-inventory-checkout-table`).DataTable({
+							paging: true,
+							data: response.checkoutRecords.map((record) => {
+								record.checkOutDate = moment
+									.tz(
+										record.checkOutDate,
+										this.manager.get("WWSUMeta")
+											? this.manager.get("WWSUMeta").meta.timezone
+											: moment.tz.guess()
+									)
+									.format("lll");
+								record.checkInDate = record.checkInDate
+									? moment
+											.tz(
+												record.checkInDate,
+												this.manager.get("WWSUMeta")
+													? this.manager.get("WWSUMeta").meta.timezone
+													: moment.tz.guess()
+											)
+											.format("lll")
+									: `Checked Out`;
+								// TODO: Add edit button
+								record.actions = `<div class="btn-group">${
+									record.checkInDate === "Checked Out"
+										? `<button class="btn btn-sm btn-success btn-inventory-checkout-checkin" data-id="${record.ID}" data-itemid="${record.item}" title="Check the item back in"><i class="fas fa-clipboard-check"></i></button>`
+										: ``
+								}<button class="btn btn-sm btn-danger btn-inventory-checkout-delete" data-id="${
+									record.ID
+								}" data-itemid="${
+									record.item
+								}" title="Remove Checkout Record"><i class="fas fa-trash"></i></button></div>`;
+								return record;
+							}),
+							columns: [
+								{
+									className: "details-control",
+									orderable: false,
+									data: null,
+									defaultContent: "",
+								},
+								{ title: "ID", data: "ID" },
+								{ title: "Name", data: "name" },
+								{ title: "Checked Out", data: "checkOutDate" },
+								{ title: "Checked In", data: "checkInDate" },
+								{ title: "Actions", data: "actions" },
+							],
+							columnDefs: [{ responsivePriority: 1, targets: 5 }],
+							order: [[1, "asc"]],
+							pageLength: 50,
+							buttons: ["copy", "csv", "excel", "pdf", "print", "colvis"],
+							drawCallback: () => {
+								// Action button click events
+								$(".btn-inventory-checkout-checkin").unbind("click");
+								$(".btn-inventory-checkout-delete").unbind("click");
 
-							$(".btn-inventory-checkout-checkin").click((e) => {
-								this.showCheckInForm(
-									parseInt($(e.currentTarget).data("id")),
-									parseInt($(e.currentTarget).data("itemid"))
-								);
-							});
+								$(".btn-inventory-checkout-checkin").click((e) => {
+									this.showCheckInForm(
+										parseInt($(e.currentTarget).data("id")),
+										parseInt($(e.currentTarget).data("itemid"))
+									);
+								});
 
-							$(".btn-inventory-checkout-delete").click((e) => {
-								var id = parseInt($(e.currentTarget).data("id"));
-								var util = new WWSUutil();
-								util.confirmDialog(
-									`Are you sure you want to <strong>permanently</strong> remove the checkout record ID ${id}?
+								$(".btn-inventory-checkout-delete").click((e) => {
+									let id = parseInt($(e.currentTarget).data("id"));
+									this.manager.get("WWSUutil").confirmDialog(
+										`Are you sure you want to <strong>permanently</strong> remove the checkout record ID ${id}?
                             <p><strong>Do NOT permanently remove a checkout record unless it was added by mistake.</strong></p>`,
-									`${id}`,
-									() => {
-										this.removeCheckout({ ID: id }, (response) => {
-											if (response) {
-												this.showItem(
-													parseInt($(e.currentTarget).data("itemid"))
-												);
-											}
-										});
-									}
-								);
-							});
-						},
-					});
+										`${id}`,
+										() => {
+											this.removeCheckout({ ID: id }, (response) => {
+												if (response) {
+													this.showItem(
+														parseInt($(e.currentTarget).data("itemid"))
+													);
+												}
+											});
+										}
+									);
+								});
+							},
+						});
 
-					// Additional info rows
-					$("#section-inventory-checkout-table tbody").on(
-						"click",
-						"td.details-control",
-						function () {
-							var tr = $(this).closest("tr");
-							var row = table.row(tr);
+						table
+							.buttons()
+							.container()
+							.appendTo(
+								`#section-inventory-checkout-table_wrapper .col-md-6:eq(0)`
+							);
 
-							if (row.child.isShown()) {
-								// This row is already open - close it
-								row.child.hide();
-								tr.removeClass("shown");
-							} else {
-								// Open this row
-								row.child(format(row.data())).show();
-								tr.addClass("shown");
+						// Additional info rows
+						$("#section-inventory-checkout-table tbody").on(
+							"click",
+							"td.details-control",
+							function () {
+								let tr = $(this).closest("tr");
+								let row = table.row(tr);
+
+								if (row.child.isShown()) {
+									// This row is already open - close it
+									row.child.hide();
+									tr.removeClass("shown");
+								} else {
+									// Open this row
+									row.child(format(row.data())).show();
+									tr.addClass("shown");
+								}
 							}
-						}
-					);
+						);
 
-					// Add click event for check out button
-					$(".btn-inventory-check-out").unbind("click");
-					$(".btn-inventory-check-out").click((e) => {
-						this.showCheckOutForm(parseInt($(e.currentTarget).data("id")));
+						// Add click event for check out button
+						$(".btn-inventory-check-out").unbind("click");
+						$(".btn-inventory-check-out").click((e) => {
+							this.showCheckOutForm(parseInt($(e.currentTarget).data("id")));
+						});
 					});
-				});
 			}
 		});
 	}
@@ -1109,7 +1134,11 @@ class WWSUinventory extends WWSUdb {
 					},
 					checkOutDate: {
 						dateFormat: `YYYY-MM-DDTHH:mm:[00]${moment
-							.parseZone(this.meta ? this.meta.meta.time : undefined)
+							.parseZone(
+								this.manager.get("WWSUMeta")
+									? this.manager.get("WWSUMeta").meta.time
+									: undefined
+							)
 							.format("Z")}`,
 						picker: {
 							inline: true,
@@ -1124,7 +1153,11 @@ class WWSUinventory extends WWSUdb {
 					},
 					checkInDue: {
 						dateFormat: `YYYY-MM-DDTHH:mm:[00]${moment
-							.parseZone(this.meta ? this.meta.meta.time : undefined)
+							.parseZone(
+								this.manager.get("WWSUMeta")
+									? this.manager.get("WWSUMeta").meta.time
+									: undefined
+							)
 							.format("Z")}`,
 						picker: {
 							inline: true,
@@ -1149,7 +1182,7 @@ class WWSUinventory extends WWSUdb {
 									form.focus();
 									return;
 								}
-								var value = form.getValue();
+								let value = form.getValue();
 								this.checkOut(value, (success) => {
 									if (success) {
 										this.checkInOutModal.iziModal("close");
@@ -1163,7 +1196,9 @@ class WWSUinventory extends WWSUdb {
 			},
 			data: {
 				item: itemID,
-				checkOutDate: moment(this.meta.meta.time).toISOString(true),
+				checkOutDate: moment(
+					this.manager.get("WWSUMeta").meta.time
+				).toISOString(true),
 			},
 		});
 	}
@@ -1221,7 +1256,11 @@ class WWSUinventory extends WWSUdb {
 					},
 					checkInDate: {
 						dateFormat: `YYYY-MM-DDTHH:mm:[00]${moment
-							.parseZone(this.meta ? this.meta.meta.time : undefined)
+							.parseZone(
+								this.manager.get("WWSUMeta")
+									? this.manager.get("WWSUMeta").meta.time
+									: undefined
+							)
 							.format("Z")}`,
 						picker: {
 							inline: true,
@@ -1250,7 +1289,7 @@ class WWSUinventory extends WWSUdb {
 									form.focus();
 									return;
 								}
-								var value = form.getValue();
+								let value = form.getValue();
 								this.checkIn(value, (success) => {
 									if (success) {
 										this.checkInOutModal.iziModal("close");
@@ -1264,7 +1303,9 @@ class WWSUinventory extends WWSUdb {
 			},
 			data: {
 				ID: checkoutID,
-				checkInDate: moment(this.meta.meta.time).toISOString(true),
+				checkInDate: moment(this.manager.get("WWSUMeta").meta.time).toISOString(
+					true
+				),
 			},
 		});
 	}

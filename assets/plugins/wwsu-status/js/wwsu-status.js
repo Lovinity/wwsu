@@ -1,28 +1,30 @@
+'use strict';
 
 // This class manages the WWSU status system
+
+// REQUIRES these WWSUmodules: noReq (WWSUreq), 
 class WWSUstatus extends WWSUdb {
 
     /**
      * Construct the class
      * 
-     * @param {sails.io} socket Socket connection to WWSU
-     * @param {WWSUreq} noReq Request with no authorization
+	 * @param {WWSUmodules} manager The modules class which initiated this module
+	 * @param {object} options Options to be passed to this module
      */
-    constructor(socket, noReq) {
+    constructor(manager, options) {
         super(); // Create the db
+
+        this.manager = manager;
 
         this.endpoints = {
             get: '/status/get',
             report: '/status/report'
         };
-        this.requests = {
-            no: noReq,
-        };
         this.data = {
             get: {}
         };
 
-        this.assignSocketEvent('status', socket);
+        this.assignSocketEvent('status', this.manager.socket);
 
         this.statusModal = new WWSUmodal(`Problems Detected with WWSU`, null, ``, true, {
             headerColor: '',
@@ -35,7 +37,7 @@ class WWSUstatus extends WWSUdb {
 
     // Start the connection. Call this in socket connect event.
     init () {
-        this.replaceData(this.requests.no, this.endpoints.get, this.data.get);
+        this.replaceData(this.manager.get("noReq"), this.endpoints.get, this.data.get);
     }
 
     /**
@@ -47,7 +49,7 @@ class WWSUstatus extends WWSUdb {
      */
     report (dom, data, cb) {
         try {
-            this.requests.no.request({ dom: dom, method: 'post', url: this.endpoints.report, data }, (response) => {
+            this.manager.get("noReq").request({ dom: dom, method: 'post', url: this.endpoints.report, data }, (response) => {
                 if (response !== 'OK') {
                     $(document).Toasts('create', {
                         class: 'bg-danger',
@@ -133,7 +135,7 @@ class WWSUstatus extends WWSUdb {
                                     form.focus();
                                     return;
                                 }
-                                var value = form.getValue();
+                                let value = form.getValue();
                                 this.report(dom, {
                                     location: value.location,
                                     information: value.information
