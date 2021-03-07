@@ -60,7 +60,7 @@ module.exports = {
           webhook,
           {
             username: inputs.event.name,
-            content: `:warning: __**Broadcast Re-scheduled__**
+            content: `:warning: __**Broadcast Re-scheduled**__
 **${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name}**
 Original date/time: ${moment(inputs.event.originalTime).format("LLLL")}
 New date/time: **${moment(inputs.event.start).format("LLLL")} - ${moment(
