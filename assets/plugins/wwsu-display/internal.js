@@ -161,7 +161,7 @@ let sounds = {
   */
 
 // Initialize slides manager
-WWSUslides = WWSUslides(Meta);
+WWSUslides = WWSUslides(WWSUmodules);
 
 // Director hours
 WWSUslides.newSlide({
@@ -236,7 +236,6 @@ let slidetimer = false;
 let prevStatus = 5;
 let offlineTimer;
 let globalStatus = 5;
-let noReq;
 let officeHoursTimer;
 let directorNotify;
 

@@ -328,7 +328,7 @@ wrapper.width = window.innerWidth;
 wrapper.height = window.innerHeight;
 
 // Initialize slides
-WWSUslides = WWSUslides(Meta);
+WWSUslides = WWSUslides(WWSUmodules);
 
 if (!isStudio) {
   WWSUslides.newSlide({

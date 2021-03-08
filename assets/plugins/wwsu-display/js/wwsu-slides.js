@@ -120,19 +120,19 @@ class WWSUslide {
   // Set manually whether or not to make the slide active, and update all slides.
   set active(value) {
     this._active = value;
-    Slides.updateBadges();
+    WWSUslides.updateBadges();
   }
 
   // Set the ISO start date/time for the slide.
   set starts(value) {
     this._starts = value;
-    Slides.updateBadges();
+    WWSUslides.updateBadges();
   }
 
   // Set the ISO string expires time for the slide.
   set expires(value) {
     this._expires = value;
-    Slides.updateBadges();
+    WWSUslides.updateBadges();
   }
 
   get html() {
@@ -146,13 +146,13 @@ class WWSUslide {
   // Set new HTML for the slide and update it.
   set html(value) {
     this._innerHtml = value;
-    if (Slides.activeSlide().name === this._name) {
+    if (WWSUslides.activeSlide().name === this._name) {
       this._html = `<div id="slide-${this._name}" style="display: inline; width: 100%;"><div id="content-slide-${this._name}">${value}</div></div>`;
       var temp = document.getElementById(`content-slide-${this._name}`);
       if (temp !== null) {
         temp.innerHTML = value;
       }
-      Slides.showSlide(this._name);
+      WWSUslides.showSlide(this._name);
     } else {
       this._html = `<div id="slide-${this._name}" style="display: none; width: 100%;"><div id="content-slide-${this._name}">${value}</div></div>`;
       var temp = document.getElementById(`content-slide-${this._name}`);
