@@ -461,6 +461,7 @@ module.exports = {
   memoryDefault: {},
 
   automation: [], // Tracks in automation, populated by sails.helpers.rest.getQueue().
+  queueMemory: [], // Used when a DJ populates RadioDJ with tracks and initiates a break; will erase RadioDJ but re-populate the queue with the tracks once break is done
   history: [], // track history array
   changingState: false // Used to block out state changes when changing state
 }
