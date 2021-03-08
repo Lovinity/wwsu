@@ -51,7 +51,7 @@ class WWSUslide {
   // Sets a new label for the slide and updates all slides.
   set label(value) {
     this._label = value;
-    Slides.updateBadges();
+    WWSUslides.updateBadges();
   }
 
   get weight() {
@@ -61,7 +61,7 @@ class WWSUslide {
   // Sets a new weight / order for the slide and updates all slides.
   set weight(value) {
     this._weight = value;
-    Slides.updateBadges();
+    WWSUslides.updateBadges();
   }
 
   get isSticky() {
@@ -71,7 +71,7 @@ class WWSUslide {
   // Changes whether or not this slide is sticky, and updates all slides.
   set isSticky(value) {
     this._isSticky = value;
-    Slides.updateBadges();
+    WWSUslides.updateBadges();
   }
 
   get color() {
