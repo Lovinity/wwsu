@@ -239,6 +239,7 @@ let globalStatus = 5;
 let officeHoursTimer;
 let directorNotify;
 let innercontent;
+let stuff;
 
 let colors = ["#FF0000", "#00FF00", "#0000FF"];
 let color = 0;
