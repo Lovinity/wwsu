@@ -240,6 +240,7 @@ let officeHoursTimer;
 let directorNotify;
 let innercontent;
 let stuff;
+let doShade = false;
 
 let colors = ["#FF0000", "#00FF00", "#0000FF"];
 let color = 0;
