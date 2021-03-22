@@ -5,118 +5,125 @@
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
 
-module.exports = {
-  datastore: 'nodebase',
-  attributes: {
+const cryptoRandomString = require("crypto-random-string");
 
+module.exports = {
+  datastore: "nodebase",
+  attributes: {
     ID: {
-      type: 'number',
-      autoIncrement: true
+      type: "number",
+      autoIncrement: true,
     },
 
     host: {
-      type: 'string',
+      type: "string",
       required: true,
-      unique: true
+      unique: true,
     },
 
     friendlyname: {
-      type: 'string',
-      defaultsTo: 'Unknown Host'
+      type: "string",
+      defaultsTo: "Unknown Host",
     },
 
     app: {
-      type: 'string',
-      allowNull: true
+      type: "string",
+      allowNull: true,
     },
 
     authorized: {
-      type: 'boolean',
-      defaultsTo: false
+      type: "boolean",
+      defaultsTo: false,
     },
 
     admin: {
-      type: 'boolean',
-      defaultsTo: false
+      type: "boolean",
+      defaultsTo: false,
     },
 
     lockToDJ: {
-      type: 'number',
-      allowNull: true
+      type: "number",
+      allowNull: true,
     },
 
     makeCalls: {
-      type: 'boolean',
-      defaultsTo: false
+      type: "boolean",
+      defaultsTo: false,
     },
 
     answerCalls: {
-      type: 'boolean',
-      defaultsTo: false
+      type: "boolean",
+      defaultsTo: false,
     },
 
     silenceDetection: {
-      type: 'boolean',
-      defaultsTo: false
+      type: "boolean",
+      defaultsTo: false,
     },
 
     recordAudio: {
-      type: 'boolean',
-      defaultsTo: false
+      type: "boolean",
+      defaultsTo: false,
     },
 
     delaySystem: {
-      type: 'boolean',
-      defaultsTo: false
+      type: "boolean",
+      defaultsTo: false,
     },
 
     EAS: {
-      type: 'boolean',
-      defaultsTo: false
+      type: "boolean",
+      defaultsTo: false,
     },
 
     requests: {
-      type: 'boolean',
-      defaultsTo: false
+      type: "boolean",
+      defaultsTo: false,
     },
 
     emergencies: {
-      type: 'boolean',
-      defaultsTo: false
+      type: "boolean",
+      defaultsTo: false,
     },
 
     accountability: {
-      type: 'boolean',
-      defaultsTo: false
+      type: "boolean",
+      defaultsTo: false,
     },
 
     webmessages: {
-      type: 'boolean',
-      defaultsTo: false
-    }
-
+      type: "boolean",
+      defaultsTo: false,
+    },
   },
 
   // Websockets standards
   afterCreate: function (newlyCreatedRecord, proceed) {
-    var data = { insert: newlyCreatedRecord }
-    sails.log.silly(`hosts socket: ${data}`)
-    sails.sockets.broadcast('hosts', 'hosts', data)
-    return proceed()
+    var data = { insert: newlyCreatedRecord };
+    sails.log.silly(`hosts socket: ${data}`);
+    sails.sockets.broadcast("hosts", "hosts", data);
+    return proceed();
   },
 
   afterUpdate: function (updatedRecord, proceed) {
-    var data = { update: updatedRecord }
-    sails.log.silly(`hosts socket: ${data}`)
-    sails.sockets.broadcast('hosts', 'hosts', data)
-    return proceed()
+    var data = { update: updatedRecord };
+    sails.log.silly(`hosts socket: ${data}`);
+    sails.sockets.broadcast("hosts", "hosts", data);
+
+    // As a security measure, invalidate all tokens for hosts by changing the secret.
+    sails.config.custom.secrets.hosts = cryptoRandomString({ length: 256 });
+
+    return proceed();
   },
 
   afterDestroy: function (destroyedRecord, proceed) {
-    var data = { remove: destroyedRecord.ID }
-    sails.log.silly(`hosts socket: ${data}`)
-    sails.sockets.broadcast('hosts', 'hosts', data)
-    return proceed()
-  }
+    var data = { remove: destroyedRecord.ID };
+    sails.log.silly(`hosts socket: ${data}`);
+    sails.sockets.broadcast("hosts", "hosts", data);
 
-}
+    // As a security measure, invalidate all tokens for hosts by changing the secret.
+    sails.config.custom.secrets.hosts = cryptoRandomString({ length: 256 });
+
+    return proceed();
+  },
+};

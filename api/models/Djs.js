@@ -5,43 +5,45 @@
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
 
+const cryptoRandomString = require("crypto-random-string");
+
 module.exports = {
   datastore: "nodebase",
   attributes: {
     ID: {
       type: "number",
-      autoIncrement: true
+      autoIncrement: true,
     },
 
     name: {
       type: "string",
       required: true,
-      unique: true
+      unique: true,
     },
 
     realName: {
       type: "string",
-      allowNull: true
+      allowNull: true,
     },
 
     email: {
       type: "string",
-      allowNull: true
+      allowNull: true,
     },
 
     login: {
       type: "string",
-      allowNull: true
+      allowNull: true,
     },
 
     lastSeen: {
       type: "ref",
-      columnType: "datetime"
-    }
+      columnType: "datetime",
+    },
   },
 
   // Websockets standards
-  afterCreate: function(newlyCreatedRecord, proceed) {
+  afterCreate: function (newlyCreatedRecord, proceed) {
     newlyCreatedRecord.login = newlyCreatedRecord.login === null ? false : true;
     var data = { insert: newlyCreatedRecord };
     sails.log.silly(`djs socket: ${data}`);
@@ -49,7 +51,7 @@ module.exports = {
     return proceed();
   },
 
-  afterUpdate: function(updatedRecord, proceed) {
+  afterUpdate: function (updatedRecord, proceed) {
     updatedRecord.login = updatedRecord.login === null ? false : true;
     var data = { update: updatedRecord };
     sails.log.silly(`djs socket: ${data}`);
@@ -59,6 +61,9 @@ module.exports = {
     var temp;
     var temp2;
 
+    // As a security measure, invalidate all tokens for DJs by changing the secret.
+    sails.config.custom.secrets.dj = cryptoRandomString({ length: 256 });
+
     // Update host data in calendar events
     temp = (async () => {
       records = await sails.models.calendar.find({
@@ -66,12 +71,12 @@ module.exports = {
           { hostDJ: updatedRecord.ID },
           { cohostDJ1: updatedRecord.ID },
           { cohostDJ2: updatedRecord.ID },
-          { cohostDJ3: updatedRecord.ID }
+          { cohostDJ3: updatedRecord.ID },
         ],
-        active: true
+        active: true,
       });
       if (records.length > 0) {
-        records.map(async record => {
+        records.map(async (record) => {
           try {
             hosts = await sails.helpers.calendar.generateHosts(record);
             await sails.models.calendar
@@ -87,11 +92,11 @@ module.exports = {
           { hostDJ: updatedRecord.ID },
           { cohostDJ1: updatedRecord.ID },
           { cohostDJ2: updatedRecord.ID },
-          { cohostDJ3: updatedRecord.ID }
-        ]
+          { cohostDJ3: updatedRecord.ID },
+        ],
       });
       if (records.length > 0) {
-        records.map(async record => {
+        records.map(async (record) => {
           try {
             hosts = await sails.helpers.calendar.generateHosts(record);
             await sails.models.schedule
@@ -105,7 +110,7 @@ module.exports = {
     return proceed();
   },
 
-  afterDestroy: function(destroyedRecord, proceed) {
+  afterDestroy: function (destroyedRecord, proceed) {
     var data = { remove: destroyedRecord.ID };
     sails.log.silly(`djs socket: ${data}`);
     sails.sockets.broadcast("djs", "djs", data);
@@ -115,6 +120,9 @@ module.exports = {
     var toUpdate;
     var temp;
 
+    // As a security measure, invalidate all tokens for DJs by changing the secret.
+    sails.config.custom.secrets.dj = cryptoRandomString({ length: 256 });
+
     // Update DJ data in calendar events
     temp = (async () => {
       records = await sails.models.calendar.find({
@@ -122,12 +130,12 @@ module.exports = {
           { hostDJ: destroyedRecord.ID },
           { cohostDJ1: destroyedRecord.ID },
           { cohostDJ2: destroyedRecord.ID },
-          { cohostDJ3: destroyedRecord.ID }
+          { cohostDJ3: destroyedRecord.ID },
         ],
-        active: true
+        active: true,
       });
       if (records.length > 0) {
-        maps = records.map(async record => {
+        maps = records.map(async (record) => {
           try {
             toUpdate = {};
             if (record.hostDJ === destroyedRecord.ID) {
@@ -161,11 +169,11 @@ module.exports = {
           { hostDJ: destroyedRecord.ID },
           { cohostDJ1: destroyedRecord.ID },
           { cohostDJ2: destroyedRecord.ID },
-          { cohostDJ3: destroyedRecord.ID }
-        ]
+          { cohostDJ3: destroyedRecord.ID },
+        ],
       });
       if (records.length > 0) {
-        maps = records.map(async record => {
+        maps = records.map(async (record) => {
           try {
             toUpdate = {};
             if (record.hostDJ === destroyedRecord.ID) {
@@ -239,5 +247,5 @@ module.exports = {
       }
     })();
     return proceed();
-  }
+  },
 };

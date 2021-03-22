@@ -1971,7 +1971,6 @@ module.exports.bootstrap = async function (done) {
           sails.models.logs,
           sails.models.messages,
           sails.models.meta,
-          sails.models.nodeusers,
           sails.models.timesheet,
           sails.models.directors,
           sails.models.songsliked,
