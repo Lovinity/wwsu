@@ -2,15 +2,11 @@
 
 // Sounds
 let sounds = {
-  goingonair: new Howl({ src: ["/sounds/display/goingonair.mp3"] }),
-  displaymessage: new Howl({ src: ["/sounds/display/displaymessage.mp3"] }),
   lifethreatening: new Howl({
     src: ["/sounds/display/lifethreatening.mp3"],
   }),
-  live: new Howl({ src: ["/sounds/display/live.mp3"] }),
-  remote: new Howl({ src: ["/sounds/display/remote.mp3"] }),
   severeeas: new Howl({ src: ["/sounds/display/severeeas.mp3"] }),
-  sports: new Howl({ src: ["/sounds/display/sports.mp3"] }),
+  displaymessage: new Howl({ src: ["/sounds/display/displaymessage.mp3"] }),
 };
 
 // Define hexrgb constants
@@ -22,7 +18,6 @@ let validHexSize = new RegExp(`^${match3or4Hex}$|^${match6or8Hex}$`, "i");
 
 // Define HTML elements
 let content = document.getElementById("slide");
-let djAlert = document.getElementById("dj-alert");
 let easAlert = document.getElementById("eas-alert");
 let nowplaying = document.getElementById("nowplaying");
 let nowplayingtime = document.getElementById("nowplaying-time");
@@ -319,8 +314,6 @@ if (isLightTheme) {
   document.body.style.color = `#000000`;
   temp = document.querySelector(`#bg-canvas`);
   temp.style.opacity = 0.5;
-  temp = document.querySelector(`#dj-alert`);
-  temp.style.backgroundColor = `#ffffff`;
 }
 let queueReminder = false;
 
@@ -1237,14 +1230,7 @@ function processNowPlaying(response) {
 
       // First, process now playing information
       easDelay -= 1;
-      let temp;
-      let countdown;
-      let countdowntext;
-      let countdownclock;
 
-      if (disconnected || typeof Meta.meta.state === "undefined") {
-        djAlert.style.display = "none";
-      }
       if (
         typeof response.state !== `undefined` ||
         typeof response.topic !== `undefined` ||
@@ -1409,129 +1395,7 @@ function processNowPlaying(response) {
               )
               .format("LLLL") || "Unknown WWSU Time"
       }`;
-      if (
-        (Meta.meta.state === "automation_live" ||
-          Meta.meta.state.startsWith("live_")) &&
-        countDown < 60 &&
-        (!Meta.meta.queueCalculating || djAlert.style.display === "inline")
-      ) {
-        djAlert.style.display = "inline";
-        countdown = document.getElementById("countdown");
-        countdowntext = document.getElementById("countdown-text");
-        countdownclock = document.getElementById("countdown-clock");
-        if (!countdown || !countdowntext || !countdownclock) {
-          temp = Meta.meta.show.split(" - ");
-          djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${
-            !isLightTheme ? `#ffffff` : `#000000`
-          };" id="countdown">
-                    <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
-                    <div class="m-3 bg-primary text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div>
-                    </div></div>`;
-          countdown = document.getElementById("countdown");
-          countdowntext = document.getElementById("countdown-text");
-          countdownclock = document.getElementById("countdown-clock");
-          countdowntext.innerHTML = `<span class="text-danger">${temp[0]}</span><br />is going live in`;
-          if (!isStudio) {
-            sounds.live.play();
-          }
-        }
-        countdownclock.innerHTML = countDown;
-        if (countDown <= 10) {
-          if (!queueReminder && isStudio) {
-            sounds.goingonair.play();
-          }
-          queueReminder = true;
-          if (!isStudio) {
-            $("#dj-alert").css("background-color", "#F44336");
-            setTimeout(() => {
-              $("#dj-alert").css(
-                "background-color",
-                !isLightTheme ? `#000000` : `#ffffff`
-              );
-            }, 250);
-          }
-        }
 
-        // When a remote broadcast is about to start
-      } else if (
-        (Meta.meta.state === "automation_remote" ||
-          Meta.meta.state.startsWith("remote_")) &&
-        countDown < 60 &&
-        (!Meta.meta.queueCalculating || djAlert.style.display === "inline")
-      ) {
-        djAlert.style.display = "inline";
-        countdown = document.getElementById("countdown");
-        countdowntext = document.getElementById("countdown-text");
-        countdownclock = document.getElementById("countdown-clock");
-        if (!countdown || !countdowntext || !countdownclock) {
-          temp = Meta.meta.show.split(" - ");
-          djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${
-            !isLightTheme ? `#ffffff` : `#000000`
-          };" id="countdown">
-                    <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
-<div class="m-3 bg-purple text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`;
-          countdown = document.getElementById("countdown");
-          countdowntext = document.getElementById("countdown-text");
-          countdownclock = document.getElementById("countdown-clock");
-          countdowntext.innerHTML = "Remote Broadcast starting in";
-          if (!isStudio) {
-            sounds.remote.play();
-          }
-        }
-        countdownclock.innerHTML = countDown;
-        // Sports broadcast about to begin
-      } else if (
-        (Meta.meta.state === "automation_sports" ||
-          Meta.meta.state.startsWith("sports_") ||
-          Meta.meta.state === "automation_sportsremote" ||
-          Meta.meta.state.startsWith("sportsremote_")) &&
-        countDown < 60 &&
-        (!Meta.meta.queueCalculating || djAlert.style.display === "inline")
-      ) {
-        djAlert.style.display = "inline";
-        countdown = document.getElementById("countdown");
-        countdowntext = document.getElementById("countdown-text");
-        countdownclock = document.getElementById("countdown-clock");
-        if (!countdown || !countdowntext || !countdownclock) {
-          djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: ${
-            !isLightTheme ? `#ffffff` : `#000000`
-          };" id="countdown">
-                    <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
-<div class="m-3 bg-success text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`;
-          countdown = document.getElementById("countdown");
-          countdowntext = document.getElementById("countdown-text");
-          countdownclock = document.getElementById("countdown-clock");
-          countdowntext.innerHTML = `<span class="text-success">${Meta.meta.show}</span><br />about to broadcast in`;
-          if (!isStudio) {
-            sounds.sports.play();
-          }
-        }
-        countdownclock.innerHTML = countDown;
-        if (
-          Meta.meta.state === "automation_sports" ||
-          Meta.meta.state.startsWith("sports_")
-        ) {
-          if (countDown <= 10) {
-            if (!queueReminder && isStudio) {
-              sounds.goingonair.play();
-            }
-            queueReminder = true;
-            if (!isStudio) {
-              $("#dj-alert").css("background-color", "#4CAF50");
-              setTimeout(() => {
-                $("#dj-alert").css(
-                  "background-color",
-                  !isLightTheme ? `#000000` : `#ffffff`
-                );
-              }, 250);
-            }
-          }
-        }
-        // Nothing special to show
-      } else {
-        djAlert.style.display = "none";
-        djAlert.innerHTML = ``;
-      }
     } catch (e) {
       console.error(e);
       iziToast.show({

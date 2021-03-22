@@ -6,6 +6,16 @@
 io.sails.url = "https://server.wwsu1069.org";
 let socket = io.sails.connect();
 
+// DEPRECATED
+let isLightTheme = false;
+
+// Define hexrgb constants
+let hexChars = "a-f\\d";
+let match3or4Hex = `#?[${hexChars}]{3}[${hexChars}]?`;
+let match6or8Hex = `#?[${hexChars}]{6}([${hexChars}]{2})?`;
+let nonHexChars = new RegExp(`[^#${hexChars}]`, "gi");
+let validHexSize = new RegExp(`^${match3or4Hex}$|^${match6or8Hex}$`, "i");
+
 // Add WWSU modules
 let wwsumodules = new WWSUmodules(socket);
 wwsumodules
@@ -34,8 +44,15 @@ let Calendar = wwsumodules.get("WWSUcalendar");
 let Recipients = wwsumodules.get("WWSUrecipientsweb");
 let Messages = wwsumodules.get("WWSUmessagesweb");
 let Status = wwsumodules.get("WWSUstatus");
+let Eas = wwsumodules.get("WWSUeas");
 
 // Add event listeners
+Eas.on("newAlert", "renderer", (record) => {
+  newEas.push(record);
+  if (record.severity === "Extreme") easExtreme = true;
+  doEas();
+});
+Eas.on("change", "renderer", (db) => processEas(db));
 Status.on("change", "renderer", (db) => processStatus(db.get()));
 Directors.on("change", "renderer", () => {
   updateCalendar();
@@ -62,6 +79,8 @@ Announcements.on("replace", "renderer", (db) => {
   db.each((data) => createAnnouncement(data));
 });
 Meta.on("newMeta", "renderer", (data) => {
+  processNowPlaying(data);
+
   try {
     for (let key in data) {
       if (Object.prototype.hasOwnProperty.call(data, key)) {
@@ -79,7 +98,10 @@ Meta.on("newMeta", "renderer", (data) => {
     console.error(e);
   }
 });
-Meta.on("metaTick", "renderer", () => clockTick());
+Meta.on("metaTick", "renderer", () => {
+  clockTick();
+  processNowPlaying({});
+});
 
 // Assign additional event handlers
 socket.on("display-refresh", () => {
@@ -115,6 +137,7 @@ socket.on("connect", () => {
     Status.init();
     Announcements.init();
     Messages.init();
+    Eas.init();
     // Remove the lost connection overlay
     if (disconnected) {
       // noConnection.style.display = "none";
@@ -154,6 +177,16 @@ let sounds = {
   warning: new Howl({ src: ["/sounds/display/warning.mp3"] }),
   ping: new Howl({ src: ["/sounds/display/ping.mp3"] }),
   displaymessage: new Howl({ src: ["/sounds/display/displaymessage.mp3"] }),
+
+  lifethreatening: new Howl({
+    src: ["/sounds/display/lifethreatening.mp3"],
+  }),
+  severeeas: new Howl({ src: ["/sounds/display/severeeas.mp3"] }),
+
+  goingonair: new Howl({ src: ["/sounds/display/goingonair.mp3"] }),
+  live: new Howl({ src: ["/sounds/display/live.mp3"] }),
+  remote: new Howl({ src: ["/sounds/display/remote.mp3"] }),
+  sports: new Howl({ src: ["/sounds/display/sports.mp3"] }),
 };
 
 /*
@@ -223,8 +256,33 @@ WWSUslides.newSlide({
   html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Automatic Director Clockout at Midnight</h1><span style="color: #FFFFFF;">All directors who are still clocked in must clock out before midnight.<br>Otherwise, the system will automatically clock you out and flag your timesheet.<br>If you are still doing hours, you can clock back in after midnight.</span>`,
 });
 
+// Weather alerts
+WWSUslides.newSlide({
+  name: `eas-alerts`,
+  label: `EAS Alerts`,
+  weight: -800000,
+  isSticky: false,
+  color: `danger`,
+  active: false,
+  transitionIn: `fadeIn`,
+  transitionOut: `fadeOut`,
+  displayTime: 15,
+  fitContent: true,
+  html: `<h1 style="text-align: center; font-size: 3em; color: ${
+    !isLightTheme ? `#ffffff` : `#000000`
+  }">WWSU EAS - Active Alerts</h1><h2 style="text-align: center; font-size: 1.5em; color: ${
+    !isLightTheme ? `#ffffff` : `#000000`
+  }">Clark, Greene, and Montgomery counties</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="eas-alerts"></div>`,
+});
+
 // Define HTML elements
 let statusLine = document.getElementById("status-line");
+let djAlert = document.getElementById("dj-alert");
+let easAlert = document.getElementById("eas-alert");
+let nowplaying = document.getElementById("nowplaying");
+let nowplayingtime = document.getElementById("nowplaying-time");
+let nowplayingline1 = document.getElementById("nowplaying-line1");
+let nowplayingline2 = document.getElementById("nowplaying-line2");
 let flashInterval = null;
 let statusMarquee = ``;
 
@@ -247,6 +305,17 @@ let colors = ["#FF0000", "#00FF00", "#0000FF"];
 let color = 0;
 let delay = 300000;
 let scrollDelay = 15000;
+
+let queueUnknown = false;
+let queueReminder = false;
+
+let newEas = [];
+let prevEas = [];
+let easActive = false;
+// LINT LIES: easDelay is used.
+// eslint-disable-next-line no-unused-lets
+let easDelay = 5;
+let easExtreme = false;
 
 // burnGuard is a periodic line that sweeps across the screen to prevent burn-in. Define / construct it.
 let $burnGuard = $("<div>")
@@ -1114,6 +1183,724 @@ function createAnnouncement(data) {
       displayTime: data.displayTime || 15,
       fitContent: true,
       html: `<div style="overflow-y: hidden; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="text-white" id="content-attn-${data.ID}">${data.announcement}</div>`,
+    });
+  }
+}
+
+// This function is called whenever meta is changed. The parameter response contains only the meta that has changed / to be updated.
+function processNowPlaying(response) {
+  if (response) {
+    try {
+      if (typeof response.state !== "undefined") {
+        queueUnknown = true;
+        setTimeout(() => {
+          queueUnknown = false;
+        }, 3000);
+        switch (response.state) {
+          case "automation_on":
+          case "automation_break":
+            nowplaying.style.background = "#495057";
+            break;
+          case "automation_genre":
+            nowplaying.style.background = "#2E4F54";
+          case "automation_playlist":
+            nowplaying.style.background = "#0056B2";
+            break;
+          case "automation_prerecord":
+          case "automation_live":
+          case "automation_remote":
+          case "automation_sports":
+          case "automation_sportsremote":
+            nowplaying.style.background = "#7E3F0A";
+            break;
+          case "live_on":
+          case "live_break":
+          case "live_returning":
+            nowplaying.style.background = "#9E0C1A";
+            break;
+          case "prerecord_on":
+          case "prerecord_break":
+            nowplaying.style.background = "#773B57";
+            break;
+          case "sports_on":
+          case "sports_break":
+          case "sports_halftime":
+          case "sports_returning":
+          case "sportsremote_on":
+          case "sportsremote_break":
+          case "sportsremote_returning":
+          case "sportsremote_halftime":
+          case "sportsremote_break_disconnected":
+            nowplaying.style.background = "#186429";
+            break;
+          case "remote_on":
+          case "remote_break":
+          case "remote_returning":
+            nowplaying.style.background = "#6610f2";
+            break;
+          default:
+            nowplaying.style.background = "#212529";
+        }
+      }
+
+      // First, process now playing information
+      easDelay -= 1;
+
+      let temp;
+      let countdown;
+      let countdowntext;
+      let countdownclock;
+
+      if (disconnected || typeof Meta.meta.state === "undefined") {
+        djAlert.style.display = "none";
+      }
+
+      let countDown =
+        Meta.meta.countdown !== null
+          ? Math.round(
+              moment(Meta.meta.countdown).diff(
+                moment(Meta.meta.time),
+                "seconds"
+              )
+            )
+          : 1000000;
+      if (countDown < 0) {
+        countDown = 0;
+      }
+      if (countDown > 29) {
+        queueReminder = false;
+      }
+
+      if (typeof response.line1 !== "undefined") {
+        let line1Timer = setTimeout(() => {
+          nowplayingline1.innerHTML = Meta.meta.line1;
+          nowplayingline1.className = ``;
+          if (Meta.meta.line1.length >= 80) {
+            $("#nowplaying-line1").marquee({
+              // duration in milliseconds of the marquee
+              speed: 100,
+              // gap in pixels between the tickers
+              gap: 100,
+              // time in milliseconds before the marquee will start animating
+              delayBeforeStart: 0,
+              // 'left' or 'right'
+              direction: "left",
+              // true or false - should the marquee be duplicated to show an effect of continues flow
+              duplicated: true,
+            });
+          }
+        }, 5000);
+
+        $("#nowplaying-line1").animateCss("fadeOut", () => {
+          clearTimeout(line1Timer);
+          nowplayingline1.innerHTML = Meta.meta.line1;
+          if (Meta.meta.line1.length >= 80) {
+            $("#nowplaying-line1").marquee({
+              // duration in milliseconds of the marquee
+              speed: 100,
+              // gap in pixels between the tickers
+              gap: 100,
+              // time in milliseconds before the marquee will start animating
+              delayBeforeStart: 0,
+              // 'left' or 'right'
+              direction: "left",
+              // true or false - should the marquee be duplicated to show an effect of continues flow
+              duplicated: true,
+            });
+          } else {
+            $("#nowplaying-line1").animateCss("fadeIn");
+          }
+        });
+      }
+
+      if (typeof response.line2 !== "undefined") {
+        let line2Timer = setTimeout(() => {
+          nowplayingline2.innerHTML = Meta.meta.line2;
+          nowplayingline2.className = ``;
+          if (Meta.meta.line2.length >= 80) {
+            $("#nowplaying-line2").marquee({
+              // duration in milliseconds of the marquee
+              speed: 100,
+              // gap in pixels between the tickers
+              gap: 100,
+              // time in milliseconds before the marquee will start animating
+              delayBeforeStart: 0,
+              // 'left' or 'right'
+              direction: "left",
+              // true or false - should the marquee be duplicated to show an effect of continues flow
+              duplicated: true,
+            });
+          }
+        }, 5000);
+
+        $("#nowplaying-line2").animateCss("fadeOut", () => {
+          clearTimeout(line2Timer);
+          nowplayingline2.innerHTML = Meta.meta.line2;
+          if (Meta.meta.line2.length >= 80) {
+            $("#nowplaying-line2").marquee({
+              // duration in milliseconds of the marquee
+              speed: 100,
+              // gap in pixels between the tickers
+              gap: 100,
+              // time in milliseconds before the marquee will start animating
+              delayBeforeStart: 0,
+              // 'left' or 'right'
+              direction: "left",
+              // true or false - should the marquee be duplicated to show an effect of continues flow
+              duplicated: true,
+            });
+          } else {
+            $("#nowplaying-line2").animateCss("fadeIn");
+          }
+        });
+      }
+
+      nowplayingtime.innerHTML = `${
+        disconnected
+          ? "DISPLAY DISCONNECTED FROM WWSU"
+          : moment
+              .tz(
+                Meta.meta.time,
+                Meta.meta ? Meta.meta.timezone : moment.tz.guess()
+              )
+              .format("LLLL") || "Unknown WWSU Time"
+      }`;
+
+      if (
+        (Meta.meta.state === "automation_live" ||
+          Meta.meta.state.startsWith("live_")) &&
+        countDown < 60 &&
+        (!Meta.meta.queueCalculating || djAlert.style.display === "inline")
+      ) {
+        djAlert.style.display = "inline";
+        countdown = document.getElementById("countdown");
+        countdowntext = document.getElementById("countdown-text");
+        countdownclock = document.getElementById("countdown-clock");
+        if (!countdown || !countdowntext || !countdownclock) {
+          temp = Meta.meta.show.split(" - ");
+          djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
+                    <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
+                    <div class="m-3 bg-primary text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div>
+                    </div></div>`;
+          countdown = document.getElementById("countdown");
+          countdowntext = document.getElementById("countdown-text");
+          countdownclock = document.getElementById("countdown-clock");
+          countdowntext.innerHTML = `<span class="text-danger">${temp[0]}</span><br />is going live in`;
+          sounds.live.play();
+        }
+        countdownclock.innerHTML = countDown;
+        if (countDown <= 10) {
+          if (!queueReminder) {
+            sounds.goingonair.play();
+          }
+          queueReminder = true;
+          $("#dj-alert").css("background-color", "#F44336");
+          setTimeout(() => {
+            $("#dj-alert").css("background-color", `#000000`);
+          }, 250);
+        }
+
+        // When a remote broadcast is about to start
+      } else if (
+        (Meta.meta.state === "automation_remote" ||
+          Meta.meta.state.startsWith("remote_")) &&
+        countDown < 60 &&
+        (!Meta.meta.queueCalculating || djAlert.style.display === "inline")
+      ) {
+        djAlert.style.display = "inline";
+        countdown = document.getElementById("countdown");
+        countdowntext = document.getElementById("countdown-text");
+        countdownclock = document.getElementById("countdown-clock");
+        if (!countdown || !countdowntext || !countdownclock) {
+          temp = Meta.meta.show.split(" - ");
+          djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
+                    <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
+<div class="m-3 bg-purple text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`;
+          countdown = document.getElementById("countdown");
+          countdowntext = document.getElementById("countdown-text");
+          countdownclock = document.getElementById("countdown-clock");
+          countdowntext.innerHTML = "Remote Broadcast starting in";
+          sounds.remote.play();
+        }
+        countdownclock.innerHTML = countDown;
+        // Sports broadcast about to begin
+      } else if (
+        (Meta.meta.state === "automation_sports" ||
+          Meta.meta.state.startsWith("sports_") ||
+          Meta.meta.state === "automation_sportsremote" ||
+          Meta.meta.state.startsWith("sportsremote_")) &&
+        countDown < 60 &&
+        (!Meta.meta.queueCalculating || djAlert.style.display === "inline")
+      ) {
+        djAlert.style.display = "inline";
+        countdown = document.getElementById("countdown");
+        countdowntext = document.getElementById("countdown-text");
+        countdownclock = document.getElementById("countdown-clock");
+        if (!countdown || !countdowntext || !countdownclock) {
+          djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
+                    <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
+<div class="m-3 bg-success text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`;
+          countdown = document.getElementById("countdown");
+          countdowntext = document.getElementById("countdown-text");
+          countdownclock = document.getElementById("countdown-clock");
+          countdowntext.innerHTML = `<span class="text-success">${Meta.meta.show}</span><br />about to broadcast in`;
+          sounds.sports.play();
+        }
+        countdownclock.innerHTML = countDown;
+        if (
+          Meta.meta.state === "automation_sports" ||
+          Meta.meta.state.startsWith("sports_")
+        ) {
+          if (countDown <= 10) {
+            if (!queueReminder) {
+              sounds.goingonair.play();
+            }
+            queueReminder = true;
+            $("#dj-alert").css("background-color", "#4CAF50");
+            setTimeout(() => {
+              $("#dj-alert").css("background-color", `#000000`);
+            }, 250);
+          }
+        }
+        // Nothing special to show
+      } else {
+        djAlert.style.display = "none";
+        djAlert.innerHTML = ``;
+      }
+    } catch (e) {
+      console.error(e);
+      iziToast.show({
+        title: "An error occurred - Please check the logs",
+        message: "Error occurred during processNowPlaying.",
+      });
+    }
+  }
+}
+
+// Check for new Eas alerts and push them out when necessary.
+function processEas(db) {
+  // Data processing
+  try {
+    // Check to see if any alerts are extreme, and update our previous Eas ID array
+    easExtreme = false;
+
+    prevEas = [];
+    let innercontent = ``;
+
+    // eslint-disable-next-line no-unused-lets
+    let makeActive = false;
+    // eslint-disable-next-line no-unused-lets
+    let displayTime = 7;
+
+    db.each((dodo) => {
+      try {
+        prevEas.push(dodo.ID);
+
+        makeActive = true;
+        displayTime += 4;
+
+        if (dodo.severity === "Extreme") {
+          easExtreme = true;
+        }
+
+        let color =
+          typeof dodo.color !== "undefined" &&
+          /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(dodo.color)
+            ? hexRgb(dodo.color)
+            : hexRgb("#787878");
+        let borderclass = "black";
+        color.red = Math.round(color.red / 2);
+        color.green = Math.round(color.green / 2);
+        color.blue = Math.round(color.blue / 2);
+        if (typeof dodo["severity"] !== "undefined") {
+          if (dodo["severity"] === "Extreme") {
+            borderclass = "danger";
+          } else if (dodo["severity"] === "Severe") {
+            borderclass = "warning";
+          } else if (dodo["severity"] === "Moderate") {
+            borderclass = "primary";
+          }
+        }
+        // LINT LIES: This letiable is used.
+        // eslint-disable-next-line no-unused-lets
+        color = `rgb(${color.red}, ${color.green}, ${color.blue});`;
+        if (isLightTheme) {
+          color = `rgb(${color.red / 4 + 191}, ${color.green / 4 + 191}, ${
+            color.blue / 4 + 191
+          });`;
+        }
+        innercontent += `<div style="width: 32%;" class="d-flex align-items-stretch m-1 ${
+          !isLightTheme ? `text-white` : `text-dark`
+        } border border-${borderclass} rounded shadow-4 ${
+          !isLightTheme ? `bg-dark-4` : `bg-light-1`
+        }">
+                        <div class="m-1" style="text-align: center; width: 100%"><span class="${
+                          !isLightTheme ? `text-white` : `text-dark`
+                        }" style="font-size: 1.5em;">${
+          typeof dodo["alert"] !== "undefined" ? dodo["alert"] : "Unknown Alert"
+        }</span><br />
+                        <span style="font-size: 1em;" class="${
+                          !isLightTheme ? `text-white` : `text-dark`
+                        }">${
+          moment(dodo["starts"]).isValid()
+            ? moment
+                .tz(
+                  dodo["starts"],
+                  Meta.meta ? Meta.meta.timezone : moment.tz.guess()
+                )
+                .format("MM/DD h:mmA")
+            : "UNKNOWN"
+        } - ${
+          moment(dodo["expires"]).isValid()
+            ? moment
+                .tz(
+                  dodo["expires"],
+                  Meta.meta ? Meta.meta.timezone : moment.tz.guess()
+                )
+                .format("MM/DD h:mmA")
+            : "UNKNOWN"
+        }</span><br />
+<span style="font-size: 1em;" class="${
+          !isLightTheme ? `text-white` : `text-dark`
+        }">${
+          typeof dodo["counties"] !== "undefined"
+            ? dodo["counties"]
+            : "Unknown Counties"
+        }</span><br /></div>
+                        </div>
+                        `;
+      } catch (e) {
+        console.error(e);
+        iziToast.show({
+          title: "An error occurred - Please check the logs",
+          message: `Error occurred during Eas iteration in processEas.`,
+        });
+      }
+    });
+
+    if (prevEas.length === 0) {
+      innercontent = `<strong class="text-white">No active alerts</strong>`;
+    }
+
+    WWSUslides.slide(`eas-alerts`).active = makeActive;
+    WWSUslides.slide(`eas-alerts`).displayTime = displayTime;
+    WWSUslides.slide(
+      `eas-alerts`
+    ).html = `<h1 style="text-align: center; font-size: 3em; color: ${
+      !isLightTheme ? `#ffffff` : `#000000`
+    }">WWSU EAS - Active Alerts</h1><h2 style="text-align: center; font-size: 1.5em; color: ${
+      !isLightTheme ? `#ffffff` : `#000000`
+    }">Clark, Greene, and Montgomery counties of Ohio</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap">${innercontent}</div>`;
+    checkSlideCounts();
+
+    // Do EAS events
+    doEas();
+  } catch (e) {
+    console.error(e);
+    iziToast.show({
+      title: "An error occurred - Please check the logs",
+      message: "Error occurred during the call of Eas[0].",
+    });
+  }
+}
+
+// This function is called whenever a change in Eas alerts is detected, or when we are finished displaying an alert. It checks to see if we should display something Eas-related.
+function doEas() {
+  try {
+    console.log(`DO EAS called`);
+    // Display the new alert if conditions permit
+    if (newEas.length > 0 && !easActive) {
+      // Make sure alert is valid. Also, only scroll severe and extreme alerts when there is an extreme alert in effect; ignore moderate and minor alerts.
+      if (
+        typeof newEas[0] !== "undefined" &&
+        (!easExtreme ||
+          (easExtreme &&
+            (newEas[0]["severity"] === "Extreme" ||
+              newEas[0]["severity"] === "Severe")))
+      ) {
+        easActive = true;
+
+        let alert =
+          typeof newEas[0]["alert"] !== "undefined"
+            ? newEas[0]["alert"]
+            : "Unknown Alert";
+        let text =
+          typeof newEas[0]["information"] !== "undefined"
+            ? newEas[0]["information"].replace(/[\r\n]+/g, " ")
+            : "There was an error attempting to retrieve information about this alert. Please check the National Weather Service or your local civil authorities for details about this alert.";
+        let color2 =
+          typeof newEas[0]["color"] !== "undefined" &&
+          /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(newEas[0]["color"])
+            ? hexRgb(newEas[0]["color"])
+            : hexRgb("#787878");
+        let color3 =
+          typeof newEas[0]["color"] !== "undefined" &&
+          /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(newEas[0]["color"])
+            ? hexRgb(newEas[0]["color"])
+            : hexRgb("#787878");
+        color3.red = Math.round(color3.red / 2);
+        color3.green = Math.round(color3.green / 2);
+        color3.blue = Math.round(color3.blue / 2);
+        color3 = `rgb(${color3.red}, ${color3.green}, ${color3.blue})`;
+        let color4 =
+          typeof newEas[0]["color"] !== "undefined" &&
+          /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(newEas[0]["color"])
+            ? hexRgb(newEas[0]["color"])
+            : hexRgb("#787878");
+        color4.red = Math.round(color4.red / 2 + 127);
+        color4.green = Math.round(color4.green / 2 + 127);
+        color4.blue = Math.round(color4.blue / 2 + 127);
+        color4 = `rgb(${color4.red}, ${color4.green}, ${color4.blue})`;
+        easAlert.style.display = "inline";
+        easAlert.style.backgroundColor = `#0000ff`;
+        easAlert.innerHTML = `<div class="animated heartBeat" id="slide-interrupt-eas"><div style="text-align: center; color: #ffffff;">
+                    <h1 style="font-size: 7vh;">WWSU Emergency Alert System</h1>
+                    <div id="eas-alert-text" class="m-3 text-white" style="font-size: 5vh;">${alert}</div>
+                    <div class="m-1 text-white" style="font-size: 3vh;">Effective ${
+                      moment(newEas[0]["starts"]).isValid()
+                        ? moment
+                            .tz(
+                              newEas[0]["starts"],
+                              Meta.meta ? Meta.meta.timezone : moment.tz.guess()
+                            )
+                            .format("MM/DD h:mmA")
+                        : "UNKNOWN"
+                    } - ${
+          moment(newEas[0]["expires"]).isValid()
+            ? moment
+                .tz(
+                  newEas[0]["expires"],
+                  Meta.meta ? Meta.meta.timezone : moment.tz.guess()
+                )
+                .format("MM/DD h:mmA")
+            : "UNKNOWN"
+        }</div>
+                    <div class="m-1 text-white" style="font-size: 3vh;">for the counties ${
+                      typeof newEas[0]["counties"] !== "undefined"
+                        ? newEas[0]["counties"]
+                        : "Unknown Counties"
+                    }</div>
+                    <div id="alert-marquee" class="marquee m-3 shadow-4" style="color: #FFFFFF; background: rgb(${Math.round(
+                      color2.red / 4
+                    )}, ${Math.round(color2.green / 4)}, ${Math.round(
+          color2.blue / 4
+        )}); font-size: 5vh;">${text}</div>
+                    </div></div>`;
+        sounds.severeeas.play();
+        if (easExtreme) {
+          easAlert.style.display = "inline";
+          easAlert.innerHTML += `<h2 style="text-align: center; font-size: 5vh;" class="text-white"><strong>LIFE-THREATENING ALERTS IN EFFECT!</strong> Please stand by for details...</h2>`;
+        }
+        $("#alert-marquee")
+          .bind("finished", () => {
+            try {
+              easActive = false;
+              let temp = document.getElementById("alert-marquee");
+              temp.innerHTML = "";
+              clearInterval(flashInterval);
+              newEas.shift();
+              doEas();
+            } catch (e) {
+              console.error(e);
+              iziToast.show({
+                title: "An error occurred - Please check the logs",
+                message: `Error occurred in the finished bind of #alert-marquee in doEas.`,
+              });
+            }
+          })
+          .marquee({
+            // duration in milliseconds of the marquee
+            speed: 180,
+            // gap in pixels between the tickers
+            gap: 50,
+            // time in milliseconds before the marquee will start animating
+            delayBeforeStart: 2000,
+            // 'left' or 'right'
+            direction: "left",
+            // true or false - should the marquee be duplicated to show an effect of continues flow
+            duplicated: false,
+          });
+        /*
+        clearInterval(flashInterval);
+        flashInterval = setInterval(function () {
+            let temp = document.querySelector(`#eas-alert-text`);
+            if (temp !== null)
+                temp.className = "m-3 animated pulse fast";
+            setTimeout(() => {
+                let temp = document.querySelector(`#eas-alert-text`);
+                if (temp !== null)
+                    temp.className = "m-3";
+            }, 900);
+            if (easActive && document.getElementById('slide-interrupt-eas') === null)
+            {
+                easActive = false;
+                doEas();
+            }
+        }, 1000);
+        */
+      } else {
+        easActive = false;
+        newEas.shift();
+        doEas();
+      }
+      // If there is an extreme alert in effect, we want it to be permanently on the screen while it is in effect
+    } else if (easExtreme && !easActive) {
+      // Make background flash red every second
+      clearInterval(flashInterval);
+      let voiceCount = 180;
+      flashInterval = setInterval(() => {
+        $("#eas-alert").css("background-color", "#D50000");
+        setTimeout(() => {
+          $("#eas-alert").css(
+            "background-color",
+            !isLightTheme ? `#320000` : `#f6cccc`
+          );
+          voiceCount++;
+          if (voiceCount > 179) {
+            voiceCount = 0;
+            sounds.lifethreatening.play();
+          }
+        }, 250);
+      }, 1000);
+
+      // Display the extreme alerts
+      easAlert.style.display = "inline";
+      easAlert.innerHTML = `<div id="slide-interrupt-eas">
+            <h1 style="text-align: center; font-size: 7vh; color: ${
+              !isLightTheme ? `#ffffff` : `#000000`
+            };">WWSU Emergency Alert System</h1>
+            <h2 style="text-align: center; font-size: 5vh;" class="${
+              !isLightTheme ? `text-white` : `text-dark`
+            }">Extreme Alerts in effect</h2>
+            <h2 style="text-align: center; font-size: 5vh;" class="${
+              !isLightTheme ? `text-white` : `text-dark`
+            }">SEEK SHELTER NOW!!!</h2>
+            <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="alerts"></div></div>`;
+      let innercontent = document.getElementById("alerts");
+      Eas.find({ severity: "Extreme" }).forEach((dodo) => {
+        try {
+          let color = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(dodo.color)
+            ? hexRgb(dodo.color)
+            : hexRgb("#787878");
+          let borderclass = "black";
+          borderclass = "danger";
+          color = `rgb(${Math.round(color.red / 4)}, ${Math.round(
+            color.green / 4
+          )}, ${Math.round(color.blue / 4)});`;
+          innercontent.innerHTML += `<div style="width: 32%;${
+            !isLightTheme ? `background-color: ${color}` : ``
+          }" class="d-flex align-items-stretch m-1 ${
+            !isLightTheme ? `text-white` : `text-dark bg-light-1`
+          } border border-${borderclass} rounded shadow-4">
+                        <div class="m-1" style="text-align: center; width: 100%"><span style="font-size: 5vh;">${
+                          typeof dodo["alert"] !== "undefined"
+                            ? dodo["alert"]
+                            : "Unknown Alert"
+                        }</span><br />
+                        <span style="font-size: 2vh;" class="${
+                          !isLightTheme ? `text-white` : `text-dark`
+                        }">${
+            moment(dodo["starts"]).isValid()
+              ? moment
+                  .tz(
+                    dodo["starts"],
+                    Meta.meta ? Meta.meta.timezone : moment.tz.guess()
+                  )
+                  .format("MM/DD h:mmA")
+              : "UNKNOWN"
+          } - ${
+            moment(dodo["expires"]).isValid()
+              ? moment
+                  .tz(
+                    dodo["expires"],
+                    Meta.meta ? Meta.meta.timezone : moment.tz.guess()
+                  )
+                  .format("MM/DD h:mmA")
+              : "UNKNOWN"
+          }</span><br />
+<span style="font-size: 1em;" class="${
+            !isLightTheme ? `text-white` : `text-dark`
+          }">${
+            typeof dodo["counties"] !== "undefined"
+              ? dodo["counties"]
+              : "Unknown Counties"
+          }</span><br />
+                        </div>
+                        `;
+        } catch (e) {
+          console.error(e);
+          iziToast.show({
+            title: "An error occurred - Please check the logs",
+            message: `Error occurred during Eas iteration in doEas.`,
+          });
+        }
+      });
+      // Resume regular slides when no extreme alerts are in effect anymore
+    } else if (
+      !easExtreme &&
+      !easActive &&
+      document.getElementById("slide-interrupt-eas") !== null
+    ) {
+      clearInterval(flashInterval);
+      easAlert.style.display = "none";
+      easAlert.innerHTML = ``;
+      // If we are supposed to display an EAS alert, but it is not on the screen, this is an error; put it on the screen.
+    } else if (
+      easActive &&
+      document.getElementById("slide-interrupt-eas") === null
+    ) {
+      easActive = false;
+      doEas();
+    }
+  } catch (e) {
+    console.error(e);
+    iziToast.show({
+      title: "An error occurred - Please check the logs",
+      message: "Error occurred during doEas.",
+    });
+  }
+}
+
+function hexRgb(hex, options = {}) {
+  try {
+    if (
+      typeof hex !== "string" ||
+      nonHexChars.test(hex) ||
+      !validHexSize.test(hex)
+    ) {
+      throw new TypeError("Expected a valid hex string");
+    }
+
+    hex = hex.replace(/^#/, "");
+    let alpha = 255;
+
+    if (hex.length === 8) {
+      alpha = parseInt(hex.slice(6, 8), 16) / 255;
+      hex = hex.substring(0, 6);
+    }
+
+    if (hex.length === 4) {
+      alpha = parseInt(hex.slice(3, 4).repeat(2), 16) / 255;
+      hex = hex.substring(0, 3);
+    }
+
+    if (hex.length === 3) {
+      hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+    }
+
+    const num = parseInt(hex, 16);
+    const red = num >> 16;
+    const green = (num >> 8) & 255;
+    const blue = num & 255;
+
+    return options.format === "array"
+      ? [red, green, blue, alpha]
+      : { red, green, blue, alpha };
+  } catch (e) {
+    console.error(e);
+    iziToast.show({
+      title: "An error occurred - Please check the logs",
+      message: "Error occurred during hexRgb.",
     });
   }
 }
