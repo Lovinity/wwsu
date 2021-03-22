@@ -1,58 +1,74 @@
-var jwt = require('jsonwebtoken')
-var bcrypt = require('bcrypt')
+var jwt = require("jsonwebtoken");
+var bcrypt = require("bcrypt");
 module.exports = {
+  friendlyName: "Auth / dj",
 
-  friendlyName: 'Auth / dj',
-
-  description: 'Authorize a dj and get a token.',
+  description: "Authorize a dj and get a token.",
 
   inputs: {
     username: {
-      type: 'string',
-      description: 'The name of the DJ to authorize.',
-      required: true
+      type: "string",
+      description: "The name of the DJ to authorize.",
+      required: true,
     },
 
     password: {
-      type: 'string',
-      description: 'DJ login to authorize.',
-      required: true
-    }
+      type: "string",
+      description: "DJ login to authorize.",
+      required: true,
+    },
   },
 
   exits: {
     success: {
-      statusCode: 200
+      statusCode: 200,
     },
     noToken: {
-      statusCode: 401
+      statusCode: 401,
     },
     error: {
-      statusCode: 500
-    }
+      statusCode: 500,
+    },
   },
 
   fn: async function (inputs, exits) {
-    sails.log.debug('Controller auth/dj called.')
+    sails.log.debug("Controller auth/dj called.");
 
     try {
       // Verify the DJ exists first
-      var dj = await sails.models.djs.findOne({ name: inputs.username })
-      if (!dj) { return exits.noToken({ tokenErr: 'The provided DJ either does not exist or is not authorized.' }) }
+      var dj = await sails.models.djs.findOne({ name: inputs.username });
+      if (!dj) {
+        return exits.noToken({
+          tokenErr:
+            "The provided DJ either does not exist or is not authorized.",
+        });
+      }
 
       // Now check the password
-      var match = await bcrypt.compare(inputs.password, dj.login)
+      var match = await bcrypt.compare(inputs.password, dj.login);
 
-      if (!match) { return exits.noToken({ tokenErr: 'The provided DJ either does not exist or is not authorized.' }) }
+      if (!match) {
+        return exits.noToken({
+          tokenErr:
+            "The provided DJ either does not exist or is not authorized.",
+        });
+      }
 
       // Generate the token valid for 60 minutes
-      var token = jwt.sign({ ID: dj.ID, name: dj.name, exp: Math.floor(Date.now() / 1000) + (60 * 60) }, sails.config.custom.secrets.dj, { subject: 'dj' })
+      var token = jwt.sign(
+        {
+          ID: dj.ID,
+          name: dj.name,
+          exp: Math.floor(Date.now() / 1000) + 60 * 60,
+        },
+        sails.config.custom.secrets.dj,
+        { subject: "dj" }
+      );
 
       // Return the token as an object
-      return exits.success({ token: token, expires: (60000 * 60) })
+      return exits.success({ token: token, expires: 60000 * 60 });
     } catch (e) {
-      return exits.error(e)
+      return exits.error(e);
     }
-  }
-
-}
+  },
+};

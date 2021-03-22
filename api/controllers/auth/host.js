@@ -9,23 +9,23 @@ module.exports = {
     username: {
       type: "string",
       description: "The host to authorize.",
-      required: true
-    }
+      required: true,
+    },
   },
 
   exits: {
     success: {
-      statusCode: 200
+      statusCode: 200,
     },
     noToken: {
-      statusCode: 401
+      statusCode: 401,
     },
     error: {
-      statusCode: 500
-    }
+      statusCode: 500,
+    },
   },
 
-  fn: async function(inputs, exits) {
+  fn: async function (inputs, exits) {
     sails.log.debug("Controller auth/host called.");
 
     try {
@@ -36,13 +36,13 @@ module.exports = {
           host: inputs.username,
           friendlyname: `UNKNOWN ${inputs.username.substr(
             inputs.username.length - 8
-          )}`
+          )}`,
         }
       );
 
       if (!host || !host.authorized) {
         return exits.noToken({
-          tokenErr: `The provided host either does not exist or is not authorized. To grant access, please use a DJ Controls with administrator privileges and authorize the host ${inputs.username}`
+          tokenErr: `The provided host either does not exist or is not authorized. To grant access, please use a DJ Controls with administrator privileges and authorize the host ${inputs.username}`,
         });
       }
 
@@ -55,7 +55,7 @@ module.exports = {
           lockToDJ: host.lockToDJ,
           makeCalls: host.authorized && host.makeCalls,
           answerCalls: host.authorized && host.answerCalls,
-          exp: Math.floor(Date.now() / 1000) + 60 * 10
+          exp: Math.floor(Date.now() / 1000) + 60 * 10,
         },
         sails.config.custom.secrets.host,
         { subject: "host" }
@@ -66,5 +66,5 @@ module.exports = {
     } catch (e) {
       return exits.error(e);
     }
-  }
+  },
 };
