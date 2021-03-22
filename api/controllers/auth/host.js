@@ -42,7 +42,7 @@ module.exports = {
 
       if (!host || !host.authorized) {
         return exits.noToken({
-          errToken: `The provided host either does not exist or is not authorized. To grant access, please use a DJ Controls with administrator privileges and authorize the host ${inputs.username}`
+          tokenErr: `The provided host either does not exist or is not authorized. To grant access, please use a DJ Controls with administrator privileges and authorize the host ${inputs.username}`
         });
       }
 

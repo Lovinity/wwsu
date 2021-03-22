@@ -38,12 +38,12 @@ module.exports = {
     try {
       // Verify the DJ exists first
       var dj = await sails.models.djs.findOne({ name: inputs.username })
-      if (!dj) { return exits.noToken({ errToken: 'The provided DJ either does not exist or is not authorized.' }) }
+      if (!dj) { return exits.noToken({ tokenErr: 'The provided DJ either does not exist or is not authorized.' }) }
 
       // Now check the password
       var match = await bcrypt.compare(inputs.password, dj.login)
 
-      if (!match) { return exits.noToken({ errToken: 'The provided DJ either does not exist or is not authorized.' }) }
+      if (!match) { return exits.noToken({ tokenErr: 'The provided DJ either does not exist or is not authorized.' }) }
 
       // Generate the token valid for 60 minutes
       var token = jwt.sign({ ID: dj.ID, name: dj.name, exp: Math.floor(Date.now() / 1000) + (60 * 60) }, sails.config.custom.secrets.dj, { subject: 'dj' })
