@@ -208,7 +208,7 @@ WWSUslides.newSlide({
   transitionOut: `fadeOut`,
   displayTime: 5,
   fitContent: false,
-  html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: One-time office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: One-time cancellation.</span><span class="text-white">9AM - 5PM</span>: Regular office hours.</span></p>`,
+  html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.75vh;" class="container-full p-2 m-1"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: One-time office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: One-time cancellation.</span><span class="text-white">9AM - 5PM</span>: Regular office hours.</span></p>`,
 });
 
 // Assistant Director hours
@@ -223,7 +223,7 @@ WWSUslides.newSlide({
   transitionOut: `fadeOut`,
   displayTime: 5,
   fitContent: false,
-  html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: One-time office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: One-time cancellation.</span><span class="text-white">9AM - 5PM/span>: Regular office hours.</span></p>`,
+  html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.75vh;" class="container-full p-2 m-1"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: One-time office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: One-time cancellation.</span><span class="text-white">9AM - 5PM/span>: Regular office hours.</span></p>`,
 });
 
 // System Status
@@ -238,7 +238,7 @@ WWSUslides.newSlide({
   transitionOut: `fadeOut`,
   displayTime: 15,
   fitContent: false,
-  html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">System Status</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1"></div>`,
+  html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">System Status</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.75vh;" class="container-full p-2 m-1"></div>`,
 });
 
 // Director auto-clockout message
@@ -665,7 +665,7 @@ function processStatus(db) {
     // Update status html
     WWSUslides.slide(
       `system`
-    ).html = `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">System Status</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1">${statusMarquee}</div>`;
+    ).html = `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">System Status</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.75vh;" class="container-full p-2 m-1">${statusMarquee}</div>`;
   } catch (e) {
     iziToast.show({
       title: "An error occurred - Please check the logs",
@@ -983,7 +983,7 @@ function updateCalendar() {
     </div>
     <div class="col-8">
       <span class="text-white">${temp.name}</span><br />
-      <span class="text-warning" style="font-size: 0.8em;">${
+      <span class="text-warning" style="font-size: 0.75em;">${
         temp.position
       }</span><br />
       ${
@@ -1030,7 +1030,7 @@ function updateCalendar() {
         WWSUslides.slide(`hours-directors`).active = isActive;
         WWSUslides.slide(
           `hours-directors`
-        ).html = `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1">${stuff}</div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: One-time office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: One-time cancellation.</span><span class="text-white">9AM - 5PM</span>: Regular office hours.</span></p>`;
+        ).html = `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.75vh;" class="container-full p-2 m-1">${stuff}</div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: One-time office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: One-time cancellation.</span><span class="text-white">9AM - 5PM</span>: Regular office hours.</span></p>`;
 
         // Assistant hours slide
         innercontent = ``;
@@ -1155,7 +1155,7 @@ function updateCalendar() {
         WWSUslides.slide(`hours-assistants`).active = isActive;
         WWSUslides.slide(
           `hours-assistants`
-        ).html = `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden;" class="container-full p-2 m-1">${stuff}</div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: One-time office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: One-time cancellation.</span><span class="text-white">9AM - 5PM</span>: Regular office hours.</span></p>`;
+        ).html = `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.75vh;" class="container-full p-2 m-1">${stuff}</div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: One-time office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: One-time cancellation.</span><span class="text-white">9AM - 5PM</span>: Regular office hours.</span></p>`;
       },
       undefined,
       moment
@@ -1591,7 +1591,6 @@ function processEas(db) {
     }">WWSU EAS - Active Alerts</h1><h2 style="text-align: center; font-size: 1.5em; color: ${
       !isLightTheme ? `#ffffff` : `#000000`
     }">Clark, Greene, and Montgomery counties of Ohio</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap">${innercontent}</div>`;
-    checkSlideCounts();
 
     // Do EAS events
     doEas();

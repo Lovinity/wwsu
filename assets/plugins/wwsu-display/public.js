@@ -87,15 +87,12 @@ Darksky.on("change", "renderer", (db) => processDarksky(db));
 Announcements.on("update", "renderer", (data) => {
   WWSUslides.removeSlide(`attn-${data.ID}`);
   createAnnouncement(data);
-  checkSlideCounts();
 });
 Announcements.on("insert", "renderer", (data) => {
   createAnnouncement(data);
-  checkSlideCounts();
 });
 Announcements.on("remove", "renderer", (data) => {
   WWSUslides.removeSlide(`attn-${data}`);
-  checkSlideCounts();
 });
 Announcements.on("replace", "renderer", (db) => {
   // Remove all announcement slides
@@ -105,7 +102,6 @@ Announcements.on("replace", "renderer", (db) => {
 
   // Add slides for each announcement
   db.each((data) => createAnnouncement(data));
-  checkSlideCounts();
 });
 
 socket.on("connect", () => {
@@ -892,7 +888,6 @@ function processEas(db) {
     }">WWSU EAS - Active Alerts</h1><h2 style="text-align: center; font-size: 1.5em; color: ${
       !isLightTheme ? `#ffffff` : `#000000`
     }">Clark, Greene, and Montgomery counties of Ohio</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap">${innercontent}</div>`;
-    checkSlideCounts();
 
     // Do EAS events
     doEas();
@@ -1244,7 +1239,6 @@ function processNowPlaying(response) {
           Meta.meta.state.startsWith("prerecord_")
         ) {
           WWSUslides.slide(`on-air`).active = true;
-          checkSlideCounts();
           let innercontent = ``;
           if (Meta.meta.topic.length > 2) {
             WWSUslides.slide(`on-air`).displayTime = 20;
@@ -1287,7 +1281,6 @@ function processNowPlaying(response) {
           }">On the Air Right Now</h1>${innercontent}</div>`;
         } else {
           WWSUslides.slide(`on-air`).active = false;
-          checkSlideCounts();
         }
       }
       let countDown =
@@ -1479,24 +1472,6 @@ function createAnnouncement(data) {
       }">${data.announcement}</div>`,
     });
   }
-}
-
-function checkSlideCounts() {
-  /*
-     let slideCount = 8;
-     if (!WWSUslides.slide(`events-2-4`).active)
-     slideCount--;
-     if (!WWSUslides.slide(`events-5-7`).active)
-     slideCount--;
-     if (WWSUslides.countActive() >= slideCount)
-     {
-     WWSUslides.slide(`events-2-4`).active = false;
-     WWSUslides.slide(`events-5-7`).active = false;
-     } else {
-     WWSUslides.slide(`events-2-4`).active = true;
-     WWSUslides.slide(`events-5-7`).active = true;
-     }
-     */
 }
 
 function processDarksky(db) {
