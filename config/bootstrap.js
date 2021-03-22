@@ -2529,7 +2529,7 @@ module.exports.bootstrap = async function (done) {
       data:
         issues.length === 0
           ? `No issues.`
-          : `<ul>${issues.map((issue) => `<li>${issue}</li>`)}</ul>`,
+          : `<ul>${issues.map((issue) => `<li>${issue}</li>`).join("")}</ul>`,
     });
   });
 
