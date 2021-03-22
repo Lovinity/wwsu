@@ -23,7 +23,7 @@ module.exports = async function (req, res, next) {
       return res
         .status(401)
         .json({
-          tokenErr:
+          errToken:
             "Error with authorization. Format is Authorization: Bearer [token]",
         });
     }
@@ -34,7 +34,7 @@ module.exports = async function (req, res, next) {
   } else {
     return res
       .status(401)
-      .json({ tokenErr: "This endpoint requires auth/dj authorization." });
+      .json({ errToken: "This endpoint requires auth/dj authorization." });
   }
 
   try {
@@ -45,7 +45,7 @@ module.exports = async function (req, res, next) {
     // This should never happen, but if there is no ID, we should error.
     if (!authorized || !authorized.ID)
       return res.status(401).json({
-        tokenErr:
+        errToken:
           "There is a problem with this token; ID property is not defined. Please try re-authorizing.",
       });
 
@@ -58,7 +58,7 @@ module.exports = async function (req, res, next) {
     return res
       .status(401)
       .json({
-        tokenErr:
+        errToken:
           "This endpoint requires auth/dj authorization. The provided token is invalid or expired.",
       });
   }

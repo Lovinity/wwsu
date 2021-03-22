@@ -42,7 +42,7 @@ module.exports = {
       });
       if (!director)
         return exits.noToken({
-          tokenErr:
+          errToken:
             "The provided director either does not exist or is not authorized.",
         });
 
@@ -51,7 +51,7 @@ module.exports = {
 
       if (!match)
         return exits.noToken({
-          tokenErr:
+          errToken:
             "The provided director either does not exist or is not authorized.",
         });
 

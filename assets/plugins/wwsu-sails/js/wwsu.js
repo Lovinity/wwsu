@@ -282,15 +282,15 @@ class WWSUreq {
 						icon: "fas fa-skull-crossbones fa-lg",
 					});
 				} else if (
-					typeof token.tokenErr !== `undefined` ||
+					typeof token.errToken !== `undefined` ||
 					typeof token.token === "undefined"
 				) {
 					$(document).Toasts("create", {
 						class: "bg-danger",
 						title: "Error Authorizing",
 						body: `${
-							typeof token.tokenErr !== `undefined`
-								? `Failed to authenticate; please try again. ${token.tokenErr}`
+							typeof token.errToken !== `undefined`
+								? `Failed to authenticate; please try again. ${token.errToken}`
 								: `Failed to authenticate; unknown error.`
 						}`,
 						autoHide: true,
@@ -365,7 +365,7 @@ class WWSUreq {
 					if (!body) {
 						// eslint-disable-next-line standard/no-callback-literal
 						cb(0);
-					} else if (typeof body.tokenErr !== `undefined`) {
+					} else if (typeof body.errToken !== `undefined`) {
 						// eslint-disable-next-line standard/no-callback-literal
 						cb(-1);
 					} else {
@@ -419,7 +419,7 @@ class WWSUreq {
 							this.expiration = body.expires || 60000 * 5;
 							this.time = moment();
 							cb(body);
-						} else if (typeof body.tokenErr !== `undefined`) {
+						} else if (typeof body.errToken !== `undefined`) {
 							cb(body);
 						} else {
 							// eslint-disable-next-line standard/no-callback-literal

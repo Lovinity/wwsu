@@ -39,7 +39,7 @@ module.exports = {
       var dj = await sails.models.djs.findOne({ name: inputs.username });
       if (!dj) {
         return exits.noToken({
-          tokenErr:
+          errToken:
             "The provided DJ either does not exist or is not authorized.",
         });
       }
@@ -49,7 +49,7 @@ module.exports = {
 
       if (!match) {
         return exits.noToken({
-          tokenErr:
+          errToken:
             "The provided DJ either does not exist or is not authorized.",
         });
       }
