@@ -7,6 +7,7 @@ let sounds = {
   }),
   severeeas: new Howl({ src: ["/sounds/display/severeeas.mp3"] }),
   displaymessage: new Howl({ src: ["/sounds/display/displaymessage.mp3"] }),
+  goingonair: new Howl({ src: ["/sounds/display/goingonair.mp3"] }),
 };
 
 // Define hexrgb constants
@@ -58,7 +59,6 @@ let Recipients = wwsumodules.get("WWSUrecipientsweb");
 let Messages = wwsumodules.get("WWSUmessagesweb");
 let Status = wwsumodules.get("WWSUstatus");
 let Eas = wwsumodules.get("WWSUeas");
-
 
 // Assign other (deprecated) data managers
 let calendar = [];
@@ -213,7 +213,13 @@ let nowPlayingTimer;
 let calendarTimer;
 let temp;
 let queueUnknown = false;
+
+// The URL should contain a query parameter "studio=true" for the display sign that is placed in the OnAir studio.
+// This disables all audio warnings (such as shows going on the air and the EAS) so they do not interfere with a live broadcast.
+// However, this enables an audio warning when a producer is about to go live in 10 seconds (for live and sports [live] shows where someone is expected to be in the studio).
+// This audio warning helps alert guests in the station to be quiet as the producer might be about to turn the microphones on.
 let isStudio = window.location.search.indexOf("studio=true") !== -1;
+
 let isLightTheme = false;
 let weatherSlide = [
   {
@@ -1389,6 +1395,22 @@ function processNowPlaying(response) {
               .format("LLLL") || "Unknown WWSU Time"
       }`;
 
+      // For the display that is in the studio, if going live or sports (live) and the countdown drops to 10 seconds, announce an audio warning to guests in the studio
+      if (
+        [
+          "automation_live",
+          "automation_sports",
+          "live_returning",
+          "sports_returning",
+        ].indexOf(Meta.meta.state) !== -1
+      ) {
+        if (countDown <= 10 && isStudio) {
+          if (!queueReminder) {
+            sounds.goingonair.play();
+          }
+          queueReminder = true;
+        }
+      }
     } catch (e) {
       console.error(e);
       iziToast.show({

@@ -182,8 +182,7 @@ let sounds = {
     src: ["/sounds/display/lifethreatening.mp3"],
   }),
   severeeas: new Howl({ src: ["/sounds/display/severeeas.mp3"] }),
-
-  goingonair: new Howl({ src: ["/sounds/display/goingonair.mp3"] }),
+  
   live: new Howl({ src: ["/sounds/display/live.mp3"] }),
   remote: new Howl({ src: ["/sounds/display/remote.mp3"] }),
   sports: new Howl({ src: ["/sounds/display/sports.mp3"] }),
@@ -1390,9 +1389,6 @@ function processNowPlaying(response) {
         }
         countdownclock.innerHTML = countDown;
         if (countDown <= 10) {
-          if (!queueReminder) {
-            sounds.goingonair.play();
-          }
           queueReminder = true;
           $("#dj-alert").css("background-color", "#F44336");
           setTimeout(() => {
@@ -1452,9 +1448,6 @@ function processNowPlaying(response) {
           Meta.meta.state.startsWith("sports_")
         ) {
           if (countDown <= 10) {
-            if (!queueReminder) {
-              sounds.goingonair.play();
-            }
             queueReminder = true;
             $("#dj-alert").css("background-color", "#4CAF50");
             setTimeout(() => {
