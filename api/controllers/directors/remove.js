@@ -1,3 +1,5 @@
+const cryptoRandomString = require("crypto-random-string");
+
 module.exports = {
   friendlyName: "directors / remove",
 
@@ -7,17 +9,17 @@ module.exports = {
     ID: {
       type: "number",
       required: true,
-      description: "The director ID to remove."
-    }
+      description: "The director ID to remove.",
+    },
   },
 
   exits: {
     conflict: {
-      statusCode: 409
-    }
+      statusCode: 409,
+    },
   },
 
-  fn: async function(inputs, exits) {
+  fn: async function (inputs, exits) {
     sails.log.debug("Controller directors/remove called.");
     sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
 
@@ -41,15 +43,23 @@ module.exports = {
 
       await sails.models.directors.destroy({ ID: inputs.ID }).fetch();
 
+      // As a security measure, invalidate all tokens for directors and admin directors by changing the secret.
+      sails.config.custom.secrets.director = cryptoRandomString({
+        length: 256,
+      });
+      sails.config.custom.secrets.adminDirector = cryptoRandomString({
+        length: 256,
+      });
+
       // Also remove the director's push notification subscriptions
       await sails.models.subscribers
         .destroy({
           type: [
             "emergencies",
             "accountability-shows",
-            "accountability-directors"
+            "accountability-directors",
           ],
-          subtype: inputs.ID
+          subtype: inputs.ID,
         })
         .fetch();
 
@@ -57,5 +67,5 @@ module.exports = {
     } catch (e) {
       return exits.error(e);
     }
-  }
+  },
 };

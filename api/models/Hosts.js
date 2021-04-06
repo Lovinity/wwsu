@@ -5,8 +5,6 @@
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
 
-const cryptoRandomString = require("crypto-random-string");
-
 module.exports = {
   datastore: "nodebase",
   attributes: {
@@ -110,8 +108,16 @@ module.exports = {
     sails.log.silly(`hosts socket: ${data}`);
     sails.sockets.broadcast("hosts", "hosts", data);
 
-    // As a security measure, invalidate all tokens for hosts by changing the secret.
-    sails.config.custom.secrets.hosts = cryptoRandomString({ length: 256 });
+    (async () => {
+      // Edit the status of recorder if necessary
+      if (!(await sails.models.hosts.count({ recordAudio: true })))
+        await sails.helpers.status.change.with({
+          name: `recorder`,
+          status: 3,
+          label: `Recorder`,
+          data: `There are no hosts currently set for recording audio. To set a responsible host, go in an administration DJ Controls and click Hosts.<br /><strong>Be prepared to manually record your broadcasts</strong> until this is resolved.`,
+        });
+    })();
 
     return proceed();
   },
@@ -121,8 +127,16 @@ module.exports = {
     sails.log.silly(`hosts socket: ${data}`);
     sails.sockets.broadcast("hosts", "hosts", data);
 
-    // As a security measure, invalidate all tokens for hosts by changing the secret.
-    sails.config.custom.secrets.hosts = cryptoRandomString({ length: 256 });
+    (async () => {
+      // Edit the status of recorder if necessary
+      if (!(await sails.models.hosts.count({ recordAudio: true })))
+        await sails.helpers.status.change.with({
+          name: `recorder`,
+          status: 3,
+          label: `Recorder`,
+          data: `There are no hosts currently set for recording audio. To set a responsible host, go in an administration DJ Controls and click Hosts.<br /><strong>Be prepared to manually record your broadcasts</strong> until this is resolved.`,
+        });
+    })();
 
     return proceed();
   },

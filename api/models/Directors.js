@@ -5,8 +5,6 @@
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
 
-const cryptoRandomString = require("crypto-random-string");
-
 module.exports = {
   // This model is only a container for temporary data. It should not persist. Use memory instead of SQL.
   datastore: "timesheets",
@@ -135,12 +133,6 @@ module.exports = {
     var temp;
     var temp2;
 
-    // As a security measure, invalidate all tokens for directors and admin directors by changing the secret.
-    sails.config.custom.secrets.director = cryptoRandomString({ length: 256 });
-    sails.config.custom.secrets.adminDirector = cryptoRandomString({
-      length: 256,
-    });
-
     // Update host data in calendar and schedule
     temp = (async () => {
       records = await sails.models.calendar.find({
@@ -191,12 +183,6 @@ module.exports = {
     sails.sockets.broadcast("directors", "directors", data);
     let records;
     let maps;
-
-    // As a security measure, invalidate all tokens for directors and admin directors by changing the secret.
-    sails.config.custom.secrets.director = cryptoRandomString({ length: 256 });
-    sails.config.custom.secrets.adminDirector = cryptoRandomString({
-      length: 256,
-    });
 
     // Deactivate office hours events for this director. Update all other events using this director ID to null director.
     (async () => {

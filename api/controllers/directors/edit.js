@@ -1,4 +1,6 @@
 const bcrypt = require("bcrypt");
+const cryptoRandomString = require("crypto-random-string");
+
 module.exports = {
   friendlyName: "directors / edit",
 
@@ -77,11 +79,12 @@ module.exports = {
     try {
       // Do not allow editing of the master director if we did not authorize with master director
       if (inputs.ID === 1 && this.req.payload.ID !== 1)
-        return new Error("Not allowed to edit the master director with any authorization other than the master director.");
+        return new Error(
+          "Not allowed to edit the master director with any authorization other than the master director."
+        );
 
       // If editing master director, do not allow disabling of the admin setting
-      if (inputs.ID === 1)
-        inputs.admin = true;
+      if (inputs.ID === 1) inputs.admin = true;
 
       // Determine if we need to lock out of editing admin
       var lockout = await sails.models.directors.count({ admin: true });
@@ -160,6 +163,14 @@ module.exports = {
 
       // Edit it
       await sails.models.directors.update({ ID: inputs.ID }, criteriaB).fetch();
+
+      // As a security measure, invalidate all tokens for directors and admin directors by changing the secret.
+      sails.config.custom.secrets.director = cryptoRandomString({
+        length: 256,
+      });
+      sails.config.custom.secrets.adminDirector = cryptoRandomString({
+        length: 256,
+      });
 
       return exits.success();
     } catch (e) {

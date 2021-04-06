@@ -5,8 +5,6 @@
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
 
-const cryptoRandomString = require("crypto-random-string");
-
 module.exports = {
   datastore: "nodebase",
   attributes: {
@@ -60,9 +58,6 @@ module.exports = {
     var hosts;
     var temp;
     var temp2;
-
-    // As a security measure, invalidate all tokens for DJs by changing the secret.
-    sails.config.custom.secrets.dj = cryptoRandomString({ length: 256 });
 
     // Update host data in calendar events
     temp = (async () => {
@@ -119,9 +114,6 @@ module.exports = {
     var maps;
     var toUpdate;
     var temp;
-
-    // As a security measure, invalidate all tokens for DJs by changing the secret.
-    sails.config.custom.secrets.dj = cryptoRandomString({ length: 256 });
 
     // Update DJ data in calendar events
     temp = (async () => {
