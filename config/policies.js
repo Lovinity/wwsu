@@ -91,6 +91,7 @@ module.exports.policies = {
   "sports/basketball-remote": "isBanned",
   "state/change-radio-dj": ["isBanned", "isSocket", "isAuthorizedDirector"],
   "status/get": ["isBanned", "isSocket"],
+  "status/recorder": ["isBanned", "isSocket", "isAuthorizedHost"],
   "status/report": ["isBanned", "isSocket"],
   "subscribers/*": ["isBanned", "isSocket"],
   "subscribers/add-directors": ["isBanned", "isSocket", "isAuthorizedDirector"],

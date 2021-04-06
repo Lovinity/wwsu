@@ -163,7 +163,15 @@ module.exports = {
       data:
         "Inventory checks have not been run since initialization. Checks are run every 5 minutes.",
       time: null
-    }
+    },
+    {
+      name: "recorder",
+      label: "Recorder",
+      status: 4,
+      data:
+        "A recording has not yet been saved since initialization.",
+      time: null
+    },
   ],
 
   /* Object used internally to check for errors.
