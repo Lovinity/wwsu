@@ -248,14 +248,31 @@ module.exports.bootstrap = async function (done) {
   await sails.helpers.status.checkReported();
 
   sails.log.verbose(
-    `BOOTSTRAP: Check if any hosts are set for recording responsibility.`
+    `BOOTSTRAP: Check if any hosts are set for recording and silence responsibility.`
   );
+
   if (!(await sails.models.hosts.count({ recordAudio: true })))
     await sails.helpers.status.change.with({
       name: `recorder`,
-      status: 3,
+      status: 2,
       label: `Recorder`,
       data: `There are no hosts currently set for recording audio. To set a responsible host, go in an administration DJ Controls and click Hosts.<br /><strong>Be prepared to manually record your broadcasts</strong> until this is resolved.`,
+    });
+
+  if (!(await sails.models.hosts.count({ silenceDetection: true })))
+    await sails.helpers.status.change.with({
+      name: `silence`,
+      status: 2,
+      label: `Silence`,
+      data: `There are no hosts currently set for silence detection. To set a responsible host, go in an administration DJ Controls and click Hosts.`,
+    });
+
+  if (!(await sails.models.hosts.count({ delaySystem: true })))
+    await sails.helpers.status.change.with({
+      name: "delay-system",
+      label: "Delay System",
+      data: `There are no hosts currently set for delay system monitoring. To set a responsible host, go in an administration DJ Controls and click Hosts.<br /><strong>You will not be able to remotely dump audio in DJ Controls</strong> until this issue is resolved.`,
+      status: 2,
     });
 
   // Load internal sails.models.recipients into memory
@@ -2443,16 +2460,16 @@ module.exports.bootstrap = async function (done) {
           await sails.helpers.status.change.with({
             name: "delay-system",
             label: "Delay System",
-            data: `There has been no information received about the delay system for over 3 minutes. Please ensure the delay system is online, the serial port is properly connected to the responsible computer, and DJ Controls is running on the responsible computer.`,
-            status: 3, // TODO: change back to 1
+            data: `There has been no information received about the delay system for over 3 minutes. Please ensure the delay system is online, the serial port is properly connected to the responsible computer, and DJ Controls is running on the responsible computer.<strong>You will not be able to remotely dump audio in DJ Controls (and possibly in the studio as well)</strong> until this issue is resolved.`,
+            status: 1,
           });
           await sails.helpers.meta.change.with({ delaySystem: null });
         } else if (responsible < 1) {
           await sails.helpers.status.change.with({
             name: "delay-system",
             label: "Delay System",
-            data: `There are no hosts currently set as responsible for monitoring the Delay System.`,
-            status: 4,
+            data: `There are no hosts currently set for delay system monitoring. To set a responsible host, go in an administration DJ Controls and click Hosts.<br /><strong>You will not be able to remotely dump audio in DJ Controls</strong> until this issue is resolved.`,
+            status: 2,
           });
           await sails.helpers.meta.change.with({ delaySystem: null });
         }

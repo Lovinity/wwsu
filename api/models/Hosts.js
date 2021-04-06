@@ -113,7 +113,7 @@ module.exports = {
       if (!(await sails.models.hosts.count({ recordAudio: true })))
         await sails.helpers.status.change.with({
           name: `recorder`,
-          status: 3,
+          status: 2,
           label: `Recorder`,
           data: `There are no hosts currently set for recording audio. To set a responsible host, go in an administration DJ Controls and click Hosts.<br /><strong>Be prepared to manually record your broadcasts</strong> until this is resolved.`,
         });
@@ -132,7 +132,7 @@ module.exports = {
       if (!(await sails.models.hosts.count({ recordAudio: true })))
         await sails.helpers.status.change.with({
           name: `recorder`,
-          status: 3,
+          status: 2,
           label: `Recorder`,
           data: `There are no hosts currently set for recording audio. To set a responsible host, go in an administration DJ Controls and click Hosts.<br /><strong>Be prepared to manually record your broadcasts</strong> until this is resolved.`,
         });

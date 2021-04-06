@@ -82,6 +82,23 @@ module.exports = {
                 }
                 await sails.helpers.status.change.with({ name: `computer-${sh.unique(hostRecord.host + sails.config.custom.hostSecret)}`, label: `Host ${recipient.label}`, status: offStatus, data: `Host is offline.${additionalData}` })
               }
+
+              if (hostRecord.recordAudio) {
+                await sails.helpers.status.change.with({
+                  name: `recorder`,
+                  status: 2,
+                  label: `Recorder`,
+                  data: `The host responsible for audio recording, ${recipient.label}, is offline.<br /><strong>Be prepared to manually record your broadcasts</strong> until this is resolved.`,
+                });
+              }
+              if (hostRecord.silenceDetection) {
+                await sails.helpers.status.change.with({
+                  name: `silence`,
+                  status: 2,
+                  label: `Silence`,
+                  data: `The host responsible for silence detection, ${recipient.label}, is offline.`
+                });
+              }
             }
           }
         }

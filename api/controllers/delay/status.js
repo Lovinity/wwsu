@@ -62,8 +62,8 @@ module.exports = {
         await sails.helpers.status.change.with({
           name: "delay-system",
           label: "Delay System",
-          data: `Delay system is in bypass mode and not actively delaying! This is against FCC regulations. Please disable bypass by pressing the bypass button on the delay system. You can also click the dump button in DJ Controls Administration -> Maintenance to bring the delay out of bypass.`,
-          status: 2
+          data: `Delay system is in bypass mode and not actively delaying! This is against FCC regulations. Please disable bypass by pressing the bypass button on the delay system. You can also click the dump button on DJ Controls (during a remote broadcast) to bring the delay out of bypass.<br /><strong>You will not be able to dump audio in the studio nor remotely</strong> until this issue is resolved.`,
+          status: 1
         });
         if (sails.models.meta.memory.delaySystem !== null) {
           await sails.models.logs
@@ -89,8 +89,8 @@ module.exports = {
             await sails.helpers.status.change.with({
               name: "delay-system",
               label: "Delay System",
-              data: `Delay system is returning 0 seconds of delay. This is against FCC regulations (requirement is 7 seconds or more). Please ensure the delay system is activated. You may have to press the start button. You can also click the dump button in DJ Controls Administration -> Maintenance.`,
-              status: 2
+              data: `Delay system is returning 0 seconds of delay. This is against FCC regulations (requirement is 7 seconds or more). Please ensure the delay system is activated. You may have to press the start button. You can also click the dump button in DJ Controls when in a remote broadcast.<strong>You will not be able to dump audio in the studio nor remotely</strong> until this issue is resolved.`,
+              status: 1
             });
           }
         } else {
@@ -108,7 +108,7 @@ module.exports = {
             name: "delay-system",
             label: "Delay System",
             data: `Delay system is returning ${inputs.seconds} seconds of delay. This is against FCC regulations (requirement is 7 seconds or more). Please ensure the delay system is set at a delay of at least 7 seconds.`,
-            status: 2
+            status: 3
           });
         } else {
           await sails.helpers.status.change.with({
