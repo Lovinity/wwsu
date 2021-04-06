@@ -124,9 +124,12 @@ socket.on("connect", () => {
     } else {
       iziToast.show({
         title: "Failed to Connect",
-        message: "Failed to connect to WWSU; recipients registration failed.",
+        message: "Failed to connect to WWSU; recipients registration failed. Display will try again in 60 seconds.",
         timeout: false,
       });
+      setTimeout(() => {
+        window.location.reload(true);
+      }, 60000);
     }
   });
 });
@@ -157,7 +160,13 @@ socket.on("disconnect", () => {
 });
 
 socket.on("display-refresh", () => {
-  window.location.reload(true);
+  if (isStudio) {
+    setTimeout(() => {
+      window.location.reload(true);
+    }, 5000);
+  } else {
+    window.location.reload(true);
+  }
 });
 
 // Display messages sent to the display
