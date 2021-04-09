@@ -927,6 +927,7 @@ class WWSUcalendar extends CalendarDb {
 	 * @param {object} event Calendardb event
 	 */
 	showClickedEvent(event) {
+		console.dir(event);
 		this.occurrenceModal.title = `${event.type}: ${event.hosts} - ${event.name}`;
 		this.occurrenceModal.body = this.generateFullEventCard(event);
 

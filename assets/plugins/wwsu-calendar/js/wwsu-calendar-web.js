@@ -105,6 +105,8 @@ class CalendarDb {
 
 		let events = [];
 
+		let scheduleIDs = [];
+
 		/**
 		 * Extends this.processRecord by filtering out events that do not fall within start and end.
 		 *
@@ -345,8 +347,8 @@ class CalendarDb {
 			if (schedule.startTime && moment(end).isSameOrAfter(moment(start))) {
 				// Construct the moment recurrence
 				let recur = moment.recur({
-					start: start,
-					end: end,
+					start: schedule.startDate && moment(schedule.startDate).isAfter("2000-01-01") ? schedule.startDate : start,
+					end: schedule.endDate,
 					rules: schedule.recurrenceRules ? schedule.recurrenceRules : undefined
 				});
 
@@ -419,6 +421,7 @@ class CalendarDb {
 					});
 				}
 			}
+
 			taskComplete();
 		};
 
@@ -428,22 +431,30 @@ class CalendarDb {
 		 * @param {object} calendar The calendar record.
 		 */
 		const processCalendarEntry = calendar => {
-			// Get regular and unscheduled events
+			// Get all schedules for the provided calendar
 			let regularEvents = scheduledb.find({
-				calendarID: calendar.ID,
-				scheduleType: [null, "unscheduled", undefined]
+				calendarID: calendar.ID
 			});
-			regularEvents.sort(scheduleCompare).map(schedule => {
-				// Add to task queue
-				tasks++;
-				if (callback) {
-					this.queue.add(() => {
+
+			// Get regular and unscheduled events
+			regularEvents
+				.filter(
+					schedule =>
+						[null, "unscheduled", undefined].indexOf(schedule.scheduleType) !==
+						-1
+				)
+				.sort(scheduleCompare)
+				.map(schedule => {
+					// Add to task queue
+					tasks++;
+					if (callback) {
+						this.queue.add(() => {
+							processScheduleEntry(calendar, schedule);
+						});
+					} else {
 						processScheduleEntry(calendar, schedule);
-					});
-				} else {
-					processScheduleEntry(calendar, schedule);
-				}
-			});
+					}
+				});
 			taskComplete();
 		};
 
@@ -779,7 +790,6 @@ class CalendarDb {
 						rec.scheduleType === newRecord.scheduleType &&
 						rec.originalTime === newRecord.originalTime
 				);
-				console.log(duplicate.length);
 				if (duplicate.length < 1) additions.push(newRecord);
 			}
 		};
@@ -1182,7 +1192,6 @@ class CalendarDb {
 			const eventsCall = events => {
 				progressCallback(`Stage 3 of 4: Intelligently filtering events`);
 				unfilteredEvents = _.cloneDeep(events); // Set unfiltered events to the variable; used for some conflict checks
-				console.dir(unfilteredEvents);
 				tasks = events.length;
 				tasksCompleted = 0;
 				let filteredEvents = [];
@@ -2111,7 +2120,7 @@ class CalendarDb {
 	}
 
 	/**
-	 * Polyfill missing information in a schedule record from its scheduleID (if applicable) and the calendar event's default properties.
+	 * Polyfill missing information in a schedule record; start from the original calendar ID and work through each schedule sequentially up to this one.
 	 *
 	 * @param {object} _record The schedule database record
 	 * @param {WWSUdb} calendardb If provided, will use this database of calendar events instead of the CalendarDb one.
@@ -2126,23 +2135,34 @@ class CalendarDb {
 		let tempCal = {};
 		let event;
 		let schedule;
+		let schedules = [];
 		let record = _.cloneDeep(_record); // Clone the record to avoid accidental mutable object editing.
 		if (record.calendarID) {
 			let calendar = calendardb.find({ ID: record.calendarID }, true);
 			tempCal = calendar || {};
+
 			if (record.scheduleID) {
 				schedule = scheduledb.find({ ID: record.scheduleID }, true);
-			}
-			if (schedule) {
-				for (let stuff in schedule) {
-					if (Object.prototype.hasOwnProperty.call(schedule, stuff)) {
-						if (
-							typeof schedule[stuff] !== "undefined" &&
-							schedule[stuff] !== null
-						)
-							tempCal[stuff] = schedule[stuff];
-					}
+
+				// Recurse back all schedules
+				while (schedule) {
+					schedules.push(schedule);
+					schedule = scheduledb.find({ ID: schedule.scheduleID }, true);
 				}
+				schedules.reverse(); // Put the schedules in chronological order
+			}
+			if (schedules.length > 0) {
+				schedules.map(schedule => {
+					for (let stuff in schedule) {
+						if (Object.prototype.hasOwnProperty.call(schedule, stuff)) {
+							if (
+								typeof schedule[stuff] !== "undefined" &&
+								schedule[stuff] !== null
+							)
+								tempCal[stuff] = schedule[stuff];
+						}
+					}
+				});
 				event = this.processRecord(
 					tempCal,
 					record,
