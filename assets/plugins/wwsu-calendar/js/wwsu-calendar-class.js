@@ -69,15 +69,6 @@ class WWSUcalendar extends CalendarDb {
 			this.calendarUpdated();
 		});
 
-		this.calendar.on("change", "stoopid", (db, query) => {
-			console.log(`Calendar change`);
-			console.dir(query);
-		});
-		this.schedule.on("change", "stoopid", (db, query) => {
-			console.log(`schedule change`);
-			console.dir(query);
-		});
-
 		// Generate a modal for displaying event conflicts
 		this.conflictModal = new WWSUmodal(
 			`Event Conflicts`,
@@ -545,7 +536,7 @@ class WWSUcalendar extends CalendarDb {
 								title: "Error loading events and playlists",
 								body:
 									"There was an error loading events and playlists. Please report this to the engineer.",
-								autoHide: true,
+								autohide: true,
 								delay: 10000,
 								icon: "fas fa-skull-crossbones fa-lg",
 							});
@@ -561,7 +552,7 @@ class WWSUcalendar extends CalendarDb {
 				title: "Error loading events and playlists",
 				body:
 					"There was an error loading events and playlists. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -594,7 +585,7 @@ class WWSUcalendar extends CalendarDb {
 								title: "Error adding schedule",
 								body:
 									"There was an error adding the schedule. Please report this to the engineer.",
-								autoHide: true,
+								autohide: true,
 								delay: 10000,
 								icon: "fas fa-skull-crossbones fa-lg",
 							});
@@ -617,7 +608,7 @@ class WWSUcalendar extends CalendarDb {
 					title: "Error adding schedule",
 					body:
 						"There was an error adding the schedule. Please report this to the engineer.",
-					autoHide: true,
+					autohide: true,
 					delay: 10000,
 					icon: "fas fa-skull-crossbones fa-lg",
 				});
@@ -651,7 +642,7 @@ class WWSUcalendar extends CalendarDb {
 								title: "Error editing schedule",
 								body:
 									"There was an error editing the schedule. Please report this to the engineer.",
-								autoHide: true,
+								autohide: true,
 								delay: 10000,
 								icon: "fas fa-skull-crossbones fa-lg",
 							});
@@ -674,7 +665,7 @@ class WWSUcalendar extends CalendarDb {
 					title: "Error editing schedule",
 					body:
 						"There was an error editing the schedule. Please report this to the engineer.",
-					autoHide: true,
+					autohide: true,
 					delay: 10000,
 					icon: "fas fa-skull-crossbones fa-lg",
 				});
@@ -701,7 +692,7 @@ class WWSUcalendar extends CalendarDb {
 				title: "Error removing/reversing schedule",
 				body:
 					"There was an error removing/reversing the schedule. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -724,7 +715,7 @@ class WWSUcalendar extends CalendarDb {
 								title: "Error removing/reversing schedule",
 								body:
 									"There was an error removing/reversing the schedule. Please report this to the engineer.",
-								autoHide: true,
+								autohide: true,
 								delay: 10000,
 								icon: "fas fa-skull-crossbones fa-lg",
 							});
@@ -747,7 +738,7 @@ class WWSUcalendar extends CalendarDb {
 					title: "Error removing/reversing schedule",
 					body:
 						"There was an error removing/reversing the schedule. Please report this to the engineer.",
-					autoHide: true,
+					autohide: true,
 					delay: 10000,
 					icon: "fas fa-skull-crossbones fa-lg",
 				});
@@ -781,7 +772,7 @@ class WWSUcalendar extends CalendarDb {
 							title: "Error adding event",
 							body:
 								"There was an error adding the event. Please report this to the engineer.",
-							autoHide: true,
+							autohide: true,
 							delay: 10000,
 							icon: "fas fa-skull-crossbones fa-lg",
 						});
@@ -804,7 +795,7 @@ class WWSUcalendar extends CalendarDb {
 				title: "Error adding event",
 				body:
 					"There was an error adding the event. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -838,7 +829,7 @@ class WWSUcalendar extends CalendarDb {
 								title: "Error editing event",
 								body:
 									"There was an error editing the event. Please report this to the engineer.",
-								autoHide: true,
+								autohide: true,
 								delay: 10000,
 								icon: "fas fa-skull-crossbones fa-lg",
 							});
@@ -861,7 +852,7 @@ class WWSUcalendar extends CalendarDb {
 					title: "Error editing event",
 					body:
 						"There was an error editing the event. Please report this to the engineer.",
-					autoHide: true,
+					autohide: true,
 					delay: 10000,
 					icon: "fas fa-skull-crossbones fa-lg",
 				});
@@ -897,7 +888,7 @@ class WWSUcalendar extends CalendarDb {
 								title: "Error removing event",
 								body:
 									"There was an error removing the event. Please report this to the engineer.",
-								autoHide: true,
+								autohide: true,
 								delay: 10000,
 								icon: "fas fa-skull-crossbones fa-lg",
 							});
@@ -920,7 +911,7 @@ class WWSUcalendar extends CalendarDb {
 					title: "Error removing event",
 					body:
 						"There was an error removing the event. Please report this to the engineer.",
-					autoHide: true,
+					autohide: true,
 					delay: 10000,
 					icon: "fas fa-skull-crossbones fa-lg",
 				});
@@ -967,11 +958,9 @@ class WWSUcalendar extends CalendarDb {
 				"canceled-system",
 				"canceled-changed",
 				"unscheduled",
-				"updated",
-				"updated-system",
 			].indexOf(event.scheduleType) === -1
 		) {
-			choices.push(`Occurrence: Edit and/or reschedule`);
+			choices.push(`Occurrence: Update or Reschedule`);
 		}
 		choices.push(`Event Schedules: Add / Edit / Delete`);
 		if (
@@ -1880,10 +1869,16 @@ class WWSUcalendar extends CalendarDb {
 						},
 						newTime: {
 							dateFormat: `YYYY-MM-DDTHH:mm:[00]${moment
-								.parseZone(this.meta ? this.meta.meta.time : undefined)
+								.parseZone(
+									this.manager.get("WWSUMeta")
+										? this.manager.get("WWSUMeta").meta.time
+										: undefined
+								)
 								.format("Z")}`,
 							helper: `If this occurrence should happen at a different date/time, specify it here. The date will default to the station's timezone of ${
-								this.meta ? this.meta.meta.timezone : "Unknown zone"
+								this.manager.get("WWSUMeta")
+									? this.manager.get("WWSUMeta").meta.timezone
+									: "Unknown zone"
 							}. The current start date/time is <strong>${moment
 								.parseZone(event.start)
 								.format("LLLL Z")}</strong>.`,
@@ -1918,6 +1913,8 @@ class WWSUcalendar extends CalendarDb {
 								].getValue();
 								if (event.type === "sports") value = value.split(" vs.")[0];
 								if (
+									value &&
+									value !== "" &&
 									(((!type || type === "") && event.type === "sports") ||
 										type === "sports") &&
 									sportsEvents.indexOf(value) === -1
@@ -2180,7 +2177,7 @@ class WWSUcalendar extends CalendarDb {
 					scheduleType: "updated",
 					originalTime: moment.parseZone(event.start).toISOString(true),
 					newTime: newStart,
-					duration: newDuration / 60
+					duration: newDuration ? newDuration / 60 : undefined,
 				},
 			});
 
@@ -2242,6 +2239,32 @@ class WWSUcalendar extends CalendarDb {
 				.find()
 				.filter((event) => event.type === "sports")
 				.map((event) => event.name);
+
+			// Make some corrections with the original schedule parameter, such as timezone correction.
+			schedule =
+				schedule && schedule.ID
+					? Object.assign(schedule, this.recurrenceRulesToFields(schedule))
+					: Object.assign(schedule || {}, { calendarID: calendarID });
+			schedule.startDate = schedule.startDate
+				? moment
+						.tz(
+							schedule.startDate,
+							this.manager.get("WWSUMeta")
+								? this.manager.get("WWSUMeta").meta.timezone
+								: moment.tz.guess()
+						)
+						.toISOString(true)
+				: undefined;
+			schedule.endDate = schedule.endDate
+				? moment
+						.tz(
+							schedule.endDate,
+							this.manager.get("WWSUMeta")
+								? this.manager.get("WWSUMeta").meta.timezone
+								: moment.tz.guess()
+						)
+						.toISOString(true)
+				: undefined;
 
 			// Convert duration from minutes to hours
 			if (schedule && schedule.duration) schedule.duration /= 60;
@@ -2419,12 +2442,18 @@ class WWSUcalendar extends CalendarDb {
 						},
 						oneTime: {
 							helper: `Specify specific non-recurring dates/times you would like the event to occur. Note that all oneTime occurrences use the same duration and overrides you provide below. Also, times you provide are in the station timezone (${
-								this.meta ? this.meta.meta.timezone : "Unknown zone"
+								this.manager.get("WWSUMeta")
+									? this.manager.get("WWSUMeta").meta.timezone
+									: "Unknown zone"
 							}) by default.`,
 							fields: {
 								item: {
 									dateFormat: `YYYY-MM-DDTHH:mm:[00]${moment
-										.parseZone(this.meta ? this.meta.meta.time : undefined)
+										.parseZone(
+											this.manager.get("WWSUMeta")
+												? this.manager.get("WWSUMeta").meta.time
+												: undefined
+										)
 										.format("Z")}`,
 									picker: {
 										inline: true,
@@ -2458,7 +2487,11 @@ class WWSUcalendar extends CalendarDb {
 						},
 						startDate: {
 							dateFormat: `YYYY-MM-DDTHH:mm:[00]${moment
-								.parseZone(this.meta ? this.meta.meta.time : undefined)
+								.parseZone(
+									this.manager.get("WWSUMeta")
+										? this.manager.get("WWSUMeta").meta.time
+										: undefined
+								)
 								.format("Z")}`,
 							helper: `If a date is specified, this schedule will not occur prior to this date.`,
 							picker: {
@@ -2468,7 +2501,11 @@ class WWSUcalendar extends CalendarDb {
 						},
 						endDate: {
 							dateFormat: `YYYY-MM-DDTHH:mm:[00]${moment
-								.parseZone(this.meta ? this.meta.meta.time : undefined)
+								.parseZone(
+									this.manager.get("WWSUMeta")
+										? this.manager.get("WWSUMeta").meta.time
+										: undefined
+								)
 								.format("Z")}`,
 							helper: `This schedule will not occur after this date. It is recommended to set this as the end of the show scheduling period (such as the semester).`,
 							picker: {
@@ -2533,7 +2570,9 @@ class WWSUcalendar extends CalendarDb {
 						},
 						startTime: {
 							helper: `If using recurrence, specify start time in the station's timezone of ${
-								this.meta ? this.meta.meta.timezone : "Unknown"
+								this.manager.get("WWSUMeta")
+									? this.manager.get("WWSUMeta").meta.timezone
+									: "Unknown"
 							}. For different start times, create multiple schedules.`,
 							dateFormat: "HH:mm",
 							picker: {
@@ -2592,9 +2631,10 @@ class WWSUcalendar extends CalendarDb {
 									"type"
 								].getValue();
 								if (
+									value &&
+									value !== "" &&
 									(((!type || type === "") && event.type === "sports") ||
 										type === "sports") &&
-									sportsEvents.indexOf(event.name) === -1 &&
 									sportsEvents.indexOf(value) === -1
 								) {
 									callback({
@@ -2852,10 +2892,7 @@ class WWSUcalendar extends CalendarDb {
 					},
 				},
 
-				data:
-					schedule && schedule.ID
-						? Object.assign(schedule, this.recurrenceRulesToFields(schedule))
-						: Object.assign(schedule || {}, { calendarID: calendarID }),
+				data: schedule,
 			});
 
 			this.scheduleModal.iziModal("open");
@@ -2883,7 +2920,7 @@ class WWSUcalendar extends CalendarDb {
 						class: "bg-danger",
 						title: "Error resolving schedule conflicts",
 						body: `Event is invalid: ${event}`,
-						autoHide: true,
+						autohide: true,
 						delay: 10000,
 						icon: "fas fa-skull-crossbones fa-lg",
 					});
@@ -2894,8 +2931,10 @@ class WWSUcalendar extends CalendarDb {
 					action === "remove" || action === "removeCalendar"
 						? event.event.ID
 						: event.event;
+
 				this.checkConflicts(
 					(conflicts) => {
+						console.dir(conflicts);
 						$(`#modal-${modal.id}`).unblock();
 
 						// If no conflicts detected, then fire callback immediately
@@ -3031,11 +3070,19 @@ class WWSUcalendar extends CalendarDb {
 						$(`#modal-${this.conflictModal.id}-conflicts`).html(
 							`<ul>${actions.join("")}</ul>`
 						);
-						this.conflictModal.footer = `<div class="alert alert-primary">
+
+						if (conflicts.errors.length === 0) {
+							this.conflictModal.footer = `<div class="alert alert-primary">
                     <p>DJs will be emailed and subscribers notified of cancellations / changes or their reversals.</p>
                   </div>
                     <button type="button" data-izimodal-close="" class="btn btn-success" id="modal-${this.conflictModal.id}-continue">Continue</button>
         <button type="button" data-izimodal-close="" class="btn btn-danger">Cancel</button>`;
+						} else {
+							this.conflictModal.footer = `<div class="alert alert-danger">
+							<p>You cannot proceed due to the errors stated above.</p>
+						  </div>
+							<button type="button" data-izimodal-close="" class="btn btn-danger">Cancel</button>`;
+						}
 
 						this.conflictModal.iziModal("open");
 
@@ -3154,7 +3201,7 @@ class WWSUcalendar extends CalendarDb {
 				title: "Multi-day Events Not Allowed",
 				body:
 					"Occurrences may not last more than 24 hours. Consider setting up a recurring schedule.",
-				autoHide: true,
+				autohide: true,
 				delay: 15000,
 			});
 			return;
