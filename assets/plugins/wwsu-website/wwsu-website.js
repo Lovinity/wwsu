@@ -910,37 +910,23 @@ function checkCalendarChanges() {
         <p class="h5">CANCELED: ${event.hosts} - ${event.name}</p>
         <p>Are you here for ${event.hosts} - ${
               event.name
-            }? This broadcast has unfortunately been canceled for ${moment
+            }? This broadcast was canceled for ${moment
               .tz(
                 event.originalTime,
                 meta.timezone ? meta.timezone : moment.tz.guess()
               )
-              .format("LLL")}.</p>
+              .format("LLL Z")}.</p>
         <p>Reason for cancellation (if specified): ${event.scheduleReason}</p>
       </div>`;
           } else if (event.scheduleType === "canceled-changed") {
             aHTML += `<div class="alert alert-warning">
         <p class="h5">RE-SCHEDULED: ${event.hosts} - ${event.name}</p>
-        <p>Are you here for ${event.hosts} - ${
-              event.name
-            }? This broadcast for ${moment
-              .tz(
-                event.originalTime,
-                meta.timezone ? meta.timezone : moment.tz.guess()
-              )
-              .format("LLL")} was re-scheduled to ${moment
+        <p>Are you here for ${event.hosts} - ${event.name} on ${moment
               .tz(
                 event.start,
                 meta.timezone ? meta.timezone : moment.tz.guess()
               )
-              .format("LLL")} - ${moment
-              .tz(
-                event.start,
-                meta.timezone ? meta.timezone : moment.tz.guess()
-              )
-              .add(event.duration, "minutes")
-              .format("LT")}.</p>
-        <p>Reason for re-schedule (if specified): ${event.scheduleReason}</p>
+              .format("LLL Z")}? ${event.scheduleReason}</p>
       </div>`;
           } else if (
             ["updated", "updated-system"].indexOf(event.scheduleType) &&
@@ -949,22 +935,18 @@ function checkCalendarChanges() {
           ) {
             aHTML += `<div class="alert alert-info">
             <p class="h5">END TIME CHANGED: ${event.hosts} - ${event.name}</p>
-            <p>Are you here for ${event.hosts} - ${
-              event.name
-            }? This broadcast for ${moment
+            <p>Are you here for ${event.hosts} - ${event.name} on ${moment
               .tz(
                 event.originalTime,
                 meta.timezone ? meta.timezone : moment.tz.guess()
               )
-              .format(
-                "LLL"
-              )} will not end at its original time. Instead, it will end at ${moment
+              .format("LLL")} ? The broadcast will end at ${moment
               .tz(
                 event.start,
                 meta.timezone ? meta.timezone : moment.tz.guess()
               )
               .add(event.duration, "minutes")
-              .format("LT")}.</p>
+              .format("LT")} instead of its originally scheduled end time.</p>
             <p>Reason for change (if specified): ${event.scheduleReason}</p>
           </div>`;
           }
