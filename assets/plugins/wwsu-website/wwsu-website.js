@@ -894,9 +894,13 @@ function checkCalendarChanges() {
       events
         .filter(
           event =>
-            ["canceled", "canceled-system", "canceled-changed"].indexOf(
-              event.scheduleType
-            ) !== -1
+            [
+              "canceled",
+              "canceled-system",
+              "canceled-changed",
+              "updated",
+              "updated-system"
+            ].indexOf(event.scheduleType) !== -1
         )
         .map(event => {
           if (
@@ -938,10 +942,35 @@ function checkCalendarChanges() {
               .format("LT")}.</p>
         <p>Reason for re-schedule (if specified): ${event.scheduleReason}</p>
       </div>`;
+          } else if (
+            ["updated", "updated-system"].indexOf(event.scheduleType) &&
+            event.originalDuration &&
+            event.originalDuration !== event.duration
+          ) {
+            aHTML += `<div class="alert alert-info">
+            <p class="h5">END TIME CHANGED: ${event.hosts} - ${event.name}</p>
+            <p>Are you here for ${event.hosts} - ${
+              event.name
+            }? This broadcast for ${moment
+              .tz(
+                event.originalTime,
+                meta.timezone ? meta.timezone : moment.tz.guess()
+              )
+              .format(
+                "LLL"
+              )} will not end at its original time. Instead, it will end at ${moment
+              .tz(
+                event.start,
+                meta.timezone ? meta.timezone : moment.tz.guess()
+              )
+              .add(event.duration, "minutes")
+              .format("LT")}.</p>
+            <p>Reason for change (if specified): ${event.scheduleReason}</p>
+          </div>`;
           }
         });
 
-        $(".announcements-calendar").html(aHTML);
+      $(".announcements-calendar").html(aHTML);
     },
     false,
     true
