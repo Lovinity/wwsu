@@ -59,7 +59,7 @@ if (typeof require !== "undefined") {
  * @requires moment.duration moment-duration-format plugin
  * @requires _ lodash utilities
  */
- class CalendarDb {
+class CalendarDb {
 	/**
 	 * Construct the calendar database.
 	 *
@@ -135,6 +135,8 @@ if (typeof require !== "undefined") {
 		let tasksCompleted = 0;
 
 		let events = [];
+
+		let scheduleIDs = [];
 
 		/**
 		 * Extends this.processRecord by filtering out events that do not fall within start and end.
@@ -376,8 +378,12 @@ if (typeof require !== "undefined") {
 			if (schedule.startTime && moment(end).isSameOrAfter(moment(start))) {
 				// Construct the moment recurrence
 				let recur = moment.recur({
-					start: start,
-					end: end,
+					start:
+						schedule.startDate &&
+						moment(schedule.startDate).isAfter("2000-01-01")
+							? schedule.startDate
+							: start,
+					end: schedule.endDate,
 					rules: schedule.recurrenceRules ? schedule.recurrenceRules : undefined
 				});
 
@@ -450,6 +456,7 @@ if (typeof require !== "undefined") {
 					});
 				}
 			}
+
 			taskComplete();
 		};
 
@@ -459,22 +466,30 @@ if (typeof require !== "undefined") {
 		 * @param {object} calendar The calendar record.
 		 */
 		const processCalendarEntry = calendar => {
-			// Get regular and unscheduled events
+			// Get all schedules for the provided calendar
 			let regularEvents = scheduledb.find({
-				calendarID: calendar.ID,
-				scheduleType: [null, "unscheduled", undefined]
+				calendarID: calendar.ID
 			});
-			regularEvents.sort(scheduleCompare).map(schedule => {
-				// Add to task queue
-				tasks++;
-				if (callback) {
-					this.queue.add(() => {
+
+			// Get regular and unscheduled events
+			regularEvents
+				.filter(
+					schedule =>
+						[null, "unscheduled", undefined].indexOf(schedule.scheduleType) !==
+						-1
+				)
+				.sort(scheduleCompare)
+				.map(schedule => {
+					// Add to task queue
+					tasks++;
+					if (callback) {
+						this.queue.add(() => {
+							processScheduleEntry(calendar, schedule);
+						});
+					} else {
 						processScheduleEntry(calendar, schedule);
-					});
-				} else {
-					processScheduleEntry(calendar, schedule);
-				}
-			});
+					}
+				});
 			taskComplete();
 		};
 
@@ -501,12 +516,14 @@ if (typeof require !== "undefined") {
 	 *
 	 * @param {?function} callback If provided, will be executed in a queue and callback fired on completion. If not provided, will return array.
 	 * @param {boolean} automationOnly If true, only prerecords, genres, and playlists will be returned.
+	 * @param {boolean} includeCanceled If true, canceled events normally scheduled to be on right now will also be returned.
 	 * @param {function} progressCallback Function called after every task is completed. Parameters are tasks completed, and total tasks.
 	 * @returns {?array} If callback not provided, will return array of events scheduled.
 	 */
 	whatShouldBePlaying(
 		callback = null,
 		automationOnly = false,
+		includeCanceled = false,
 		progressCallback = () => {}
 	) {
 		/**
@@ -550,9 +567,10 @@ if (typeof require !== "undefined") {
 					.filter(event => {
 						// Canceled events should not be playing
 						if (
-							event.scheduleType === "canceled" ||
-							event.scheduleType === "canceled-system" ||
-							event.scheduleType === "canceled-changed"
+							(event.scheduleType === "canceled" ||
+								event.scheduleType === "canceled-system" ||
+								event.scheduleType === "canceled-changed") &&
+							!includeCanceled
 						)
 							return false;
 
@@ -810,7 +828,6 @@ if (typeof require !== "undefined") {
 						rec.scheduleType === newRecord.scheduleType &&
 						rec.originalTime === newRecord.originalTime
 				);
-				console.log(duplicate.length);
 				if (duplicate.length < 1) additions.push(newRecord);
 			}
 		};
@@ -1213,7 +1230,6 @@ if (typeof require !== "undefined") {
 			const eventsCall = events => {
 				progressCallback(`Stage 3 of 4: Intelligently filtering events`);
 				unfilteredEvents = _.cloneDeep(events); // Set unfiltered events to the variable; used for some conflict checks
-				console.dir(unfilteredEvents);
 				tasks = events.length;
 				tasksCompleted = 0;
 				let filteredEvents = [];
@@ -1936,17 +1952,20 @@ if (typeof require !== "undefined") {
 
 		// If this is an updated / rescheduled event, return the new date/time only.
 		if (event.newTime) {
-			return `On ${moment
+			return `${moment.parseZone(event.newTime).format("LLLL")} - ${moment
 				.parseZone(event.newTime)
-				.format("LLLL Z")} for ${moment
-				.duration(event.duration, "minutes")
-				.format("h [hours], m [minutes]")}`;
+				.add(event.duration, "minutes")
+				.format("LT")}`;
 		}
 
 		// Add oneTime dates/times to the oneTime letiable.
 		if (event.oneTime && event.oneTime.length > 0) {
-			oneTime = event.oneTime.map(onetime =>
-				moment.parseZone(onetime).format("LLLL Z")
+			oneTime = event.oneTime.map(
+				onetime =>
+					`${moment.parseZone(onetime).format("LLLL")} - ${moment
+						.parseZone(onetime)
+						.add(event.duration, "minutes")
+						.format("LT")}`
 			);
 		}
 
@@ -1963,7 +1982,7 @@ if (typeof require !== "undefined") {
 			event.recurrenceRules.length > 0
 		) {
 			if (oneTime.length > 0) {
-				recurDayString += `... and `;
+				recurDayString += `, and `;
 			}
 
 			event.recurrenceRules.map(rule => {
@@ -1976,7 +1995,7 @@ if (typeof require !== "undefined") {
 					case "years":
 						recurDayString += `every ${rule.units
 							.sort((a, b) => a - b)
-							.join(", ")} ${rule.measure}, `;
+							.join(", ")} ${rule.measure} `;
 						break;
 					case "monthsOfYear":
 						days = rule.units
@@ -2010,7 +2029,7 @@ if (typeof require !== "undefined") {
 								}
 								return "Unknown month";
 							});
-						recurDayString += `in ${days.join(", ")}, `;
+						recurDayString += `in ${days.join("/")} `;
 						break;
 					case "daysOfWeek":
 						days = rule.units
@@ -2018,23 +2037,23 @@ if (typeof require !== "undefined") {
 							.map(unit => {
 								switch (unit) {
 									case 0:
-										return "Sunday";
+										return "Sundays";
 									case 1:
-										return "Monday";
+										return "Mondays";
 									case 2:
-										return "Tuesday";
+										return "Tuesdays";
 									case 3:
-										return "Wednesday";
+										return "Wednesdays";
 									case 4:
-										return "Thursday";
+										return "Thursdays";
 									case 5:
-										return "Friday";
+										return "Fridays";
 									case 6:
-										return "Saturday";
+										return "Saturdays";
 								}
 								return "Unknown day";
 							});
-						recurDayString += `on ${days.join(", ")}, `;
+						recurDayString += `on ${days.join("/")} `;
 						break;
 					case "weeksOfMonth":
 					case "weeksOfMonthByDay":
@@ -2056,9 +2075,7 @@ if (typeof require !== "undefined") {
 										return "last";
 								}
 							});
-						recurDayString += `on the ${days.join(
-							", "
-						)} week(s) of the month, `;
+						recurDayString += `on the ${days.join("/")} week(s) of the month `;
 						break;
 					case "daysOfMonth":
 						days = rule.units
@@ -2078,7 +2095,7 @@ if (typeof require !== "undefined") {
 								}
 								return `${unit}th`;
 							});
-						recurDayString += `on the ${days.join(", ")} day(s) of the month, `;
+						recurDayString += `on the ${days.join("/")} day(s) of the month `;
 						break;
 					case "weeksOfYear":
 						days = rule.units
@@ -2106,43 +2123,44 @@ if (typeof require !== "undefined") {
 								}
 								return `${unit}th`;
 							});
-						recurDayString += `on the ${days.join(", ")} week(s) of the year, `;
+						recurDayString += `on the ${days.join("/")} week(s) of the year `;
 						break;
 				}
 			});
 
-			recurDayString += `... at ${event.startTime}${
-				this.meta
-					? moment()
-							.tz(this.meta.meta.timezone)
-							.format(" z")
-					: ``
-			}`;
-		}
+			let recurringPattern =
+				event.startDate && moment(event.startDate).isAfter("2000-01-01")
+					? moment(event.startDate).format("YYYY-MM-DD")
+					: moment().format("YYYY-MM-DD");
+			let startTime = moment(
+				`${recurringPattern}T${event.startTime}${moment(
+					recurringPattern
+				).format("Z")}`
+			);
+			recurDayString += ` at ${startTime.format("LT")} - ${startTime
+				.add(event.duration, "minutes")
+				.format("LT")}`;
 
-		recurDayString += `... for ${moment
-			.duration(event.duration, "minutes")
-			.format("h [hours], m [minutes]")}`;
-
-		if (event.startDate || event.endDate) {
-			recurDayString += `... `;
-		}
-		if (event.startDate) {
-			recurDayString += `starting ${moment
-				.parseZone(event.startDate)
-				.format("LL")} `;
-		}
-		if (event.endDate) {
-			recurDayString += `until ${moment
-				.parseZone(event.endDate)
-				.format("LL")} `;
+			if (event.startDate || event.endDate) {
+				recurDayString += ` `;
+			}
+			if (event.startDate && moment(event.startDate).isAfter("2000-01-01")) {
+				recurDayString += `starting ${moment
+					.parseZone(event.startDate)
+					.format("LL")} `;
+			}
+			if (event.endDate) {
+				recurDayString += `until ${moment
+					.parseZone(event.endDate)
+					.format("LL")} `;
+			}
 		}
 
 		return recurDayString;
 	}
 
 	/**
-	 * Polyfill missing information in a schedule record from its scheduleID (if applicable) and the calendar event's default properties.
+	 * Polyfill missing information in a schedule record; start from the original calendar ID and work through each schedule sequentially up to this one.
 	 *
 	 * @param {object} _record The schedule database record
 	 * @param {WWSUdb} calendardb If provided, will use this database of calendar events instead of the CalendarDb one.
@@ -2157,23 +2175,34 @@ if (typeof require !== "undefined") {
 		let tempCal = {};
 		let event;
 		let schedule;
+		let schedules = [];
 		let record = _.cloneDeep(_record); // Clone the record to avoid accidental mutable object editing.
 		if (record.calendarID) {
 			let calendar = calendardb.find({ ID: record.calendarID }, true);
 			tempCal = calendar || {};
+
 			if (record.scheduleID) {
 				schedule = scheduledb.find({ ID: record.scheduleID }, true);
-			}
-			if (schedule) {
-				for (let stuff in schedule) {
-					if (Object.prototype.hasOwnProperty.call(schedule, stuff)) {
-						if (
-							typeof schedule[stuff] !== "undefined" &&
-							schedule[stuff] !== null
-						)
-							tempCal[stuff] = schedule[stuff];
-					}
+
+				// Recurse back all schedules
+				while (schedule) {
+					schedules.push(schedule);
+					schedule = scheduledb.find({ ID: schedule.scheduleID }, true);
 				}
+				schedules.reverse(); // Put the schedules in chronological order
+			}
+			if (schedules.length > 0) {
+				schedules.map(schedule => {
+					for (let stuff in schedule) {
+						if (Object.prototype.hasOwnProperty.call(schedule, stuff)) {
+							if (
+								typeof schedule[stuff] !== "undefined" &&
+								schedule[stuff] !== null
+							)
+								tempCal[stuff] = schedule[stuff];
+						}
+					}
+				});
 				event = this.processRecord(
 					tempCal,
 					record,

@@ -385,6 +385,12 @@ meta.on("newMeta", "renderer", (response, _meta) => {
   }
 });
 
+meta.on("metaTick", "renderer", meta => {
+  if (moment(meta.time).seconds() === 0) {
+    checkCalendarChanges();
+  }
+});
+
 /*
     TRACK LIKING FUNCTIONS
 */
@@ -652,6 +658,8 @@ function updateCalendar() {
               });
           });
 
+          checkCalendarChanges();
+
           calendarUpdating = false;
         },
         moment()
@@ -874,6 +882,70 @@ function updateDirectorsCalendar() {
       directorsCalendarUpdating = false;
     }
   });
+}
+
+/**
+ * Check for, and display on now playing page, event re-schedules and cancellations that take place right now.
+ */
+function checkCalendarChanges() {
+  calendar.whatShouldBePlaying(
+    events => {
+      let aHTML = ``;
+      events
+        .filter(
+          event =>
+            ["canceled", "canceled-system", "canceled-changed"].indexOf(
+              event.scheduleType
+            ) !== -1
+        )
+        .map(event => {
+          if (
+            ["canceled", "canceled-system"].indexOf(event.scheduleType) !== -1
+          ) {
+            aHTML += `<div class="alert alert-danger">
+        <p class="h5">CANCELED: ${event.hosts} - ${event.name}</p>
+        <p>Are you here for ${event.hosts} - ${
+              event.name
+            }? This broadcast has unfortunately been canceled for ${moment
+              .tz(
+                event.originalTime,
+                meta.timezone ? meta.timezone : moment.tz.guess()
+              )
+              .format("LLL")}.</p>
+        <p>Reason for cancellation (if specified): ${event.scheduleReason}</p>
+      </div>`;
+          } else if (event.scheduleType === "canceled-changed") {
+            aHTML += `<div class="alert alert-warning">
+        <p class="h5">RE-SCHEDULED: ${event.hosts} - ${event.name}</p>
+        <p>Are you here for ${event.hosts} - ${
+              event.name
+            }? This broadcast for ${moment
+              .tz(
+                event.originalTime,
+                meta.timezone ? meta.timezone : moment.tz.guess()
+              )
+              .format("LLL")} was re-scheduled to ${moment
+              .tz(
+                event.start,
+                meta.timezone ? meta.timezone : moment.tz.guess()
+              )
+              .format("LLL")} - ${moment
+              .tz(
+                event.start,
+                meta.timezone ? meta.timezone : moment.tz.guess()
+              )
+              .add(event.duration, "minutes")
+              .format("LT")}.</p>
+        <p>Reason for re-schedule (if specified): ${event.scheduleReason}</p>
+      </div>`;
+          }
+        });
+
+        $(".announcements-calendar").html(aHTML);
+    },
+    false,
+    true
+  );
 }
 
 /**

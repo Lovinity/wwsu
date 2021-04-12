@@ -347,7 +347,11 @@ class CalendarDb {
 			if (schedule.startTime && moment(end).isSameOrAfter(moment(start))) {
 				// Construct the moment recurrence
 				let recur = moment.recur({
-					start: schedule.startDate && moment(schedule.startDate).isAfter("2000-01-01") ? schedule.startDate : start,
+					start:
+						schedule.startDate &&
+						moment(schedule.startDate).isAfter("2000-01-01")
+							? schedule.startDate
+							: start,
 					end: schedule.endDate,
 					rules: schedule.recurrenceRules ? schedule.recurrenceRules : undefined
 				});
@@ -481,12 +485,14 @@ class CalendarDb {
 	 *
 	 * @param {?function} callback If provided, will be executed in a queue and callback fired on completion. If not provided, will return array.
 	 * @param {boolean} automationOnly If true, only prerecords, genres, and playlists will be returned.
+	 * @param {boolean} includeCanceled If true, canceled events normally scheduled to be on right now will also be returned.
 	 * @param {function} progressCallback Function called after every task is completed. Parameters are tasks completed, and total tasks.
 	 * @returns {?array} If callback not provided, will return array of events scheduled.
 	 */
 	whatShouldBePlaying(
 		callback = null,
 		automationOnly = false,
+		includeCanceled = false,
 		progressCallback = () => {}
 	) {
 		/**
@@ -530,9 +536,10 @@ class CalendarDb {
 					.filter(event => {
 						// Canceled events should not be playing
 						if (
-							event.scheduleType === "canceled" ||
-							event.scheduleType === "canceled-system" ||
-							event.scheduleType === "canceled-changed"
+							(event.scheduleType === "canceled" ||
+								event.scheduleType === "canceled-system" ||
+								event.scheduleType === "canceled-changed") &&
+							!includeCanceled
 						)
 							return false;
 
@@ -1914,17 +1921,20 @@ class CalendarDb {
 
 		// If this is an updated / rescheduled event, return the new date/time only.
 		if (event.newTime) {
-			return `On ${moment
+			return `${moment.parseZone(event.newTime).format("LLLL")} - ${moment
 				.parseZone(event.newTime)
-				.format("LLLL Z")} for ${moment
-				.duration(event.duration, "minutes")
-				.format("h [hours], m [minutes]")}`;
+				.add(event.duration, "minutes")
+				.format("LT")}`;
 		}
 
 		// Add oneTime dates/times to the oneTime letiable.
 		if (event.oneTime && event.oneTime.length > 0) {
-			oneTime = event.oneTime.map(onetime =>
-				moment.parseZone(onetime).format("LLLL Z")
+			oneTime = event.oneTime.map(
+				onetime =>
+					`${moment.parseZone(onetime).format("LLLL")} - ${moment
+						.parseZone(onetime)
+						.add(event.duration, "minutes")
+						.format("LT")}`
 			);
 		}
 
@@ -1941,7 +1951,7 @@ class CalendarDb {
 			event.recurrenceRules.length > 0
 		) {
 			if (oneTime.length > 0) {
-				recurDayString += `... and `;
+				recurDayString += `, and `;
 			}
 
 			event.recurrenceRules.map(rule => {
@@ -1954,7 +1964,7 @@ class CalendarDb {
 					case "years":
 						recurDayString += `every ${rule.units
 							.sort((a, b) => a - b)
-							.join(", ")} ${rule.measure}, `;
+							.join(", ")} ${rule.measure} `;
 						break;
 					case "monthsOfYear":
 						days = rule.units
@@ -1988,7 +1998,7 @@ class CalendarDb {
 								}
 								return "Unknown month";
 							});
-						recurDayString += `in ${days.join(", ")}, `;
+						recurDayString += `in ${days.join("/")} `;
 						break;
 					case "daysOfWeek":
 						days = rule.units
@@ -1996,23 +2006,23 @@ class CalendarDb {
 							.map(unit => {
 								switch (unit) {
 									case 0:
-										return "Sunday";
+										return "Sundays";
 									case 1:
-										return "Monday";
+										return "Mondays";
 									case 2:
-										return "Tuesday";
+										return "Tuesdays";
 									case 3:
-										return "Wednesday";
+										return "Wednesdays";
 									case 4:
-										return "Thursday";
+										return "Thursdays";
 									case 5:
-										return "Friday";
+										return "Fridays";
 									case 6:
-										return "Saturday";
+										return "Saturdays";
 								}
 								return "Unknown day";
 							});
-						recurDayString += `on ${days.join(", ")}, `;
+						recurDayString += `on ${days.join("/")} `;
 						break;
 					case "weeksOfMonth":
 					case "weeksOfMonthByDay":
@@ -2034,9 +2044,7 @@ class CalendarDb {
 										return "last";
 								}
 							});
-						recurDayString += `on the ${days.join(
-							", "
-						)} week(s) of the month, `;
+						recurDayString += `on the ${days.join("/")} week(s) of the month `;
 						break;
 					case "daysOfMonth":
 						days = rule.units
@@ -2056,7 +2064,7 @@ class CalendarDb {
 								}
 								return `${unit}th`;
 							});
-						recurDayString += `on the ${days.join(", ")} day(s) of the month, `;
+						recurDayString += `on the ${days.join("/")} day(s) of the month `;
 						break;
 					case "weeksOfYear":
 						days = rule.units
@@ -2084,36 +2092,37 @@ class CalendarDb {
 								}
 								return `${unit}th`;
 							});
-						recurDayString += `on the ${days.join(", ")} week(s) of the year, `;
+						recurDayString += `on the ${days.join("/")} week(s) of the year `;
 						break;
 				}
 			});
 
-			recurDayString += `... at ${event.startTime}${
-				this.meta
-					? moment()
-							.tz(this.meta.meta.timezone)
-							.format(" z")
-					: ``
-			}`;
-		}
+			let recurringPattern =
+				event.startDate && moment(event.startDate).isAfter("2000-01-01")
+					? moment(event.startDate).format("YYYY-MM-DD")
+					: moment().format("YYYY-MM-DD");
+			let startTime = moment(
+				`${recurringPattern}T${event.startTime}${moment(
+					recurringPattern
+				).format("Z")}`
+			);
+			recurDayString += ` at ${startTime.format("LT")} - ${startTime
+				.add(event.duration, "minutes")
+				.format("LT")}`;
 
-		recurDayString += `... for ${moment
-			.duration(event.duration, "minutes")
-			.format("h [hours], m [minutes]")}`;
-
-		if (event.startDate || event.endDate) {
-			recurDayString += `... `;
-		}
-		if (event.startDate) {
-			recurDayString += `starting ${moment
-				.parseZone(event.startDate)
-				.format("LL")} `;
-		}
-		if (event.endDate) {
-			recurDayString += `until ${moment
-				.parseZone(event.endDate)
-				.format("LL")} `;
+			if (event.startDate || event.endDate) {
+				recurDayString += ` `;
+			}
+			if (event.startDate && moment(event.startDate).isAfter("2000-01-01")) {
+				recurDayString += `starting ${moment
+					.parseZone(event.startDate)
+					.format("LL")} `;
+			}
+			if (event.endDate) {
+				recurDayString += `until ${moment
+					.parseZone(event.endDate)
+					.format("LL")} `;
+			}
 		}
 
 		return recurDayString;
