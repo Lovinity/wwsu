@@ -44,8 +44,8 @@ module.exports = {
       .setFooter(
         `Tune in on WWSU 106.9 FM or click the title to listen online`
       );
-    if (inputs.event.banner) embed = embed.setImage(inputs.event.banner);
-    if (inputs.event.logo) embed = embed.setThumbnail(inputs.event.logo);
+    if (inputs.event.banner) embed = embed.setImage(`https://server.wwsu1069.org/uploads/calendar/banner/${inputs.event.banner}`);
+    if (inputs.event.logo) embed = embed.setThumbnail(`https://server.wwsu1069.org/uploads/calendar/logo/${inputs.event.logo}`);
 
     // Get the live channel
     let channel = await DiscordClient.channels.resolve(

@@ -54,8 +54,8 @@ module.exports = {
 
     // Prep discord
     let embed = new Discord.MessageEmbed();
-    if (inputs.event.banner) embed = embed.setImage(inputs.event.banner);
-    if (inputs.event.logo) embed = embed.setThumbnail(inputs.event.logo);
+    if (inputs.event.banner) embed = embed.setImage(`https://server.wwsu1069.org/uploads/calendar/banner/${inputs.event.banner}`);
+    if (inputs.event.logo) embed = embed.setThumbnail(`https://server.wwsu1069.org/uploads/calendar/logo/${inputs.event.logo}`);
     let channel = await DiscordClient.channels.resolve(
       sails.config.custom.discord.channels.scheduleChanges
     );
