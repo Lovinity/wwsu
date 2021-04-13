@@ -360,7 +360,6 @@ module.exports.bootstrap = async function (done) {
   // DISCORD
 
   sails.log.verbose(`BOOTSTRAP: Loading Discord bot.`);
-  Discord.DiscordMenu = require("../util/DiscordMenu");
   global["DiscordClient"] = new Discord.Client(
     sails.config.custom.discord.clientOptions
   );
