@@ -2629,7 +2629,10 @@ module.exports.bootstrap = async function(done) {
           if (!channel) return resolve();
 
           let connection = await channel.join();
-          connection.play("https://server.wwsu1069.org/stream");
+          let dispatcher = connection.play("https://server.wwsu1069.org/stream");
+          dispatcher.on("debug", (e) => sails.log.debug(e));
+          dispatcher.on("error", (e) => sails.log.error(e));
+          dispatcher.on("start", () => sails.log.debug("Discord bot started playing radio stream"));
         }
         return resolve();
       } catch (e) {
