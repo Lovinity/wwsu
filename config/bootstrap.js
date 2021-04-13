@@ -2616,8 +2616,9 @@ module.exports.bootstrap = async function(done) {
   // every minute at second 15, check voice state of the Discord bot. If it is not in the radio channel, join it.
   sails.log.verbose(`BOOTSTRAP: scheduling checkDiscordVoice CRON.`);
   cron.schedule("15 * * * * *", () => {
+    /* TODO
     return new Promise(async (resolve, reject) => {
-      sails.log.debug(`CRON checkDiscordVoice.`);
+      sails.log.debug(`CRON checkDiscordVoice ran.`);
       try {
         if (
           !DiscordClient.voice ||
@@ -2629,10 +2630,11 @@ module.exports.bootstrap = async function(done) {
           if (!channel) return resolve();
 
           let connection = await channel.join();
-          let dispatcher = connection.play("https://server.wwsu1069.org/stream");
-          dispatcher.on("debug", (e) => sails.log.debug(e));
-          dispatcher.on("error", (e) => sails.log.error(e));
-          dispatcher.on("start", () => sails.log.debug("Discord bot started playing radio stream"));
+          connection.play("https://server.wwsu1069.org/stream").then((dispatcher) => {
+            dispatcher.on("debug", (e) => sails.log.debug(e));
+            dispatcher.on("error", (e) => sails.log.error(e));
+            dispatcher.on("start", () => sails.log.debug("Discord bot started playing radio stream"));
+          });
         }
         return resolve();
       } catch (e) {
@@ -2640,6 +2642,7 @@ module.exports.bootstrap = async function(done) {
         return reject(e);
       }
     });
+    */
   });
 
   // Every minute at second 17, check server memory and CPU use.
