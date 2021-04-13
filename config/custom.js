@@ -1224,6 +1224,7 @@ var defaultConfig = {
     channels: {
       live: "", // Snowflake ID of the channel where the bot should post when broadcasts go live
       scheduleChanges: "", // Snowflake ID of the channel where changes to broadcast schedules should be posted
+      radioVoice: "", // Snowflake ID of the radio voice channel
     },
   },
 
