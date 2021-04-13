@@ -357,6 +357,43 @@ module.exports.bootstrap = async function (done) {
     await sails.helpers.meta.change.with({ changingState: null });
   }
 
+  // DISCORD
+
+  sails.log.verbose(`BOOTSTRAP: Loading Discord bot.`);
+  Discord.DiscordMenu = require("../util/DiscordMenu");
+  global["DiscordClient"] = new Discord.Client(
+    sails.config.custom.discord.clientOptions
+  );
+
+  // Initialize DiscordClient event handlers (every Discord.js event is handled in a sails.helpers.events file)
+  if (sails.helpers.discord.events) {
+    for (var event in sails.helpers.discord.events) {
+      if (
+        Object.prototype.hasOwnProperty.call(
+          sails.helpers.discord.events,
+          event
+        )
+      ) {
+        // Needs to be in a self-calling function to provide the proper value of event
+        let temp = (async (event2) => {
+          // ready should only ever fire once whereas other events should be allowed to fire multiple times.
+          if (["ready"].indexOf(event2) !== -1) {
+            DiscordClient.once(event2, async (...args) => {
+              await sails.helpers.discord.events[event2](...args);
+            });
+          } else {
+            DiscordClient.on(event2, async (...args) => {
+              await sails.helpers.discord.events[event2](...args);
+            });
+          }
+        })(event);
+      }
+    }
+  }
+
+  // Start the Discord bot
+  DiscordClient.login(sails.config.custom.discord.token);
+
   // CRON JOBS
 
   // Automation / queue checks every second
