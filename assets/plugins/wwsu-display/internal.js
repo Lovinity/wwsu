@@ -201,13 +201,23 @@ let sounds = {
   point1: new Howl({ src: ["/sounds/display/shootout/1point.mp3"] }),
   point2: new Howl({ src: ["/sounds/display/shootout/2points.mp3"] }),
   point3: new Howl({ src: ["/sounds/display/shootout/3points.mp3"] }),
-  beat: new Howl({ src: ["/sounds/display/shootout/beat.mp3"] }),
+  beat: new Howl({ src: ["/sounds/display/shootout/beat.mp3"], loop: true }),
   begin: new Howl({ src: ["/sounds/display/shootout/begin.mp3"] }),
   buzzer: new Howl({ src: ["/sounds/display/shootout/buzzer.mp3"] }),
   countdown: new Howl({ src: ["/sounds/display/shootout/countdown.mp3"] }),
   whistle: new Howl({ src: ["/sounds/display/shootout/whistle.mp3"] }),
   shortbuzz: new Howl({ src: ["/sounds/display/shootout/shortbuzz.mp3"] })
 };
+
+// When begin plays, we should start a timer for the clock
+sounds.begin.on("play", () => {
+  shootoutTimer = setTimeout(() => {
+    shootoutTimeB = shootoutTime;
+    shootoutTimeLeft = shootoutTime;
+    shootoutStartTimer();
+    sounds.beat.play();
+  }, 2900);
+})
 
 /*
       DEFAULT SLIDES
@@ -2011,12 +2021,8 @@ Shootout.on("update", "displayinternal", data => {
 });
 Shootout.on("replace", "displayinternal", data => {
   data.get().map(datum => {
-
     // On replaces, do not process certain triggers
-    if (
-      ["timeStart", "timeStop", "timeResume"].indexOf(datum.name) !==
-      -1
-    )
+    if (["timeStart", "timeStop", "timeResume"].indexOf(datum.name) !== -1)
       return;
 
     processShootout(datum);
@@ -2057,10 +2063,7 @@ function processShootout(data) {
     }
   } else if (data.name.startsWith("score")) {
     let score = parseInt(data.name.replace("score", ""));
-    switch (
-      parseInt(data.value) -
-      shootoutScore[score - 1]
-    ) {
+    switch (parseInt(data.value) - shootoutScore[score - 1]) {
       case 1:
         sounds.point1.play();
         break;
@@ -2071,9 +2074,7 @@ function processShootout(data) {
         sounds.point3.play();
         break;
     }
-    shootoutScore[score - 1] = parseInt(
-      data.value
-    );
+    shootoutScore[score - 1] = parseInt(data.value);
     $(`.shootout-score${score}`).html(data.value);
     $(`.shootout-score${score}`).animateCss("heartBeat");
   } else if (data.name === "timeStart") {
@@ -2081,12 +2082,11 @@ function processShootout(data) {
     clearTimeout(shootoutTimer);
     clearInterval(shootoutTimer);
     sounds.begin.play();
-    shootoutTimer = setTimeout(() => {
-      shootoutTimeB = shootoutTime;
-      shootoutTimeLeft = shootoutTime;
-      shootoutStartTimer();
-      sounds.beat.play();
-    }, 3000);
+    $(`.shootout-time`).html(
+      moment
+        .duration(shootoutTime, "seconds")
+        .format("mm:ss", { trim: false, precision: 1 })
+    );
   } else if (data.name === "timeStop") {
     clearTimeout(shootoutTimer);
     clearInterval(shootoutTimer);
@@ -2119,20 +2119,27 @@ function shootoutStartTimer() {
     shootoutTimeLeft =
       shootoutTimeB - moment().diff(moment(shootoutStart), "seconds", true);
 
-      if (shootoutTimeLeft <= 0) {
-        shootoutTimeLeft = 0;
-        clearTimeout(shootoutTimer);
-        sounds.buzzer.play();
-        sounds.beat.stop();
-        $(`.shootout-time`).removeClass("text-warning");
-        $(`.shootout-time`).addClass("text-danger");
-      }
+    if (shootoutTimeLeft <= 0) {
+      shootoutTimeLeft = 0;
+      clearTimeout(shootoutTimer);
+      sounds.buzzer.play();
+      sounds.beat.stop();
+      $(`.shootout-time`).removeClass("text-warning");
+      $(`.shootout-time`).addClass("text-danger");
+    }
 
     $(`.shootout-time`).html(
-      moment.duration(shootoutTimeLeft, "seconds").format("mm:ss", { trim: false, precision: 1 })
+      moment
+        .duration(shootoutTimeLeft, "seconds")
+        .format("mm:ss", { trim: false, precision: 1 })
     );
 
-    if (shootoutTimeLeft > 0 && shootoutTimeLeft <= 10 && parseInt(shootoutTimeLeft * 10) % 10 === 0 && !sounds.countdown.playing()) {
+    if (
+      shootoutTimeLeft > 0 &&
+      shootoutTimeLeft <= 10 &&
+      parseInt(shootoutTimeLeft * 10) % 10 === 0 &&
+      !sounds.countdown.playing()
+    ) {
       sounds.countdown.play();
       $(`.shootout-time`).animateCss("pulse");
       $(`.shootout-time`).removeClass("text-danger");
