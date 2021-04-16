@@ -2035,7 +2035,7 @@ function processShootout(data) {
     $(".shootout-time").html(
       moment
         .duration(shootoutTime, "seconds")
-        .format("mm:ss.S", { trim: false, precision: 1 })
+        .format("mm:ss", { trim: false, precision: 1 })
     );
   } else if (data.name === "turn") {
     for (let i = 1; i <= 4; i++) {
@@ -2129,10 +2129,10 @@ function shootoutStartTimer() {
       }
 
     $(`.shootout-time`).html(
-      moment.duration(shootoutTimeLeft, "seconds").format("mm:ss.S", { trim: false, precision: 1 })
+      moment.duration(shootoutTimeLeft, "seconds").format("mm:ss", { trim: false, precision: 1 })
     );
 
-    if (shootoutTimeLeft <= 10 && parseInt(shootoutTimeLeft * 10) % 10 === 0) {
+    if (shootoutTimeLeft > 0 && shootoutTimeLeft <= 10 && parseInt(shootoutTimeLeft * 10) % 10 === 0 && !sounds.countdown.playing()) {
       sounds.countdown.play();
       $(`.shootout-time`).animateCss("pulse");
       $(`.shootout-time`).removeClass("text-danger");
