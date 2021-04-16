@@ -26,11 +26,12 @@ wwsumodules
   .add("WWSUdirectors", WWSUdirectors, { host: `display-internal` })
   .add("WWSUeas", WWSUeas)
   .add("WWSUannouncements", WWSUannouncements, {
-    types: ["display-internal", "display-internal-sticky"],
+    types: ["display-internal", "display-internal-sticky"]
   })
   .add("WWSUcalendar", WWSUcalendar)
   .add("WWSUrecipientsweb", WWSUrecipientsweb)
   .add("WWSUstatus", WWSUstatus)
+  .add("WWSUshootout", WWSUshootout)
   .add("WWSUmessagesweb", WWSUmessagesweb);
 
 // Reference modules to variables
@@ -45,40 +46,41 @@ let Recipients = wwsumodules.get("WWSUrecipientsweb");
 let Messages = wwsumodules.get("WWSUmessagesweb");
 let Status = wwsumodules.get("WWSUstatus");
 let Eas = wwsumodules.get("WWSUeas");
+let Shootout = wwsumodules.get("WWSUshootout");
 
 // Add event listeners
-Eas.on("newAlert", "renderer", (record) => {
+Eas.on("newAlert", "renderer", record => {
   newEas.push(record);
   if (record.severity === "Extreme") easExtreme = true;
   doEas();
 });
-Eas.on("change", "renderer", (db) => processEas(db));
-Status.on("change", "renderer", (db) => processStatus(db.get()));
+Eas.on("change", "renderer", db => processEas(db));
+Status.on("change", "renderer", db => processStatus(db.get()));
 Directors.on("change", "renderer", () => {
   updateCalendar();
 });
 Calendar.on("calendarUpdated", "renderer", (data, db) => {
   updateCalendar();
 });
-Announcements.on("update", "renderer", (data) => {
+Announcements.on("update", "renderer", data => {
   WWSUslides.removeSlide(`attn-${data.ID}`);
   createAnnouncement(data);
 });
-Announcements.on("insert", "renderer", (data) => createAnnouncement(data));
-Announcements.on("remove", "renderer", (data) =>
+Announcements.on("insert", "renderer", data => createAnnouncement(data));
+Announcements.on("remove", "renderer", data =>
   WWSUslides.removeSlide(`attn-${data}`)
 );
-Announcements.on("replace", "renderer", (db) => {
+Announcements.on("replace", "renderer", db => {
   console.dir(db.get());
   // Remove all announcement slides
   WWSUslides.allSlides()
-    .filter((slide) => slide.name.startsWith(`attn-`))
-    .map((slide) => WWSUslides.removeSlide(slide.name));
+    .filter(slide => slide.name.startsWith(`attn-`))
+    .map(slide => WWSUslides.removeSlide(slide.name));
 
   // Add slides for each announcement
-  db.each((data) => createAnnouncement(data));
+  db.each(data => createAnnouncement(data));
 });
-Meta.on("newMeta", "renderer", (data) => {
+Meta.on("newMeta", "renderer", data => {
   processNowPlaying(data);
 
   try {
@@ -93,7 +95,7 @@ Meta.on("newMeta", "renderer", (data) => {
   } catch (e) {
     iziToast.show({
       title: "An error occurred - Please check the logs",
-      message: "Error occurred on meta event.",
+      message: "Error occurred on meta event."
     });
     console.error(e);
   }
@@ -110,7 +112,7 @@ socket.on("display-refresh", () => {
 });
 
 // Display messages sent to the display
-Messages.on("insert", "renderer", (data) => {
+Messages.on("insert", "renderer", data => {
   iziToast.show({
     title: "Message",
     message: data[key].message,
@@ -123,7 +125,7 @@ Messages.on("insert", "renderer", (data) => {
     titleSize: "2em",
     messageSize: "1.5em",
     balloon: true,
-    zindex: 999,
+    zindex: 999
   });
   sounds.displaymessage.play();
 });
@@ -138,6 +140,7 @@ socket.on("connect", () => {
     Announcements.init();
     Messages.init();
     Eas.init();
+    Shootout.init();
     // Remove the lost connection overlay
     if (disconnected) {
       // noConnection.style.display = "none";
@@ -157,7 +160,7 @@ socket.on("disconnect", () => {
   } catch (e) {
     iziToast.show({
       title: "An error occurred - Please check the logs",
-      message: "Error occurred trying to make socket reconnect indefinitely.",
+      message: "Error occurred trying to make socket reconnect indefinitely."
     });
     console.error(e);
   }
@@ -171,21 +174,39 @@ socket.on("disconnect", () => {
 
 // Sound alerts
 let sounds = {
+  // Director auto clockout warning
   clockOut: new Howl({ src: ["/sounds/display/clockout.mp3"] }),
+
+  // Statuses
   critical: new Howl({ src: ["/sounds/display/critical.mp3"] }),
   disconnected: new Howl({ src: ["/sounds/display/disconnected.mp3"] }),
   warning: new Howl({ src: ["/sounds/display/warning.mp3"] }),
   ping: new Howl({ src: ["/sounds/display/ping.mp3"] }),
+
+  // Message sent
   displaymessage: new Howl({ src: ["/sounds/display/displaymessage.mp3"] }),
 
+  // EAS
   lifethreatening: new Howl({
-    src: ["/sounds/display/lifethreatening.mp3"],
+    src: ["/sounds/display/lifethreatening.mp3"]
   }),
   severeeas: new Howl({ src: ["/sounds/display/severeeas.mp3"] }),
-  
+
+  // Notices for broadcasts going on the air
   live: new Howl({ src: ["/sounds/display/live.mp3"] }),
   remote: new Howl({ src: ["/sounds/display/remote.mp3"] }),
   sports: new Howl({ src: ["/sounds/display/sports.mp3"] }),
+
+  // Shootout scoreboard
+  point1: new Howl({ src: ["/sounds/display/shootout/1point.mp3"] }),
+  point2: new Howl({ src: ["/sounds/display/shootout/2points.mp3"] }),
+  point3: new Howl({ src: ["/sounds/display/shootout/3points.mp3"] }),
+  beat: new Howl({ src: ["/sounds/display/shootout/beat.mp3"] }),
+  begin: new Howl({ src: ["/sounds/display/shootout/begin.mp3"] }),
+  buzzer: new Howl({ src: ["/sounds/display/shootout/buzzer.mp3"] }),
+  countdown: new Howl({ src: ["/sounds/display/shootout/countdown.mp3"] }),
+  whistle: new Howl({ src: ["/sounds/display/shootout/whistle.mp3"] }),
+  shortbuzz: new Howl({ src: ["/sounds/display/shootout/shortbuzz.mp3"] })
 };
 
 /*
@@ -207,7 +228,7 @@ WWSUslides.newSlide({
   transitionOut: `fadeOut`,
   displayTime: 5,
   fitContent: false,
-  html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.75vh;" class="container-full p-2 m-1"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: One-time office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: One-time cancellation.</span><span class="text-white">9AM - 5PM</span>: Regular office hours.</span></p>`,
+  html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.75vh;" class="container-full p-2 m-1"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: One-time office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: One-time cancellation.</span><span class="text-white">9AM - 5PM</span>: Regular office hours.</span></p>`
 });
 
 // Assistant Director hours
@@ -222,7 +243,7 @@ WWSUslides.newSlide({
   transitionOut: `fadeOut`,
   displayTime: 5,
   fitContent: false,
-  html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.75vh;" class="container-full p-2 m-1"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: One-time office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: One-time cancellation.</span><span class="text-white">9AM - 5PM/span>: Regular office hours.</span></p>`,
+  html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.75vh;" class="container-full p-2 m-1"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: One-time office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: One-time cancellation.</span><span class="text-white">9AM - 5PM/span>: Regular office hours.</span></p>`
 });
 
 // System Status
@@ -237,7 +258,74 @@ WWSUslides.newSlide({
   transitionOut: `fadeOut`,
   displayTime: 15,
   fitContent: false,
-  html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">System Status</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.75vh;" class="container-full p-2 m-1"></div>`,
+  html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">System Status</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.75vh;" class="container-full p-2 m-1"></div>`
+});
+
+// Shootout scoreboard
+WWSUslides.newSlide({
+  name: `shootout`,
+  label: `Shootout`,
+  weight: -2000000,
+  isSticky: true,
+  color: `success`,
+  active: false,
+  transitionIn: `fadeIn`,
+  transitionOut: `fadeOut`,
+  displayTime: 15,
+  fitContent: false,
+  html: `<div style="font-size: 10vh; text-align: center;">
+  Basketball Shootout
+</div>
+
+<div class="container-full" style="font-size: 8vh; text-align: center;">
+  <div class="row">
+    <div class="col-6">
+      Round: <span class="shootout-round">0</span>
+    </div>
+    <div class="col-6">
+      Time: <span class="shootout-time">0:00.0</span>
+    </div>
+  </div>
+</div>
+
+<div class="container" style="font-size: 8vh;">
+
+  <div class="row p-1 shootout-player1 shadow-2 d-none">
+    <div class="col-10 shootout-name1 bg-dark">
+      Jon Doe
+    </div>
+    <div class="col-2 shootout-score1 bg-primary" style="text-align: center;">
+      0
+    </div>
+  </div>
+
+  <div class="row p-1 shootout-player2 shadow-2 d-none">
+    <div class="col-10 shootout-name2 bg-danger">
+      Jon Doe
+    </div>
+    <div class="col-2 shootout-score2 bg-primary" style="text-align: center;">
+      0
+    </div>
+  </div>
+
+  <div class="row p-1 shootout-player3 shadow-2 d-none">
+    <div class="col-10 shootout-name3 bg-dark">
+      Jon Doe
+    </div>
+    <div class="col-2 shootout-score3 bg-primary" style="text-align: center;">
+      0
+    </div>
+  </div>
+
+  <div class="row  p-1 shootout-player4 shadow-2 d-none">
+    <div class="col-10 shootout-name1 bg-dark">
+      Jon Doe
+    </div>
+    <div class="col-2 shootout-score1 bg-primary" style="text-align: center;">
+      0
+    </div>
+  </div>
+</div>`
 });
 
 // Director auto-clockout message
@@ -252,7 +340,7 @@ WWSUslides.newSlide({
   transitionOut: `fadeOut`,
   displayTime: 60,
   fitContent: true,
-  html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Automatic Director Clockout at Midnight</h1><span style="color: #FFFFFF;">All directors who are still clocked in must clock out before midnight.<br>Otherwise, the system will automatically clock you out and flag your timesheet.<br>If you are still doing hours, you can clock back in after midnight.</span>`,
+  html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Automatic Director Clockout at Midnight</h1><span style="color: #FFFFFF;">All directors who are still clocked in must clock out before midnight.<br>Otherwise, the system will automatically clock you out and flag your timesheet.<br>If you are still doing hours, you can clock back in after midnight.</span>`
 });
 
 // Weather alerts
@@ -271,7 +359,7 @@ WWSUslides.newSlide({
     !isLightTheme ? `#ffffff` : `#000000`
   }">WWSU EAS - Active Alerts</h1><h2 style="text-align: center; font-size: 1.5em; color: ${
     !isLightTheme ? `#ffffff` : `#000000`
-  }">Clark, Greene, and Montgomery counties</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="eas-alerts"></div>`,
+  }">Clark, Greene, and Montgomery counties</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="eas-alerts"></div>`
 });
 
 // Define HTML elements
@@ -316,6 +404,14 @@ let easActive = false;
 let easDelay = 5;
 let easExtreme = false;
 
+let shootoutInactivity;
+let shootoutTimer;
+let shootoutTime = 0;
+let shootoutTimeB = 0;
+let shootoutTimeLeft = 0;
+let shootoutScore = [0, 0, 0, 0];
+let shootoutStart = moment();
+
 // burnGuard is a periodic line that sweeps across the screen to prevent burn-in. Define / construct it.
 let $burnGuard = $("<div>")
   .attr("id", "burnGuard")
@@ -327,7 +423,7 @@ let $burnGuard = $("<div>")
     top: "0px",
     left: "0px",
     display: "none",
-    "z-index": 9999,
+    "z-index": 9999
   })
   .appendTo("body");
 
@@ -339,16 +435,16 @@ function burnGuardAnimate() {
     $burnGuard
       .css({
         left: "0px",
-        "background-color": rColor,
+        "background-color": rColor
       })
       .show()
       .animate(
         {
-          left: $(window).width() + "px",
+          left: $(window).width() + "px"
         },
         scrollDelay,
         "linear",
-        function () {
+        function() {
           $(this).hide();
         }
       );
@@ -356,7 +452,7 @@ function burnGuardAnimate() {
   } catch (e) {
     iziToast.show({
       title: "An error occurred - Please check the logs",
-      message: "Error occurred during the burnGuardAnimate function.",
+      message: "Error occurred during the burnGuardAnimate function."
     });
     console.error(e);
   }
@@ -378,18 +474,18 @@ iziToast.settings({
   layout: 1,
   closeOnClick: true,
   position: "center",
-  timeout: 30000,
+  timeout: 30000
 });
 
 $.fn.extend({
   // Add an animateCss function to JQuery to trigger an animation of an HTML element with animate.css
-  animateCss: function (animationName, callback) {
-    let animationEnd = (function (el) {
+  animateCss: function(animationName, callback) {
+    let animationEnd = (function(el) {
       let animations = {
         animation: "animationend",
         OAnimation: "oAnimationEnd",
         MozAnimation: "mozAnimationEnd",
-        WebkitAnimation: "webkitAnimationEnd",
+        WebkitAnimation: "webkitAnimationEnd"
       };
 
       for (let t in animations) {
@@ -399,7 +495,7 @@ $.fn.extend({
       }
     })(document.createElement("div"));
 
-    this.addClass("animated " + animationName).one(animationEnd, function () {
+    this.addClass("animated " + animationName).one(animationEnd, function() {
       $(this).removeClass("animated " + animationName);
 
       if (typeof callback === "function") {
@@ -408,7 +504,7 @@ $.fn.extend({
     });
 
     return this;
-  },
+  }
 });
 
 // Define a reload timer; terminates if socket connection gets established. This ensures if no connection is made, page will refresh itself to try again.
@@ -475,7 +571,7 @@ function processStatus(db) {
                     }">`;
 
     // Add status info to table for each status, and determine current global status (worst of all statuses)
-    db.forEach((thestatus) => {
+    db.forEach(thestatus => {
       try {
         if (thestatus.status === 5) return; // Skip good statuses
         if (!secondRow) {
@@ -548,7 +644,7 @@ function processStatus(db) {
       } catch (e) {
         iziToast.show({
           title: "An error occurred - Please check the logs",
-          message: `Error occurred during Status iteration in processStatus call.`,
+          message: `Error occurred during Status iteration in processStatus call.`
         });
         console.error(e);
       }
@@ -668,7 +764,7 @@ function processStatus(db) {
   } catch (e) {
     iziToast.show({
       title: "An error occurred - Please check the logs",
-      message: "Error occurred during the call of Status[0].",
+      message: "Error occurred during the call of Status[0]."
     });
     console.error(e);
   }
@@ -680,15 +776,18 @@ function updateCalendar() {
   clearTimeout(officeHoursTimer);
   officeHoursTimer = setTimeout(() => {
     Calendar.getEvents(
-      (events) => {
+      events => {
         let directorHours = [];
         let tasks = [];
 
         directorHours = events
           .filter(
-            (event) =>
+            event =>
               ["office-hours"].indexOf(event.type) !== -1 &&
-              moment(event.end).add(1, "days").startOf("day").isAfter(moment())
+              moment(event.end)
+                .add(1, "days")
+                .startOf("day")
+                .isAfter(moment())
           )
           .sort(
             (a, b) => moment(a.start).valueOf() - moment(b.start).valueOf()
@@ -696,16 +795,19 @@ function updateCalendar() {
 
         tasks = events
           .filter(
-            (event) =>
+            event =>
               ["tasks"].indexOf(event.type) !== -1 &&
-              moment(event.end).add(1, "days").startOf("day").isAfter(moment())
+              moment(event.end)
+                .add(1, "days")
+                .startOf("day")
+                .isAfter(moment())
           )
           .sort(
             (a, b) => moment(a.start).valueOf() - moment(b.start).valueOf()
           );
 
         // Sort director hours by start time
-        let compare = function (a, b) {
+        let compare = function(a, b) {
           try {
             if (moment(a.start).valueOf() < moment(b.start).valueOf()) {
               return -1;
@@ -718,7 +820,7 @@ function updateCalendar() {
             console.error(e);
             iziToast.show({
               title: "An error occurred - Please check the logs",
-              message: `Error occurred in the compare function of Calendar.sort in the Calendar[0] call.`,
+              message: `Error occurred in the compare function of Calendar.sort in the Calendar[0] call.`
             });
           }
         };
@@ -727,7 +829,7 @@ function updateCalendar() {
         let calendar = {};
         let asstcalendar = {};
 
-        Directors.find({ assistant: false }).forEach((director) => {
+        Directors.find({ assistant: false }).forEach(director => {
           calendar[director.ID] = {};
           calendar[director.ID]["director"] = director;
           calendar[director.ID][0] = ``;
@@ -739,7 +841,7 @@ function updateCalendar() {
           calendar[director.ID][6] = ``;
         });
 
-        Directors.find({ assistant: true }).forEach((director) => {
+        Directors.find({ assistant: true }).forEach(director => {
           asstcalendar[director.ID] = {};
           asstcalendar[director.ID]["director"] = director;
           asstcalendar[director.ID][0] = ``;
@@ -751,7 +853,7 @@ function updateCalendar() {
           asstcalendar[director.ID][6] = ``;
         });
 
-        directorHours.sort(compare).map((event) => {
+        directorHours.sort(compare).map(event => {
           // First, get the director
           let temp = Directors.find({ ID: event.director }, true);
 
@@ -854,7 +956,10 @@ function updateCalendar() {
               }
               if (
                 moment(event.start).isBefore(
-                  moment.parseZone(Meta.meta.time).add(i, "days").startOf("day")
+                  moment
+                    .parseZone(Meta.meta.time)
+                    .add(i, "days")
+                    .startOf("day")
                 )
               ) {
                 event.startT = moment
@@ -891,16 +996,14 @@ function updateCalendar() {
               if (!assistant) {
                 calendar[event.director][
                   i
-                ] += `<div class="m-1 text-white" style="${
-                  bg || ``
-                }">${endText}</div>`;
+                ] += `<div class="m-1 text-white" style="${bg ||
+                  ``}">${endText}</div>`;
               }
               if (assistant) {
                 asstcalendar[event.director][
                   i
-                ] += `<div class="m-1 text-white" style="${
-                  bg || ``
-                }">${endText}</div>`;
+                ] += `<div class="m-1 text-white" style="${bg ||
+                  ``}">${endText}</div>`;
               }
             }
           }
@@ -1181,7 +1284,7 @@ function createAnnouncement(data) {
       transitionOut: `fadeOut`,
       displayTime: data.displayTime || 15,
       fitContent: true,
-      html: `<div style="overflow-y: hidden; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="text-white" id="content-attn-${data.ID}">${data.announcement}</div>`,
+      html: `<div style="overflow-y: hidden; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="text-white" id="content-attn-${data.ID}">${data.announcement}</div>`
     });
   }
 }
@@ -1285,7 +1388,7 @@ function processNowPlaying(response) {
               // 'left' or 'right'
               direction: "left",
               // true or false - should the marquee be duplicated to show an effect of continues flow
-              duplicated: true,
+              duplicated: true
             });
           }
         }, 5000);
@@ -1304,7 +1407,7 @@ function processNowPlaying(response) {
               // 'left' or 'right'
               direction: "left",
               // true or false - should the marquee be duplicated to show an effect of continues flow
-              duplicated: true,
+              duplicated: true
             });
           } else {
             $("#nowplaying-line1").animateCss("fadeIn");
@@ -1327,7 +1430,7 @@ function processNowPlaying(response) {
               // 'left' or 'right'
               direction: "left",
               // true or false - should the marquee be duplicated to show an effect of continues flow
-              duplicated: true,
+              duplicated: true
             });
           }
         }, 5000);
@@ -1346,7 +1449,7 @@ function processNowPlaying(response) {
               // 'left' or 'right'
               direction: "left",
               // true or false - should the marquee be duplicated to show an effect of continues flow
-              duplicated: true,
+              duplicated: true
             });
           } else {
             $("#nowplaying-line2").animateCss("fadeIn");
@@ -1464,7 +1567,7 @@ function processNowPlaying(response) {
       console.error(e);
       iziToast.show({
         title: "An error occurred - Please check the logs",
-        message: "Error occurred during processNowPlaying.",
+        message: "Error occurred during processNowPlaying."
       });
     }
   }
@@ -1485,7 +1588,7 @@ function processEas(db) {
     // eslint-disable-next-line no-unused-lets
     let displayTime = 7;
 
-    db.each((dodo) => {
+    db.each(dodo => {
       try {
         prevEas.push(dodo.ID);
 
@@ -1518,9 +1621,8 @@ function processEas(db) {
         // eslint-disable-next-line no-unused-lets
         color = `rgb(${color.red}, ${color.green}, ${color.blue});`;
         if (isLightTheme) {
-          color = `rgb(${color.red / 4 + 191}, ${color.green / 4 + 191}, ${
-            color.blue / 4 + 191
-          });`;
+          color = `rgb(${color.red / 4 + 191}, ${color.green / 4 +
+            191}, ${color.blue / 4 + 191});`;
         }
         innercontent += `<div style="width: 32%;" class="d-flex align-items-stretch m-1 ${
           !isLightTheme ? `text-white` : `text-dark`
@@ -1566,7 +1668,7 @@ function processEas(db) {
         console.error(e);
         iziToast.show({
           title: "An error occurred - Please check the logs",
-          message: `Error occurred during Eas iteration in processEas.`,
+          message: `Error occurred during Eas iteration in processEas.`
         });
       }
     });
@@ -1591,7 +1693,7 @@ function processEas(db) {
     console.error(e);
     iziToast.show({
       title: "An error occurred - Please check the logs",
-      message: "Error occurred during the call of Eas[0].",
+      message: "Error occurred during the call of Eas[0]."
     });
   }
 }
@@ -1696,7 +1798,7 @@ function doEas() {
               console.error(e);
               iziToast.show({
                 title: "An error occurred - Please check the logs",
-                message: `Error occurred in the finished bind of #alert-marquee in doEas.`,
+                message: `Error occurred in the finished bind of #alert-marquee in doEas.`
               });
             }
           })
@@ -1710,7 +1812,7 @@ function doEas() {
             // 'left' or 'right'
             direction: "left",
             // true or false - should the marquee be duplicated to show an effect of continues flow
-            duplicated: false,
+            duplicated: false
           });
         /*
         clearInterval(flashInterval);
@@ -1769,7 +1871,7 @@ function doEas() {
             }">SEEK SHELTER NOW!!!</h2>
             <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="alerts"></div></div>`;
       let innercontent = document.getElementById("alerts");
-      Eas.find({ severity: "Extreme" }).forEach((dodo) => {
+      Eas.find({ severity: "Extreme" }).forEach(dodo => {
         try {
           let color = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(dodo.color)
             ? hexRgb(dodo.color)
@@ -1823,7 +1925,7 @@ function doEas() {
           console.error(e);
           iziToast.show({
             title: "An error occurred - Please check the logs",
-            message: `Error occurred during Eas iteration in doEas.`,
+            message: `Error occurred during Eas iteration in doEas.`
           });
         }
       });
@@ -1848,7 +1950,7 @@ function doEas() {
     console.error(e);
     iziToast.show({
       title: "An error occurred - Please check the logs",
-      message: "Error occurred during doEas.",
+      message: "Error occurred during doEas."
     });
   }
 }
@@ -1892,7 +1994,133 @@ function hexRgb(hex, options = {}) {
     console.error(e);
     iziToast.show({
       title: "An error occurred - Please check the logs",
-      message: "Error occurred during hexRgb.",
+      message: "Error occurred during hexRgb."
     });
   }
+}
+
+Shootout.on("insert", "displayinternal", data => {
+  processShootout(data);
+});
+Shootout.on("update", "displayinternal", data => {
+  processShootout(data);
+});
+Shootout.on("replace", "displayinternal", data => {
+  data.get().map(datum => {
+    // On replaces, do not process triggers
+    if (
+      ["timeStart", "timeStop", "timeResume", "active"].indexOf(datum.name) !==
+      -1
+    )
+      return;
+
+    processShootout(datum);
+  });
+});
+
+function processShootout(data) {
+  // Disable slide after 10 minutes of inactivity
+  clearTimeout(shootoutInactivity);
+  shootoutInactivity = setTimeout(() => {
+    WWSUslides.slide(`shootout`).active = false;
+  }, 1000 * 60 * 10);
+
+  if (data.name === "time") {
+    shootoutTime = parseFloat(data.value);
+    $(".shootout-time").html(
+      moment
+        .duration(shootoutTime, "seconds")
+        .format("mm:ss.S", { trim: false })
+    );
+  } else if (data.name === "turn") {
+    for (let i = 1; i <= 4; i++) {
+      if (parseInt(data.value) === i) {
+        $(`.shootout-name${i}`).removeClass("bg-dark");
+        $(`.shootout-name${i}`).addClass("bg-success");
+      } else {
+        $(`.shootout-name${i}`).removeClass("bg-success");
+        $(`.shootout-name${i}`).addClass("bg-dark");
+      }
+    }
+  } else if (data.name.startsWith("name")) {
+    let player = data.name.replace("name", "");
+    if (!data.value || data.value.length < 1) {
+      $(`.shootout-player${i}`).addClass("d-none");
+    } else {
+      $(`.shootout-player${i}`).removeClass("d-none");
+      $(`.shootout-name${i}`).html(data.value);
+    }
+  } else if (data.name.startsWith("score")) {
+    switch (
+      parseInt(data.value) -
+      shootoutScore[parseInt(data.name.replace("score", "")) - 1]
+    ) {
+      case 1:
+        sounds.point1.play();
+        break;
+      case 2:
+        sounds.point2.play();
+        break;
+      case 3:
+        sounds.point3.play();
+        break;
+    }
+    shootoutScore[parseInt(data.name.replace("score", "")) - 1] = parseInt(
+      data.value
+    );
+    $(`.shootout-score${i}`).html(data.value);
+    $(`.shootout-score${i}`).animateCss("heartBeat");
+  } else if (data.name === "timeStart") {
+    sounds.beat.stop();
+    clearTimeout(shootoutTimer);
+    sounds.begin.play();
+    shootoutTimer = setTimeout(() => {
+      shootoutTimeB = shootoutTime;
+      shootoutTimeLeft = shootoutTime;
+      shootoutStartTimer();
+    }, 3000);
+  } else if (data.name === "timeStop") {
+    clearTimeout(shootoutTimer);
+    sounds.whistle.play();
+  } else if (data.name === "timeResume") {
+    shootoutTimeB = shootoutTimeLeft;
+    sounds.shortbuzz.play();
+    shootoutStartTimer();
+  } else if (data.name === "active") {
+    if (parseInt(data.value) === 1) {
+      WWSUslides.slide(`shootout`).active = true;
+    } else {
+      clearTimeout(shootoutInactivity);
+      WWSUslides.slide(`shootout`).active = false;
+    }
+  } else {
+    $(`.shootout-${data.name}`).html(data.value);
+  }
+}
+
+function shootoutStartTimer() {
+  shootoutStart = moment();
+  $(`.shootout-time`).removeClass("text-warning");
+  $(`.shootout-time`).removeClass("text-danger");
+  clearTimeout(shootoutTimer);
+  shootoutTimer = setTimeout(() => {
+    shootoutTimeLeft =
+      shootoutTimeB - moment().diff(moment(shootoutStart), "seconds", true);
+    $(`.shootout-time`).html(
+      moment.duration(shootoutTimeLeft, "seconds").format("mm:ss.S")
+    );
+
+    if (shootoutTimeLeft <= 10 && parseInt(shootoutTimeLeft * 10) % 10 === 0) {
+      sounds.countdown.play();
+      $(`.shootout-time`).animateCss("pulse");
+      $(`.shootout-time`).addClass("text-warning");
+    }
+
+    if (shootoutTimeLeft <= 0) {
+      clearTimeout(shootoutTimer);
+      sounds.buzzer.play();
+      sounds.beat.stop();
+      $(`.shootout-time`).addClass("text-danger");
+    }
+  }, 100);
 }

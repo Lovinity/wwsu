@@ -61,7 +61,11 @@ wwsumodules
   .add("WWSUcalendar", WWSUcalendar)
   .add("WWSUdiscipline", WWSUdiscipline)
   .add("WWSUtimesheet", WWSUtimesheet)
-  .add("WWSUmessages", WWSUmessages);
+  .add("WWSUmessages", WWSUmessages)
+  .add("WWSUshootout", WWSUshootout, {
+    username: "#shootout-username",
+    password: "#shootout-password"
+  });
 
 // Reference modules to variables
 var navigation = wwsumodules.get("WWSUNavigation"); // Navigation must be global so it can be accessed by other ejs scripts
@@ -77,6 +81,7 @@ let calendar = wwsumodules.get("WWSUcalendar");
 let discipline = wwsumodules.get("WWSUdiscipline");
 let timesheets = wwsumodules.get("WWSUtimesheet");
 let messages = wwsumodules.get("WWSUmessages");
+let shootout = wwsumodules.get("WWSUshootout");
 
 timesheets.init(
   `#section-timesheets-hours`,
@@ -114,8 +119,15 @@ navigation.addItem(
 navigation.addItem(
   "#nav-timesheets",
   "#section-timesheets",
-  "Director timesheets - WWSU DJ Controls",
+  "Director timesheets - WWSU Timesheets",
   "/directors/timesheets",
+  false
+);
+navigation.addItem(
+  "#nav-shootout",
+  "#section-shootout",
+  "Basketball Scoreboard Control - WWSU Timesheets",
+  "/directors/shootout",
   false
 );
 
@@ -292,6 +304,7 @@ socket.on("connect", () => {
     djs.init();
     calendar.init();
     announcements.init();
+    shootout.init();
   });
 });
 
@@ -571,3 +584,67 @@ function processAnnouncements() {
     $(".announcements-timesheet").html(html);
   });
 }
+
+// Click events for shootout
+$(`#shootout-active`).on("click", event => {
+  shootout.set(`active`, 1);
+});
+$(`#shootout-inactive`).on("click", event => {
+  shootout.set(`active`, 0);
+});
+
+$(`#shootout-round`).on("change", event => {
+  shootout.set(`round`, event.target.value);
+});
+$(`#shootout-roundadd`).on("click", event => {
+  shootout.set(`round`, parseInt($(`#shootout-round`).val()) + 1);
+});
+
+$(`#shootout-time`).on("change", event => {
+  shootout.set(`time`, event.target.value);
+});
+$(`#shootout-timestart`).on("click", event => {
+  shootout.set(`timeStart`, moment().valueOf());
+});
+$(`#shootout-timestop`).on("click", event => {
+  shootout.set(`timeStop`, moment().valueOf());
+});
+$(`#shootout-timeresume`).on("click", event => {
+  shootout.set(`timeResume`, moment().valueOf());
+});
+
+for (let i = 1; i <= 4; i++) {
+  $(`#shootout-name${i}`).on("change", event => {
+    shootout.set(`name${i}`, event.target.value);
+  });
+
+  $(`#shootout-score${i}`).on("change", event => {
+    shootout.set(`score${i}`, event.target.value);
+  });
+
+  for (let i2 = 1; i2 <= 3; i2++) {
+    $(`#shootout-score${i}-add${i2}`).on("click", event => {
+      shootout.set(`score${i}`, parseInt($(`#shootout-score${i}`).val()) + i2);
+    });
+  }
+
+  $(`#shootout-name${i}-turn`).on("click", event => {
+    shootout.set(`turn`, i);
+  });
+}
+
+shootout.on("change", "website", db => {
+  db.get().map(record => {
+    if (record.name.startsWith("name")) {
+      let name = record.name.replace("name", "");
+      $(`#shootout-name${name}`).val(record.value);
+    } else if (record.name.startsWith("score")) {
+      let score = record.name.replace("score", "");
+      $(`#shootout-score${acore}`).val(record.value);
+    } else if (record.name === "time") {
+      $(`#shootout-time`).val(record.value);
+    } else if (record.name === "round") {
+      $(`#shootout-round`).val(record.value);
+    }
+  });
+});
