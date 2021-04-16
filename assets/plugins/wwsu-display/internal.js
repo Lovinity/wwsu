@@ -273,9 +273,9 @@ WWSUslides.newSlide({
   transitionOut: `fadeOut`,
   displayTime: 15,
   fitContent: false,
-  html: `<div class="class="text-white">
+  html: `<div class="text-white">
   
-  <div style="font-size: 10vh; text-align: center;">
+  <div style="font-size: 8vh; text-align: center;">
   Basketball Shootout
 </div>
 
@@ -2011,9 +2011,10 @@ Shootout.on("update", "displayinternal", data => {
 });
 Shootout.on("replace", "displayinternal", data => {
   data.get().map(datum => {
-    // On replaces, do not process triggers
+    
+    // On replaces, do not process certain triggers
     if (
-      ["timeStart", "timeStop", "timeResume", "active"].indexOf(datum.name) !==
+      ["timeStart", "timeStop", "timeResume"].indexOf(datum.name) !==
       -1
     )
       return;
@@ -2084,6 +2085,7 @@ function processShootout(data) {
       shootoutTimeB = shootoutTime;
       shootoutTimeLeft = shootoutTime;
       shootoutStartTimer();
+      sounds.beat.play();
     }, 3000);
   } else if (data.name === "timeStop") {
     clearTimeout(shootoutTimer);
@@ -2116,21 +2118,23 @@ function shootoutStartTimer() {
   shootoutTimer = setInterval(() => {
     shootoutTimeLeft =
       shootoutTimeB - moment().diff(moment(shootoutStart), "seconds", true);
+
+      if (shootoutTimeLeft <= 0) {
+        shootoutTimeLeft = 0;
+        clearTimeout(shootoutTimer);
+        sounds.buzzer.play();
+        sounds.beat.stop();
+        $(`.shootout-time`).addClass("text-danger");
+      }
+
     $(`.shootout-time`).html(
-      moment.duration(shootoutTimeLeft, "seconds").format("mm:ss.S")
+      moment.duration(shootoutTimeLeft, "seconds").format("mm:ss", { trim: false })
     );
 
     if (shootoutTimeLeft <= 10 && parseInt(shootoutTimeLeft * 10) % 10 === 0) {
       sounds.countdown.play();
       $(`.shootout-time`).animateCss("pulse");
       $(`.shootout-time`).addClass("text-warning");
-    }
-
-    if (shootoutTimeLeft <= 0) {
-      clearTimeout(shootoutTimer);
-      sounds.buzzer.play();
-      sounds.beat.stop();
-      $(`.shootout-time`).addClass("text-danger");
     }
   }, 100);
 }

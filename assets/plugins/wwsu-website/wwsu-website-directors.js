@@ -640,7 +640,7 @@ shootout.on("change", "website", db => {
       $(`#shootout-name${name}`).val(record.value);
     } else if (record.name.startsWith("score")) {
       let score = record.name.replace("score", "");
-      $(`#shootout-score${acore}`).val(record.value);
+      $(`#shootout-score${score}`).val(record.value);
     } else if (record.name === "time") {
       $(`#shootout-time`).val(record.value);
     } else if (record.name === "round") {
