@@ -388,8 +388,9 @@ class WWSUreq {
 			} else {
 				doRequest(() => {});
 			}
-		} catch (unusedE) {
+		} catch (e) {
 			// eslint-disable-next-line standard/no-callback-literal
+			console.error(e);
 			cb(0);
 		}
 	}

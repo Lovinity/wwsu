@@ -76,19 +76,26 @@ class WWSUshootout extends WWSUdb {
           icon: "fas fa-skull-crossbones fa-lg"
         });
       } else {
-        req._tryRequest({ name: name, value: value }, body2 => {
-          if (!body2 || body2 === -1) {
-            $(document).Toasts("create", {
-              class: "bg-danger",
-              title: "Error updating scoreboard",
-              body:
-                "There was an error updating the shootout scoreboard. Please contact the engineer",
-              autohide: true,
-              delay: 10000,
-              icon: "fas fa-skull-crossbones fa-lg"
-            });
+        req._tryRequest(
+          {
+            method: "post",
+            url: this.endpoints.set,
+            data: { name: name, value: value }
+          },
+          body2 => {
+            if (!body2 || body2 === -1) {
+              $(document).Toasts("create", {
+                class: "bg-danger",
+                title: "Error updating scoreboard",
+                body:
+                  "There was an error updating the shootout scoreboard. Please contact the engineer",
+                autohide: true,
+                delay: 10000,
+                icon: "fas fa-skull-crossbones fa-lg"
+              });
+            }
           }
-        });
+        );
       }
     });
   }
