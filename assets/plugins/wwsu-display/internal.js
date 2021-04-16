@@ -273,7 +273,7 @@ WWSUslides.newSlide({
   transitionOut: `fadeOut`,
   displayTime: 15,
   fitContent: false,
-  html: `<div style="font-size: 10vh; text-align: center;">
+  html: `<div style="font-size: 10vh; text-align: center;" class="text-white">
   Basketball Shootout
 </div>
 
@@ -2045,15 +2045,16 @@ function processShootout(data) {
   } else if (data.name.startsWith("name")) {
     let player = data.name.replace("name", "");
     if (!data.value || data.value.length < 1) {
-      $(`.shootout-player${i}`).addClass("d-none");
+      $(`.shootout-player${player}`).addClass("d-none");
     } else {
-      $(`.shootout-player${i}`).removeClass("d-none");
-      $(`.shootout-name${i}`).html(data.value);
+      $(`.shootout-player${player}`).removeClass("d-none");
+      $(`.shootout-name${player}`).html(data.value);
     }
   } else if (data.name.startsWith("score")) {
+    let score = parseInt(data.name.replace("score", ""));
     switch (
       parseInt(data.value) -
-      shootoutScore[parseInt(data.name.replace("score", "")) - 1]
+      shootoutScore[score - 1]
     ) {
       case 1:
         sounds.point1.play();
@@ -2065,11 +2066,11 @@ function processShootout(data) {
         sounds.point3.play();
         break;
     }
-    shootoutScore[parseInt(data.name.replace("score", "")) - 1] = parseInt(
+    shootoutScore[score - 1] = parseInt(
       data.value
     );
-    $(`.shootout-score${i}`).html(data.value);
-    $(`.shootout-score${i}`).animateCss("heartBeat");
+    $(`.shootout-score${score}`).html(data.value);
+    $(`.shootout-score${score}`).animateCss("heartBeat");
   } else if (data.name === "timeStart") {
     sounds.beat.stop();
     clearTimeout(shootoutTimer);
