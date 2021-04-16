@@ -8,6 +8,11 @@
 module.exports = {
   datastore: 'ram',
   attributes: {
+    ID: {
+      type: 'number',
+      autoIncrement: true
+    },
+    
     name: {
       type: "string",
       unique: true,
