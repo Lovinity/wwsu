@@ -44,11 +44,14 @@ module.exports = {
         .exec(async (err, newOrExistingRecord, wasCreated) => {
           if (err) return reject(err);
 
-          if (!wasCreated)
-            await sails.models.shootout.update(
+          if (wasCreated) return resolve();
+
+          await sails.models.shootout
+            .update(
               { name: inputs.name },
               { name: inputs.name, value: inputs.value }
-            );
+            )
+            .fetch();
 
           return resolve();
         });

@@ -273,7 +273,9 @@ WWSUslides.newSlide({
   transitionOut: `fadeOut`,
   displayTime: 15,
   fitContent: false,
-  html: `<div style="font-size: 10vh; text-align: center;" class="text-white">
+  html: `<div class="class="text-white">
+  
+  <div style="font-size: 10vh; text-align: center;">
   Basketball Shootout
 </div>
 
@@ -294,16 +296,16 @@ WWSUslides.newSlide({
     <div class="col-10 shootout-name1 bg-dark">
       Jon Doe
     </div>
-    <div class="col-2 shootout-score1 bg-primary" style="text-align: center;">
+    <div class="col-2 shootout-score1 bg-secondary" style="text-align: center;">
       0
     </div>
   </div>
 
   <div class="row p-1 shootout-player2 shadow-2 d-none">
-    <div class="col-10 shootout-name2 bg-danger">
+    <div class="col-10 shootout-name2 bg-dark">
       Jon Doe
     </div>
-    <div class="col-2 shootout-score2 bg-primary" style="text-align: center;">
+    <div class="col-2 shootout-score2 bg-secondary" style="text-align: center;">
       0
     </div>
   </div>
@@ -312,7 +314,7 @@ WWSUslides.newSlide({
     <div class="col-10 shootout-name3 bg-dark">
       Jon Doe
     </div>
-    <div class="col-2 shootout-score3 bg-primary" style="text-align: center;">
+    <div class="col-2 shootout-score3 bg-secondary" style="text-align: center;">
       0
     </div>
   </div>
@@ -321,10 +323,12 @@ WWSUslides.newSlide({
     <div class="col-10 shootout-name1 bg-dark">
       Jon Doe
     </div>
-    <div class="col-2 shootout-score1 bg-primary" style="text-align: center;">
+    <div class="col-2 shootout-score1 bg-secondary" style="text-align: center;">
       0
     </div>
   </div>
+</div>
+
 </div>`
 });
 
@@ -2074,6 +2078,7 @@ function processShootout(data) {
   } else if (data.name === "timeStart") {
     sounds.beat.stop();
     clearTimeout(shootoutTimer);
+    clearInterval(shootoutTimer);
     sounds.begin.play();
     shootoutTimer = setTimeout(() => {
       shootoutTimeB = shootoutTime;
@@ -2082,8 +2087,11 @@ function processShootout(data) {
     }, 3000);
   } else if (data.name === "timeStop") {
     clearTimeout(shootoutTimer);
+    clearInterval(shootoutTimer);
     sounds.whistle.play();
   } else if (data.name === "timeResume") {
+    clearTimeout(shootoutTimer);
+    clearInterval(shootoutTimer);
     shootoutTimeB = shootoutTimeLeft;
     sounds.shortbuzz.play();
     shootoutStartTimer();
@@ -2104,7 +2112,8 @@ function shootoutStartTimer() {
   $(`.shootout-time`).removeClass("text-warning");
   $(`.shootout-time`).removeClass("text-danger");
   clearTimeout(shootoutTimer);
-  shootoutTimer = setTimeout(() => {
+  clearInterval(shootoutTimer);
+  shootoutTimer = setInterval(() => {
     shootoutTimeLeft =
       shootoutTimeB - moment().diff(moment(shootoutStart), "seconds", true);
     $(`.shootout-time`).html(
