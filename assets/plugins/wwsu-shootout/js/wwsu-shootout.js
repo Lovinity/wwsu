@@ -8,7 +8,7 @@ class WWSUshootout extends WWSUdb {
    *
    * @param {WWSUmodules} manager The modules class which initiated this module
    * @param {object} options Options to be passed to this module
-   * @param {string} options.user If this is the web interface, the DOM query string for the text field containing the director
+   * @param {string} options.username If this is the web interface, the DOM query string for the text field containing the director
    * @param {string} options.password If this is the web interface, the DOM query string for the text field containing the password
    */
   constructor(manager, options) {
@@ -26,7 +26,7 @@ class WWSUshootout extends WWSUdb {
 
     this.assignSocketEvent("shootout", this.manager.socket);
 
-    this.user = options ? options.user : undefined;
+    this.username = options ? options.username : undefined;
     this.password = options ? options.password : undefined;
   }
 
@@ -48,7 +48,7 @@ class WWSUshootout extends WWSUdb {
    */
   set(name, value) {
     let req = this.manager.get("directorReq");
-    req._authorize($(this.user).val(), $(this.password).val(), status => {
+    req._authorize($(this.username).val(), $(this.password).val(), status => {
       if (!status) {
         $(document).Toasts("create", {
           class: "bg-danger",
