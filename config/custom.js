@@ -1221,6 +1221,7 @@ var defaultConfig = {
       },
     },
     token: "", // Discord.js bot token
+    guild: "", // WWSU Guild
     channels: {
       live: "", // Snowflake ID of the channel where the bot should post when broadcasts go live
       scheduleChanges: "", // Snowflake ID of the channel where changes to broadcast schedules should be posted

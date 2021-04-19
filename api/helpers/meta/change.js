@@ -899,7 +899,7 @@ module.exports = {
 
             // Set Discord activity based on what is playing on the air
             await DiscordClient.user.setActivity(push[key3], {
-              type: sails.models.meta.memory.state.startsWith("automation_") ? "PLAYING" : "STREAMING",
+              type: "PLAYING",
             });
           }
         }
