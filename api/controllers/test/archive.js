@@ -14,8 +14,8 @@ module.exports = {
     await sails.models.calendar.archive({
       updatedAt: {
         "<": moment().subtract(2, "years").toISOString(true),
-        active: false,
       },
+      active: false,
     });
     await sails.models.emails.archive({
       createdAt: { "<": moment().subtract(2, "years").toISOString(true) },
