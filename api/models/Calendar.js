@@ -132,7 +132,7 @@ module.exports = {
           moment().toISOString(true)
         );
         await sails.helpers.onesignal.sendEvent(event, false, false);
-        await sails.helpers.discord.sendSchedule(event, false, false);
+        await sails.helpers.discord.sendSchedule(event, updatedRecord, false, false);
       })();
     } else {
       var data = { update: updatedRecord };
@@ -162,7 +162,7 @@ module.exports = {
         moment().toISOString(true)
       );
       await sails.helpers.onesignal.sendEvent(event, false, false);
-      await sails.helpers.discord.sendSchedule(event, false, false);
+      await sails.helpers.discord.sendSchedule(event, destroyedRecord, false, false);
     })();
 
     return proceed();

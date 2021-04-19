@@ -7,21 +7,18 @@ module.exports = {
   inputs: {
     event: {
       type: "json",
-      description: "Event object triggering the notification."
-    }
+      description: "Event object triggering the notification.",
+    },
   },
 
   exits: {
     success: {
-      description: "All done."
-    }
+      description: "All done.",
+    },
   },
 
-  fn: async function(inputs) {
-    // TODO: move this to config
-    const webhook =
-      "https://discord.com/api/webhooks/782133813853683712/1qJv5Yc8dnqolO_MK_Dsz6g8axZqX5KmLpm6S8C1jr-sppwjadLFeryC-oJ0lEOT-vAR";
-
+  fn: async function (inputs) {
+    // Skip if the event is not a broadcast
     if (
       !inputs.event ||
       ["show", "remote", "sports", "prerecord", "playlist"].indexOf(
@@ -30,18 +27,34 @@ module.exports = {
     )
       return;
 
-    return await needle(
-      "post",
-      webhook,
-      {
-        username: inputs.event.name,
-        content: `:radio: __**Now live on WWSU Radio**__
-**${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name}.**
-${sails.models.meta.memory.topic}
+    // Construct a Discord embed
+    let embed = new Discord.MessageEmbed()
+      .setColor(sails.models.calendar.calendardb.getColor(inputs.event))
+      .setTitle(
+        `:radio: ${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name} is now on the air!`
+      )
+      .setDescription(sails.models.meta.memory.topic || "No topic provided")
+      .setURL("https://server.wwsu1069.org")
+      .addField(
+        "Scheduled Time",
+        `${moment(inputs.event.start).format("LT")} - ${moment(
+          inputs.event.end
+        ).format("LT")}`
+      )
+      .setFooter(
+        `Tune in on WWSU 106.9 FM or click the title to listen online`
+      );
+    if (inputs.event.banner) embed = embed.setImage(`https://server.wwsu1069.org/uploads/calendar/banner/${inputs.event.banner}`);
+    if (inputs.event.logo) embed = embed.setThumbnail(`https://server.wwsu1069.org/uploads/calendar/logo/${inputs.event.logo}`);
 
-:link: Tune in at https://server.wwsu1069.org or by going in the Radio voice channel.`
-      },
-      { headers: { "Content-Type": "application/json" } }
+    // Get the live channel
+    let channel = await DiscordClient.channels.resolve(
+      sails.config.custom.discord.channels.live
     );
-  }
+
+    // Send the embed
+    if (channel) await channel.send({ embed: embed });
+
+    return;
+  },
 };

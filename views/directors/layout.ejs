@@ -101,14 +101,14 @@
 
     <!-- Datatables buttons -->
     <script src="/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
-		<link
-			rel="stylesheet"
-			href="/plugins/datatables-buttons/css/buttons.bootstrap4.min.css"
-		/>
-		<script src="/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
-		<script src="/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
-		<script src="/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
-		<script src="/plugins/datatables-buttons/js/buttons.print.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="/plugins/datatables-buttons/css/buttons.bootstrap4.min.css"
+    />
+    <script src="/plugins/datatables-buttons/js/buttons.bootstrap4.min.js"></script>
+    <script src="/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
+    <script src="/plugins/datatables-buttons/js/buttons.colVis.min.js"></script>
+    <script src="/plugins/datatables-buttons/js/buttons.print.min.js"></script>
 
     <!--izi-->
     <link rel="stylesheet" href="/plugins/iziModal/css/iziModal.min.css" />
@@ -127,20 +127,21 @@
       environment="production"
       reconnection="true"
     ></script>
-    <script src="/plugins/wwsu-modules/js/wwsu-modules.js?v=202104082033"></script>
-    <script src="/plugins/wwsu-sails/js/wwsu.js?t=202104082033"></script>
-    <script src="/plugins/wwsu-navigation/js/wwsu-navigation.js?t=202104082033"></script>
-    <script src="/plugins/wwsu-directors/js/wwsu-directors.js?t=202104082033"></script>
-    <script src="/plugins/wwsu-djs/js/wwsu-djs.js?t=202104082033"></script>
-    <script src="/plugins/wwsu-timesheet/js/wwsu-timesheet.js?t=202104082033"></script>
-    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-web.js?t=202104082033"></script>
-    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-class.js?t=202104082033"></script>
-    <script src="/plugins/wwsu-meta/js/wwsu-meta.js?t=202104082033"></script>
-    <script src="/plugins/wwsu-hosts/js/wwsu-hosts.js?t=202104082033"></script>
-    <script src="/plugins/wwsu-recipients/js/wwsu-recipients.js?t=202104082033"></script>
-    <script src="/plugins/wwsu-announcements/js/wwsu-announcements.js?t=202104082033"></script>
-    <script src="/plugins/wwsu-discipline/js/wwsu-discipline.js?t=202104082033"></script>
-    <script src="/plugins/wwsu-messages/js/wwsu-messages.js?t=202104082033"></script>
+    <script src="/plugins/wwsu-modules/js/wwsu-modules.js?v=202104160216"></script>
+    <script src="/plugins/wwsu-sails/js/wwsu.js?t=202104160216"></script>
+    <script src="/plugins/wwsu-navigation/js/wwsu-navigation.js?t=202104160216"></script>
+    <script src="/plugins/wwsu-directors/js/wwsu-directors.js?t=202104160216"></script>
+    <script src="/plugins/wwsu-djs/js/wwsu-djs.js?t=202104160216"></script>
+    <script src="/plugins/wwsu-timesheet/js/wwsu-timesheet.js?t=202104160216"></script>
+    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-web.js?t=202104160216"></script>
+    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-class.js?t=202104160216"></script>
+    <script src="/plugins/wwsu-meta/js/wwsu-meta.js?t=202104160216"></script>
+    <script src="/plugins/wwsu-hosts/js/wwsu-hosts.js?t=202104160216"></script>
+    <script src="/plugins/wwsu-recipients/js/wwsu-recipients.js?t=202104160216"></script>
+    <script src="/plugins/wwsu-announcements/js/wwsu-announcements.js?t=202104160216"></script>
+    <script src="/plugins/wwsu-discipline/js/wwsu-discipline.js?t=202104160216"></script>
+    <script src="/plugins/wwsu-messages/js/wwsu-messages.js?t=202104160216"></script>
+    <script src="/plugins/wwsu-shootout/js/wwsu-shootout.js?t=202104160216"></script>
   </head>
 
   <body class="hold-transition sidebar-mini">
@@ -229,6 +230,17 @@
                   <p>Timesheets</p>
                 </a>
               </li>
+              <li class="nav-item">
+                <a
+                  href="#"
+                  class="nav-link"
+                  id="nav-shootout"
+                  title="Manage the scoreboard for backetball shootouts on the internal display sign."
+                >
+                  <i class="nav-icon fas fa-basketball-ball"></i>
+                  <p>BBall Scoreboard</p>
+                </a>
+              </li>
             </ul>
           </nav>
           <!-- /.sidebar-menu -->
@@ -257,7 +269,7 @@
           <div class="content">
             <div class="card card-danger elevation-2">
               <div class="card-header">
-                  <h3 class="card-title">Announcements</h3>
+                <h3 class="card-title">Announcements</h3>
               </div>
               <!-- /.card-header -->
               <div class="card-body">
@@ -639,6 +651,364 @@
         </div>
       </section>
 
+      <!-- Shootout scoreboard control -->
+      <section id="section-shootout">
+        <div class="content-wrapper">
+          <div class="content-header">
+            <div class="container-fluid">
+              <div class="row mb-2">
+                <div class="col-12">
+                  <h1 class="m-0 text-dark">Director Timesheets</h1>
+                </div>
+                <!-- /.col -->
+              </div>
+              <!-- /.row -->
+            </div>
+            <!-- /.container-fluid -->
+          </div>
+
+          <div class="content">
+            <div class="card card-danger">
+              <div class="card-header">
+                <h3 class="card-title">Authorization</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <div class="container">
+                  <div class="row">
+                    <div class="col-lg-6 col-md-6 col-12">
+                      <label for="shootout-username">Director Name: </label>
+                      <input type="text" id="shootout-username" />
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-12">
+                      <label for="shootout-password">Password: </label>
+                      <input type="password" id="shootout-password" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- /.card-body -->
+            </div>
+
+            <div class="card card-secondary">
+              <div class="card-header">
+                <h3 class="card-title">Scoreboard Display</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <div class="container">
+                  <div class="row">
+                    <div class="col-6">
+                      <button id="shootout-active" class="btn btn-success p-3">
+                        Activate
+                      </button>
+                    </div>
+                    <div class="col-6">
+                      <button
+                        id="shootout-inactive"
+                        class="btn btn-secondary p-3"
+                      >
+                        De-activate
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- /.card-body -->
+            </div>
+
+            <div class="card card-primary">
+              <div class="card-header">
+                <h3 class="card-title">Round</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <div class="container">
+                  <div class="row">
+                    <div class="col-lg-6 col-md-6 col-12">
+                      <label for="shootout-round">Round: </label>
+                      <input type="number" id="shootout-round" value="0" />
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-12">
+                      <button
+                        id="shootout-roundadd"
+                        class="btn btn-success p-2"
+                      >
+                        Next Round
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- /.card-body -->
+            </div>
+
+            <div class="card card-warning">
+              <div class="card-header">
+                <h3 class="card-title">Time</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <div class="container">
+                  <div class="row">
+                    <div class="col-lg-6 col-md-6 col-12">
+                      <label for="shootout-time">Seconds: </label>
+                      <input type="number" id="shootout-time" value="0" />
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-12">
+                      <button
+                        id="shootout-timestart"
+                        class="btn btn-success p-3"
+                      >
+                        Start
+                      </button>
+                      <button id="shootout-timestop" class="btn btn-danger p-3">
+                        Stop
+                      </button>
+                      <button
+                        id="shootout-timeresume"
+                        class="btn btn-warning p-3"
+                      >
+                        Resume
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- /.card-body -->
+            </div>
+
+            <div class="container">
+              <div class="row">
+                <div class="col-xl-3 col-lg-4 col-md-6 col-12">
+                  <div class="card card-success">
+                    <div class="card-header">
+                      <h3 class="card-title">Player 1</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                      <div class="container-fluid">
+                        <div class="row p-1">
+                          <label for="shootout-name1">Name: </label>
+                          <input type="text" id="shootout-name1" />
+                        </div>
+                        <div class="row p-1">
+                          <label for="shootout-score1">Score: </label>
+                          <input type="number" id="shootout-score1" value="0" />
+                        </div>
+                        <div class="row p-1">
+                          <div class="col">
+                            <button
+                              id="shootout-score1-add1"
+                              class="btn btn-danger p-3"
+                            >
+                              + 1
+                            </button>
+                          </div>
+                          <div class="col">
+                            <button
+                              id="shootout-score1-add2"
+                              class="btn btn-warning p-3"
+                            >
+                              + 2
+                            </button>
+                          </div>
+                          <div class="col">
+                            <button
+                              id="shootout-score1-add3"
+                              class="btn btn-success p-3"
+                            >
+                              + 3
+                            </button>
+                          </div>
+                          <div class="col">
+                            <button
+                              id="shootout-name1-turn"
+                              class="btn btn-primary p-3"
+                            >
+                              Up
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- /.card-body -->
+                  </div>
+                </div>
+
+                <div class="col-xl-3 col-lg-4 col-md-6 col-12">
+                  <div class="card card-success">
+                    <div class="card-header">
+                      <h3 class="card-title">Player 2</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                      <div class="container-fluid">
+                        <div class="row p-1">
+                          <label for="shootout-name2">Name: </label>
+                          <input type="text" id="shootout-name2" />
+                        </div>
+                        <div class="row p-1">
+                          <label for="shootout-score2">Score: </label>
+                          <input type="number" id="shootout-score2" value="0" />
+                        </div>
+                        <div class="row p-1">
+                          <div class="col">
+                            <button
+                              id="shootout-score2-add1"
+                              class="btn btn-danger p-3"
+                            >
+                              + 1
+                            </button>
+                          </div>
+                          <div class="col">
+                            <button
+                              id="shootout-score2-add2"
+                              class="btn btn-warning p-3"
+                            >
+                              + 2
+                            </button>
+                          </div>
+                          <div class="col">
+                            <button
+                              id="shootout-score2-add3"
+                              class="btn btn-success p-3"
+                            >
+                              + 3
+                            </button>
+                          </div>
+                          <div class="col">
+                            <button
+                              id="shootout-name2-turn"
+                              class="btn btn-primary p-3"
+                            >
+                              Up
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- /.card-body -->
+                  </div>
+                </div>
+
+                <div class="col-xl-3 col-lg-4 col-md-6 col-12">
+                  <div class="card card-success">
+                    <div class="card-header">
+                      <h3 class="card-title">Player 3</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                      <div class="container-fluid">
+                        <div class="row p-1">
+                          <label for="shootout-name3">Name: </label>
+                          <input type="text" id="shootout-name3" />
+                        </div>
+                        <div class="row p-1">
+                          <label for="shootout-score3">Score: </label>
+                          <input type="number" id="shootout-score3" value="0" />
+                        </div>
+                        <div class="row p-1">
+                          <div class="col">
+                            <button
+                              id="shootout-score3-add1"
+                              class="btn btn-danger p-3"
+                            >
+                              + 1
+                            </button>
+                          </div>
+                          <div class="col">
+                            <button
+                              id="shootout-score3-add2"
+                              class="btn btn-warning p-3"
+                            >
+                              + 2
+                            </button>
+                          </div>
+                          <div class="col">
+                            <button
+                              id="shootout-score3-add3"
+                              class="btn btn-success p-3"
+                            >
+                              + 3
+                            </button>
+                          </div>
+                          <div class="col">
+                            <button
+                              id="shootout-name3-turn"
+                              class="btn btn-primary p-3"
+                            >
+                              Up
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- /.card-body -->
+                  </div>
+                </div>
+
+                <div class="col-xl-3 col-lg-4 col-md-6 col-12">
+                  <div class="card card-success">
+                    <div class="card-header">
+                      <h3 class="card-title">Player 4</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                      <div class="container-fluid">
+                        <div class="row p-1">
+                          <label for="shootout-name4">Name: </label>
+                          <input type="text" id="shootout-name4" />
+                        </div>
+                        <div class="row p-1">
+                          <label for="shootout-score4">Score: </label>
+                          <input type="number" id="shootout-score4" value="0" />
+                        </div>
+                        <div class="row p-1">
+                          <div class="col">
+                            <button
+                              id="shootout-score4-add1"
+                              class="btn btn-danger p-3"
+                            >
+                              + 1
+                            </button>
+                          </div>
+                          <div class="col">
+                            <button
+                              id="shootout-score4-add2"
+                              class="btn btn-warning p-3"
+                            >
+                              + 2
+                            </button>
+                          </div>
+                          <div class="col">
+                            <button
+                              id="shootout-score4-add3"
+                              class="btn btn-success p-3"
+                            >
+                              + 3
+                            </button>
+                          </div>
+                          <div class="col">
+                            <button
+                              id="shootout-name4-turn"
+                              class="btn btn-primary p-3"
+                            >
+                              Up
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- /.card-body -->
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Control Sidebar -->
       <aside class="control-sidebar control-sidebar-dark">
         <!-- Control sidebar content goes here -->
@@ -653,7 +1023,7 @@
       </footer>
     </div>
     <!-- ./wrapper -->
-    <script src="/plugins/wwsu-website/wwsu-website-directors.js?t=202104082033"></script>
+    <script src="/plugins/wwsu-website/wwsu-website-directors.js?t=202104160216"></script>
 
     <%- body %>
   </body>

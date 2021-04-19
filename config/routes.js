@@ -108,6 +108,13 @@ module.exports.routes = {
     }
   },
 
+  "GET /directors/shootout": {
+    view: "directors/shootout",
+    locals: {
+      layout: "directors/layout"
+    }
+  },
+
   "GET /director/:director": function(req, res) {
     return res.view("directors/director", {
       layout: "directors/layout",

@@ -896,6 +896,11 @@ module.exports = {
           // If we're changing stream meta, push to history array, and send an API call to the stream to update the meta on the stream.
           if (key3 === "stream") {
             // TODO: Put stream metadata updating API query here
+
+            // Set Discord activity based on what is playing on the air
+            await DiscordClient.user.setActivity(push[key3], {
+              type: sails.models.meta.memory.state.startsWith("automation_") ? "PLAYING" : "STREAMING",
+            });
           }
         }
       }
