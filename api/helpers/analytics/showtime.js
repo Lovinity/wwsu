@@ -893,13 +893,15 @@ module.exports = {
     // Initialize range
     var start = inputs.start
       ? moment(inputs.start).toISOString(true)
-      : moment("2002-01-01T00:00:00Z").toISOString(true);
+      : moment().subtract(1, "years").toISOString(true);
     var end = inputs.end
       ? moment(inputs.end).toISOString(true)
       : moment().toISOString(true);
 
     // Form query for filtering attendance records
-    var query = {};
+    var query = {
+      createdAt: { ">": moment().subtract(1, "years").toISOString(true) }, // Never get records older than 1 year for analytics
+    };
     if (inputs.djs && inputs.djs.length > 0) {
       query.or = [
         { dj: inputs.djs },
@@ -919,6 +921,7 @@ module.exports = {
     var process1 = new Promise(async (resolve) => {
       let records = await sails.models.xp.find({
         dj: inputs.djs ? inputs.djs : { "!=": null },
+        createdAt: { ">": moment().subtract(1, "years").toISOString(true) }, // Never get records older than 1 year
       });
 
       let tasksLeft = records.length;

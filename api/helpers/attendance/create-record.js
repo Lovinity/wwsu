@@ -197,7 +197,7 @@ module.exports = {
 
   <hr>
   
-  <p>Here are analytics for ${currentRecord.event} for <strong>lifetime</strong> so far:</p>
+  <p>Here are analytics for ${currentRecord.event} for <strong>the past year</strong>:</p>
   <ul>
   <li><strong>On-air time:</strong> ${moment.duration(topStats[ 1 ][ currentRecord.calendarID ].overall.showtime, 'minutes').format("h [hours], m [minutes]")}</li>
   <li><strong>Online listener time*:</strong> ${moment.duration(topStats[ 1 ][ currentRecord.calendarID ].overall.listeners, 'minutes').format("h [hours], m [minutes]")}</li>\
