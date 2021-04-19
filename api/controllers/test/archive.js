@@ -8,37 +8,37 @@ module.exports = {
   exits: {},
 
   fn: async function (inputs) {
-    await sails.models.attendance.archive({
+    await sails.models.attendance.destroy({
       createdAt: { "<": moment().subtract(2, "years").toISOString(true) },
     });
-    await sails.models.calendar.archive({
+    await sails.models.calendar.destroy({
       updatedAt: {
         "<": moment().subtract(2, "years").toISOString(true),
       },
       active: false,
     });
-    await sails.models.emails.archive({
+    await sails.models.emails.destroy({
       createdAt: { "<": moment().subtract(2, "years").toISOString(true) },
     });
-    await sails.models.history.archive({
+    await sails.models.history.destroy({
       createdAt: { "<": moment().subtract(2, "years").toISOString(true) },
     });
-    await sails.models.listeners.archive({
+    await sails.models.listeners.destroy({
       createdAt: { "<": moment().subtract(2, "years").toISOString(true) },
     });
-    await sails.models.logs.archive({
+    await sails.models.logs.destroy({
       createdAt: { "<": moment().subtract(2, "years").toISOString(true) },
     });
-    await sails.models.messages.archive({
+    await sails.models.messages.destroy({
       createdAt: { "<": moment().subtract(2, "years").toISOString(true) },
     });
-    await sails.models.requests.archive({
+    await sails.models.requests.destroy({
       createdAt: { "<": moment().subtract(2, "years").toISOString(true) },
     });
-    await sails.models.timesheet.archive({
+    await sails.models.timesheet.destroy({
       createdAt: { "<": moment().subtract(2, "years").toISOString(true) },
     });
-    await sails.models.uabtimesheet.archive({
+    await sails.models.uabtimesheet.destroy({
       createdAt: { "<": moment().subtract(2, "years").toISOString(true) },
     });
 
