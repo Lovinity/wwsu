@@ -2871,16 +2871,45 @@ module.exports.bootstrap = async function (done) {
     });
   });
 
-  // Every hour at xx:59:52, re-load calendardb cache in case it gets out of sync with the database.
-  sails.log.verbose("BOOTSTRAP: scheduling calendardbCacheSync CRON.");
-  cron.schedule("52 59 * * * *", () => {
+  // Every day at 23:59:52, archive logs that are older than 2 years
+  sails.log.verbose("BOOTSTRAP: scheduling archiveLogs CRON.");
+  cron.schedule("52 59 23 * * *", () => {
     return new Promise(async (resolve, reject) => {
-      sails.log.debug("CRON calendardbCacheSync called");
+      sails.log.debug("CRON archiveLogs called");
       try {
-        // TODO: Temporarily disabled
-        // sails.models.calendar.calendardb.query('calendar', await sails.models.calendar.find({ active: true }), true)
-        // sails.models.calendar.calendardb.query('schedule', await sails.models.schedule.find(), true);
-        // sails.models.calendar.calendardb.query('clockwheels', await sails.models.clockwheels.find(), true);
+        await sails.models.attendance.archive({
+          createdAt: { "<": moment().subtract(2, "years").toISOString(true) },
+        });
+        await sails.models.calendar.archive({
+          updatedAt: {
+            "<": moment().subtract(2, "years").toISOString(true),
+            active: false,
+          },
+        });
+        await sails.models.emails.archive({
+          createdAt: { "<": moment().subtract(2, "years").toISOString(true) },
+        });
+        await sails.models.history.archive({
+          createdAt: { "<": moment().subtract(2, "years").toISOString(true) },
+        });
+        await sails.models.listeners.archive({
+          createdAt: { "<": moment().subtract(2, "years").toISOString(true) },
+        });
+        await sails.models.logs.archive({
+          createdAt: { "<": moment().subtract(2, "years").toISOString(true) },
+        });
+        await sails.models.messages.archive({
+          createdAt: { "<": moment().subtract(2, "years").toISOString(true) },
+        });
+        await sails.models.requests.archive({
+          createdAt: { "<": moment().subtract(2, "years").toISOString(true) },
+        });
+        await sails.models.timesheet.archive({
+          createdAt: { "<": moment().subtract(2, "years").toISOString(true) },
+        });
+        await sails.models.uabtimesheet.archive({
+          createdAt: { "<": moment().subtract(2, "years").toISOString(true) },
+        });
       } catch (e) {
         sails.log.error(e);
         return reject(e);
