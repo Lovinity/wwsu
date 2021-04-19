@@ -1054,7 +1054,7 @@ function onlineSocket(doOneSignal = false) {
         // Discord iframe
         $("#section-discord-iframe").attr(
           "src",
-          `https://titanembeds.com/embed/742819639096246383?defaultchannel=782073518606647297&theme=DiscordDark&username=${data.label
+          `https://titanembeds.com/embed/830253278465097758?defaultchannel=830253279166464042&theme=DiscordDark&username=${data.label
             .replace("Web ", "")
             .match(/\(([^)]+)\)/)[1]
             .replace(/[^a-zA-Z0-9\d\-_\s]+/gi, "")
