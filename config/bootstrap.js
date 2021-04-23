@@ -2960,8 +2960,8 @@ module.exports.bootstrap = async function(done) {
         await sails.models.calendar.destroy({
           updatedAt: {
             "<": moment().subtract(2, "years").toISOString(true),
-            active: false,
           },
+          active: false,
         });
         await sails.models.emails.destroy({
           createdAt: { "<": moment().subtract(2, "years").toISOString(true) },
