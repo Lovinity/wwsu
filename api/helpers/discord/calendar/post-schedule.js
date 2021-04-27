@@ -10,7 +10,7 @@ module.exports = {
       required: true,
     },
     channel: {
-      type: "string",
+      type: "ref",
     },
   },
 
