@@ -10,8 +10,8 @@ module.exports = {
       required: true,
     },
     channel: {
-      type: "string"
-    }
+      type: "string",
+    },
   },
 
   exits: {},
@@ -54,16 +54,15 @@ module.exports = {
     }
 
     // Get or create the Discord channel for the event
-    channel = inputs.channel || await sails.helpers.discord.calendar.makeEventChannel(
-      inputs.event
-    );
+    channel =
+      inputs.channel ||
+      (await sails.helpers.discord.calendar.makeEventChannel(inputs.event));
 
     // Get all the schedules
     let schedules = await sails.models.schedule.find({
       calendarID: inputs.event.calendarID || inputs.event.ID,
-      scheduleType: null,
     });
-    if (!schedules) return;
+    schedules = schedules.filter((schedule) => schedule.scheduleType === null);
 
     // Construct an embed containing the details of the schedules
     let embed = new Discord.MessageEmbed()
@@ -71,7 +70,7 @@ module.exports = {
       .setTitle(`Time slots for ${inputs.event.hosts} - ${inputs.event.name}`);
 
     // Add the time slots
-    if (schedules.length > 0) {
+    if (schedules && schedules.length > 0) {
       schedules.map((schedule) => {
         embed = embed.addField(
           `Slot ${schedule.ID}`,
