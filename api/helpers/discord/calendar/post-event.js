@@ -57,6 +57,13 @@ module.exports = {
       }
       if (message) {
         message = await message.edit({ embed: embed });
+
+        // Also add schedule message
+        await sails.helpers.discord.calendar.postSchedule(
+          inputs.event,
+          channel.id
+        );
+
         return message;
       }
     }
