@@ -52,7 +52,7 @@ module.exports = {
     );
 
     // Get all the schedules
-    let schedules = await sails.models.schedules.find({
+    let schedules = await sails.models.schedule.find({
       calendarID: inputs.event.calendarID || inputs.event.ID,
       scheduleType: null,
     });
