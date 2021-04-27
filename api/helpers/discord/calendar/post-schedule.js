@@ -9,6 +9,9 @@ module.exports = {
       type: "json",
       required: true,
     },
+    channel: {
+      type: "string"
+    }
   },
 
   exits: {},
@@ -47,7 +50,7 @@ module.exports = {
     }
 
     // Get or create the Discord channel for the event
-    channel = await sails.helpers.discord.calendar.makeEventChannel(
+    channel = inputs.channel || await sails.helpers.discord.calendar.makeEventChannel(
       inputs.event
     );
 

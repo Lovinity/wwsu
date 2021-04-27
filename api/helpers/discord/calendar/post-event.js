@@ -68,7 +68,7 @@ module.exports = {
     );
 
     // Also add schedule message
-    await sails.helpers.discord.calendar.postSchedule(inputs.event);
+    await sails.helpers.discord.calendar.postSchedule(inputs.event, channel);
 
     return message;
   },
