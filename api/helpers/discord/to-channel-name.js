@@ -15,8 +15,9 @@ module.exports = {
   fn: async function (inputs) {
     return inputs.text
       .toLowerCase() // Make everything lower case
-      .replace(/\s/g, "-") // Replace all whitespace with a dash -
+      .replace(/\s/g, "-") // Replace all whitespace with a hyphen
       .replace("&", "and") // Replace ampersands with the word and
-      .replace(/[^0-9a-z]/gi, ""); // Remove all remaining non-alphanumeric characters
+      .replace("_", "-") // Replace underscores with hyphens
+      .replace(/[^0-9a-z\-]/gi, ""); // Remove all remaining non-alphanumeric characters unless it's a hyphen
   },
 };
