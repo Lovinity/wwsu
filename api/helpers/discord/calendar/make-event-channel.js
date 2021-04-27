@@ -51,15 +51,16 @@ module.exports = {
         topic: `${inputs.event.type}: ${inputs.event.description}`,
         rateLimitPerUser: 15,
         reason: reason,
-        parent: sails.config.custom.discord.categories.defaultShow
+        parent: sails.config.custom.discord.categories.defaultShow,
       }
     );
 
-    // API note: do NOT .fetch() nor .updateOne(); we do not want to trigger lifecycle callbacks for a discord channel update. We might end up in an infinite loop if we do.
-    await sails.models.calendar.update(
-      { ID: inputs.event.calendarID || inputs.event.ID },
-      { discordChannel: channel.id }
-    );
+    await sails.models.calendar
+      .update(
+        { ID: inputs.event.calendarID || inputs.event.ID },
+        { discordChannel: channel.id }
+      )
+      .fetch();
 
     return channel;
   },

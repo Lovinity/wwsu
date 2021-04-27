@@ -44,11 +44,12 @@ module.exports = {
           );
         }
         // Set scheduleMessage to null so we don't run this again.
-        // API note: do NOT .fetch() nor .updateOne(); we do not want to trigger lifecycle callbacks for a discord message update. We might end up in an infinite loop if we do.
-        await sails.models.calendar.update(
-          { ID: inputs.event.calendarID || inputs.event.ID },
-          { discordScheduleMessage: null }
-        );
+        await sails.models.calendar
+          .update(
+            { ID: inputs.event.calendarID || inputs.event.ID },
+            { discordScheduleMessage: null }
+          )
+          .fetch();
       }
       return;
     }
@@ -104,11 +105,12 @@ module.exports = {
     message = await channel.send({ embed: embed });
     await message.pin();
 
-    // API note: do NOT .fetch() nor .updateOne(); we do not want to trigger lifecycle callbacks for a discord message update. We might end up in an infinite loop if we do.
-    await sails.models.calendar.update(
-      { ID: inputs.event.calendarID || inputs.event.ID },
-      { discordScheduleMessage: message.id }
-    );
+    await sails.models.calendar
+      .update(
+        { ID: inputs.event.calendarID || inputs.event.ID },
+        { discordScheduleMessage: message.id }
+      )
+      .fetch();
 
     return message;
   },
