@@ -2176,7 +2176,7 @@ class WWSUcalendar extends CalendarDb {
 					calendarID: event.calendarID,
 					scheduleID: event.scheduleID,
 					scheduleType: "updated",
-					originalTime: moment.parseZone(event.start).toISOString(true),
+					originalTime: event.start,
 					newTime: newStart,
 					duration: newDuration ? newDuration / 60 : undefined,
 				},

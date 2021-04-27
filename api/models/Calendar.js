@@ -10,7 +10,7 @@ module.exports = {
   attributes: {
     ID: {
       type: "number",
-      autoIncrement: true
+      autoIncrement: true,
     },
 
     type: {
@@ -25,126 +25,155 @@ module.exports = {
         "event",
         "onair-booking",
         "prod-booking",
-        "office-hours"
+        "office-hours",
       ],
-      defaultsTo: "event"
+      defaultsTo: "event",
     },
 
     active: {
       type: "boolean",
-      defaultsTo: true
+      defaultsTo: true,
     },
 
     priority: {
       type: "number",
-      allowNull: true
+      allowNull: true,
     },
 
     hostDJ: {
       type: "number",
-      allowNull: true
+      allowNull: true,
     },
 
     cohostDJ1: {
       type: "number",
-      allowNull: true
+      allowNull: true,
     },
 
     cohostDJ2: {
       type: "number",
-      allowNull: true
+      allowNull: true,
     },
 
     cohostDJ3: {
       type: "number",
-      allowNull: true
+      allowNull: true,
     },
 
     eventID: {
       type: "number",
-      allowNull: true
+      allowNull: true,
     },
 
     playlistID: {
       type: "number",
-      allowNull: true
+      allowNull: true,
     },
 
     director: {
       type: "number",
-      allowNull: true
+      allowNull: true,
     },
 
     hosts: {
       type: "string",
-      allowNull: true
+      allowNull: true,
     },
 
     name: {
       type: "string",
-      allowNull: true
+      allowNull: true,
     },
 
     description: {
       type: "string",
-      allowNull: true
+      allowNull: true,
     },
 
     logo: {
       type: "string",
-      allowNull: true
+      allowNull: true,
     },
 
     banner: {
       type: "string",
-      allowNull: true
-    }
+      allowNull: true,
+    },
+
+    discordChannel: {
+      type: "string",
+      allowNull: true,
+    },
+
+    discordCalendarMessage: {
+      type: "string",
+      allowNull: true,
+    },
+
+    discordScheduleMessage: {
+      type: "string",
+      allowNull: true,
+    },
   },
 
   calendardb: undefined,
 
   // Websockets standards
-  afterCreate: function(newlyCreatedRecord, proceed) {
+  afterCreate: function (newlyCreatedRecord, proceed) {
     var data = { insert: newlyCreatedRecord };
     sails.models.calendar.calendardb.query("calendar", data);
     sails.log.silly(`calendar socket: ${data}`);
     sails.sockets.broadcast("calendar", "calendar", data);
+
+    var temp;
+    temp = (async () => {
+      var event = sails.models.calendar.calendardb.processRecord(
+        newlyCreatedRecord,
+        {},
+        moment().toISOString(true)
+      );
+      await sails.helpers.discord.calendar.postEvent(event);
+    })();
     return proceed();
   },
 
-  afterUpdate: function(updatedRecord, proceed) {
-    var data = { update: updatedRecord };
+  afterUpdate: function (updatedRecord, proceed) {
     var temp;
 
+    var data = { update: updatedRecord };
+    if (!updatedRecord.active) data = { remove: updatedRecord.ID };
+
+    sails.models.calendar.calendardb.query("calendar", data);
+    sails.log.silly(`calendar socket: ${data}`);
+    sails.sockets.broadcast("calendar", "calendar", data);
+
     // If setting active to false, treat as deletion in web sockets and delete all schedules and notify subscribers of a discontinued show
-    if (!updatedRecord.active) {
-      var data = { remove: updatedRecord.ID };
-      sails.models.calendar.calendardb.query("calendar", data);
-      sails.log.silly(`calendar socket: ${data}`);
-      sails.sockets.broadcast("calendar", "calendar", data);
-      temp = (async () => {
+    temp = (async () => {
+      var event = sails.models.calendar.calendardb.processRecord(
+        updatedRecord,
+        {},
+        moment().toISOString(true)
+      );
+      if (!updatedRecord.active) {
         await sails.models.schedule
           .destroy({ calendarID: updatedRecord.ID })
           .fetch();
-        var event = sails.models.calendar.calendardb.processRecord(
-          updatedRecord,
-          {},
-          moment().toISOString(true)
-        );
-        await sails.helpers.onesignal.sendEvent(event, false, false);
-        await sails.helpers.discord.sendSchedule(event, updatedRecord, false, false);
-      })();
-    } else {
-      var data = { update: updatedRecord };
-      sails.models.calendar.calendardb.query("calendar", data);
-      sails.log.silly(`calendar socket: ${data}`);
-      sails.sockets.broadcast("calendar", "calendar", data);
-    }
+      } else {
+        await sails.helpers.discord.calendar.postEvent(event);
+      }
+      await sails.helpers.onesignal.sendEvent(event, false, false);
+      await sails.helpers.discord.sendSchedule(
+        event,
+        updatedRecord,
+        false,
+        false
+      );
+    })();
 
     return proceed();
   },
 
-  afterDestroy: function(destroyedRecord, proceed) {
+  afterDestroy: function (destroyedRecord, proceed) {
     var data = { remove: destroyedRecord.ID };
     sails.models.calendar.calendardb.query("calendar", data);
     sails.log.silly(`calendar socket: ${data}`);
@@ -162,9 +191,14 @@ module.exports = {
         moment().toISOString(true)
       );
       await sails.helpers.onesignal.sendEvent(event, false, false);
-      await sails.helpers.discord.sendSchedule(event, destroyedRecord, false, false);
+      await sails.helpers.discord.sendSchedule(
+        event,
+        destroyedRecord,
+        false,
+        false
+      );
     })();
 
     return proceed();
-  }
+  },
 };

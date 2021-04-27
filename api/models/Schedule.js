@@ -181,9 +181,12 @@ module.exports = {
     sails.sockets.broadcast("schedule", "schedule", data);
     var temp;
 
-    // Process notifications
+    // Process notifications and Discord
     temp = (async (event) => {
       var _event = sails.models.calendar.calendardb.scheduleToEvent(event);
+
+      await sails.helpers.discord.calendar.postSchedule(_event);
+
       if (
         (event.scheduleType === "updated" ||
           event.scheduleType === "updated-system") &&
@@ -342,9 +345,11 @@ module.exports = {
 
     // API note: updated/canceled schedule.type records should NEVER be updated; delete the old one and create a new one.
 
-    // Process notifications
+    // Process notifications and discord
     temp = (async (event) => {
       var _event = sails.models.calendar.calendardb.scheduleToEvent(event);
+
+      await sails.helpers.discord.calendar.postSchedule(_event);
       if (
         (event.scheduleType === "updated" ||
           event.scheduleType === "updated-system") &&
@@ -492,9 +497,11 @@ module.exports = {
     sails.sockets.broadcast("schedule", "schedule", data);
     var temp;
 
-    // Process notifications
+    // Process notifications and Discord
     temp = (async (event) => {
       var _event = sails.models.calendar.calendardb.scheduleToEvent(event);
+
+      await sails.helpers.discord.calendar.postSchedule(_event);
       if (_event.active) {
         if (
           (event.scheduleType === "updated" ||

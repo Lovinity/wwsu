@@ -31,6 +31,12 @@ module.exports = {
       description:
         "If true, the event object, which is an exception, was removed. For example, reversal of cancelations or updates.",
     },
+    removedSchedule: {
+      type: "boolean",
+      defaultsTo: false,
+      description:
+        "If true, the event object, which is a main schedule, was removed.",
+    },
   },
 
   exits: {
@@ -54,11 +60,43 @@ module.exports = {
 
     // Prep discord
     let embed = new Discord.MessageEmbed();
-    if (inputs.event.banner) embed = embed.setImage(`https://server.wwsu1069.org/uploads/calendar/banner/${inputs.event.banner}`);
-    if (inputs.event.logo) embed = embed.setThumbnail(`https://server.wwsu1069.org/uploads/calendar/logo/${inputs.event.logo}`);
+    if (inputs.event.banner)
+      embed = embed.setImage(
+        `https://server.wwsu1069.org/uploads/calendar/banner/${inputs.event.banner}`
+      );
+    if (inputs.event.logo)
+      embed = embed.setThumbnail(
+        `https://server.wwsu1069.org/uploads/calendar/logo/${inputs.event.logo}`
+      );
     let channel = await DiscordClient.channels.resolve(
       sails.config.custom.discord.channels.scheduleChanges
     );
+    let channel2;
+
+    // Get and send the same message in the show channel if it exists
+    if (inputs.event.discordChannel) {
+      channel2 = DiscordClient.channels.resolve(inputs.event.discordChannel);
+    }
+
+    if (!inputs.event.active) {
+      embed = embed
+        .setTitle(
+          `:no_entry_sign: ${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name} has been discontinued`
+        )
+        .setColor("#000000")
+        .setFooter(`This show will no longer air on WWSU 106.9 FM`);
+
+      if (channel) await channel.send({ embed: embed });
+      if (channel2) await channel2.send({ embed: embed });
+
+      // Make sure
+      await sails.models.calendar.update(
+        { ID: inputs.event.calendarID || inputs.event.ID },
+        { discordScheduleMessage: null }
+      );
+
+      return;
+    }
 
     if (!inputs.newSchedule && !inputs.removedException) {
       if (
@@ -86,6 +124,7 @@ module.exports = {
           );
 
         if (channel) await channel.send({ embed: embed });
+        if (channel2) await channel2.send({ embed: embed });
 
         return;
       }
@@ -109,6 +148,7 @@ module.exports = {
           );
 
         if (channel) await channel.send({ embed: embed });
+        if (channel2) await channel2.send({ embed: embed });
 
         return;
       }
@@ -136,6 +176,7 @@ module.exports = {
           );
 
         if (channel) await channel.send({ embed: embed });
+        if (channel2) await channel2.send({ embed: embed });
 
         return;
       }
@@ -156,15 +197,36 @@ module.exports = {
           .setFooter(`Broadcast will now air at the specified time above.`);
 
         if (channel) await channel.send({ embed: embed });
+        if (channel2) await channel2.send({ embed: embed });
 
         return;
       }
     }
 
+    if (inputs.removedSchedule) {
+      embed = embed
+        .setTitle(
+          `:calendar: :wastebasket: A time slot for ${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name} was removed`
+        )
+        .setColor("#ff0000")
+        .addField(
+          "Removed Time Slot",
+          `${sails.models.calendar.calendardb.generateScheduleText(
+            inputs.record
+          )}`
+        )
+        .setFooter(`This show will no longer air on WWSU at the specified time slot`);
+
+      if (channel) await channel.send({ embed: embed });
+      if (channel2) await channel2.send({ embed: embed });
+
+      return;
+    }
+
     if (inputs.newSchedule) {
       embed = embed
         .setTitle(
-          `:white_check_mark: A new time slot for ${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name} was added`
+          `:calendar: A time slot for ${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name} was added`
         )
         .setColor("#00ff00")
         .addField(
@@ -175,19 +237,7 @@ module.exports = {
         );
 
       if (channel) await channel.send({ embed: embed });
-
-      return;
-    }
-
-    if (!inputs.event.active) {
-      embed = embed
-        .setTitle(
-          `:no_entry_sign: ${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name} has been discontinued`
-        )
-        .setColor("#000000")
-        .setFooter(`This show will no longer air on WWSU 106.9 FM`);
-
-      if (channel) await channel.send({ embed: embed });
+      if (channel2) await channel2.send({ embed: embed });
 
       return;
     }

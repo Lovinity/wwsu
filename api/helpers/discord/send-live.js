@@ -48,12 +48,20 @@ module.exports = {
     if (inputs.event.logo) embed = embed.setThumbnail(`https://server.wwsu1069.org/uploads/calendar/logo/${inputs.event.logo}`);
 
     // Get the live channel
-    let channel = await DiscordClient.channels.resolve(
+    let channel = DiscordClient.channels.resolve(
       sails.config.custom.discord.channels.live
     );
 
     // Send the embed
     if (channel) await channel.send({ embed: embed });
+
+    // Get and send the same message in the show channel if it exists
+    if (inputs.event.discordChannel) {
+      channel = DiscordClient.channels.resolve(
+        inputs.event.discordChannel
+      );
+      if (channel) await channel.send({ embed: embed });
+    }
 
     return;
   },
