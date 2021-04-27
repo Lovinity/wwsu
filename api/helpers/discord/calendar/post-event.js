@@ -59,7 +59,7 @@ module.exports = {
 
     // At this point, message does not exist. Create it if the event is active.
     message = await channel.send({ embed: embed });
-    await message.pin();
+    message = await message.pin();
 
     // API note: do NOT .fetch() nor .updateOne(); we do not want to trigger lifecycle callbacks for a discord message update. We might end up in an infinite loop if we do.
     await sails.models.calendar.update(

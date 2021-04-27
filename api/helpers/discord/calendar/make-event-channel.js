@@ -34,6 +34,7 @@ module.exports = {
           {
             name: await sails.helpers.discord.toChannelName(inputs.event.name),
             topic: `${inputs.event.type}: ${inputs.event.description}`,
+            parent: sails.config.custom.discord.categories.defaultShow
           },
           "Event changed in the system"
         );

@@ -1227,6 +1227,9 @@ var defaultConfig = {
       scheduleChanges: "", // Snowflake ID of the channel where changes to broadcast schedules should be posted
       radioVoice: "", // Snowflake ID of the radio voice channel
     },
+    categories: {
+      defaultShow: "" // Default channel category id in Discord where new shows will be placed
+    }
   },
 
   /*
