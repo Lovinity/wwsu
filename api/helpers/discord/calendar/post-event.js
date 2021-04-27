@@ -48,9 +48,13 @@ module.exports = {
 
     // Update existing message if applicable
     if (inputs.event.discordCalendarMessage) {
-      message = await channel.messages.fetch(
-        inputs.event.discordCalendarMessage
-      );
+      try {
+        message = await channel.messages.fetch(
+          inputs.event.discordCalendarMessage
+        );
+      } catch (e) {
+        /* Ignore errors */
+      }
       if (message) {
         message = await message.edit({ embed: embed });
         return message;

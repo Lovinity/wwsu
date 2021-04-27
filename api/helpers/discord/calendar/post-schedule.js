@@ -30,9 +30,13 @@ module.exports = {
     // If the event is discontinued, edit the schedule message
     if (!inputs.event.active) {
       if (inputs.event.discordScheduleMessage) {
-        message = await channel.messages.fetch(
-          inputs.event.discordScheduleMessage
-        );
+        try {
+          message = await channel.messages.fetch(
+            inputs.event.discordScheduleMessage
+          );
+        } catch (e) {
+          /* Ignore errors */
+        }
         if (message) {
           await message.edit(
             ":x: This show was discontinued and is no longer airing on WWSU.",
@@ -84,9 +88,13 @@ module.exports = {
 
     // Update existing message if applicable
     if (inputs.event.discordScheduleMessage) {
-      message = await channel.messages.fetch(
-        inputs.event.discordScheduleMessage
-      );
+      try {
+        message = await channel.messages.fetch(
+          inputs.event.discordScheduleMessage
+        );
+      } catch (e) {
+        /* Ignore errors */
+      }
       if (message) {
         message = await message.edit({ embed: embed });
         return message;
