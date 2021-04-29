@@ -59,7 +59,7 @@ if (typeof require !== "undefined") {
  * @requires moment.duration moment-duration-format plugin
  * @requires _ lodash utilities
  */
- class CalendarDb {
+class CalendarDb {
 	/**
 	 * Construct the calendar database.
 	 *
@@ -1867,6 +1867,15 @@ if (typeof require !== "undefined") {
 					: null, // Date the event ends (exclusive).
 			timeChanged:
 				schedule.scheduleID && (schedule.newTime || schedule.duration), // True if this event's time was changed from the original, else false
+			discordChannel: schedule.discordChannel
+				? schedule.discordChannel
+				: calendar.discordChannel, // id of the discord channel for this event/show, if applicable
+			discordCalendarMessage: schedule.discordCalendarMessage
+				? schedule.discordCalendarMessage
+				: calendar.discordCalendarMessage, // id of the message in the discordChannel containing information about the event
+			discordScheduleMessage: schedule.discordScheduleMessage
+				? schedule.discordScheduleMessage
+				: calendar.discordScheduleMessage, // id of the message in the discordChannel containing information about this schedule
 			createdAt: schedule.createdAt || calendar.createdAt, // createdAt used to determine which event gets priority in conflict checking if both have the same priority
 			updatedAt: schedule.updatedAt || calendar.updatedAt,
 		};
