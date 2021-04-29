@@ -68,7 +68,7 @@ module.exports = {
       embed = embed.setThumbnail(
         `https://server.wwsu1069.org/uploads/calendar/logo/${inputs.event.logo}`
       );
-    let channel = await DiscordClient.channels.resolve(
+    let channel = DiscordClient.channels.resolve(
       sails.config.custom.discord.channels.scheduleChanges
     );
     let channel2;
