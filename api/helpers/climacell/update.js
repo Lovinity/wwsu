@@ -16,9 +16,6 @@ module.exports = {
     )
       return;
 
-    // Retrieve current records
-    let records = await sails.models.climacell.find();
-
     // Get data from climacell
     let { body } = await got("https://api.tomorrow.io/v4/timelines", {
       method: "GET",
@@ -64,14 +61,12 @@ module.exports = {
 
     // Run through operations in the body for each timestep in the array
     let maps = body.data.timelines.map(async (timeline) => {
-
       // Skip if there are no intervals
       if (!timeline.intervals || timeline.intervals.constructor !== Array)
         return;
 
       // Run through each interval in the timeline
       let iMaps = timeline.intervals.map(async (interval, index) => {
-
         // No values? Exit.
         if (!interval.values) return;
 
@@ -81,9 +76,9 @@ module.exports = {
 
           let dataClass = `${timeline.timestep}-${index}-${field}`;
 
-          let original = records.find(
-            (record) => record.dataClass === dataClass
-          );
+          let original = await sails.models.climacell.findOne({
+            dataClass: dataClass,
+          });
 
           // Update only if the value changed or the record does not exist
           if (
