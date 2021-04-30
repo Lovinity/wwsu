@@ -16,17 +16,32 @@ module.exports = {
     )
       return;
 
-    var records = await sails.models.climacell.find();
+    // Retrieve current records
+    let records = await sails.models.climacell.find();
 
-    // Start with real-time data
-    var { body } = await got("https://api.climacell.co/v3/weather/realtime", {
+    // Get data from climacell
+    let { body } = await got("https://api.tomorrow.io/v4/timelines", {
       method: "GET",
       searchParams: {
-        lat: sails.config.custom.climacell.position.latitude,
-        lon: sails.config.custom.climacell.position.longitude,
-        unit_system: sails.config.custom.climacell.unitSystem,
-        fields:
-          "temp,feels_like,humidity,dewpoint,wind_speed,wind_direction,wind_gust,precipitation,precipitation_type,visibility,cloud_cover,weather_code,epa_health_concern,road_risk_score",
+        location: `${sails.config.custom.climacell.position.latitude},${sails.config.custom.climacell.position.longitude}`,
+        fields: [
+          "temperature",
+          "temperatureApparent",
+          "dewPoint",
+          "humidity",
+          "windSpeed",
+          "windDirection",
+          "windGust",
+          "precipitationIntensity",
+          "precipitationProbability",
+          "precipitationType",
+          "visibility",
+          "cloudCover",
+          "weatherCode",
+          "epaHealthConcern",
+        ].join(),
+        timesteps: ["current", "5m", "1h"].join(),
+        units: "imperial",
       },
       responseType: "json",
       headers: {
@@ -34,208 +49,97 @@ module.exports = {
         apikey: sails.config.custom.climacell.api,
       },
     });
-    if (body.errorCode) {
+
+    // Exit if there was an error, there was no body, or the body timelines constructor is not an array
+    if (
+      !body ||
+      body.errorCode ||
+      !body.data ||
+      !body.data.timelines ||
+      body.data.timelines.constructor !== Array
+    ) {
       sails.log.error(new Error(body));
       return;
     }
-    if (body) {
-      for (let key in body) {
-        if (Object.prototype.hasOwnProperty.call(body, key)) {
-          let key2 = `realtime-${key.replace("_", "-")}`;
-          await new Promise(async (resolve) => {
-            let data = body[key]
-              ? `${body[key].value}${
-                  body[key].units ? ` ${body[key].units}` : ``
-                }`
-              : null;
-            sails.models.climacell
-              .findOrCreate(
-                { dataClass: key2 },
-                {
-                  dataClass: key2,
-                  data: data,
-                }
-              )
-              .exec(async (err, record, wasCreated) => {
-                if (err) {
-                  sails.log.error(err);
-                  resolve();
-                }
-                if (wasCreated) {
-                  resolve();
-                }
 
-                let original = records.find(
-                  (record) => record.dataClass === key2
-                );
-                if (!original || original.data !== data) {
+    // Run through operations in the body for each timestep in the array
+    let maps = body.data.timelines.map(async (timeline) => {
+      let dataClass = `${timeline.timestep}`;
+
+      // Skip if there are no intervals
+      if (!timeline.intervals || timeline.intervals.constructor !== Array)
+        return;
+
+      // Run through each interval in the timeline
+      let iMaps = timeline.intervals.map(async (interval, index) => {
+        dataClass += `-${index}`;
+
+        // No values? Exit.
+        if (!interval.values) return;
+
+        for (let field in interval.values) {
+          if (!Object.prototype.hasOwnProperty.call(interval.values, field))
+            continue;
+
+          dataClass += `-${field}`;
+
+          let original = records.find(
+            (record) => record.dataClass === dataClass
+          );
+
+          // Update only if the value changed or the record does not exist
+          if (
+            !original ||
+            original.data !== interval.values[field] ||
+            !moment(interval.startTime).isSame(original.dataTime, "minute")
+          ) {
+            await new Promise(async (resolve) => {
+              // Create the record if it does not exist
+              sails.models.climacell
+                .findOrCreate(
+                  { dataClass: dataClass },
+                  {
+                    dataClass: dataClass,
+                    data: interval.values[field],
+                    dataTime: moment(interval.startTime).toISOString(true),
+                  }
+                )
+                .exec(async (err, record, wasCreated) => {
+                  // Exit on error or if the record was new / created
+                  if (err) {
+                    sails.log.error(err);
+                    resolve();
+                    return;
+                  }
+                  if (wasCreated) {
+                    resolve();
+                    return;
+                  }
+
+                  // At this point, record was not created; update it
                   await sails.models.climacell
                     .update(
-                      { dataClass: key2 },
+                      { dataClass: dataClass },
                       {
-                        dataClass: key2,
-                        data: data,
+                        dataClass: dataClass,
+                        data: interval.values[field],
+                        dataTime: moment(interval.startTime).toISOString(true),
                       }
                     )
                     .fetch();
-                }
 
-                resolve();
-              });
-          });
+                  resolve();
+                });
+            });
+          }
         }
-      }
-    }
+      });
 
-    // Nowcast
-    var { body } = await got("https://api.climacell.co/v3/weather/nowcast", {
-      method: "GET",
-      searchParams: {
-        lat: sails.config.custom.climacell.position.latitude,
-        lon: sails.config.custom.climacell.position.longitude,
-        unit_system: sails.config.custom.climacell.unitSystem,
-        timestep: 5,
-        fields: "precipitation,precipitation_type",
-      },
-      responseType: "json",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: sails.config.custom.climacell.api,
-      },
+      await Promise.all(iMaps);
     });
-    if (body.errorCode) {
-      sails.log.error(new Error(body));
-      return;
-    }
-    if (body && body.constructor === Array) {
 
-      var nowcastMaps = body.map(async (nc, index) => {
-        for (let key in nc) {
-          if (Object.prototype.hasOwnProperty.call(nc, key)) {
-            let key2 = `nc-${index}-${key.replace("_", "-")}`;
-            
-            await new Promise(async (resolve) => {
-              let data = nc[key]
-                ? `${nc[key].value}${nc[key].units ? ` ${nc[key].units}` : ``}`
-                : null;
-              sails.models.climacell
-                .findOrCreate(
-                  { dataClass: key2 },
-                  {
-                    dataClass: key2,
-                    data: data,
-                  }
-                )
-                .exec(async (err, record, wasCreated) => {
-                  if (err) {
-                    sails.log.error(err);
-                    resolve();
-                  }
-                  if (wasCreated) {
-                    resolve();
-                  }
+    await Promise.all(maps);
 
-                  let original = records.find(
-                    (record) => record.dataClass === key2
-                  );
-                  if (!original || original.data !== data) {
-                    await sails.models.climacell
-                      .update(
-                        { dataClass: key2 },
-                        {
-                          dataClass: key2,
-                          data: data,
-                        }
-                      )
-                      .fetch();
-                  }
-
-                  resolve();
-                });
-            });
-          }
-        }
-      });
-      await Promise.all(nowcastMaps);
-    }
-
-    // Hourly forecast
-    var { body } = await got(
-      "https://api.climacell.co/v3/weather/forecast/hourly",
-      {
-        method: "GET",
-        searchParams: {
-          lat: sails.config.custom.climacell.position.latitude,
-          lon: sails.config.custom.climacell.position.longitude,
-          unit_system: sails.config.custom.climacell.unitSystem,
-          fields:
-            "temp,precipitation,precipitation_type,precipitation_probability,cloud_cover,weather_code",
-        },
-        responseType: "json",
-        headers: {
-          "Content-Type": "application/json",
-          apikey: sails.config.custom.climacell.api,
-        },
-      }
-    );
-
-    if (body.errorCode) {
-      sails.log.error(new Error(body));
-      return;
-    }
-
-    if (body && typeof body.constructor === Array) {
-
-      var hourlyMaps = body.map(async (hr, index) => {
-        for (let key in hr) {
-          if (Object.prototype.hasOwnProperty.call(hr, key)) {
-            let key2 = `hr-${index}-${key.replace("_", "-")}`;
-
-            await new Promise(async (resolve) => {
-              let data = hr[key]
-                ? `${hr[key].value || hr[key]}${hr[key].units ? ` ${hr[key].units}` : ``}`
-                : null;
-              sails.models.climacell
-                .findOrCreate(
-                  { dataClass: key2 },
-                  {
-                    dataClass: key2,
-                    data: data,
-                  }
-                )
-                .exec(async (err, record, wasCreated) => {
-                  if (err) {
-                    sails.log.error(err);
-                    resolve();
-                  }
-                  if (wasCreated) {
-                    resolve();
-                  }
-
-                  let original = records.find(
-                    (record) => record.dataClass === key2
-                  );
-                  if (!original || original.data !== data) {
-                    await sails.models.climacell
-                      .update(
-                        { dataClass: key2 },
-                        {
-                          dataClass: key2,
-                          data: data,
-                        }
-                      )
-                      .fetch();
-                  }
-
-                  resolve();
-                });
-            });
-
-          }
-        }
-      });
-      await Promise.all(hourlyMaps);
-
-    }
+    return maps;
   },
 };

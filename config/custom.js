@@ -193,7 +193,6 @@ var defaultConfig = {
       latitude: 39.7846,
       longitude: -84.0583,
     },
-    unitSystem: "us",
   },
 
   // Skyway.js

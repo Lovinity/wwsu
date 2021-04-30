@@ -2396,9 +2396,9 @@ module.exports.bootstrap = async function(done) {
     });
   });
 
-  // Every tenth minute at second 11, refresh sails.models.climacell weather information
+  // Every fifth minute at second 11, refresh sails.models.climacell weather information
   sails.log.verbose(`BOOTSTRAP: scheduling climacell CRON.`);
-  cron.schedule("11 */10 * * * *", () => {
+  cron.schedule("11 */5 * * * *", () => {
     // eslint-disable-next-line no-async-promise-executor
     return new Promise(async (resolve, reject) => {
       sails.log.debug(`CRON climacell called.`);

@@ -22,7 +22,12 @@ module.exports = {
     data: {
       type: 'string',
       allowNull: true
-    }
+    },
+
+    dataTime: {
+      type: "ref",
+      columnType: "datetime",
+    },
   },
 
   // Websockets standards
