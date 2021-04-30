@@ -938,10 +938,10 @@ class WWSUcalendar extends CalendarDb {
 
 		// Determine what else can be done
 		if (event.scheduleType === "updated") {
-			choices.push(`Occurrence: Reverse / discard changes`);
+			choices.push(`Occurrence: Reverse / Discard this Update`);
 		}
 		if (event.scheduleType === "canceled") {
-			choices.push(`Occurrence: Un-cancel`);
+			choices.push(`Occurrence: Reverse Cancellation`);
 		}
 		if (
 			[
@@ -969,8 +969,8 @@ class WWSUcalendar extends CalendarDb {
 				event.type
 			) === -1
 		) {
-			choices.push(`Event: Edit defaults`);
-			choices.push(`Event: Delete (and all schedules)`);
+			choices.push(`Event: Edit Defaults`);
+			choices.push(`Event: Permamently Remove (and all schedules)`);
 		}
 
 		// generate form
@@ -1008,7 +1008,7 @@ class WWSUcalendar extends CalendarDb {
 								// Determine what to do based on selected action
 								switch (value.action) {
 									// Confirm whether or not to reverse schedule changes
-									case `Occurrence: Reverse / discard changes`:
+									case `Occurrence: Reverse / Discard this Update`:
 										this.manager.get("WWSUutil").confirmDialog(
 											`<p>Are you sure you want to reverse updates made for ${
 												event.type
@@ -1063,7 +1063,7 @@ class WWSUcalendar extends CalendarDb {
 										break;
 
 									// Confirm whether or not to reverse a cancellation
-									case `Occurrence: Un-cancel`:
+									case `Occurrence: Reverse Cancellation`:
 										this.manager.get("WWSUutil").confirmDialog(
 											`<p>Are you sure you want to reverse the cancellation of ${
 												event.type
@@ -1117,7 +1117,7 @@ class WWSUcalendar extends CalendarDb {
 										break;
 
 									// Confirm whether or not to permanently remove an event
-									case `Event: Delete (and all schedules)`:
+									case `Event: Permamently Remove (and all schedules)`:
 										this.manager.get("WWSUutil").confirmDialog(
 											`<p>Are you sure you want to <b>permanently</b> remove ${
 												event.type
@@ -1181,14 +1181,14 @@ class WWSUcalendar extends CalendarDb {
 										this.showCancelForm(event);
 										break;
 
-									case `Event: Edit defaults`:
+									case `Event: Edit Defaults`:
 										let _calendar = this.calendar
 											.find()
 											.find((_event) => _event.ID === event.calendarID);
 										this.showEventForm(_calendar);
 										break;
 
-									case `Occurrence: Edit and/or reschedule`:
+									case `Occurrence: Update or Reschedule`:
 										this.showOccurrenceForm(event);
 										break;
 

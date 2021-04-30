@@ -55,12 +55,7 @@ module.exports = {
       }
     );
 
-    await sails.models.calendar
-      .update(
-        { ID: inputs.event.calendarID || inputs.event.ID },
-        { discordChannel: channel.id }
-      )
-      .fetch();
+    // You should update discordChannel in the database from whatever called this helper. We do not do it here because it will trigger multiple messages.
 
     return channel;
   },

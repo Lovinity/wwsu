@@ -7,13 +7,13 @@ module.exports = {
   inputs: {
     event: {
       type: "json",
-      required: true,
-    },
+      required: true
+    }
   },
 
   exits: {},
 
-  fn: async function (inputs) {
+  fn: async function(inputs) {
     // Do not make channels for events that are not a broadcast or are a sports broadcast
     if (
       ["show", "remote", "prerecord", "playlist"].indexOf(inputs.event.type) ===
@@ -36,7 +36,9 @@ module.exports = {
         `${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name}`
       )
       .setDescription(inputs.event.description)
-      .setFooter(`Read this channel for the show's schedule and updates`);
+      .setFooter(
+        `This message will be edited automatically when the details of the broadcast changes. This message was pinned to the channel for easy access.`
+      );
     if (inputs.event.banner)
       embed = embed.setImage(
         `https://server.wwsu1069.org/uploads/calendar/banner/${inputs.event.banner}`
@@ -75,13 +77,14 @@ module.exports = {
     await sails.models.calendar
       .update(
         { ID: inputs.event.calendarID || inputs.event.ID },
-        { discordCalendarMessage: message.id }
+        { discordChannel: channel.id, discordCalendarMessage: message.id }
       )
       .fetch();
 
-    // Also add schedule message
-    await sails.helpers.discord.calendar.postSchedule(inputs.event, channel);
+    // NOTE: It is assumed via the above update that this helper will be called again (afterCreate lifecycle), this time with discordCalendarMessage present.
+    // Therefore, we will not call sails.helpers.discord.calendar.postSchedule here as it would be called on the second iteration.
+    // If we called it, we would end up with two schedule messages.
 
     return message;
-  },
+  }
 };

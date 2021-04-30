@@ -7,16 +7,16 @@ module.exports = {
   inputs: {
     event: {
       type: "json",
-      required: true,
+      required: true
     },
     channel: {
-      type: "ref",
-    },
+      type: "ref"
+    }
   },
 
   exits: {},
 
-  fn: async function (inputs) {
+  fn: async function(inputs) {
     // Do not make channels for events that are not a broadcast or are a sports broadcast
     if (
       ["show", "remote", "prerecord", "playlist"].indexOf(inputs.event.type) ===
@@ -27,9 +27,14 @@ module.exports = {
     let channel;
     let message;
 
+    // Get or create the Discord channel for the event
+    channel =
+      inputs.channel ||
+      (await sails.helpers.discord.calendar.makeEventChannel(inputs.event));
+
     // If the event is discontinued, edit the schedule message
     if (!inputs.event.active) {
-      if (inputs.event.discordScheduleMessage) {
+      if (inputs.event.discordScheduleMessage && channel) {
         try {
           message = await channel.messages.fetch(
             inputs.event.discordScheduleMessage
@@ -47,32 +52,32 @@ module.exports = {
         await sails.models.calendar
           .update(
             { ID: inputs.event.calendarID || inputs.event.ID },
-            { discordScheduleMessage: null }
+            { discordChannel: channel.id, discordScheduleMessage: null }
           )
           .fetch();
       }
       return;
     }
 
-    // Get or create the Discord channel for the event
-    channel =
-      inputs.channel ||
-      (await sails.helpers.discord.calendar.makeEventChannel(inputs.event));
-
     // Get all the schedules
     let schedules = await sails.models.schedule.find({
-      calendarID: inputs.event.calendarID || inputs.event.ID,
+      calendarID: inputs.event.calendarID || inputs.event.ID
     });
-    schedules = schedules.filter((schedule) => schedule.scheduleType === null);
+    schedules = schedules.filter(schedule => schedule.scheduleType === null);
 
     // Construct an embed containing the details of the schedules
     let embed = new Discord.MessageEmbed()
-      .setColor(sails.models.calendar.calendardb.getColor(inputs.event))
-      .setTitle(`Time slots for ${inputs.event.hosts} - ${inputs.event.name}`);
+      .setColor("#787800")
+      .setTitle(
+        `:calendar: Time slots for ${inputs.event.hosts} - ${inputs.event.name}`
+      )
+      .setFooter(
+        `This message will be edited automatically when the broadcast's time slots change. This message was pinned to the channel for easy access.`
+      );
 
     // Add the time slots
     if (schedules && schedules.length > 0) {
-      schedules.map((schedule) => {
+      schedules.map(schedule => {
         embed = embed.addField(
           `Slot ${schedule.ID}`,
           `${sails.models.calendar.calendardb.generateScheduleText(schedule)}${
@@ -108,10 +113,10 @@ module.exports = {
     await sails.models.calendar
       .update(
         { ID: inputs.event.calendarID || inputs.event.ID },
-        { discordScheduleMessage: message.id }
+        { discordChannel: channel.id, discordScheduleMessage: message.id }
       )
       .fetch();
 
     return message;
-  },
+  }
 };
