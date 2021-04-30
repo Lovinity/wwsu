@@ -568,6 +568,17 @@ module.exports = {
               .fetch();
           }
         }
+
+        if (!event.scheduleType) {
+          await sails.helpers.discord.sendSchedule(
+            _event,
+            destroyedRecord,
+            false,
+            false,
+            false,
+            true
+          );
+        }
       }
 
       // Remove any schedules that were created as an override for the deleted schedule.
