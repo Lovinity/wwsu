@@ -43,7 +43,7 @@ module.exports = {
         eventNow = _eventNow.filter(
           (event) =>
             event.type === "show" &&
-            sails.models.meta.memory.show === `${event.hosts} - ${event.name}`
+            name === event.name
         );
         if (eventNow.length < 1) {
           calendar = await sails.models.calendar.find({
@@ -97,7 +97,7 @@ module.exports = {
         eventNow = _eventNow.filter(
           (event) =>
             event.type === "remote" &&
-            sails.models.meta.memory.show === `${event.hosts} - ${event.name}`
+            name === event.name
         );
         if (eventNow.length < 1) {
           calendar = await sails.models.calendar.find({
@@ -193,7 +193,7 @@ module.exports = {
         eventNow = _eventNow.filter(
           (event) =>
             event.type === "prerecord" &&
-            sails.models.meta.memory.show === `${event.hosts} - ${event.name}`
+            name === event.name
         );
         if (eventNow.length < 1) {
           calendar = await sails.models.calendar.find({
@@ -249,7 +249,7 @@ module.exports = {
         eventNow = _eventNow.filter(
           (event) =>
             event.type === "playlist" &&
-            sails.models.meta.memory.show === `${event.hosts} - ${event.name}`
+            name === event.name
         );
         if (eventNow.length < 1) {
           calendar = await sails.models.calendar.find({
