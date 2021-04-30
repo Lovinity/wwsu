@@ -64,7 +64,6 @@ module.exports = {
 
     // Run through operations in the body for each timestep in the array
     let maps = body.data.timelines.map(async (timeline) => {
-      let dataClass = `${timeline.timestep}`;
 
       // Skip if there are no intervals
       if (!timeline.intervals || timeline.intervals.constructor !== Array)
@@ -72,7 +71,6 @@ module.exports = {
 
       // Run through each interval in the timeline
       let iMaps = timeline.intervals.map(async (interval, index) => {
-        dataClass += `-${index}`;
 
         // No values? Exit.
         if (!interval.values) return;
@@ -81,7 +79,7 @@ module.exports = {
           if (!Object.prototype.hasOwnProperty.call(interval.values, field))
             continue;
 
-          dataClass += `-${field}`;
+          let dataClass = `${timeline.timestep}-${index}-${field}`;
 
           let original = records.find(
             (record) => record.dataClass === dataClass
