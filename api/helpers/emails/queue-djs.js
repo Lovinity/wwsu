@@ -76,7 +76,7 @@ module.exports = {
 
     // Queue the email
     if (to.length > 0)
-      await sails.helpers.emails.queue(to, cc, inputs.subject, inputs.text, inputs.sendNow);
+      await sails.helpers.emails.queue(to, cc, null, inputs.subject, inputs.text, inputs.sendNow);
 
 
   }

@@ -43,7 +43,7 @@ module.exports = {
       .map((record) => record.email);
 
     // Queue the email
-    await sails.helpers.emails.queue(to, null, inputs.subject, inputs.text, inputs.sendNow);
+    await sails.helpers.emails.queue(to, null, null, inputs.subject, inputs.text, inputs.sendNow);
   }
 
 

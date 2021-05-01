@@ -71,6 +71,7 @@ module.exports = {
           await sails.helpers.emails.queue(
             to,
             cc,
+            null,
             `Changed date/time for ${inputs.event.hosts} - ${inputs.event.name}`,
             `Dear ${inputs.event.hosts},<br /><br />
 
@@ -98,6 +99,7 @@ module.exports = {
           await sails.helpers.emails.queue(
             to,
             cc,
+            null,
             `Canceled date/time for ${inputs.event.hosts} - ${inputs.event.name}`,
             `Dear ${inputs.event.hosts},<br /><br />
 
@@ -125,6 +127,7 @@ module.exports = {
           await sails.helpers.emails.queue(
             to,
             cc,
+            null,
             `Reversal of a re-schedule for ${inputs.event.hosts} - ${inputs.event.name}`,
             `Dear ${inputs.event.hosts},<br /><br />
 
@@ -154,6 +157,7 @@ module.exports = {
           await sails.helpers.emails.queue(
             to,
             cc,
+            null,
             `Reversal of cancellation for ${inputs.event.hosts} - ${inputs.event.name}`,
             `Dear ${inputs.event.hosts},<br /><br />
 
