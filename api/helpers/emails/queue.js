@@ -15,6 +15,11 @@ module.exports = {
       description:
         "Array of email addresses of those who should be CCd, in nodemailer format."
     },
+    bcc: {
+      type: "json",
+      description:
+        "Array of email addresses of those who should be BCCd, in nodemailer format."
+    },
     subject: {
       type: "string",
       maxLength: 255,
@@ -42,15 +47,16 @@ module.exports = {
     inputs.text = await sails.helpers.sanitize(inputs.text);
 
     // Add notice this is a system message
-    inputs.text += `<p>This is an automatic email generated and sent by the WWSU automation system (node server).</p>`
+    inputs.text += `<p>This is an automatic email generated and sent by the WWSU automation system (node server).</p>`;
 
     // Queue the email
     var record = await sails.models.emails
       .create({
         to: inputs.to,
         cc: inputs.cc,
-        subject: inputs.subject,
-        text: inputs.text,
+        bcc: inputs.bcc,
+        subject: await sails.helpers.sanitize(inputs.subject),
+        text: await sails.helpers.sanitize(inputs.text),
         sent: false
       })
       .fetch();

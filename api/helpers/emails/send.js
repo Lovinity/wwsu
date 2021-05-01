@@ -34,6 +34,7 @@ module.exports = {
       from: 'wwsu1069fm@wright.edu',
       to: record.to ? record.to : undefined,
       cc: record.cc ? record.cc : undefined,
+      bcc: record.bcc ? record.bcc : undefined,
       subject: record.subject,
       text: record.text,
       html: record.text

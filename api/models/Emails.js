@@ -6,42 +6,43 @@
  */
 
 module.exports = {
-  datastore: 'nodebase',
+  datastore: "nodebase",
   attributes: {
-
     ID: {
-      type: 'number',
+      type: "number",
       autoIncrement: true
     },
 
     to: {
-      type: 'json',
+      type: "json",
       required: true
     },
 
     cc: {
-      type: 'json',
+      type: "json"
+    },
+
+    bcc: {
+      type: "json"
     },
 
     subject: {
-      type: 'string',
+      type: "string",
       maxLength: 255
     },
 
     text: {
-      type: 'string',
+      type: "string",
       maxLength: 65535
     },
 
     sent: {
-      type: 'boolean',
+      type: "boolean",
       defaultsTo: false
     },
 
     status: {
-      type: 'json'
+      type: "json"
     }
-  },
-
+  }
 };
-

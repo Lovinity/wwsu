@@ -10,22 +10,22 @@ module.exports = {
   attributes: {
     ID: {
       type: "number",
-      autoIncrement: true,
+      autoIncrement: true
     },
 
     calendarID: {
       type: "number",
-      required: true,
+      required: true
     },
 
     scheduleID: {
       type: "number",
-      allowNull: true,
+      allowNull: true
     },
 
     overriddenID: {
       type: "number",
-      allowNull: true,
+      allowNull: true
     },
 
     scheduleType: {
@@ -35,19 +35,19 @@ module.exports = {
         "updated",
         "canceled",
         "updated-system",
-        "canceled-system",
+        "canceled-system"
       ],
-      allowNull: true,
+      allowNull: true
     },
 
     scheduleReason: {
       type: "string",
-      allowNull: true,
+      allowNull: true
     },
 
     originalTime: {
       type: "ref",
-      columnType: "datetime",
+      columnType: "datetime"
     },
 
     type: {
@@ -63,118 +63,118 @@ module.exports = {
         "onair-booking",
         "prod-booking",
         "office-hours",
-        "task",
+        "task"
       ],
-      allowNull: true,
+      allowNull: true
     },
 
     priority: {
       type: "number",
-      allowNull: true,
+      allowNull: true
     },
 
     hostDJ: {
       type: "number",
-      allowNull: true,
+      allowNull: true
     },
 
     cohostDJ1: {
       type: "number",
-      allowNull: true,
+      allowNull: true
     },
 
     cohostDJ2: {
       type: "number",
-      allowNull: true,
+      allowNull: true
     },
 
     cohostDJ3: {
       type: "number",
-      allowNull: true,
+      allowNull: true
     },
 
     eventID: {
       type: "number",
-      allowNull: true,
+      allowNull: true
     },
 
     playlistID: {
       type: "number",
-      allowNull: true,
+      allowNull: true
     },
 
     director: {
       type: "number",
-      allowNull: true,
+      allowNull: true
     },
 
     hosts: {
       type: "string",
-      allowNull: true,
+      allowNull: true
     },
 
     name: {
       type: "string",
-      allowNull: true,
+      allowNull: true
     },
 
     description: {
       type: "string",
-      allowNull: true,
+      allowNull: true
     },
 
     logo: {
       type: "string",
-      allowNull: true,
+      allowNull: true
     },
 
     banner: {
       type: "string",
-      allowNull: true,
+      allowNull: true
     },
 
     newTime: {
       type: "ref",
-      columnType: "datetime",
+      columnType: "datetime"
     },
 
     oneTime: {
-      type: "json",
+      type: "json"
     },
 
     startDate: {
       type: "ref",
-      columnType: "date",
+      columnType: "date"
     },
 
     endDate: {
       type: "ref",
-      columnType: "date",
+      columnType: "date"
     },
 
     startTime: {
       type: "string",
-      allowNull: true,
+      allowNull: true
     },
 
     recurrenceRules: {
-      type: "json",
+      type: "json"
     },
 
     recurrenceInterval: {
-      type: "json",
+      type: "json"
     },
 
     duration: {
       type: "number",
       min: 0,
       max: 60 * 24,
-      allowNull: true,
-    },
+      allowNull: true
+    }
   },
 
   // Websockets standards
-  afterCreate: function (newlyCreatedRecord, proceed) {
+  afterCreate: function(newlyCreatedRecord, proceed) {
     var data = { insert: newlyCreatedRecord };
     sails.models.calendar.calendardb.query("schedule", data);
     sails.log.silly(`schedule socket: ${data}`);
@@ -182,7 +182,7 @@ module.exports = {
     var temp;
 
     // Process notifications and Discord
-    temp = (async (event) => {
+    temp = (async event => {
       var _event = sails.models.calendar.calendardb.scheduleToEvent(event);
 
       await sails.helpers.discord.calendar.postSchedule(_event);
@@ -226,7 +226,7 @@ module.exports = {
             "sports",
             "prerecord",
             "genre",
-            "playlist",
+            "playlist"
           ].indexOf(_event.type) !== -1
         ) {
           sails.models.attendance
@@ -244,7 +244,7 @@ module.exports = {
                 scheduledStart: moment(_event.start).toISOString(true),
                 scheduledEnd: moment(_event.end).toISOString(true),
                 actualStart: null,
-                actualEnd: null,
+                actualEnd: null
               }
             )
             .exec(async (err, created, wasCreated) => {
@@ -269,10 +269,10 @@ module.exports = {
                   event: `${_event.type}: ${_event.hosts} - ${
                     _event.name
                   } was canceled for ${moment(_event.start).format("LLLL")}.`,
-                  createdAt: moment().toISOString(true),
+                  createdAt: moment().toISOString(true)
                 })
                 .fetch()
-                .tolerate((err) => {
+                .tolerate(err => {
                   sails.log.error(err);
                 });
             });
@@ -286,7 +286,7 @@ module.exports = {
                 name: _event.hosts,
                 approved: -1,
                 scheduledIn: moment(_event.start).toISOString(true),
-                scheduledOut: moment(_event.end).toISOString(true),
+                scheduledOut: moment(_event.end).toISOString(true)
               }
             )
             .exec(async (err, created, wasCreated) => {
@@ -313,10 +313,10 @@ module.exports = {
                   }<br />Scheduled time: ${moment(_event.start).format(
                     "llll"
                   )} - ${moment(_event.end).format("llll")}`,
-                  createdAt: moment().toISOString(true),
+                  createdAt: moment().toISOString(true)
                 })
                 .fetch()
-                .tolerate((err) => {
+                .tolerate(err => {
                   sails.log.error(err);
                 });
             });
@@ -336,7 +336,7 @@ module.exports = {
     return proceed();
   },
 
-  afterUpdate: function (updatedRecord, proceed) {
+  afterUpdate: function(updatedRecord, proceed) {
     var data = { update: updatedRecord };
     sails.models.calendar.calendardb.query("schedule", data);
     sails.log.silly(`schedule socket: ${data}`);
@@ -346,7 +346,7 @@ module.exports = {
     // API note: updated/canceled schedule.type records should NEVER be updated; delete the old one and create a new one.
 
     // Process notifications and discord
-    temp = (async (event) => {
+    temp = (async event => {
       var _event = sails.models.calendar.calendardb.scheduleToEvent(event);
 
       await sails.helpers.discord.calendar.postSchedule(_event);
@@ -389,7 +389,7 @@ module.exports = {
             "sports",
             "prerecord",
             "genre",
-            "playlist",
+            "playlist"
           ].indexOf(_event.type) !== -1
         ) {
           sails.models.attendance
@@ -407,7 +407,7 @@ module.exports = {
                 scheduledStart: moment(_event.start).toISOString(true),
                 scheduledEnd: moment(_event.end).toISOString(true),
                 actualStart: null,
-                actualEnd: null,
+                actualEnd: null
               }
             )
             .exec(async (err, created, wasCreated) => {
@@ -432,10 +432,10 @@ module.exports = {
                   event: `${_event.type}: ${_event.hosts} - ${
                     _event.name
                   } was canceled for ${moment(_event.start).format("LLLL")}.`,
-                  createdAt: moment().toISOString(true),
+                  createdAt: moment().toISOString(true)
                 })
                 .fetch()
-                .tolerate((err) => {
+                .tolerate(err => {
                   sails.log.error(err);
                 });
             });
@@ -449,7 +449,7 @@ module.exports = {
                 name: _event.hosts,
                 approved: -1,
                 scheduledIn: moment(_event.start).toISOString(true),
-                scheduledOut: moment(_event.end).toISOString(true),
+                scheduledOut: moment(_event.end).toISOString(true)
               }
             )
             .exec(async (err, created, wasCreated) => {
@@ -476,10 +476,10 @@ module.exports = {
                   }<br />Scheduled time: ${moment(_event.start).format(
                     "llll"
                   )} - ${moment(_event.end).format("llll")}`,
-                  createdAt: moment().toISOString(true),
+                  createdAt: moment().toISOString(true)
                 })
                 .fetch()
-                .tolerate((err) => {
+                .tolerate(err => {
                   sails.log.error(err);
                 });
             });
@@ -490,7 +490,7 @@ module.exports = {
     return proceed();
   },
 
-  afterDestroy: function (destroyedRecord, proceed) {
+  afterDestroy: function(destroyedRecord, proceed) {
     var data = { remove: destroyedRecord.ID };
     sails.models.calendar.calendardb.query("schedule", data);
     sails.log.silly(`schedule socket: ${data}`);
@@ -498,7 +498,7 @@ module.exports = {
     var temp;
 
     // Process notifications and Discord
-    temp = (async (event) => {
+    temp = (async event => {
       var _event = sails.models.calendar.calendardb.scheduleToEvent(event);
 
       await sails.helpers.discord.calendar.postSchedule(_event);
@@ -534,38 +534,40 @@ module.exports = {
               false,
               true
             );
-          }
 
-          // Destroy cancellation records (but only if the main calendar event is still active)
-          if (
-            [
-              "show",
-              "remote",
-              "sports",
-              "prerecord",
-              "genre",
-              "playlist",
-            ].indexOf(_event.type) !== -1
-          ) {
-            var destroyed = await sails.models.attendance
-              .destroy({ unique: _event.unique, happened: -1 })
-              .fetch();
-            if (destroyed && destroyed.length > 0) {
-              var IDs = destroyed.map((record) => record.ID);
-              await sails.models.logs.destroy({ attendanceID: IDs }).fetch();
+            // Destroy cancellation records (but only if the main calendar event is still active, and the current time is before event end)
+            if (
+              [
+                "show",
+                "remote",
+                "sports",
+                "prerecord",
+                "genre",
+                "playlist"
+              ].indexOf(_event.type) !== -1
+            ) {
+              var destroyed = await sails.models.attendance
+                .destroy({ unique: _event.unique, happened: -1 })
+                .fetch();
+              if (destroyed && destroyed.length > 0) {
+                var IDs = destroyed.map(record => record.ID);
+                await sails.models.logs.destroy({ attendanceID: IDs }).fetch();
+              }
+            } else if (_event.type === "office-hours") {
+              await sails.models.timesheet
+                .destroy({ unique: _event.unique, approved: -1 })
+                .fetch();
+              await sails.models.logs
+                .destroy({
+                  logtype: `director-cancellation`,
+                  event: `Director: ${
+                    _event.hosts
+                  }<br />Scheduled time: ${moment(_event.start).format(
+                    "llll"
+                  )} - ${moment(_event.end).format("llll")}`
+                })
+                .fetch();
             }
-          } else if (_event.type === "office-hours") {
-            await sails.models.timesheet
-              .destroy({ unique: _event.unique, approved: -1 })
-              .fetch();
-            await sails.models.logs
-              .destroy({
-                logtype: `director-cancellation`,
-                event: `Director: ${_event.hosts}<br />Scheduled time: ${moment(
-                  _event.start
-                ).format("llll")} - ${moment(_event.end).format("llll")}`,
-              })
-              .fetch();
           }
         }
 
@@ -582,9 +584,11 @@ module.exports = {
       }
 
       // Remove any schedules that were created as an override for the deleted schedule.
+      // DISABLED: interferes with the event conflict detection
       //await sails.models.schedule.destroy({ overriddenID: event.ID }).fetch();
 
       // Remove any schedules that were created to override this schedule
+      // DISABLED: interferes with the event conflict detection
       //await sails.models.schedule.destroy({ scheduleID: event.ID }).fetch();
 
       // Remove any clockwheels created for this schedule
@@ -592,5 +596,5 @@ module.exports = {
     })(destroyedRecord);
 
     return proceed();
-  },
+  }
 };
