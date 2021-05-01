@@ -25,7 +25,7 @@ module.exports = {
         }
 
         if (
-          moment(sails.config.custom.startOfSemester).isAfter(moment(endTime))
+          moment(sails.config.custom.startOfSemester).isSameOrAfter(moment(endTime))
         ) {
           await sails.models.schedule.destroy({ ID: schedule.ID }).fetch();
 
