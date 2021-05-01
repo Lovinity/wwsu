@@ -7,7 +7,7 @@ module.exports = {
 
   fn: async function(inputs) {
     let schedules = await sails.models.schedule.find({
-      scheduleType: [null, "unscheduled"]
+      or: [{ scheduleType: null }, { scheduleType: "unscheduled" }]
     });
 
     if (schedules && schedules.length > 0) {
