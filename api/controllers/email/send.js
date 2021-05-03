@@ -11,6 +11,7 @@ module.exports = {
         "All DJs, Directors, and Assistants",
         "All Directors and Assistants",
         "All non-assistant Directors",
+        "Admin Directors Only",
         "All DJs",
         "DJs Active This Semester",
         "DJs Active in the Past 30 Days",
@@ -69,6 +70,15 @@ module.exports = {
           .filter(director => director.email && director.email !== "")
           .map(director => recipients.push(director.email));
         break;
+      case "Admin Directors Only":
+        directors = await sails.models.directors.find({
+          email: { "!=": null },
+          admin: true
+        });
+        directors
+          .filter(director => director.email && director.email !== "")
+          .map(director => recipients.push(director.email));
+        break;
       case "All DJs":
         djs = await sails.models.djs.find({ email: { "!=": null } });
         djs
@@ -121,7 +131,7 @@ module.exports = {
       thisDirector && thisDirector.email && thisDirector.email !== ""
         ? thisDirector.email
         : "wwsu1069fm@wright.edu";
-        
+
     return await sails.helpers.emails.queue.with({
       to: inputs.bcc ? thisDirector : recipients,
       bcc: inputs.bcc ? recipients : undefined,
