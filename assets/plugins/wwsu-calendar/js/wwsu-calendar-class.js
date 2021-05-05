@@ -1226,22 +1226,40 @@ class WWSUcalendar extends CalendarDb {
 			colorClass = "dark";
 		}
 
-		// Determine if we should show a badge indicating a changed status of the event
+		// Determine if we should show a ribbon indicating a changed status of the event
 		let badgeInfo;
 		if (["canceled-changed"].indexOf(event.scheduleType) !== -1) {
-			badgeInfo = `<span class="badge-warning" style="font-size: 1em;">RESCHEDULED</span>`;
+			badgeInfo = `<div class="ribbon-wrapper ribbon-lg">
+			<div class="ribbon bg-orange" title="This event was re-scheduled to a different date/time for this instance.">
+			  RE-SCHEDULED
+			</div>
+		  </div>`;
 		}
 		if (
 			["updated", "updated-system"].indexOf(event.scheduleType) !== -1 &&
 			event.timeChanged
 		) {
-			badgeInfo = `<span class="badge badge-warning" style="font-size: 1em;">TEMP TIME CHANGE</span>`;
+			badgeInfo = `<div class="ribbon-wrapper ribbon-lg">
+			<div class="ribbon bg-warning" title="This event was re-scheduled from its original date/time; this is the new temporary date/time.">
+			  TEMP TIME
+			</div>
+		  </div>`;
 		}
 		if (["canceled", "canceled-system"].indexOf(event.scheduleType) !== -1) {
-			badgeInfo = `<span class="badge badge-danger" style="font-size: 1em;">CANCELED</span>`;
+			badgeInfo = `<div class="ribbon-wrapper ribbon-lg">
+			<div class="ribbon bg-danger" title="This event was canceled for this date/time.">
+			  CANCELED
+			</div>
+		  </div>`;
 		}
 
-		return `<div class="p-2 card card-${colorClass} card-outline">
+		return `<div class="p-2 card card-${colorClass} card-outline position-relative">
+		<div class="ribbon-wrapper">
+		<div class="ribbon bg-${colorClass}">
+			${event.type}
+		</div>
+	</div>
+	${badgeInfo || ``}
       <div class="card-body box-profile">
         <div class="text-center">
         ${
@@ -1257,24 +1275,17 @@ class WWSUcalendar extends CalendarDb {
 
         <ul class="list-group list-group-unbordered mb-3">
         ${
-					badgeInfo
-						? `<li class="list-group-item text-center">
-        <p><b>${badgeInfo}</b></p>
-        ${
-					event.scheduleReason !== null
-						? `<p><strong>${event.scheduleReason}</strong></p>`
-						: ``
-				}
-      </li>`
-						: ``
-				}
+			event.scheduleReason !== null
+				? `<li class="list-group-item text-center"><strong>${event.scheduleReason}</strong></li>`
+				: ``
+		}
         <li class="list-group-item text-center">
             <b>${
 							["canceled", "canceled-system", "canceled-changed"].indexOf(
 								event.scheduleType
 							) !== -1
 								? `Original Time: `
-								: ``
+								: `Scheduled Time: `
 						}${moment(event.start).format("lll")} - ${moment(event.end).format(
 			"hh:mm A"
 		)}</b>

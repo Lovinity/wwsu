@@ -298,7 +298,10 @@ function doSockets(firsttime = false) {
 meta.on("newMeta", "renderer", (response, _meta) => {
   try {
     // Update meta, if new meta was provided
-    if ("line1" in response || "line2" in response) {
+    if ("line1" in response || "line2" in response || "state" in response) {
+      let ribbonColor;
+      let ribbonText;
+      let ribbonTitle;
       // Update now playing icon
       if (_meta.state.startsWith("live_")) {
         $(".nowplaying-icon").html(
@@ -308,6 +311,9 @@ meta.on("newMeta", "renderer", (response, _meta) => {
               : `<i class="profile-user-img img-fluid img-circle fas fa-microphone bg-danger" aria-hidden="true" title="Live radio show"></i><span class="sr-only">Live radio show</span>`
           }`
         );
+        ribbonColor = "danger";
+        ribbonText = "SHOW";
+        ribbonTitle = "This is a live show produced from the WWSU studios.";
       }
       if (_meta.state.startsWith("prerecord_")) {
         $(".nowplaying-icon").html(
@@ -317,6 +323,9 @@ meta.on("newMeta", "renderer", (response, _meta) => {
               : `<i class="profile-user-img img-fluid img-circle fas fa-play-circle bg-pink" aria-hidden="true" title="Prerecorded show"></i><span class="sr-only">Prerecorded show</span>`
           }`
         );
+        ribbonColor = "pink";
+        ribbonText = "PRERECORD";
+        ribbonTitle = "This is a pre-recorded show.";
       }
       if (
         _meta.state.startsWith("sports_") ||
@@ -329,18 +338,21 @@ meta.on("newMeta", "renderer", (response, _meta) => {
               : `<i class="profile-user-img img-fluid img-circle fas fa-basketball-ball bg-success" aria-hidden="true" title="Sports broadcast"></i><span class="sr-only">Sports broadcast</span>`
           }`
         );
+        ribbonColor = "success";
+        ribbonText = "SPORTS";
+        ribbonTitle = "This is a live sports broadcast.";
       }
       if (_meta.state.startsWith("remote_")) {
         $(".nowplaying-icon").html(
-          `<i class="profile-user-img img-fluid img-circle fas fa-broadcast-tower bg-purple"></i>`
-        );
-        $(".nowplaying-icon").html(
           `${
             _meta.showLogo !== null
-              ? `<img class="profile-user-img img-fluid img-circle bg-purple" src="/uploads/calendar/logo/${_meta.showLogo}" alt="Show Logo">`
-              : `<i class="profile-user-img img-fluid img-circle fas fa-broadcast-tower bg-purple" aria-hidden="true" title="Remote broadcast"></i><span class="sr-only">Remote broadcast</span>`
+              ? `<img class="profile-user-img img-fluid img-circle bg-indigo" src="/uploads/calendar/logo/${_meta.showLogo}" alt="Show Logo">`
+              : `<i class="profile-user-img img-fluid img-circle fas fa-broadcast-tower bg-indigo" aria-hidden="true" title="Remote broadcast"></i><span class="sr-only">Remote broadcast</span>`
           }`
         );
+        ribbonColor = "indigo";
+        ribbonText = "REMOTE";
+        ribbonTitle = "This is a live show produced from a remote location.";
       }
       if (
         _meta.state.startsWith("automation_") &&
@@ -354,6 +366,9 @@ meta.on("newMeta", "renderer", (response, _meta) => {
         $(".nowplaying-icon").html(
           `<i class="profile-user-img img-fluid img-circle fas fa-music bg-orange" aria-hidden="true" title="Broadcast about to start"></i><span class="sr-only">Broadcast about to start</span>`
         );
+        ribbonColor = "orange";
+        ribbonText = "START";
+        ribbonTitle = "A broadcast is about to start.";
       }
       if (
         ["automation_on", "automation_break", "unknown"].indexOf(
@@ -363,22 +378,34 @@ meta.on("newMeta", "renderer", (response, _meta) => {
         $(".nowplaying-icon").html(
           `<i class="profile-user-img img-fluid img-circle fas fa-music bg-secondary" aria-hidden="true" title="Music"></i><span class="sr-only">Music</span>`
         );
+        ribbonColor = "secondary";
+        ribbonText = "RANDOM";
+        ribbonTitle = "Random music is currently playing.";
       }
       if (_meta.state === "automation_playlist") {
         $(".nowplaying-icon").html(
           `<i class="profile-user-img img-fluid img-circle fas fa-music bg-primary" aria-hidden="true" title="Music playlist"></i><span class="sr-only">Music playlist</span>`
         );
+        ribbonColor = "primary";
+        ribbonText = "PLAYLIST";
+        ribbonTitle = "A music playlist is currently airing.";
       }
       if (_meta.state === "automation_genre") {
         $(".nowplaying-icon").html(
           `<i class="profile-user-img img-fluid img-circle fas fa-music bg-info" aria-hidden="true" title="Music genre"></i><span class="sr-only">Music genre</span>`
         );
+        ribbonColor = "info";
+        ribbonText = "GENRE";
+        ribbonTitle = "A genre rotation is currently airing.";
       }
 
       // Update now playing text
       $(".nowplaying-line1").html(_meta.line1);
       $(".nowplaying-line2").html(_meta.line2);
       $(".nowplaying-topic").html(_meta.topic);
+      $(".nowplaying-ribbon").html(`<div class="ribbon bg-${ribbonColor}" title="${ribbonTitle}">
+      ${ribbonText}
+      </div>`);
     }
   } catch (e) {
     console.error(e);
@@ -560,21 +587,33 @@ function updateCalendar() {
 
                 var badgeInfo;
                 if (["canceled-changed"].indexOf(event.scheduleType) !== -1) {
-                  badgeInfo = `<span class="badge badge-warning" style="font-size: 1em;">RESCHEDULED</span>`;
+                  badgeInfo = `<div class="ribbon-wrapper ribbon-lg">
+                  <div class="ribbon bg-orange" title="This event was re-scheduled to a different date/time for this instance.">
+                    RE-SCHEDULED
+                  </div>
+                  </div>`;
                 }
                 if (
                   ["updated", "updated-system"].indexOf(event.scheduleType) !==
                     -1 &&
                   event.timeChanged
                 ) {
-                  badgeInfo = `<span class="badge badge-warning" style="font-size: 1em;">TEMP TIME CHANGE</span>`;
+                  badgeInfo = `<div class="ribbon-wrapper ribbon-lg">
+                  <div class="ribbon bg-warning" title="This event was re-scheduled from its original date/time; this is the new temporary date/time.">
+                    TEMP TIME
+                  </div>
+                  </div>`;
                 }
                 if (
                   ["canceled", "canceled-system"].indexOf(
                     event.scheduleType
                   ) !== -1
                 ) {
-                  badgeInfo = `<span class="badge badge-danger" style="font-size: 1em;">CANCELED</span>`;
+                  badgeInfo = `<div class="ribbon-wrapper ribbon-lg">
+                  <div class="ribbon bg-danger" title="This event was canceled for this date/time.">
+                    CANCELED
+                  </div>
+                  </div>`;
                 }
 
                 var shouldBeDark =
@@ -585,7 +624,13 @@ function updateCalendar() {
                 html += `<div class="col" style="min-width: 280px;">
                 <div class="p-2 card card-${colorClass} card-outline${
                   shouldBeDark ? ` bg-secondary` : ``
-                }">
+                } position-relative">
+                  <div class="ribbon-wrapper">
+                    <div class="ribbon bg-${colorClass}">
+                    ${event.type}
+                    </div>
+                  </div>
+                  ${badgeInfo || ``}
                   <div class="card-body box-profile">
                     <div class="text-center">
                     ${
@@ -602,15 +647,6 @@ function updateCalendar() {
                     }text-center">${event.hosts}</p>
     
                     <ul class="list-group list-group-unbordered mb-3 text-center">
-                    ${
-                      badgeInfo
-                        ? `<li class="list-group-item${
-                            shouldBeDark ? ` bg-secondary` : ``
-                          }">
-                    <b>${badgeInfo}</b>
-                  </li>`
-                        : ``
-                    }
                     <li class="list-group-item${
                       shouldBeDark ? ` bg-secondary` : ``
                     }">
@@ -819,7 +855,12 @@ function updateDirectorsCalendar() {
                   theClass = "indigo";
                 }
                 html += `<div class="col" style="min-width: 280px;">
-                  <div class="p-2 card card-${theClass} card-outline">
+                  <div class="p-2 card card-${theClass} card-outline position-relative">
+                  <div class="ribbon-wrapper ribbon-lg">
+                  <div class="ribbon bg-${theClass}" title="${textTitle}">
+                    ${text1}
+                  </div>
+                  </div>
                     <div class="card-body box-profile">
                       <div class="text-center">
                       ${
@@ -841,9 +882,6 @@ function updateDirectorsCalendar() {
                       }</p>
       
                       <ul class="list-group list-group-unbordered mb-3 text-center">
-                      <li class="list-group-item">
-                      <div class="p-1 text-center" style="width: 100%;"><span class="notification badge badge-${theClass}" style="font-size: 1em;" title="${textTitle}">${text1}</span></div>
-                      </li>
                       <li class="list-group-item">
                           <strong>${directorHours[directorHour].hours.join(
                             "<br />"
