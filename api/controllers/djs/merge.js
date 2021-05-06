@@ -38,7 +38,7 @@ module.exports = {
       var updatedRecords = {};
 
       // Update all XP records
-      await sails.models.xp.update({ dj: djfrom.ID }, { dj: djto.ID }).fetch();
+      await sails.models.djnotes.update({ dj: djfrom.ID }, { dj: djto.ID }).fetch();
 
       // Update all attendance records
       await sails.models.attendance

@@ -53,7 +53,7 @@ module.exports = {
 
       var query = {};
 
-      var dj = await sails.models.djs.findOne({ ID: inputs.event[ key ] });
+      var dj = await sails.models.djs.findOne({ ID: inputs.event[ key ], active: true });
       if (dj && dj.email && dj.email !== '') {
         to.push(dj.email);
       }

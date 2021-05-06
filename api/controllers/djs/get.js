@@ -55,7 +55,7 @@ module.exports = {
         delete record.email;
 
         returnData.DJ = record
-        returnData.XP = await sails.models.xp.find({ dj: inputs.dj })
+        returnData.notes = await sails.models.djnotes.find({ dj: inputs.dj })
         returnData.attendance = await sails.models.attendance.find({
           or: [
             { dj: inputs.dj },

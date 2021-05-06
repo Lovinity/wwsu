@@ -13,6 +13,11 @@ module.exports = {
       autoIncrement: true,
     },
 
+    active: {
+      type: "boolean",
+      defaultsTo: true
+    },
+
     name: {
       type: "string",
       required: true,
@@ -221,8 +226,8 @@ module.exports = {
         .update({ lockToDJ: destroyedRecord.ID }, { lockToDJ: 0 })
         .fetch();
 
-      // Destroy XP records
-      await sails.models.xp.destroy({ dj: destroyedRecord.ID }).fetch();
+      // Destroy notes records
+      await sails.models.djnotes.destroy({ dj: destroyedRecord.ID }).fetch();
 
       // Edit meta if necessary
       if (sails.models.meta.memory.dj === destroyedRecord.ID) {

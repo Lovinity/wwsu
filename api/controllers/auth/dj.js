@@ -36,7 +36,7 @@ module.exports = {
 
     try {
       // Verify the DJ exists first
-      var dj = await sails.models.djs.findOne({ name: inputs.username });
+      var dj = await sails.models.djs.findOne({ name: inputs.username, active: true });
       if (!dj) {
         return exits.noToken({
           errToken:

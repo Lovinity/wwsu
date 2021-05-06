@@ -51,7 +51,7 @@ module.exports = {
         var show = dj[ 1 ];
         var djs = dj[ 0 ];
         dj = dj[ 0 ].split("; ");
-        var query = { name: [] };
+        var query = { name: [], active: true };
         if (dj && dj[ 0 ])
           query.name.push(dj[ 0 ])
         if (dj && dj[ 1 ])

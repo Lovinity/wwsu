@@ -42,7 +42,10 @@ module.exports = {
     let directors;
     switch (inputs.sendTo) {
       case "All DJs, Directors, and Assistants":
-        djs = await sails.models.djs.find({ email: { "!=": null } });
+        djs = await sails.models.djs.find({
+          email: { "!=": null },
+          active: true
+        });
         djs
           .filter(dj => dj.email && dj.email !== "")
           .map(dj => recipients.push(dj.email));
@@ -80,7 +83,10 @@ module.exports = {
           .map(director => recipients.push(director.email));
         break;
       case "All DJs":
-        djs = await sails.models.djs.find({ email: { "!=": null } });
+        djs = await sails.models.djs.find({
+          email: { "!=": null },
+          active: true
+        });
         djs
           .filter(dj => dj.email && dj.email !== "")
           .map(dj => recipients.push(dj.email));
@@ -90,7 +96,8 @@ module.exports = {
           email: { "!=": null },
           lastSeen: {
             ">=": moment(sails.config.custom.startOfSemester).toISOString(true)
-          }
+          },
+          active: true
         });
         djs
           .filter(dj => dj.email && dj.email !== "")
@@ -103,7 +110,8 @@ module.exports = {
             ">=": moment()
               .subtract(30, "days")
               .toISOString(true)
-          }
+          },
+          active: true
         });
         djs
           .filter(dj => dj.email && dj.email !== "")
@@ -116,7 +124,8 @@ module.exports = {
             ">=": moment()
               .subtract(7, "days")
               .toISOString(true)
-          }
+          },
+          active: true
         });
         djs
           .filter(dj => dj.email && dj.email !== "")

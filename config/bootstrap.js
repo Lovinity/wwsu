@@ -2028,7 +2028,7 @@ module.exports.bootstrap = async function(done) {
           sails.models.directors,
           sails.models.songsliked,
           sails.models.sports,
-          sails.models.xp,
+          sails.models.djnotes,
           sails.models.schedule,
           sails.models.version
         ];
@@ -2954,39 +2954,107 @@ module.exports.bootstrap = async function(done) {
     return new Promise(async (resolve, reject) => {
       sails.log.debug("CRON archiveLogs called");
       try {
-        await sails.models.attendance.destroy({
-          createdAt: { "<": moment().subtract(2, "years").toISOString(true) },
-        });
-        await sails.models.calendar.destroy({
-          updatedAt: {
-            "<": moment().subtract(2, "years").toISOString(true),
-          },
-          active: false,
-        });
-        await sails.models.emails.destroy({
-          createdAt: { "<": moment().subtract(2, "years").toISOString(true) },
-        });
-        await sails.models.history.destroy({
-          createdAt: { "<": moment().subtract(2, "years").toISOString(true) },
-        });
-        await sails.models.listeners.destroy({
-          createdAt: { "<": moment().subtract(2, "years").toISOString(true) },
-        });
-        await sails.models.logs.destroy({
-          createdAt: { "<": moment().subtract(2, "years").toISOString(true) },
-        });
-        await sails.models.messages.destroy({
-          createdAt: { "<": moment().subtract(2, "years").toISOString(true) },
-        });
-        await sails.models.requests.destroy({
-          createdAt: { "<": moment().subtract(2, "years").toISOString(true) },
-        });
-        await sails.models.timesheet.destroy({
-          createdAt: { "<": moment().subtract(2, "years").toISOString(true) },
-        });
-        await sails.models.uabtimesheet.destroy({
-          createdAt: { "<": moment().subtract(2, "years").toISOString(true) },
-        });
+        await sails.models.attendance
+          .destroy({
+            createdAt: {
+              "<": moment()
+                .subtract(2, "years")
+                .toISOString(true)
+            }
+          })
+          .fetch();
+        await sails.models.calendar
+          .destroy({
+            updatedAt: {
+              "<": moment()
+                .subtract(2, "years")
+                .toISOString(true)
+            },
+            active: false
+          })
+          .fetch();
+        await sails.models.djs
+          .destroy({
+            updatedAt: {
+              "<": moment()
+                .subtract(1, "years")
+                .toISOString(true)
+            },
+            active: false
+          })
+          .fetch();
+        await sails.models.emails
+          .destroy({
+            createdAt: {
+              "<": moment()
+                .subtract(2, "years")
+                .toISOString(true)
+            }
+          })
+          .fetch();
+        await sails.models.history
+          .destroy({
+            createdAt: {
+              "<": moment()
+                .subtract(2, "years")
+                .toISOString(true)
+            }
+          })
+          .fetch();
+        await sails.models.listeners
+          .destroy({
+            createdAt: {
+              "<": moment()
+                .subtract(2, "years")
+                .toISOString(true)
+            }
+          })
+          .fetch();
+        await sails.models.logs
+          .destroy({
+            createdAt: {
+              "<": moment()
+                .subtract(2, "years")
+                .toISOString(true)
+            }
+          })
+          .fetch();
+        await sails.models.messages
+          .destroy({
+            createdAt: {
+              "<": moment()
+                .subtract(2, "years")
+                .toISOString(true)
+            }
+          })
+          .fetch();
+        await sails.models.requests
+          .destroy({
+            createdAt: {
+              "<": moment()
+                .subtract(2, "years")
+                .toISOString(true)
+            }
+          })
+          .fetch();
+        await sails.models.timesheet
+          .destroy({
+            createdAt: {
+              "<": moment()
+                .subtract(2, "years")
+                .toISOString(true)
+            }
+          })
+          .fetch();
+        await sails.models.uabtimesheet
+          .destroy({
+            createdAt: {
+              "<": moment()
+                .subtract(2, "years")
+                .toISOString(true)
+            }
+          })
+          .fetch();
       } catch (e) {
         sails.log.error(e);
         return reject(e);

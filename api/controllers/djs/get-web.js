@@ -15,7 +15,7 @@ module.exports = {
 
     try {
       var returnData = { ID: this.req.payload.ID, name: this.req.payload.name }
-      returnData.XP = await sails.models.xp.find({ dj: this.req.payload.ID })
+      returnData.notes = await sails.models.djnotes.find({ dj: this.req.payload.ID })
       returnData.attendance = await sails.models.attendance.find({
         or: [
           { dj: this.req.payload.ID },
