@@ -109,7 +109,8 @@ module.exports = {
       name: inputs.name,
       description: inputs.description,
       logo: inputs.logo,
-      banner: inputs.banner
+      banner: inputs.banner,
+      lastAired: moment('2002-01-01 00:00:00').toISOString(true)
     };
 
     try {

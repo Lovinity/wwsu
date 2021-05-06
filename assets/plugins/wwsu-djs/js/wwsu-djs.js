@@ -22,9 +22,11 @@ class WWSUdjs extends WWSUdb {
 			add: "/djs/add",
 			edit: "/djs/edit",
 			remove: "/djs/remove",
+			active: "/djs/active",
+			inactive: "/djs/inactive"
 		};
 		this.data = {
-			get: {},
+			get: {}
 		};
 
 		this.assignSocketEvent("djs", this.manager.socket);
@@ -34,25 +36,29 @@ class WWSUdjs extends WWSUdb {
 		this.djsModal = new WWSUmodal(`Manage DJs`, null, ``, true, {
 			headerColor: "",
 			overlayClose: false,
-			zindex: 1100,
+			zindex: 1100
 		});
 
 		this.djModal = new WWSUmodal(``, null, ``, true, {
 			headerColor: "",
 			overlayClose: false,
-			zindex: 1100,
+			zindex: 1100
 		});
 
 		this.djInfoModal = new WWSUmodal(``, null, ``, true, {
 			headerColor: "",
 			width: 800,
-			zindex: 1100,
+			zindex: 1100
 		});
 
 		this.newDjModal = new WWSUmodal(`New DJ`, null, ``, true, {
 			headerColor: "",
 			overlayClose: false,
-			zindex: 1110,
+			zindex: 1110
+		});
+
+		this.on("change", "WWSUdjs", () => {
+			this.updateTable();
 		});
 	}
 
@@ -103,12 +109,12 @@ class WWSUdjs extends WWSUdb {
 					columns: [
 						{ title: "DJ Name" },
 						{ title: "Full Name" },
-						{ title: "Last Seen" },
+						{ title: "Last Seen" }
 					],
 					order: [[0, "asc"]],
-					pageLength: 100,
+					pageLength: 100
 				});
-				this.find().forEach((dj) => {
+				this.find().forEach(dj => {
 					table.rows.add([
 						[
 							dj.name || "Unknown",
@@ -120,13 +126,13 @@ class WWSUdjs extends WWSUdb {
 										? this.manager.get("WWSUMeta").meta.timezone
 										: moment.tz.guess()
 								)
-								.format("LLL"),
-						],
+								.format("LLL")
+						]
 					]);
 				});
 				table.draw();
 				$(this.djsModal.body).unblock();
-			},
+			}
 		});
 	}
 
@@ -141,7 +147,7 @@ class WWSUdjs extends WWSUdb {
 
 		this.newDjModal.iziModal("open");
 
-		let _djs = this.find().map((dj) => dj.name);
+		let _djs = this.find().map(dj => dj.name);
 
 		$(this.newDjModal.body).alpaca({
 			schema: {
@@ -149,42 +155,42 @@ class WWSUdjs extends WWSUdb {
 				type: "object",
 				properties: {
 					ID: {
-						type: "number",
+						type: "number"
 					},
 					name: {
 						type: "string",
 						required: true,
 						title: "Name of DJ as used on radio",
-						maxLength: 255,
+						maxLength: 255
 					},
 					realName: {
 						type: "string",
 						title: "Real full name of person",
-						maxLength: 255,
+						maxLength: 255
 					},
 					email: {
 						type: "string",
 						format: "email",
 						title: "Change email address",
-						maxLength: 255,
+						maxLength: 255
 					},
 					login: {
 						type: "string",
 						format: "password",
 						title: "Change login password",
-						maxLength: 255,
-					},
-				},
+						maxLength: 255
+					}
+				}
 			},
 			options: {
 				fields: {
 					ID: {
-						type: "hidden",
+						type: "hidden"
 					},
 					name: {
 						helper:
 							"This is the name that appears publicly on shows, the website, etc. You may not use the same DJ name twice.",
-						validator: function (callback) {
+						validator: function(callback) {
 							let value = this.getValue();
 							if (
 								(!data || data.name !== value) &&
@@ -193,34 +199,34 @@ class WWSUdjs extends WWSUdb {
 								callback({
 									status: false,
 									message:
-										"A DJ by this name already exists in the system. This is not allowed.",
+										"A DJ by this name already exists in the system. This is not allowed."
 								});
 								return;
 							}
 							if (value.includes(" -") || value.includes("; ")) {
 								callback({
 									status: false,
-									message: `DJ names may not contain " - " or semicolons. These are used by the system as separators. If you are adding multiple DJs, please add each one by one.`,
+									message: `DJ names may not contain " - " or semicolons. These are used by the system as separators. If you are adding multiple DJs, please add each one by one.`
 								});
 								return;
 							}
 							callback({
-								status: true,
+								status: true
 							});
-						},
+						}
 					},
 					realName: {
 						helper:
-							"Used for directors to help easily identify who this person is.",
+							"Used for directors to help easily identify who this person is."
 					},
 					email: {
 						helper:
-							"Change the email address used to send the DJ show changes / cancellations and analytics. Type remove@example.com to remove their email address. <strong>Campus email is highly recommended.</strong>",
+							"Change the email address used to send the DJ show changes / cancellations and analytics. Type remove@example.com to remove their email address. <strong>Campus email is highly recommended.</strong>"
 					},
 					login: {
 						helper:
-							"DJs will use this to log in to their online DJ panel. In the future, this may be used to log in to prod / onair computers during schedule shows or bookings. You might choose to use their door PIN. Type remove to remove their password.",
-					},
+							"DJs will use this to log in to their online DJ panel. In the future, this may be used to log in to prod / onair computers during schedule shows or bookings. You might choose to use their door PIN. Type remove to remove their password."
+					}
 				},
 				form: {
 					buttons: {
@@ -234,26 +240,26 @@ class WWSUdjs extends WWSUdb {
 								}
 								let value = form.getValue();
 								if (data) {
-									this.editDJ(value, (success) => {
+									this.editDJ(value, success => {
 										if (success) {
 											this.djsModal.iziModal("close");
 											this.newDjModal.iziModal("close");
 										}
 									});
 								} else {
-									this.addDJ(value, (success) => {
+									this.addDJ(value, success => {
 										if (success) {
 											this.djsModal.iziModal("close");
 											this.newDjModal.iziModal("close");
 										}
 									});
 								}
-							},
-						},
-					},
-				},
+							}
+						}
+					}
+				}
 			},
-			data: data ? data : [],
+			data: data ? data : []
 		});
 	}
 
@@ -270,16 +276,16 @@ class WWSUdjs extends WWSUdb {
 					dom: `#modal-${this.newDjModal.id}`,
 					method: "post",
 					url: this.endpoints.add,
-					data: data,
+					data: data
 				},
-				(response) => {
+				response => {
 					if (response !== "OK") {
 						$(document).Toasts("create", {
 							class: "bg-warning",
 							title: "Error adding",
 							body:
 								"There was an error adding the DJ. Please make sure you filled all fields correctly.",
-							delay: 10000,
+							delay: 10000
 						});
 						cb(false);
 					} else {
@@ -288,7 +294,7 @@ class WWSUdjs extends WWSUdb {
 							title: "DJ Added",
 							autohide: true,
 							delay: 10000,
-							body: `DJ has been created`,
+							body: `DJ has been created`
 						});
 						cb(true);
 					}
@@ -300,9 +306,9 @@ class WWSUdjs extends WWSUdb {
 				title: "Error adding DJ",
 				body:
 					"There was an error adding a new DJ. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
-				icon: "fas fa-skull-crossbones fa-lg",
+				icon: "fas fa-skull-crossbones fa-lg"
 			});
 			console.error(e);
 			cb(false);
@@ -322,16 +328,16 @@ class WWSUdjs extends WWSUdb {
 					dom: `#modal-${this.newDjModal.id}`,
 					method: "post",
 					url: this.endpoints.edit,
-					data: data,
+					data: data
 				},
-				(response) => {
+				response => {
 					if (response !== "OK") {
 						$(document).Toasts("create", {
 							class: "bg-warning",
 							title: "Error editing",
 							body:
 								"There was an error editing the DJ. Please make sure you filled all fields correctly.",
-							delay: 10000,
+							delay: 10000
 						});
 						console.log(response);
 						if (typeof cb === "function") cb(false);
@@ -341,7 +347,7 @@ class WWSUdjs extends WWSUdb {
 							title: "DJ Edited",
 							autohide: true,
 							delay: 10000,
-							body: `DJ has been edited`,
+							body: `DJ has been edited`
 						});
 						if (typeof cb === "function") cb(true);
 					}
@@ -353,9 +359,9 @@ class WWSUdjs extends WWSUdb {
 				title: "Error adding DJ",
 				body:
 					"There was an error editing the DJ. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
-				icon: "fas fa-skull-crossbones fa-lg",
+				icon: "fas fa-skull-crossbones fa-lg"
 			});
 			console.error(e);
 			if (typeof cb === "function") cb(false);
@@ -363,30 +369,30 @@ class WWSUdjs extends WWSUdb {
 	}
 
 	/**
-	 * Remove a DJ from the system.
+	 * Mark a DJ as inactive in the system.
 	 *
 	 * @param {Object} data The data to send in the request to the API
 	 * @param {function} cb Callback called after the request is complete. Parameter false if unsuccessful or true if it was.
 	 */
-	removeDJ(data, cb) {
+	inactiveDJ(data, cb) {
 		try {
 			this.manager.get("directorReq").request(
 				{
 					dom: `#modal-${this.newDjModal.id}`,
 					method: "post",
-					url: this.endpoints.remove,
-					data: data,
+					url: this.endpoints.inactive,
+					data: data
 				},
-				(response) => {
+				response => {
 					if (response !== "OK") {
 						$(document).Toasts("create", {
 							class: "bg-danger",
-							title: "Error removing DJ",
+							title: "Error marking DJ as inactive",
 							body:
-								"There was an error removing the DJ. Please report this to the engineer.",
-							autoHide: true,
+								"There was an error marking the DJ as inactive. Please report this to the engineer.",
+							autohide: true,
 							delay: 10000,
-							icon: "fas fa-skull-crossbones fa-lg",
+							icon: "fas fa-skull-crossbones fa-lg"
 						});
 						if (typeof cb === "function") cb(false);
 					} else {
@@ -395,7 +401,7 @@ class WWSUdjs extends WWSUdb {
 							title: "DJ Removed",
 							autohide: true,
 							delay: 30000,
-							body: `DJ has been removed <br /><strong>WARNING!</strong> If this DJ had any DJ Controls installed on personal machines, please remove access under Administration -> Hosts.`,
+							body: `DJ was marked inactive.<br /><strong>WARNING!</strong> If this DJ had any DJ Controls installed on personal machines, please remove access under Administration -> Hosts.`
 						});
 						if (typeof cb === "function") cb(true);
 					}
@@ -404,17 +410,125 @@ class WWSUdjs extends WWSUdb {
 		} catch (e) {
 			$(document).Toasts("create", {
 				class: "bg-danger",
-				title: "Error removing DJ",
+				title: "Error marking DJ inactive",
 				body:
-					"There was an error removing the DJ. Please report this to the engineer.",
-				autoHide: true,
+					"There was an error marking the DJ as inactive. Please report this to the engineer.",
+				autohide: true,
 				delay: 10000,
-				icon: "fas fa-skull-crossbones fa-lg",
+				icon: "fas fa-skull-crossbones fa-lg"
 			});
 			console.error(e);
 			if (typeof cb === "function") cb(false);
 		}
 	}
+
+	/**
+	 * Mark a DJ as active in the system.
+	 *
+	 * @param {Object} data The data to send in the request to the API
+	 * @param {function} cb Callback called after the request is complete. Parameter false if unsuccessful or true if it was.
+	 */
+	activeDJ(data, cb) {
+		try {
+			this.manager.get("directorReq").request(
+				{
+					dom: `#modal-${this.newDjModal.id}`,
+					method: "post",
+					url: this.endpoints.active,
+					data: data
+				},
+				response => {
+					if (response !== "OK") {
+						$(document).Toasts("create", {
+							class: "bg-danger",
+							title: "Error marking DJ as active",
+							body:
+								"There was an error marking the DJ as active. Please report this to the engineer.",
+							autohide: true,
+							delay: 10000,
+							icon: "fas fa-skull-crossbones fa-lg"
+						});
+						if (typeof cb === "function") cb(false);
+					} else {
+						$(document).Toasts("create", {
+							class: "bg-success",
+							title: "DJ Removed",
+							autohide: true,
+							delay: 5000,
+							body: `DJ was marked active.`
+						});
+						if (typeof cb === "function") cb(true);
+					}
+				}
+			);
+		} catch (e) {
+			$(document).Toasts("create", {
+				class: "bg-danger",
+				title: "Error marking DJ active",
+				body:
+					"There was an error marking the DJ as active. Please report this to the engineer.",
+				autohide: true,
+				delay: 10000,
+				icon: "fas fa-skull-crossbones fa-lg"
+			});
+			console.error(e);
+			if (typeof cb === "function") cb(false);
+		}
+	}
+
+		/**
+	 * Permanently remove a DJ from the system.
+	 *
+	 * @param {Object} data The data to send in the request to the API
+	 * @param {function} cb Callback called after the request is complete. Parameter false if unsuccessful or true if it was.
+	 */
+		 removeDJ(data, cb) {
+			try {
+				this.manager.get("directorReq").request(
+					{
+						dom: `#modal-${this.newDjModal.id}`,
+						method: "post",
+						url: this.endpoints.remove,
+						data: data
+					},
+					response => {
+						if (response !== "OK") {
+							$(document).Toasts("create", {
+								class: "bg-danger",
+								title: "Error removing DJ",
+								body:
+									"There was an error removing the DJ. Please report this to the engineer.",
+								autohide: true,
+								delay: 10000,
+								icon: "fas fa-skull-crossbones fa-lg"
+							});
+							if (typeof cb === "function") cb(false);
+						} else {
+							$(document).Toasts("create", {
+								class: "bg-success",
+								title: "DJ Removed",
+								autohide: true,
+								delay: 30000,
+								body: `DJ was removed.<br /><strong>WARNING!</strong> If this DJ had any DJ Controls installed on personal machines, please remove access under Administration -> Hosts.`
+							});
+							if (typeof cb === "function") cb(true);
+						}
+					}
+				);
+			} catch (e) {
+				$(document).Toasts("create", {
+					class: "bg-danger",
+					title: "Error removing DJ",
+					body:
+						"There was an error removing the DJ. Please report this to the engineer.",
+					autohide: true,
+					delay: 10000,
+					icon: "fas fa-skull-crossbones fa-lg"
+				});
+				console.error(e);
+				if (typeof cb === "function") cb(false);
+			}
+		}
 
 	/**
 	 * Initialize the table for managing DJs.
@@ -440,14 +554,14 @@ class WWSUdjs extends WWSUdb {
 					columns: [
 						{ title: "DJ Handle" },
 						{ title: "Real Name" },
-						{ title: "Icon" },
+						{ title: "Active?" },
 						{ title: "Last Seen" },
-						{ title: "Actions" },
+						{ title: "Actions" }
 					],
 					columnDefs: [{ responsivePriority: 1, targets: 4 }],
 					order: [
 						[0, "asc"],
-						[1, "asc"],
+						[1, "asc"]
 					],
 					pageLength: 100,
 					buttons: ["copy", "csv", "excel", "pdf", "print", "colvis"],
@@ -456,41 +570,87 @@ class WWSUdjs extends WWSUdb {
 						$(".btn-dj-logs").unbind("click");
 						$(".btn-dj-analytics").unbind("click");
 						$(".btn-dj-edit").unbind("click");
+						$(".btn-dj-inactive").unbind("click");
+						$(".btn-dj-active").unbind("click");
 						$(".btn-dj-delete").unbind("click");
 
-						$(".btn-dj-analytics").click((e) => {
+						$(".btn-dj-analytics").click(e => {
 							let dj = this.find().find(
-								(dj) => dj.ID === parseInt($(e.currentTarget).data("id"))
+								dj => dj.ID === parseInt($(e.currentTarget).data("id"))
 							);
 							this.showDJAnalytics(dj);
 						});
 
-						$(".btn-dj-logs").click((e) => {
+						$(".btn-dj-logs").click(e => {
 							let dj = this.find().find(
-								(dj) => dj.ID === parseInt($(e.currentTarget).data("id"))
+								dj => dj.ID === parseInt($(e.currentTarget).data("id"))
 							);
 							this.showDJLogs(dj);
 						});
 
-						$(".btn-dj-edit").click((e) => {
+						$(".btn-dj-edit").click(e => {
 							let dj = this.find().find(
-								(dj) => dj.ID === parseInt($(e.currentTarget).data("id"))
+								dj => dj.ID === parseInt($(e.currentTarget).data("id"))
 							);
 							this.showDJForm(dj);
 						});
 
-						$(".btn-dj-delete").click((e) => {
+						$(".btn-dj-inactive").click(e => {
 							let dj = this.find().find(
-								(dj) => dj.ID === parseInt($(e.currentTarget).data("id"))
+								dj => dj.ID === parseInt($(e.currentTarget).data("id"))
 							);
 							this.manager.get("WWSUutil").confirmDialog(
-								`Are you sure you want to <strong>permanently</strong> remove the DJ "${dj.name}"?
+								`Are you sure you want to <strong>mark the DJ "${dj.name}" as inactive</strong>?
                             <ul>
-                            <li><strong>Do NOT permanently remove a DJ until you no longer need their analytics, and they are no longer with WWSU and will not be returning.</strong></li>
-                            <li>This removes the DJ from the system. Their analyics can no longer be viewed under "Analytics", but their show logs will remain in the system.</li>
-                            <li>The DJ can no longer log in with their password, such as the DJ Panel.</li>
+                            <li><strong>Do NOT mark a DJ as inactive until/unless they are no longer going to air any broadcasts for the forseeable future.</strong></li>
+							<li><strong>An inactive DJ will be permanently removed from the system after going one year without airing a broadcast ("last seen") if not re-activated.</strong> This means their analytics can no longer be viewed once permanently removed (but show logs will still be available).</li>
+							<li>The DJ will no longer receive any emails sent via the DJ Controls email tab so long as they are inactive.</li>
+                            <li>The DJ can no longer log in or authorize, such as to access the DJ Panel, as long as they are inactive.</li>
+							<li>Any hosts which has this DJ set as the "Lock to DJ" will have that setting changed to "Do not allow anyone to start any kind of broadcast on this host". However, the host will still be authorized to connect to WWSU unless manually edited or removed.</li>
                             <li>The DJ will be removed from all calendar events they are listed on.</li>
-                            <li><strong>Any events which this DJ was the host of will also be removed</strong> (If you don't want this, please assign a new host to these events before deleting this DJ.). Subscribers of those shows will be notified it has been permanently discontinued. And analytics for those shows can no longer be viewed (but logs will remain).
+                            <li><strong>Any events which this DJ was the primary host of will also be marked inactive</strong> (If you don't want this, please assign a new host to these events before deleting this DJ.). Subscribers of those shows will be notified it has been discontinued.</li>
+							<li>Inactive DJs cannot be set as event hosts.</li>
+                            </ul>`,
+								dj.name,
+								() => {
+									this.inactiveDJ({ ID: dj.ID });
+								}
+							);
+						});
+
+						$(".btn-dj-active").click(e => {
+							let dj = this.find().find(
+								dj => dj.ID === parseInt($(e.currentTarget).data("id"))
+							);
+							this.manager.get("WWSUutil").confirmDialog(
+								`Are you sure you want to <strong>mark the DJ "${dj.name}" as active</strong>?
+                            <ul>
+							<li>The DJ will start to receive emails sent via the DJ Controls -> Email tab.</li>
+                            <li>The DJ can log in or authorize again, such as to access the DJ Panel.</li>
+							<li>The DJ can now be set as a host / co-host for events again.</li>
+							<li><strong>Hosts which had this DJ set as the "Lock to DJ" will need to be manually edited</strong>; this setting was switched to no one can start any broadcast when the DJ was marked inactive.</li>
+							<li><strong>Events which had this DJ as a host or co-host will need to be manually edited</strong>; This DJ was removed as co-host from all events when marked inactive. And events which this DJ was the primary host were marked inactive.</li>
+                            </ul>`,
+								null,
+								() => {
+									this.activeDJ({ ID: dj.ID });
+								}
+							);
+						});
+
+						$(".btn-dj-delete").click(e => {
+							let dj = this.find().find(
+								dj => dj.ID === parseInt($(e.currentTarget).data("id"))
+							);
+							this.manager.get("WWSUutil").confirmDialog(
+								`Are you sure you want to <strong>permanently remove the DJ "${dj.name}"</strong>?
+                            <ul>
+                            <li><strong>It is NOT recommended permanently removing a DJ unless the DJ was added out of error</strong>. Instead, mark a DJ as inactive.</li>
+							<li>This DJ's analytics will no longer be available (but show logs will still be available).</li>
+                            <li>The DJ can no longer log in or authorize, such as to access the DJ Panel.</li>
+							<li>Any hosts which has this DJ set as the "Lock to DJ" will have that setting changed to "Do not allow anyone to start any kind of broadcast on this host". However, the host will still be authorized to connect to WWSU unless manually edited or removed.</li>
+                            <li>The DJ will be removed from all calendar events they are listed on.</li>
+                            <li><strong>Any events which this DJ was the primary host of will also be marked inactive</strong> (If you don't want this, please assign a new host to these events before deleting this DJ.). Subscribers of those shows will be notified it has been discontinued.
                             </ul>`,
 								dj.name,
 								() => {
@@ -498,7 +658,7 @@ class WWSUdjs extends WWSUdb {
 								}
 							);
 						});
-					},
+					}
 				});
 
 				this.table
@@ -525,9 +685,11 @@ class WWSUdjs extends WWSUdb {
 		this.manager.get("WWSUanimations").add("djs-update-table", () => {
 			if (this.table) {
 				this.table.clear();
-				this.find().forEach((dj) => {
-					let icon = `secondary`;
-					if (
+				this.find().forEach(dj => {
+					let icon = `<i class="far fa-times-circle text-secondary" title="This DJ was marked inactive."></i>`;
+					if (!dj.active) {
+						icon = `<i class="far fa-times-circle text-secondary" title="This DJ was marked inactive."></i>`;
+					} else if (
 						!dj.lastSeen ||
 						moment(dj.lastSeen)
 							.add(30, "days")
@@ -539,7 +701,7 @@ class WWSUdjs extends WWSUdb {
 								)
 							)
 					) {
-						icon = `danger`;
+						icon = `<i class="far fa-question-circle text-danger" title="This DJ did not air a broadcast for over 30 days."></i>`;
 					} else if (
 						moment(dj.lastSeen)
 							.add(7, "days")
@@ -551,14 +713,14 @@ class WWSUdjs extends WWSUdb {
 								)
 							)
 					) {
-						icon = `warning`;
+						icon = `<i class="far fa-check-circle text-warning" title="This DJ did not air a broadcast in the last 7 to 30 days."></i>`;
 					} else {
-						icon = `success`;
+						icon = `<i class="fas fa-check-circle text-success" title="This DJ aired a broadcast in the last 7 days."></i>`;
 					}
 					this.table.row.add([
 						dj.name || "",
 						dj.realName || "",
-						`<i class="fas fa-dot-circle text-${icon}"></i>`,
+						`${icon}`,
 						dj.lastSeen
 							? moment
 									.tz(
@@ -569,7 +731,9 @@ class WWSUdjs extends WWSUdb {
 									)
 									.format("LLLL")
 							: "Unknown / Long Ago",
-						`<div class="btn-group"><button class="btn btn-sm btn-primary btn-dj-analytics" data-id="${dj.ID}" title="View DJ and Show Analytics"><i class="fas fa-chart-line"></i></button><button class="btn btn-sm btn-secondary btn-dj-logs" data-id="${dj.ID}" title="View Show Logs"><i class="fas fa-clipboard-list"></i></button><button class="btn btn-sm bg-indigo btn-dj-notes" data-id="${dj.ID}" title="View/Edit Notes and Remote Credits"><i class="fas fa-sticky-note"></i></button><button class="btn btn-sm btn-warning btn-dj-edit" data-id="${dj.ID}" title="Edit DJ"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-danger btn-dj-delete" data-id="${dj.ID}" title="Remove DJ"><i class="fas fa-trash"></i></button></div>`,
+						dj.active
+							? `<div class="btn-group"><button class="btn btn-sm btn-primary btn-dj-analytics" data-id="${dj.ID}" title="View DJ and Show Analytics"><i class="fas fa-chart-line"></i></button><button class="btn btn-sm btn-secondary btn-dj-logs" data-id="${dj.ID}" title="View Show Logs"><i class="fas fa-clipboard-list"></i></button><button class="btn btn-sm bg-indigo btn-dj-notes" data-id="${dj.ID}" title="View/Edit Notes and Remote Credits"><i class="fas fa-sticky-note"></i></button><button class="btn btn-sm btn-warning btn-dj-edit" data-id="${dj.ID}" title="Edit DJ"><i class="fas fa-edit"></i></button><button class="btn btn-sm bg-orange btn-dj-inactive" data-id="${dj.ID}" title="Mark DJ as inactive"><i class="fas fa-times-circle"></i></button></div>`
+							: `<div class="btn-group"><button class="btn btn-sm btn-primary btn-dj-analytics" data-id="${dj.ID}" title="View DJ and Show Analytics"><i class="fas fa-chart-line"></i></button><button class="btn btn-sm btn-secondary btn-dj-logs" data-id="${dj.ID}" title="View Show Logs"><i class="fas fa-clipboard-list"></i></button><button class="btn btn-sm bg-indigo btn-dj-notes" data-id="${dj.ID}" title="View/Edit Notes and Remote Credits"><i class="fas fa-sticky-note"></i></button><button class="btn btn-sm btn-success btn-dj-active" data-id="${dj.ID}" title="Mark DJ as active"><i class="fas fa-check-circle"></i></button><button class="btn btn-sm btn-danger btn-dj-delete" data-id="${dj.ID}" title="Permanently remove this DJ"><i class="fas fa-trash"></i></button></div>`
 					]);
 				});
 				this.table.draw();
@@ -583,9 +747,8 @@ class WWSUdjs extends WWSUdb {
 	 * @param {object} dj The DJ record to get analytics
 	 */
 	showDJAnalytics(dj) {
-		this.djInfoModal.title = `Analytics for ${dj.name} (${
-			dj.realName || `Unknown Person`
-		})`;
+		this.djInfoModal.title = `Analytics for ${dj.name} (${dj.realName ||
+			`Unknown Person`})`;
 		this.djInfoModal.body = ``;
 
 		this.djInfoModal.iziModal("open");
@@ -605,9 +768,9 @@ class WWSUdjs extends WWSUdb {
 					this.manager.get("WWSUMeta")
 						? this.manager.get("WWSUMeta").meta.time
 						: undefined
-				).toISOString(true),
+				).toISOString(true)
 			},
-			(analytics) => {
+			analytics => {
 				if (!analytics) return;
 				let analytic = analytics[0][dj.ID];
 				let html = `<div class="card card-widget widget-user-2 p-1">
@@ -1093,9 +1256,8 @@ class WWSUdjs extends WWSUdb {
 	 * @param {object} dj The DJ record to view attendance records
 	 */
 	showDJLogs(dj) {
-		this.djInfoModal.title = `Attendance Logs for ${dj.name} (${
-			dj.realName || `Unknown Person`
-		})`;
+		this.djInfoModal.title = `Attendance Logs for ${dj.name} (${dj.realName ||
+			`Unknown Person`})`;
 		this.djInfoModal.body = `<p class="wwsumeta-timezone-display">Times are shown in the timezone ${
 			this.manager.get("WWSUMeta")
 				? this.manager.get("WWSUMeta").meta.timezone
@@ -1112,13 +1274,13 @@ class WWSUdjs extends WWSUdb {
 					.getAttendance(
 						`#modal-${this.djInfoModal.id}`,
 						{ dj: dj.ID },
-						(logs) => {
+						logs => {
 							let table = $(`#section-djs-table-logs`).DataTable({
 								paging: true,
 								data:
 									!logs || typeof logs.map !== "function"
 										? []
-										: logs.map((record) => {
+										: logs.map(record => {
 												let theClass = "secondary";
 												if (
 													record.event.toLowerCase().startsWith("show: ") ||
@@ -1172,7 +1334,7 @@ class WWSUdjs extends WWSUdb {
 																	: moment.tz.guess()
 															)
 															.format("h:mm A"),
-														`<button class="btn btn-sm btn-primary btn-logs-view" data-id="${record.ID}" title="View this log"><i class="fas fa-eye"></i></button>`,
+														`<button class="btn btn-sm btn-primary btn-logs-view" data-id="${record.ID}" title="View this log"><i class="fas fa-eye"></i></button>`
 													];
 												} else if (
 													record.actualStart !== null &&
@@ -1200,7 +1362,7 @@ class WWSUdjs extends WWSUdb {
 															)
 															.format("h:mm A"),
 														`ONGOING`,
-														`<button class="btn btn-sm btn-primary btn-logs-view" data-id="${record.ID}" title="View this log"><i class="fas fa-eye"></i></button>`,
+														`<button class="btn btn-sm btn-primary btn-logs-view" data-id="${record.ID}" title="View this log"><i class="fas fa-eye"></i></button>`
 													];
 												} else if (
 													record.actualStart === null &&
@@ -1235,7 +1397,7 @@ class WWSUdjs extends WWSUdb {
 																	: moment.tz.guess()
 															)
 															.format("h:mm A")})`,
-														``,
+														``
 													];
 												} else if (
 													record.actualStart === null &&
@@ -1270,7 +1432,7 @@ class WWSUdjs extends WWSUdb {
 																	: moment.tz.guess()
 															)
 															.format("h:mm A")})`,
-														``,
+														``
 													];
 												} else if (
 													record.actualStart !== null &&
@@ -1307,7 +1469,7 @@ class WWSUdjs extends WWSUdb {
 																	)
 																	.format("h:mm A")
 															: `ONGOING`,
-														`<button class="btn btn-sm btn-primary btn-logs-view" data-id="${record.ID}" title="View this log"><i class="fas fa-eye"></i></button>`,
+														`<button class="btn btn-sm btn-primary btn-logs-view" data-id="${record.ID}" title="View this log"><i class="fas fa-eye"></i></button>`
 													];
 												} else {
 													return [
@@ -1338,7 +1500,7 @@ class WWSUdjs extends WWSUdb {
 																	: moment.tz.guess()
 															)
 															.format("h:mm A")})`,
-														``,
+														``
 													];
 												}
 										  }),
@@ -1349,7 +1511,7 @@ class WWSUdjs extends WWSUdb {
 									{ title: "Event" },
 									{ title: "Start" },
 									{ title: "End" },
-									{ title: "Actions" },
+									{ title: "Actions" }
 								],
 								columnDefs: [{ responsivePriority: 1, targets: 6 }],
 								order: [[0, "desc"]],
@@ -1358,11 +1520,11 @@ class WWSUdjs extends WWSUdb {
 								drawCallback: () => {
 									// Add log buttons click event
 									$(".btn-logs-view").unbind("click");
-									$(".btn-logs-view").click((e) => {
+									$(".btn-logs-view").click(e => {
 										let id = parseInt($(e.currentTarget).data("id"));
 										this.manager.get("WWSUlogs").viewLog(id);
 									});
-								},
+								}
 							});
 
 							table

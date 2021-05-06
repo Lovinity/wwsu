@@ -33,6 +33,7 @@ module.exports = {
         signedOnLate: false,
         signedOffEarly: false,
         signedOffLate: false,
+        badPlaylist: false
       };
 
       // Get logs

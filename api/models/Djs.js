@@ -10,7 +10,7 @@ module.exports = {
   attributes: {
     ID: {
       type: "number",
-      autoIncrement: true,
+      autoIncrement: true
     },
 
     active: {
@@ -21,32 +21,32 @@ module.exports = {
     name: {
       type: "string",
       required: true,
-      unique: true,
+      unique: true
     },
 
     realName: {
       type: "string",
-      allowNull: true,
+      allowNull: true
     },
 
     email: {
       type: "string",
-      allowNull: true,
+      allowNull: true
     },
 
     login: {
       type: "string",
-      allowNull: true,
+      allowNull: true
     },
 
     lastSeen: {
       type: "ref",
-      columnType: "datetime",
-    },
+      columnType: "datetime"
+    }
   },
 
   // Websockets standards
-  afterCreate: function (newlyCreatedRecord, proceed) {
+  afterCreate: function(newlyCreatedRecord, proceed) {
     newlyCreatedRecord.login = newlyCreatedRecord.login === null ? false : true;
     var data = { insert: newlyCreatedRecord };
     sails.log.silly(`djs socket: ${data}`);
@@ -54,7 +54,7 @@ module.exports = {
     return proceed();
   },
 
-  afterUpdate: function (updatedRecord, proceed) {
+  afterUpdate: function(updatedRecord, proceed) {
     updatedRecord.login = updatedRecord.login === null ? false : true;
     var data = { update: updatedRecord };
     sails.log.silly(`djs socket: ${data}`);
@@ -71,12 +71,12 @@ module.exports = {
           { hostDJ: updatedRecord.ID },
           { cohostDJ1: updatedRecord.ID },
           { cohostDJ2: updatedRecord.ID },
-          { cohostDJ3: updatedRecord.ID },
+          { cohostDJ3: updatedRecord.ID }
         ],
-        active: true,
+        active: true
       });
       if (records.length > 0) {
-        records.map(async (record) => {
+        records.map(async record => {
           try {
             hosts = await sails.helpers.calendar.generateHosts(record);
             await sails.models.calendar
@@ -92,15 +92,37 @@ module.exports = {
           { hostDJ: updatedRecord.ID },
           { cohostDJ1: updatedRecord.ID },
           { cohostDJ2: updatedRecord.ID },
-          { cohostDJ3: updatedRecord.ID },
-        ],
+          { cohostDJ3: updatedRecord.ID }
+        ]
       });
       if (records.length > 0) {
-        records.map(async (record) => {
+        records.map(async record => {
           try {
+            let toUpdate = {};
+            if (!record.active) {
+              if (record.hostDJ === updatedRecord.ID) {
+                toUpdate.hostDJ = null;
+                record.hostDJ = null;
+              }
+              if (record.cohostDJ1 === updatedRecord.ID) {
+                toUpdate.cohostDJ1 = null;
+                record.cohostDJ1 = null;
+              }
+              if (record.cohostDJ2 === updatedRecord.ID) {
+                toUpdate.cohostDJ2 = null;
+                record.cohostDJ2 = null;
+              }
+              if (record.cohostDJ3 === updatedRecord.ID) {
+                toUpdate.cohostDJ3 = null;
+                record.cohostDJ3 = null;
+              }
+            }
             hosts = await sails.helpers.calendar.generateHosts(record);
             await sails.models.schedule
-              .update({ ID: record.ID }, { hosts: hosts })
+              .update(
+                { ID: record.ID },
+                Object.assign(toUpdate, { hosts: hosts })
+              )
               .fetch();
           } catch (e) {}
         });
@@ -110,7 +132,7 @@ module.exports = {
     return proceed();
   },
 
-  afterDestroy: function (destroyedRecord, proceed) {
+  afterDestroy: function(destroyedRecord, proceed) {
     var data = { remove: destroyedRecord.ID };
     sails.log.silly(`djs socket: ${data}`);
     sails.sockets.broadcast("djs", "djs", data);
@@ -127,12 +149,12 @@ module.exports = {
           { hostDJ: destroyedRecord.ID },
           { cohostDJ1: destroyedRecord.ID },
           { cohostDJ2: destroyedRecord.ID },
-          { cohostDJ3: destroyedRecord.ID },
+          { cohostDJ3: destroyedRecord.ID }
         ],
-        active: true,
+        active: true
       });
       if (records.length > 0) {
-        maps = records.map(async (record) => {
+        maps = records.map(async record => {
           try {
             toUpdate = {};
             if (record.hostDJ === destroyedRecord.ID) {
@@ -166,11 +188,11 @@ module.exports = {
           { hostDJ: destroyedRecord.ID },
           { cohostDJ1: destroyedRecord.ID },
           { cohostDJ2: destroyedRecord.ID },
-          { cohostDJ3: destroyedRecord.ID },
-        ],
+          { cohostDJ3: destroyedRecord.ID }
+        ]
       });
       if (records.length > 0) {
-        maps = records.map(async (record) => {
+        maps = records.map(async record => {
           try {
             toUpdate = {};
             if (record.hostDJ === destroyedRecord.ID) {
@@ -244,5 +266,5 @@ module.exports = {
       }
     })();
     return proceed();
-  },
+  }
 };

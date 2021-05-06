@@ -59,7 +59,7 @@ if (typeof require !== "undefined") {
  * @requires moment.duration moment-duration-format plugin
  * @requires _ lodash utilities
  */
-class CalendarDb {
+ class CalendarDb {
 	/**
 	 * Construct the calendar database.
 	 *
@@ -125,7 +125,7 @@ class CalendarDb {
 			.parseZone(this.meta ? this.meta.meta.time : undefined)
 			.add(1, "days")
 			.toISOString(true),
-		query = {},
+		query = { active: true },
 		calendardb = this.calendar,
 		scheduledb = this.schedule,
 		progressCallback = () => {}
@@ -675,7 +675,7 @@ class CalendarDb {
 
 		// Prepare a copy of the current calendar
 		let vcalendar = new WWSUdb(TAFFY());
-		vcalendar.query(this.calendar.find(), true);
+		vcalendar.query(this.calendar.find({ active: true }), true);
 
 		// Prepare a copy of the current schedule
 		let vschedule = new WWSUdb(TAFFY());
@@ -709,13 +709,33 @@ class CalendarDb {
 			)
 				return 0;
 
+			// If one event is show or sports and the other is onair-booking, the show/sports event always overrides onair-booking.
+			if (
+				["show", "sports"].indexOf(eventa.type) !== -1 &&
+				eventb.type === "onair-booking"
+			)
+				return 1;
+			if (
+				["show", "sports"].indexOf(eventb.type) !== -1 &&
+				eventa.type === "onair-booking"
+			)
+				return -1;
+
 			// If either event has a priority of -1, there is no conflict (-1 events ignore conflict detection)
 			if (eventa.priority === -1 || eventb.priority === -1) return 0;
 
-			// If one event is priority 0 and the other is not, there is no conflict (0 events only conflict with other 0 events).
+			// If one event is priority 0 and the other is not, there is no conflict.
 			if (
 				(eventa.priority === 0 && eventb.priority !== 0) ||
 				(eventb.priority === 0 && eventa.priority !== 0)
+			)
+				return 0;
+
+			// If both events are priority 0 but not of the same event type, there is no conflict.
+			if (
+				eventa.priority === 0 &&
+				eventb.priority === 0 &&
+				eventa.type !== eventb.type
 			)
 				return 0;
 
@@ -1790,7 +1810,10 @@ class CalendarDb {
 				: schedule.cohostDJ3 !== 0
 				? calendar.cohostDJ3 || null
 				: null, // The ID of the third cohost DJ
-			active: calendar.active, // True if the event is active, false if it is not.
+			active:
+				typeof schedule.active !== "undefined"
+					? schedule.active
+					: calendar.active, // True if the event is active, false if it is not.
 			eventID: schedule.eventID
 				? schedule.eventID
 				: schedule.eventID !== 0
@@ -1885,6 +1908,7 @@ class CalendarDb {
 					: null, // Date the event ends (exclusive).
 			timeChanged:
 				schedule.scheduleID && (schedule.newTime || schedule.duration), // True if this event's time was changed from the original, else false
+			lastAired: schedule.lastAired || calendar.lastAired, // Date/time the event was last aired (for on-air programming)
 			discordChannel: schedule.discordChannel
 				? schedule.discordChannel
 				: calendar.discordChannel, // id of the discord channel for this event/show, if applicable

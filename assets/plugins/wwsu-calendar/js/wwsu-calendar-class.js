@@ -12,7 +12,7 @@
  * @requires $.alpaca Alpaca forms custom WWSU build
  */
 
-// REQUIRES the following WWSUmodules: noReq (WWSUreq), directorReq (WWSUreq) (only if managing calendar), djReq (WWSUreq) (Only on DJ web panel), WWSUMeta, WWSUthis.manager.get("WWSUutil")
+// REQUIRES the following WWSUmodules: noReq (WWSUreq), directorReq (WWSUreq) (only if managing calendar), djReq (WWSUreq) (Only on DJ web panel), WWSUMeta, WWSUutil, WWSUdjs (only if editing/adding calendar events)
 // WWSUMeta MUST be loaded before WWSUcalendar is loaded!
 class WWSUcalendar extends CalendarDb {
 	/**
@@ -37,6 +37,8 @@ class WWSUcalendar extends CalendarDb {
 			getSchedule: "/calendar/get-schedule",
 			remove: "/calendar/remove",
 			removeSchedule: "/calendar/remove-schedule",
+			inactive: "/calendar/inactive",
+			active: "/calendar/active"
 		};
 		this.data = {
 			add: {},
@@ -49,6 +51,8 @@ class WWSUcalendar extends CalendarDb {
 			getSchedule: {},
 			remove: {},
 			removeSchedule: {},
+			inactive: {},
+			active: {}
 		};
 
 		this.events = new WWSUevents();
@@ -89,8 +93,8 @@ class WWSUcalendar extends CalendarDb {
 			`<p>Priorities determine how the system will resolve incidents where event schedules overlap each other.</p>
         <ul>
             <li><strong>-1</strong>: Schedule is always allowed to overlap any other schedule. Use this for events that do not deal with OnAir programming, such as meetings and office hours.</li>
-            <li><strong>0</strong>: Schedule is not allowed to overlap any other priority 0 schedule, but can overlap schedules of any other priority. Use this for genre rotations where you do not want genres to overlap, but they are allowed to co-exist with scheduled broadcasts (eg. if the broadcast is not on the air, the system will run the genre rotation instead until they go on the air).</li>
-            <li><strong>1 - 10</strong>: Schedule is not allowed to overlap other schedules with the same or higher priority. If it overlaps a schedule of the same or higher priority, this schedule for that date/time will either be auto-canceled or its time/duration updated to avoid the conflict. If it overlaps a schedule of lower priority, the lower-priority schedule will be auto-canceled or its time/duration updated to avoid the conflict.</li>
+            <li><strong>0</strong>: Schedule is not allowed to overlap any other schedules of the same type, but can overlap schedules of another type. For example, a priority 0 genre cannot overlap any other genre event, but it can co-exist with any other event such as live, remote, and sports broadcasts.</li>
+            <li><strong>1 - 10</strong>: Schedule is not allowed to overlap other schedules with the same or higher priority regardless of event type. If it overlaps a schedule of the same or higher priority, this schedule for that date/time will either be auto-canceled or its time/duration updated to avoid the conflict. If it overlaps a schedule of lower priority, the lower-priority schedule will be auto-canceled or its time/duration updated to avoid the conflict.</li>
         </ul>
         <p>Example: A priority 5 show is scheduled Thursdays 7-9PM. Someone schedules a priority 9 sports broadcast for one of those Thursdays 7-9PM. Because sports takes priority, the show for that day will be auto-canceled.</p>
         <p>Example: A priority 5 show is scheduled Thursdays 8-10PM. Someone schedules a priority 9 sports broadcast for one of those Thursdays 7-9PM. Because sports takes priority, but there is at least 30 minutes of the show that would not be in conflict, the show's time for that day will be updated to 9-10PM instead of completely canceled.</p>
@@ -1458,7 +1462,7 @@ class WWSUcalendar extends CalendarDb {
 
 		// We need to get the events and playlists we can choose from
 		this.getEventsPlaylists((events, playlists) => {
-			let _djs = this.manager.get(this.manager.get("djReq").db).find();
+			let _djs = this.manager.get("WWSUdjs").find({ active: true });
 
 			let calendarEvents = this.calendar.find().map((_event) => _event.name);
 
@@ -1764,7 +1768,7 @@ class WWSUcalendar extends CalendarDb {
 
 		// Get events and playlist we can select
 		this.getEventsPlaylists((events, playlists) => {
-			let _djs = this.manager.get(this.manager.get("djReq").db).find();
+			let _djs = this.manager.get("WWSUdjs").find({ active: true });
 
 			let calendarEvents = this.calendar.find().map((event) => event.name);
 
@@ -2244,7 +2248,7 @@ class WWSUcalendar extends CalendarDb {
 
 		// Get the events and playlists we can select from
 		this.getEventsPlaylists((events, playlists) => {
-			let _djs = this.manager.get(this.manager.get("djReq").db).find();
+			let _djs = this.manager.get("WWSUdjs").find({ active: true });
 
 			let calendarEvents = this.calendar.find().map((event) => event.name);
 			let sportsEvents = this.calendar

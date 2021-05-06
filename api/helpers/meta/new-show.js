@@ -6,7 +6,7 @@ module.exports = {
 
   inputs: {},
 
-  fn: async function (inputs, exits) {
+  fn: async function(inputs, exits) {
     sails.log.debug("Helper meta.newShow called.");
     var toUpdate = {};
 
@@ -41,15 +41,13 @@ module.exports = {
       case "live_on":
         // Current program is not supposed to be on the air
         eventNow = _eventNow.filter(
-          (event) =>
-            event.type === "show" &&
-            name === event.name
+          event => event.type === "show" && name === event.name
         );
         if (eventNow.length < 1) {
           calendar = await sails.models.calendar.find({
             hosts: hosts,
             name: name,
-            type: "show",
+            type: "show"
           });
           // Create a new main calendar event if it does not exist for this show
           if (!calendar || !calendar[0]) {
@@ -58,7 +56,7 @@ module.exports = {
                 type: "show",
                 active: true,
                 priority: sails.models.calendar.calendardb.getDefaultPriority({
-                  type: "show",
+                  type: "show"
                 }),
                 hostDJ: sails.models.meta.memory.dj,
                 cohostDJ1: sails.models.meta.memory.cohostDJ1,
@@ -66,9 +64,10 @@ module.exports = {
                 cohostDJ3: sails.models.meta.memory.cohostDJ3,
                 hosts: hosts,
                 name: name,
+                lastAired: moment().toISOString(true)
               })
               .fetch();
-            // If a calendar event does exist, use the first one returned and also re-activate it if it was deactivated.
+            // If a calendar event does exist, use the first one returned and also re-activate it.
           } else {
             calendar = calendar[0];
             if (!calendar.active)
@@ -83,7 +82,7 @@ module.exports = {
               scheduleType: "unscheduled",
               scheduleReason: `Show ${show} went on the air outside of their scheduled time!`,
               oneTime: [moment().toISOString(true)],
-              duration: 60,
+              duration: 60
             })
             .fetch();
           eventNow = sails.models.calendar.calendardb.processRecord(
@@ -95,15 +94,13 @@ module.exports = {
         break;
       case "remote_on":
         eventNow = _eventNow.filter(
-          (event) =>
-            event.type === "remote" &&
-            name === event.name
+          event => event.type === "remote" && name === event.name
         );
         if (eventNow.length < 1) {
           calendar = await sails.models.calendar.find({
             hosts: hosts,
             name: name,
-            type: "remote",
+            type: "remote"
           });
           if (!calendar || !calendar[0]) {
             calendar = await sails.models.calendar
@@ -111,14 +108,14 @@ module.exports = {
                 type: "remote",
                 active: true,
                 priority: sails.models.calendar.calendardb.getDefaultPriority({
-                  type: "remote",
+                  type: "remote"
                 }),
                 hostDJ: sails.models.meta.memory.dj,
                 cohostDJ1: sails.models.meta.memory.cohostDJ1,
                 cohostDJ2: sails.models.meta.memory.cohostDJ2,
                 cohostDJ3: sails.models.meta.memory.cohostDJ3,
                 hosts: hosts,
-                name: name,
+                name: name
               })
               .fetch();
           } else {
@@ -134,7 +131,7 @@ module.exports = {
               scheduleType: "unscheduled",
               scheduleReason: `Remote broadcast ${show} went on the air outside of their scheduled time!`,
               oneTime: [moment().toISOString(true)],
-              duration: 60,
+              duration: 60
             })
             .fetch();
           eventNow = sails.models.calendar.calendardb.processRecord(
@@ -147,12 +144,12 @@ module.exports = {
       case "sports_on":
       case "sportsremote_on":
         eventNow = _eventNow.filter(
-          (event) => event.type === "sports" && event.name.startsWith(name)
+          event => event.type === "sports" && event.name.startsWith(name)
         );
         if (eventNow.length < 1) {
           calendar = await sails.models.calendar.find({
             name: { startsWith: name },
-            type: "sports",
+            type: "sports"
           });
           if (!calendar || !calendar[0]) {
             calendar = await sails.models.calendar
@@ -160,9 +157,9 @@ module.exports = {
                 type: "sports",
                 active: true,
                 priority: sails.models.calendar.calendardb.getDefaultPriority({
-                  type: "sports",
+                  type: "sports"
                 }),
-                name: name,
+                name: name
               })
               .fetch();
           } else {
@@ -178,7 +175,7 @@ module.exports = {
               scheduleType: "unscheduled",
               scheduleReason: `Sports broadcast ${show} went on the air outside of their scheduled time!`,
               oneTime: [moment().toISOString(true)],
-              duration: 60,
+              duration: 60
             })
             .fetch();
           eventNow = sails.models.calendar.calendardb.processRecord(
@@ -191,15 +188,13 @@ module.exports = {
       case "prerecord_on":
       case "automation_prerecord":
         eventNow = _eventNow.filter(
-          (event) =>
-            event.type === "prerecord" &&
-            name === event.name
+          event => event.type === "prerecord" && name === event.name
         );
         if (eventNow.length < 1) {
           calendar = await sails.models.calendar.find({
             hosts: hosts,
             name: name,
-            type: "prerecord",
+            type: "prerecord"
           });
           if (!calendar || !calendar[0]) {
             calendar = await sails.models.calendar
@@ -207,14 +202,14 @@ module.exports = {
                 type: "prerecord",
                 active: true,
                 priority: sails.models.calendar.calendardb.getDefaultPriority({
-                  type: "prerecord",
+                  type: "prerecord"
                 }),
                 hostDJ: sails.models.meta.memory.dj,
                 cohostDJ1: sails.models.meta.memory.cohostDJ1,
                 cohostDJ2: sails.models.meta.memory.cohostDJ2,
                 cohostDJ3: sails.models.meta.memory.cohostDJ3,
                 hosts: hosts,
-                name: name,
+                name: name
               })
               .fetch();
           } else {
@@ -235,7 +230,7 @@ module.exports = {
               scheduleType: "unscheduled",
               scheduleReason: `Prerecord ${show} went on the air outside of their scheduled time!`,
               oneTime: [moment().toISOString(true)],
-              duration: 60,
+              duration: 60
             })
             .fetch();
           eventNow = sails.models.calendar.calendardb.processRecord(
@@ -247,15 +242,13 @@ module.exports = {
         break;
       case "automation_playlist":
         eventNow = _eventNow.filter(
-          (event) =>
-            event.type === "playlist" &&
-            name === event.name
+          event => event.type === "playlist" && name === event.name
         );
         if (eventNow.length < 1) {
           calendar = await sails.models.calendar.find({
             hosts: hosts,
             name: name,
-            type: "playlist",
+            type: "playlist"
           });
           if (!calendar || !calendar[0]) {
             calendar = await sails.models.calendar
@@ -263,14 +256,14 @@ module.exports = {
                 type: "playlist",
                 active: true,
                 priority: sails.models.calendar.calendardb.getDefaultPriority({
-                  type: "playlist",
+                  type: "playlist"
                 }),
                 hostDJ: sails.models.meta.memory.dj,
                 cohostDJ1: sails.models.meta.memory.cohostDJ1,
                 cohostDJ2: sails.models.meta.memory.cohostDJ2,
                 cohostDJ3: sails.models.meta.memory.cohostDJ3,
                 hosts: hosts,
-                name: name,
+                name: name
               })
               .fetch();
           } else {
@@ -286,7 +279,7 @@ module.exports = {
               scheduleType: "unscheduled",
               scheduleReason: `Playlist ${show} went on the air outside of their scheduled time!`,
               oneTime: [moment().toISOString(true)],
-              duration: 60,
+              duration: 60
             })
             .fetch();
           eventNow = sails.models.calendar.calendardb.processRecord(
@@ -298,14 +291,14 @@ module.exports = {
         break;
       case "automation_genre":
         eventNow = _eventNow.filter(
-          (event) =>
+          event =>
             event.type === "genre" &&
             event.name === sails.models.meta.memory.genre
         );
         if (eventNow.length < 1) {
           calendar = await sails.models.calendar.find({
             name: sails.models.meta.memory.genre,
-            type: "genre",
+            type: "genre"
           });
           if (!calendar || !calendar[0]) {
             calendar = await sails.models.calendar
@@ -313,10 +306,10 @@ module.exports = {
                 type: "genre",
                 active: true,
                 priority: sails.models.calendar.calendardb.getDefaultPriority({
-                  type: "genre",
+                  type: "genre"
                 }),
                 hosts: "Unknown Hosts",
-                name: sails.models.meta.memory.genre,
+                name: sails.models.meta.memory.genre
               })
               .fetch();
           } else {
@@ -332,7 +325,7 @@ module.exports = {
               scheduleType: "unscheduled",
               scheduleReason: `Genre ${sails.models.meta.memory.genre} went on the air outside of scheduled time!`,
               oneTime: [moment().toISOString(true)],
-              duration: 60,
+              duration: 60
             })
             .fetch();
           eventNow = sails.models.calendar.calendardb.processRecord(
@@ -359,6 +352,14 @@ module.exports = {
       eventNow &&
       sails.models.meta.memory.calendarUnique !== eventNow.unique
     ) {
+      // Update lastAired in the calendar
+      await sails.models.calendar
+        .update(
+          { ID: eventNow.calendarID },
+          { active: true, lastAired: moment().toISOString(true) }
+        )
+        .fetch();
+
       // Create a new attendance record and update meta with the new attendance ID
       attendance = await sails.helpers.attendance.createRecord(eventNow);
       toUpdate.attendanceID = attendance.newID;
@@ -373,10 +374,10 @@ module.exports = {
           logIcon: sails.models.calendar.calendardb.getIconClass(eventNow),
           title: `A ${eventNow.type} started.`,
           event: `Broadcast: ${eventNow.hosts} - ${eventNow.name}<br />Topic: ${sails.models.meta.memory.topic}`,
-          createdAt: moment().toISOString(true),
+          createdAt: moment().toISOString(true)
         })
         .fetch()
-        .tolerate((err) => {
+        .tolerate(err => {
           sails.log.error(err);
         });
 
@@ -404,10 +405,10 @@ module.exports = {
                 logIcon: `fas fa-times-circle`,
                 title: `An unscheduled / unauthorized broadcast started!`,
                 event: `${eventNow.type}: ${eventNow.hosts} - ${eventNow.name}`,
-                createdAt: moment().toISOString(true),
+                createdAt: moment().toISOString(true)
               })
               .fetch()
-              .tolerate((err) => {
+              .tolerate(err => {
                 sails.log.error(err);
               });
             await sails.helpers.onesignal.sendMass(
@@ -456,10 +457,10 @@ module.exports = {
           logIcon: `fas fa-music`,
           title: `Default rotation started.`,
           event: ``,
-          createdAt: moment().toISOString(true),
+          createdAt: moment().toISOString(true)
         })
         .fetch()
-        .tolerate((err) => {
+        .tolerate(err => {
           sails.log.error(err);
         });
     }
@@ -477,5 +478,5 @@ module.exports = {
     await sails.helpers.meta.change.with(toUpdate);
 
     return exits.success(toUpdate);
-  },
+  }
 };

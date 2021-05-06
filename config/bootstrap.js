@@ -2965,9 +2965,9 @@ module.exports.bootstrap = async function(done) {
           .fetch();
         await sails.models.calendar
           .destroy({
-            updatedAt: {
+            lastAired: {
               "<": moment()
-                .subtract(2, "years")
+                .subtract(1, "years")
                 .toISOString(true)
             },
             active: false
@@ -2975,7 +2975,7 @@ module.exports.bootstrap = async function(done) {
           .fetch();
         await sails.models.djs
           .destroy({
-            updatedAt: {
+            lastSeen: {
               "<": moment()
                 .subtract(1, "years")
                 .toISOString(true)

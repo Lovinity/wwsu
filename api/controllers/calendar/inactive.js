@@ -1,13 +1,13 @@
 module.exports = {
-  friendlyName: "Calendar / Remove",
+  friendlyName: "Calendar / Inactive",
 
-  description: "Permanently remove a calendar event",
+  description: "Mark an event in the main calendar inactive",
 
   inputs: {
     ID: {
       type: "number",
       required: true,
-      description: "The ID number of the calendar event to remove."
+      description: "The ID number of the calendar event to mark inactive."
     }
   },
 
@@ -36,8 +36,8 @@ module.exports = {
       [{ removeCalendar: inputs.ID }]
     );
 
-    // Destroy the event
-    await sails.models.calendar.destroyOne({ ID: inputs.ID });
+    // Mark the calendar as inactive
+    await sails.models.calendar.updateOne({ ID: inputs.ID }, { active: false });
 
     return;
   }
