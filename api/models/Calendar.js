@@ -164,7 +164,7 @@ module.exports = {
           .fetch();
 
         // Only post discontinued notifications if we deleted a schedule
-        if (scheduleRecords) {
+        if (scheduleRecords && scheduleRecords.length > 0) {
           await sails.helpers.onesignal.sendEvent(event, false, false);
           await sails.helpers.discord.sendSchedule(
             event,
@@ -207,7 +207,7 @@ module.exports = {
       );
 
       // Only post discontinued notifications if we deleted a schedule
-      if (scheduleRecords) {
+      if (scheduleRecords && scheduleRecords.length > 0) {
         await sails.helpers.onesignal.sendEvent(event, false, false);
         await sails.helpers.discord.sendSchedule(
           event,
