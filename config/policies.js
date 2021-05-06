@@ -56,6 +56,8 @@ module.exports.policies = {
   "display/public": "isBanned",
   "display/internal": "isBanned",
   dj: "isBanned",
+  "djnotes/*": ["isBanned", "isSocket", "isAuthorizedDirector"],
+  "djnotes/get": ["isBanned", "isSocket", "isAuthorizedHost"],
   "djs/*": ["isBanned", "isSocket", "isAuthorizedDirector"],
   "djs/get": ["isBanned", "isSocket"],
   "djs/get-web": ["isBanned", "isSocket", "isAuthorizedDJ"],
@@ -120,6 +122,4 @@ module.exports.policies = {
   "underwritings/*": ["isBanned", "isSocket", "isAuthorizedDirector"],
   "underwritings/get": ["isBanned", "isSocket"],
   "version/edit": ["isBanned", "isSocket", "isAuthorizedAdminDirector"],
-  "xp/*": ["isBanned", "isSocket", "isAuthorizedDirector"],
-  "xp/get": ["isBanned", "isSocket", "isAuthorizedHost"]
 };
