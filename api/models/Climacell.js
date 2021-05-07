@@ -20,8 +20,7 @@ module.exports = {
     },
 
     data: {
-      type: 'string',
-      allowNull: true
+      type: 'json',
     },
 
     dataTime: {
