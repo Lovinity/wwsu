@@ -2476,6 +2476,8 @@ module.exports.bootstrap = async function(done) {
       sails.log.debug(`CRON checkStatuses called.`);
       try {
         // Delay system; error if no status data for over 3 minutes
+        // DISABLED: Serial not supported in current DJ Controls
+        /*
         var delay = await sails.models.status.findOne({ name: "delay-system" });
         var responsible = await sails.models.hosts.count({ delaySystem: true });
         if (
@@ -2500,6 +2502,7 @@ module.exports.bootstrap = async function(done) {
           });
           await sails.helpers.meta.change.with({ delaySystem: null });
         }
+        */
 
         // Silence detection; error if no silence status reported for over 3 minutes
         var silence = await sails.models.status.findOne({ name: "silence" });

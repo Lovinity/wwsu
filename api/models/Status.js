@@ -140,12 +140,22 @@ module.exports = {
       status: 4,
       time: null
     },
+    /*
     {
       name: "delay-system",
       label: "Delay System",
       data:
         "Status of Delay System has not been checked since initialization. Delay system is checked by the responsible DJ Controls every 15 seconds.",
       status: 4,
+      time: moment().toISOString(true)
+    },
+    */
+    {
+      name: "delay-system",
+      label: "Delay System",
+      data:
+        "Delay System support is temporarily disabled due to DJ Controls compatibility issues",
+      status: 2,
       time: moment().toISOString(true)
     },
     {
