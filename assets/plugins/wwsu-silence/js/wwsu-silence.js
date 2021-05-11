@@ -39,7 +39,7 @@ class WWSUSilence extends WWSUevents {
 							title: "Error sending silence alarm",
 							body:
 								"There was an error sending a silence alarm to WWSU. Please report this to the engineer.",
-							autoHide: true,
+							autohide: true,
 							delay: 10000,
 							icon: "fas fa-skull-crossbones fa-lg",
 						});
@@ -56,7 +56,7 @@ class WWSUSilence extends WWSUevents {
 				title: "Error sending silence alarm",
 				body:
 					"There was an error sending a silence alarm to WWSU. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -80,7 +80,7 @@ class WWSUSilence extends WWSUevents {
 							title: "Error sending silence alarm",
 							body:
 								"There was an error deactivating the silence alarm on WWSU. Please report this to the engineer.",
-							autoHide: true,
+							autohide: true,
 							delay: 10000,
 							icon: "fas fa-skull-crossbones fa-lg",
 						});
@@ -97,7 +97,7 @@ class WWSUSilence extends WWSUevents {
 				title: "Error sending silence alarm",
 				body:
 					"There was an error deactivating the silence alarm on WWSU. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});

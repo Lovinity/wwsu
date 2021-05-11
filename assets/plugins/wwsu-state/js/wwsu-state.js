@@ -95,7 +95,7 @@ class WWSUstate extends WWSUevents {
 									title: "Error returning",
 									body:
 										"There was an error returning from break. Either you are not in a break, or your DJ controls prevents you from returning when you are not on the air. If neither of these are true, please contact the engineer.",
-									autoHide: true,
+									autohide: true,
 									delay: 15000,
 									icon: "fas fa-skull-crossbones fa-lg",
 								});
@@ -116,7 +116,7 @@ class WWSUstate extends WWSUevents {
 				title: "Error returning",
 				body:
 					"There was an error returning from break. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -153,7 +153,7 @@ class WWSUstate extends WWSUevents {
 											title: "Error adding PSA",
 											body:
 												"There was an error adding the PSA. Your DJ Controls might not allow you to do this when you are not on the air. If this is not the case, please contact the engineer.",
-											autoHide: true,
+											autohide: true,
 											delay: 15000,
 											icon: "fas fa-skull-crossbones fa-lg",
 										});
@@ -182,7 +182,7 @@ class WWSUstate extends WWSUevents {
 				title: "Error adding PSA",
 				body:
 					"There was an error adding the PSA. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -219,7 +219,7 @@ class WWSUstate extends WWSUevents {
 											title: "Error ending broadcast",
 											body:
 												"There was an error ending the broadcast. Your DJ Controls might not allow you to end broadcasts you did not start. If this is not the case, please contact the engineer.",
-											autoHide: true,
+											autohide: true,
 											delay: 15000,
 											icon: "fas fa-skull-crossbones fa-lg",
 										});
@@ -241,7 +241,7 @@ class WWSUstate extends WWSUevents {
 				title: "Error ending broadcast",
 				body:
 					"There was an error ending the broadcast. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -272,7 +272,7 @@ class WWSUstate extends WWSUevents {
 									title: "Error going to break",
 									body:
 										"There was an error going to break. Your DJ Controls might not allow you to go to break when you are not on the air. If this is not the case, please contact the engineer.",
-									autoHide: true,
+									autohide: true,
 									delay: 15000,
 									icon: "fas fa-skull-crossbones fa-lg",
 								});
@@ -307,7 +307,7 @@ class WWSUstate extends WWSUevents {
 				title: "Error going to break",
 				body:
 					"There was an error going to break. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -338,7 +338,7 @@ class WWSUstate extends WWSUevents {
 									title: "Error queuing Top Add",
 									body:
 										"There was an error queuing a Top Add. Your DJ Controls might not allow you to do this when you are not on the air. If this is not the case, please contact the engineer.",
-									autoHide: true,
+									autohide: true,
 									delay: 15000,
 									icon: "fas fa-skull-crossbones fa-lg",
 								});
@@ -366,7 +366,7 @@ class WWSUstate extends WWSUevents {
 				title: "Error queuing Top Add",
 				body:
 					"There was an error queuing a Top Add. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -397,7 +397,7 @@ class WWSUstate extends WWSUevents {
 									title: "Error queuing liner",
 									body:
 										"There was an error queuing a liner. Your DJ Controls might not allow you to do this when you are not on the air. If this is not the case, please contact the engineer.",
-									autoHide: true,
+									autohide: true,
 									delay: 15000,
 									icon: "fas fa-skull-crossbones fa-lg",
 								});
@@ -425,7 +425,7 @@ class WWSUstate extends WWSUevents {
 				title: "Error queuing liner",
 				body:
 					"There was an error queuing a liner. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -458,7 +458,7 @@ class WWSUstate extends WWSUevents {
 										title: "Error dumping",
 										body:
 											"There was an error triggering the dump on the delay system. Your DJ Controls might not allow you to do this when you are not on the air. If this is not the case, please contact the engineer.",
-										autoHide: true,
+										autohide: true,
 										delay: 15000,
 										icon: "fas fa-skull-crossbones fa-lg",
 									});
@@ -486,7 +486,7 @@ class WWSUstate extends WWSUevents {
 				title: "Error dumping",
 				body:
 					"There was an error triggering the dump on the delay system. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -550,6 +550,11 @@ class WWSUstate extends WWSUevents {
 						type: "string",
 						title: "Episode Topic / Description",
 						maxLength: 256,
+					},
+					webchat: {
+						type: "boolean",
+						title: "Allow messages from the web?",
+						default: true,
 					},
 				},
 			},
@@ -626,6 +631,13 @@ class WWSUstate extends WWSUevents {
 							});
 						},
 					},
+					webchat: {
+						rightLabel: "Yes",
+						helpers: [
+							"If you un-check this box, website visitors will not be allowed to send messages to you during your broadcast (they can still send messages through Discord, but you will not be notified in DJ Controls).",
+							"Remember that you can mute/ban visitors who send harassing or threatening messages. You can also delete messages.",
+						],
+					},
 				},
 				form: {
 					buttons: {
@@ -641,7 +653,7 @@ class WWSUstate extends WWSUevents {
 
 								value = {
 									topic: value.topic,
-									showname: `${value.djs} - ${value.name}`
+									showname: `${value.djs} - ${value.name}`,
 								};
 
 								this.goLive(value, (success) => {
@@ -696,7 +708,7 @@ class WWSUstate extends WWSUevents {
 										title: "Error starting live broadcast",
 										body:
 											"There was an error starting the live broadcast. Live broadcasts may only be started from the WWSU studio (otherwise, you must do a remote broadcast). If you are in the WWSU studio, please contact the engineer.",
-										autoHide: true,
+										autohide: true,
 										delay: 15000,
 										icon: "fas fa-skull-crossbones fa-lg",
 									});
@@ -717,7 +729,7 @@ class WWSUstate extends WWSUevents {
 				title: "Error starting live broadcast",
 				body:
 					"There was an error starting the live broadcast. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -842,6 +854,11 @@ class WWSUstate extends WWSUevents {
 						title: "Episode Topic / Description",
 						maxLength: 256,
 					},
+					webchat: {
+						type: "boolean",
+						title: "Allow messages from the web?",
+						default: true,
+					},
 				},
 			},
 			options: {
@@ -956,6 +973,13 @@ class WWSUstate extends WWSUevents {
 						helper:
 							"Choose which host you want to establish an audio call with for the broadcast. Please contact a director for guidance or choose the first one (unless that one does not work).",
 					},
+					webchat: {
+						rightLabel: "Yes",
+						helpers: [
+							"If you un-check this box, website visitors will not be allowed to send messages to you during your broadcast. (they can still send messages through Discord, but you will not be notified in DJ Controls)",
+							"Remember that you can mute/ban visitors who send harassing or threatening messages. You can also delete messages.",
+						],
+					},
 				},
 				form: {
 					buttons: {
@@ -1060,7 +1084,7 @@ class WWSUstate extends WWSUevents {
 								title: "Error starting remote broadcast",
 								body:
 									"There was an error starting the remote broadcast. Please contact the engineer if you think you should be allowed to start a remote broadcast.",
-								autoHide: true,
+								autohide: true,
 								delay: 15000,
 								icon: "fas fa-skull-crossbones fa-lg",
 							});
@@ -1080,7 +1104,7 @@ class WWSUstate extends WWSUevents {
 				title: "Error starting remote broadcast",
 				body:
 					"There was an error starting the remote broadcast. Please contact the engineer if you think you should be allowed to start a remote broadcast.",
-				autoHide: true,
+				autohide: true,
 				delay: 15000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -1144,6 +1168,11 @@ class WWSUstate extends WWSUevents {
 						title: "Broadcast Description",
 						maxLength: 256,
 					},
+					webchat: {
+						type: "boolean",
+						title: "Allow messages from the web?",
+						default: true,
+					},
 				},
 			},
 			options: {
@@ -1168,6 +1197,8 @@ class WWSUstate extends WWSUevents {
 					},
 					sport: {
 						type: "select",
+						hideNone: false,
+						emptySelectFirst: false,
 						validator: function (callback) {
 							let value = this.getValue();
 							if (!title || title !== value) {
@@ -1186,6 +1217,13 @@ class WWSUstate extends WWSUevents {
 						helper:
 							"Limit: 256 characters. The topic will be displayed on the website and display signs. It will also be posted in the WWSU Discord.",
 						type: "textarea",
+					},
+					webchat: {
+						rightLabel: "Yes",
+						helpers: [
+							"If you un-check this box, website visitors will not be allowed to send messages to you during your broadcast. (they can still send messages through Discord, but you will not be notified in DJ Controls)",
+							"Remember that you can mute/ban visitors who send harassing or threatening messages. You can also delete messages.",
+						],
 					},
 				},
 				form: {
@@ -1248,7 +1286,7 @@ class WWSUstate extends WWSUevents {
 										title: "Error starting live sports broadcast",
 										body:
 											"There was an error starting the live sports broadcast. Live sports broadcasts may only be started from the WWSU studio (otherwise, you must do a remote sports broadcast). If you are in the WWSU studio, please contact the engineer.",
-										autoHide: true,
+										autohide: true,
 										delay: 15000,
 										icon: "fas fa-skull-crossbones fa-lg",
 									});
@@ -1269,7 +1307,7 @@ class WWSUstate extends WWSUevents {
 				title: "Error starting live sports broadcast",
 				body:
 					"There was an error starting the live sports broadcast. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -1374,6 +1412,11 @@ class WWSUstate extends WWSUevents {
 						title: "Broadcast Description",
 						maxLength: 256,
 					},
+					webchat: {
+						type: "boolean",
+						title: "Allow messages from the web?",
+						default: true,
+					},
 				},
 			},
 			options: {
@@ -1421,6 +1464,8 @@ class WWSUstate extends WWSUevents {
 					},
 					sport: {
 						type: "select",
+						hideNone: false,
+						emptySelectFirst: false,
 						validator: function (callback) {
 							let value = this.getValue();
 							if (!title || title !== value) {
@@ -1445,6 +1490,13 @@ class WWSUstate extends WWSUevents {
 						helper:
 							"Limit: 256 characters. The topic will be displayed on the website and display signs. It will also be posted in the WWSU Discord.",
 						type: "textarea",
+					},
+					webchat: {
+						rightLabel: "Yes",
+						helpers: [
+							"If you un-check this box, website visitors will not be allowed to send messages to you during your broadcast. (they can still send messages through Discord, but you will not be notified in DJ Controls)",
+							"Remember that you can mute/ban visitors who send harassing or threatening messages. You can also delete messages.",
+						],
 					},
 				},
 				form: {
@@ -1520,7 +1572,7 @@ class WWSUstate extends WWSUevents {
 								title: "Error starting remote sports broadcast",
 								body:
 									"There was an error starting the remote sports broadcast. Please contact the engineer if you think you should be allowed to start a remote sports broadcast.",
-								autoHide: true,
+								autohide: true,
 								delay: 15000,
 								icon: "fas fa-skull-crossbones fa-lg",
 							});
@@ -1540,7 +1592,7 @@ class WWSUstate extends WWSUevents {
 				title: "Error starting remote sports broadcast",
 				body:
 					"There was an error starting the remote sports broadcast. Please contact the engineer if you think you should be allowed to start a remote sports broadcast.",
-				autoHide: true,
+				autohide: true,
 				delay: 15000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});

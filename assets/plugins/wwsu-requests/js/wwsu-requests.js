@@ -123,7 +123,7 @@ class WWSUrequests extends WWSUdb {
                     class: "bg-danger",
                     title: "Error queuing request",
                     body: `There was an error queuing the request. Your DJ Controls might not be allowed to do this when you are not on the air. Or, this request was already queued.`,
-                    autoHide: true,
+                    autohide: true,
                     delay: 10000,
                     icon: "fas fa-skull-crossbones fa-lg",
                   });
@@ -151,7 +151,7 @@ class WWSUrequests extends WWSUdb {
         title: "Error queuing request",
         body:
           "There was an error queuing the request. Please report this to the engineer.",
-        autoHide: true,
+        autohide: true,
         delay: 10000,
         icon: "fas fa-skull-crossbones fa-lg",
       });

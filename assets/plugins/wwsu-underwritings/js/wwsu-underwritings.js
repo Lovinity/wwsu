@@ -193,7 +193,7 @@ class WWSUunderwritings extends WWSUdb {
 				title: "Error adding underwriting",
 				body:
 					"There was an error adding a new underwriting. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -246,7 +246,7 @@ class WWSUunderwritings extends WWSUdb {
 				title: "Error editing underwriting",
 				body:
 					"There was an error editing the underwriting. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -276,7 +276,7 @@ class WWSUunderwritings extends WWSUdb {
 							title: "Error removing underwriting",
 							body:
 								"There was an error removing the underwriting. Please report this to the engineer.",
-							autoHide: true,
+							autohide: true,
 							delay: 10000,
 							icon: "fas fa-skull-crossbones fa-lg",
 						});
@@ -299,7 +299,7 @@ class WWSUunderwritings extends WWSUdb {
 				title: "Error removing underwriting",
 				body:
 					"There was an error removing the underwriting. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});

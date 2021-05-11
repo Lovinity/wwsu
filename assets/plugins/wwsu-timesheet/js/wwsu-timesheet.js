@@ -66,7 +66,9 @@ class WWSUtimesheet extends WWSUevents {
 	 */
 	clockForm(directorID) {
 		// Find the director
-		let director = this.manager.get(this.manager.get("directorReq").db).find({ ID: directorID }, true);
+		let director = this.manager
+			.get(this.manager.get("directorReq").db)
+			.find({ ID: directorID }, true);
 
 		this.modals.clock.title = `${director.name} - Clock ${
 			!director.present
@@ -169,10 +171,9 @@ class WWSUtimesheet extends WWSUevents {
 									return;
 								}
 								let value = form.getValue();
-								this.manager.get("directorReq")._authorize(
-									value.name,
-									value.password,
-									(body) => {
+								this.manager
+									.get("directorReq")
+									._authorize(value.name, value.password, (body) => {
 										if (body === 0 || typeof body.token === `undefined`) {
 											$(document).Toasts("create", {
 												class: "bg-warning",
@@ -180,7 +181,7 @@ class WWSUtimesheet extends WWSUevents {
 												body:
 													"There was an error authorizing you. Did you type your password in correctly? Please contact the engineer if this is a bug.",
 												delay: 15000,
-												autoHide: true,
+												autohide: true,
 											});
 										} else {
 											this.manager.get("directorReq")._tryRequest(
@@ -229,8 +230,7 @@ class WWSUtimesheet extends WWSUevents {
 												}
 											);
 										}
-									}
-								);
+									});
 							},
 						},
 					},
@@ -239,7 +239,9 @@ class WWSUtimesheet extends WWSUevents {
 			data: {
 				name: director.name,
 				password: ``,
-				timestamp: moment().toISOString(true),
+				timestamp: moment(this.manager.get("WWSUMeta").meta.time).toISOString(
+					true
+				),
 				notes: ``,
 			},
 		});
@@ -253,43 +255,45 @@ class WWSUtimesheet extends WWSUevents {
 	 */
 	edit(data, cb) {
 		try {
-			this.manager.get("adminDirectorReq").request(
-				{ method: "post", url: this.endpoints.edit, data },
-				(response) => {
-					if (response !== "OK") {
-						$(document).Toasts("create", {
-							class: "bg-danger",
-							title: "Error editing timesheet",
-							body:
-								"There was an error editing the timesheet. Please report this to the engineer.",
-							autoHide: true,
-							delay: 10000,
-							icon: "fas fa-skull-crossbones fa-lg",
-						});
-						if (typeof cb === "function") {
-							cb(false);
-						}
-					} else {
-						$(document).Toasts("create", {
-							class: "bg-success",
-							title: "timesheet edited",
-							autohide: true,
-							delay: 15000,
-							body: `The timesheet was edited.`,
-						});
-						if (typeof cb === "function") {
-							cb(true);
+			this.manager
+				.get("adminDirectorReq")
+				.request(
+					{ method: "post", url: this.endpoints.edit, data },
+					(response) => {
+						if (response !== "OK") {
+							$(document).Toasts("create", {
+								class: "bg-danger",
+								title: "Error editing timesheet",
+								body:
+									"There was an error editing the timesheet. Please report this to the engineer.",
+								autohide: true,
+								delay: 10000,
+								icon: "fas fa-skull-crossbones fa-lg",
+							});
+							if (typeof cb === "function") {
+								cb(false);
+							}
+						} else {
+							$(document).Toasts("create", {
+								class: "bg-success",
+								title: "timesheet edited",
+								autohide: true,
+								delay: 15000,
+								body: `The timesheet was edited.`,
+							});
+							if (typeof cb === "function") {
+								cb(true);
+							}
 						}
 					}
-				}
-			);
+				);
 		} catch (e) {
 			$(document).Toasts("create", {
 				class: "bg-danger",
 				title: "Error editing timesheet",
 				body:
 					"There was an error editing the timesheet. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -308,43 +312,45 @@ class WWSUtimesheet extends WWSUevents {
 	 */
 	remove(data, cb) {
 		try {
-			this.manager.get("adminDirectorReq").request(
-				{ method: "post", url: this.endpoints.remove, data },
-				(response) => {
-					if (response !== "OK") {
-						$(document).Toasts("create", {
-							class: "bg-danger",
-							title: "Error removing timesheet",
-							body:
-								"There was an error removing the timesheet. Please report this to the engineer.",
-							autoHide: true,
-							delay: 10000,
-							icon: "fas fa-skull-crossbones fa-lg",
-						});
-						if (typeof cb === "function") {
-							cb(false);
-						}
-					} else {
-						$(document).Toasts("create", {
-							class: "bg-success",
-							title: "timesheet removed",
-							autohide: true,
-							delay: 10000,
-							body: `The timesheet was removed.`,
-						});
-						if (typeof cb === "function") {
-							cb(true);
+			this.manager
+				.get("adminDirectorReq")
+				.request(
+					{ method: "post", url: this.endpoints.remove, data },
+					(response) => {
+						if (response !== "OK") {
+							$(document).Toasts("create", {
+								class: "bg-danger",
+								title: "Error removing timesheet",
+								body:
+									"There was an error removing the timesheet. Please report this to the engineer.",
+								autohide: true,
+								delay: 10000,
+								icon: "fas fa-skull-crossbones fa-lg",
+							});
+							if (typeof cb === "function") {
+								cb(false);
+							}
+						} else {
+							$(document).Toasts("create", {
+								class: "bg-success",
+								title: "timesheet removed",
+								autohide: true,
+								delay: 10000,
+								body: `The timesheet was removed.`,
+							});
+							if (typeof cb === "function") {
+								cb(true);
+							}
 						}
 					}
-				}
-			);
+				);
 		} catch (e) {
 			$(document).Toasts("create", {
 				class: "bg-danger",
 				title: "Error removing timesheet",
 				body:
 					"There was an error removing the timesheet. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -397,7 +403,6 @@ class WWSUtimesheet extends WWSUevents {
 						data: [],
 						columns: [
 							{ title: "Director" },
-							{ title: "Scheduled Hours" },
 							{ title: "In-Office Hours" },
 							{ title: "Remote Hours" },
 							{ title: "Total Hours" },
@@ -441,7 +446,7 @@ class WWSUtimesheet extends WWSUevents {
 							},
 							{ title: "ID", data: "ID" },
 							{ title: "Director", data: "director" },
-							{ title: "Status", data: "status" },
+							{ title: "Statuses", data: "status" },
 							{ title: "Clock In", data: "clockIn" },
 							{ title: "Clock Out", data: "clockOut" },
 							{ title: "Actions", data: "actions" },
@@ -466,7 +471,7 @@ class WWSUtimesheet extends WWSUevents {
 										title: "Error accessing timesheet edit form",
 										body:
 											"There was an error loading the form to edit that timesheet. Please report this to the engineer.",
-										autoHide: true,
+										autohide: true,
 										delay: 10000,
 										icon: "fas fa-skull-crossbones fa-lg",
 									});
@@ -545,7 +550,7 @@ class WWSUtimesheet extends WWSUevents {
 						title: "Error getting timesheet records",
 						body:
 							"There was an error getting timesheet records. Please report this to the engineer.",
-						autoHide: true,
+						autohide: true,
 						delay: 10000,
 						icon: "fas fa-skull-crossbones fa-lg",
 					});
@@ -565,25 +570,10 @@ class WWSUtimesheet extends WWSUevents {
 							// Set up tamplate if new director
 							if (typeof directors[record.name] === "undefined") {
 								directors[record.name] = {
-									scheduled: { office: 0, remote: 0, total: 0 },
 									office: { approved: 0, unapproved: 0, total: 0 },
 									remote: { approved: 0, unapproved: 0, total: 0 },
 									total: { approved: 0, unapproved: 0, total: 0 },
 								};
-							}
-
-							// Add scheduled hours
-							if (record.scheduledIn && record.scheduledOut) {
-								directors[record.name].scheduled[
-									record.remote ? "remote" : "office"
-								] += moment(record.scheduledOut).diff(
-									record.scheduledIn,
-									"hours",
-									true
-								);
-								directors[record.name].scheduled.total += moment(
-									record.scheduledOut
-								).diff(record.scheduledIn, "hours", true);
 							}
 
 							// Add actual hours
@@ -631,28 +621,6 @@ class WWSUtimesheet extends WWSUevents {
 								this.tables.hours.rows.add([
 									[
 										director,
-										`<ul>
-										<li>In-Office: ${
-											Math.round(
-												(directors[director].scheduled.office +
-													Number.EPSILON) *
-													100
-											) / 100
-										}</li>
-										<li>Remote: ${
-											Math.round(
-												(directors[director].scheduled.remote +
-													Number.EPSILON) *
-													100
-											) / 100
-										}</li>
-										<li>Total: ${
-											Math.round(
-												(directors[director].scheduled.total + Number.EPSILON) *
-													100
-											) / 100
-										}</li>
-										</ul>`,
 										`<ul>
 										<li>Approved: ${
 											Math.round(
@@ -825,6 +793,42 @@ class WWSUtimesheet extends WWSUevents {
 	timesheetForm(data) {
 		this.modals.edit.body = ``;
 		this.modals.edit.iziModal("open");
+
+		// Correct timezones in data
+		if (data) {
+			data.scheduledIn = moment
+				.tz(
+					data.scheduledIn,
+					this.manager.get("WWSUMeta")
+						? this.manager.get("WWSUMeta").meta.timezone
+						: moment.tz.guess()
+				)
+				.toISOString(true);
+			data.scheduledOut = moment
+				.tz(
+					data.scheduledOut,
+					this.manager.get("WWSUMeta")
+						? this.manager.get("WWSUMeta").meta.timezone
+						: moment.tz.guess()
+				)
+				.toISOString(true);
+			data.timeIn = moment
+				.tz(
+					data.timeIn,
+					this.manager.get("WWSUMeta")
+						? this.manager.get("WWSUMeta").meta.timezone
+						: moment.tz.guess()
+				)
+				.toISOString(true);
+			data.timeOut = moment
+				.tz(
+					data.timeOut,
+					this.manager.get("WWSUMeta")
+						? this.manager.get("WWSUMeta").meta.timezone
+						: moment.tz.guess()
+				)
+				.toISOString(true);
+		}
 
 		$(this.modals.edit.body).alpaca({
 			schema: {

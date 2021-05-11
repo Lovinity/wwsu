@@ -78,6 +78,7 @@ class WWSUemail {
 							"All DJs, Directors, and Assistants",
 							"All Directors and Assistants",
 							"All non-assistant Directors",
+							"Admin Directors Only",
 							"All DJs",
 							"DJs Active This Semester",
 							"DJs Active in the Past 30 Days",

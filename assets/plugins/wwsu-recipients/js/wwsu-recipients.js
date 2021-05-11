@@ -163,8 +163,8 @@ class WWSUrecipients extends WWSUdb {
 							this.manager.get("WWSUMeta") &&
 							this.manager.get("WWSUMeta").meta.webchat) ||
 						recipient.status !== 0
-							? `<span class="text-success">ONLINE</span>`
-							: `<span class="text-danger">OFFLINE</span>`,
+							? `<span class="badge badge-success">ONLINE</span>`
+							: `<span class="badge badge-danger">OFFLINE</span>`,
 						recipient.group,
 						recipient.label,
 						recipient.unreadMessages,

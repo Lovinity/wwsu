@@ -59,7 +59,7 @@ class WWSUrequestsweb extends WWSUevents {
         .get("WWSUutil")
         .waitForElement(`#section-requests-track-table`, () => {
           // Generate table
-          this.table = $(`#section-requests-track-table`).DataTable({
+          this.requestTable = $(`#section-requests-track-table`).DataTable({
             paging: true,
             data: [],
             columns: [{ title: "Artist - Title" }, { title: "View / Request" }],
@@ -111,12 +111,12 @@ class WWSUrequestsweb extends WWSUevents {
         .request(
           { dom: dom, method: "post", url: this.endpoints.place, data },
           (response) => {
-            if (!response || !response.requested) {
+            if (response !== "OK") {
               $(document).Toasts("create", {
                 class: "bg-danger",
                 title: "Error placing request",
                 body: `There was an error placing the request. Maybe this track cannot be requested right now?`,
-                autoHide: true,
+                autohide: true,
                 delay: 10000,
                 icon: "fas fa-skull-crossbones fa-lg",
               });
@@ -138,19 +138,19 @@ class WWSUrequestsweb extends WWSUevents {
           }
         );
     } catch (e) {
-      console.error(e);
       $(document).Toasts("create", {
         class: "bg-danger",
         title: "Error placing request",
         body:
           "There was an error placing the request. Please report this to the engineer.",
-        autoHide: true,
+        autohide: true,
         delay: 10000,
         icon: "fas fa-skull-crossbones fa-lg",
       });
       if (typeof cb === "function") {
         cb(false);
       }
+      console.error(e);
     }
   }
 
@@ -198,16 +198,16 @@ class WWSUrequestsweb extends WWSUevents {
           } else {
             $(document).Toasts("create", {
                 class: "bg-warning",
-                autoHide: true,
+                autohide: true,
                 delay: 5000,
                 title: "No more tracks",
                 body:
                   "There are no more tracks to load for your search.",
               });
           }
-
-          this.table.draw();
         });
+
+        this.table.draw();
       }
     });
   }

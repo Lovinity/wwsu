@@ -44,7 +44,7 @@ class WWSUremote extends WWSUevents {
 							title: "Error requesting audio call",
 							body:
 								"There was an error informing the WWSU API we want to start an audio call for a remote broadcast. Please contact the engineer.",
-							autoHide: true,
+							autohide: true,
 							delay: 15000,
 							icon: "fas fa-skull-crossbones fa-lg",
 						});
@@ -64,7 +64,7 @@ class WWSUremote extends WWSUevents {
 				title: "Error requesting audio call",
 				body:
 					"There was an error informing the WWSU API we want to start an audio call for a remote broadcast. Please contact the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 15000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -97,7 +97,7 @@ class WWSUremote extends WWSUevents {
 							title: "Error generating Skyway.js credential",
 							body:
 								"There was an error generating a credential token to authorize Skyway.js for an audio call. Please contact the engineer.",
-							autoHide: true,
+							autohide: true,
 							delay: 15000,
 							icon: "fas fa-skull-crossbones fa-lg",
 						});
@@ -113,7 +113,7 @@ class WWSUremote extends WWSUevents {
 				title: "Error generating Skyway.js credential",
 				body:
 					"There was an error generating a credential token to authorize Skyway.js for an audio call. Please contact the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 15000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});

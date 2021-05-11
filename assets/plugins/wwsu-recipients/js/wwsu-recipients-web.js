@@ -16,7 +16,7 @@ class WWSUrecipientsweb {
     this.endpoints = {
       addDisplay: "/recipients/add-display",
       addWeb: "/recipients/add-web",
-      editWeb: "/recipients/edit-web"
+      editWeb: "/recipients/edit-web",
     };
 
     this.recipient = {};
@@ -33,9 +33,9 @@ class WWSUrecipientsweb {
       {
         method: "post",
         url: this.endpoints.addDisplay,
-        data: { host: host }
+        data: { host: host },
       },
-      response2 => {
+      (response2) => {
         try {
           if (response2.label) {
             cb(response2, true);
@@ -61,12 +61,11 @@ class WWSUrecipientsweb {
       {
         method: "post",
         url: this.endpoints.addWeb,
-        data: { device: device }
+        data: { device: device },
       },
-      response2 => {
+      (response2) => {
         try {
           this.recipient = response2;
-          this.manager.get("WWSUmessagesweb").updateMessages();
           if (response2.label) {
             cb(response2, true);
           } else {
@@ -92,11 +91,9 @@ class WWSUrecipientsweb {
       {
         method: "post",
         url: this.endpoints.editWeb,
-        data: { label: label }
+        data: { label: label },
       },
-      response2 => {
-        if (this.recipient.label) this.recipient.label = `Web (${label})`;
-        this.manager.get("WWSUmessagesweb").updateMessages();
+      (response2) => {
         if (typeof cb === "function") cb();
       }
     );

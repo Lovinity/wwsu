@@ -47,7 +47,7 @@ class WWSUconfig extends WWSUevents {
 							title: "Error loading WWSU server configuration",
 							body:
 								"There was an error WWSU server configuration. Please report this to the engineer.",
-							autoHide: true,
+							autohide: true,
 							delay: 10000,
 							icon: "fas fa-skull-crossbones fa-lg",
 						});
@@ -63,7 +63,7 @@ class WWSUconfig extends WWSUevents {
 				title: "Error loading WWSU server configuration",
 				body:
 					"There was an error WWSU server configuration. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});

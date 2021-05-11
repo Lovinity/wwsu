@@ -87,7 +87,7 @@ class WWSUeas extends WWSUdb {
 							title: "Error sending alert",
 							body:
 								"There was an error sending the alert. Please report this to the engineer.",
-							autoHide: true,
+							autohide: true,
 							delay: 10000,
 							icon: "fas fa-skull-crossbones fa-lg",
 						});
@@ -110,7 +110,7 @@ class WWSUeas extends WWSUdb {
 				title: "Error sending alert",
 				body:
 					"There was an error sending the alert. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -138,7 +138,7 @@ class WWSUeas extends WWSUdb {
 								title: "Error sending test alert",
 								body:
 									"There was an error sending the test alert. Please report this to the engineer.",
-								autoHide: true,
+								autohide: true,
 								delay: 10000,
 								icon: "fas fa-skull-crossbones fa-lg",
 							});
@@ -161,7 +161,7 @@ class WWSUeas extends WWSUdb {
 				title: "Error sending test alert",
 				body:
 					"There was an error sending the test alert. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -193,7 +193,7 @@ class WWSUeas extends WWSUdb {
 							title: "Error editing alert",
 							body:
 								"There was an error editing the alert. Please report this to the engineer.",
-							autoHide: true,
+							autohide: true,
 							delay: 10000,
 							icon: "fas fa-skull-crossbones fa-lg",
 						});
@@ -216,7 +216,7 @@ class WWSUeas extends WWSUdb {
 				title: "Error editing alert",
 				body:
 					"There was an error editing the alert. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -248,7 +248,7 @@ class WWSUeas extends WWSUdb {
 							title: "Error remove alert",
 							body:
 								"There was an error removing the alert. Please report this to the engineer.",
-							autoHide: true,
+							autohide: true,
 							delay: 10000,
 							icon: "fas fa-skull-crossbones fa-lg",
 						});
@@ -271,7 +271,7 @@ class WWSUeas extends WWSUdb {
 				title: "Error removing alert",
 				body:
 					"There was an error removing the alert. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -302,7 +302,9 @@ class WWSUeas extends WWSUdb {
 			// Init html
 			$(table).html(
 				`<p class="wwsumeta-timezone-display">Times are shown in the timezone ${
-					this.manager.get("WWSUMeta") ? this.manager.get("WWSUMeta").meta.timezone : moment.tz.guess()
+					this.manager.get("WWSUMeta")
+						? this.manager.get("WWSUMeta").meta.timezone
+						: moment.tz.guess()
 				}.</p><p><button type="button" class="btn btn-block btn-success btn-eas-new">New EAS Alert</button><button type="button" class="btn btn-block btn-warning btn-eas-test">Send Test</button></p><table id="section-eas-table" class="table table-striped display responsive" style="width: 100%;"></table>`
 			);
 
@@ -396,13 +398,17 @@ class WWSUeas extends WWSUdb {
 						moment
 							.tz(
 								eas.starts,
-								this.manager.get("WWSUMeta") ? this.manager.get("WWSUMeta").meta.timezone : moment.tz.guess()
+								this.manager.get("WWSUMeta")
+									? this.manager.get("WWSUMeta").meta.timezone
+									: moment.tz.guess()
 							)
 							.format("lll"),
 						moment
 							.tz(
 								eas.expires,
-								this.manager.get("WWSUMeta") ? this.manager.get("WWSUMeta").meta.timezone : moment.tz.guess()
+								this.manager.get("WWSUMeta")
+									? this.manager.get("WWSUMeta").meta.timezone
+									: moment.tz.guess()
 							)
 							.format("lll"),
 						eas.source === "WWSU"
@@ -424,6 +430,26 @@ class WWSUeas extends WWSUdb {
 		this.newEASModal.body = ``;
 
 		this.newEASModal.iziModal("open");
+
+		// Correct timezones in data
+		if (data) {
+			data.starts = moment
+				.tz(
+					data.starts,
+					this.manager.get("WWSUMeta")
+						? this.manager.get("WWSUMeta").meta.timezone
+						: moment.tz.guess()
+				)
+				.toISOString(true);
+			data.expires = moment
+				.tz(
+					data.expires,
+					this.manager.get("WWSUMeta")
+						? this.manager.get("WWSUMeta").meta.timezone
+						: moment.tz.guess()
+				)
+				.toISOString(true);
+		}
 
 		$(this.newEASModal.body).alpaca({
 			schema: {
@@ -510,7 +536,11 @@ class WWSUeas extends WWSUdb {
 					},
 					starts: {
 						dateFormat: `YYYY-MM-DDTHH:mm:[00]${moment
-							.parseZone(this.manager.get("WWSUMeta") ? this.manager.get("WWSUMeta").meta.time : undefined)
+							.parseZone(
+								this.manager.get("WWSUMeta")
+									? this.manager.get("WWSUMeta").meta.time
+									: undefined
+							)
 							.format("Z")}`,
 						picker: {
 							inline: true,
@@ -519,7 +549,11 @@ class WWSUeas extends WWSUdb {
 					},
 					expires: {
 						dateFormat: `YYYY-MM-DDTHH:mm:[00]${moment
-							.parseZone(this.manager.get("WWSUMeta") ? this.manager.get("WWSUMeta").meta.time : undefined)
+							.parseZone(
+								this.manager.get("WWSUMeta")
+									? this.manager.get("WWSUMeta").meta.time
+									: undefined
+							)
 							.format("Z")}`,
 						picker: {
 							inline: true,

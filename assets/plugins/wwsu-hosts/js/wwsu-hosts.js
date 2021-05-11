@@ -20,10 +20,10 @@ class WWSUhosts extends WWSUdb {
 		this.endpoints = {
 			edit: "/hosts/edit",
 			get: "/hosts/get",
-			remove: "/hosts/remove",
+			remove: "/hosts/remove"
 		};
 		this.data = {
-			get: { host: options.machineID, app: options.app },
+			get: { host: options.machineID, app: options.app }
 		};
 
 		this.host = options.machineID;
@@ -36,23 +36,29 @@ class WWSUhosts extends WWSUdb {
 		this.client = {};
 
 		// Update client info if it changed
-		this.on("update", "WWSUhosts", (record) => {
+		this.on("update", "WWSUhosts", record => {
 			if (record.host === this.host) {
 				this.client = record;
 				this.emitEvent("clientChanged", [record]);
+				$(".host-friendlyname").html(record.friendlyname);
 			}
 		});
-		this.on("remove", "WWSUhosts", (record) => {
+		this.on("remove", "WWSUhosts", record => {
 			if (record.host === this.host) {
 				this.client = {};
 				this.emitEvent("clientChanged", [null]);
+				$(".host-friendlyname").html("Unknown Host");
 			}
 		});
 
 		this.hostModal = new WWSUmodal(``, null, ``, true, {
 			headerColor: "",
 			overlayClose: false,
-			zindex: 1100,
+			zindex: 1100
+		});
+
+		this.on("change", "WWSUhosts", db => {
+			this.updateTable();
 		});
 	}
 
@@ -67,9 +73,10 @@ class WWSUhosts extends WWSUdb {
 			.get("hostReq")
 			.request(
 				{ method: "POST", url: this.endpoints.get, data: this.data.get },
-				(body) => {
+				body => {
 					try {
 						this.client = body;
+						$(".host-friendlyname").html(body.friendlyname);
 
 						if (!this.client.authorized) {
 							cb(0);
@@ -112,18 +119,18 @@ class WWSUhosts extends WWSUdb {
 					dom: `#modal-${this.hostModal.id}`,
 					method: "post",
 					url: this.endpoints.edit,
-					data: data,
+					data: data
 				},
-				(response) => {
+				response => {
 					if (response !== "OK") {
 						$(document).Toasts("create", {
 							class: "bg-danger",
 							title: "Error editing host",
 							body:
 								"There was an error editing the host. Please report this to the engineer.",
-							autoHide: true,
+							autohide: true,
 							delay: 10000,
-							icon: "fas fa-skull-crossbones fa-lg",
+							icon: "fas fa-skull-crossbones fa-lg"
 						});
 						console.log(response);
 						if (typeof cb === "function") cb(false);
@@ -133,7 +140,7 @@ class WWSUhosts extends WWSUdb {
 							title: "Host Edited",
 							autohide: true,
 							delay: 10000,
-							body: `Host has been edited`,
+							body: `Host has been edited`
 						});
 						if (typeof cb === "function") cb(true);
 					}
@@ -145,9 +152,9 @@ class WWSUhosts extends WWSUdb {
 				title: "Error editing host",
 				body:
 					"There was an error editing the host. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
-				icon: "fas fa-skull-crossbones fa-lg",
+				icon: "fas fa-skull-crossbones fa-lg"
 			});
 			console.error(e);
 			if (typeof cb === "function") cb(false);
@@ -166,18 +173,18 @@ class WWSUhosts extends WWSUdb {
 				{
 					method: "post",
 					url: this.endpoints.remove,
-					data: data,
+					data: data
 				},
-				(response) => {
+				response => {
 					if (response !== "OK") {
 						$(document).Toasts("create", {
 							class: "bg-danger",
 							title: "Error removing host",
 							body:
 								"There was an error removing the host. Please report this to the engineer.",
-							autoHide: true,
+							autohide: true,
 							delay: 10000,
-							icon: "fas fa-skull-crossbones fa-lg",
+							icon: "fas fa-skull-crossbones fa-lg"
 						});
 						console.log(response);
 						if (typeof cb === "function") cb(false);
@@ -187,7 +194,7 @@ class WWSUhosts extends WWSUdb {
 							title: "Host Removed",
 							autohide: true,
 							delay: 10000,
-							body: `Host has been removed`,
+							body: `Host has been removed`
 						});
 						if (typeof cb === "function") cb(true);
 					}
@@ -199,9 +206,9 @@ class WWSUhosts extends WWSUdb {
 				title: "Error removing host",
 				body:
 					"There was an error removing the host. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
-				icon: "fas fa-skull-crossbones fa-lg",
+				icon: "fas fa-skull-crossbones fa-lg"
 			});
 			console.error(e);
 			if (typeof cb === "function") cb(false);
@@ -216,10 +223,10 @@ class WWSUhosts extends WWSUdb {
 
 		this.hostModal.iziModal("open");
 
-		let _djs = this.manager.get("WWSUdjs").find();
+		let _djs = this.manager.get("WWSUdjs").find({ active: true });
 		_djs.push({
 			ID: 0,
-			name: "(Do not allow anyone to start any kind of broadcast on this host)",
+			name: "(Do not allow anyone to start any kind of broadcast on this host)"
 		});
 
 		let rSilence = this.find({ silenceDetection: true }, true);
@@ -233,139 +240,139 @@ class WWSUhosts extends WWSUdb {
 				type: "object",
 				properties: {
 					ID: {
-						type: "number",
+						type: "number"
 					},
 					host: {
 						type: "string",
 						title: "Host ID",
-						readonly: true,
+						readonly: true
 					},
 					app: {
 						type: "string",
 						title: "Application / Version",
-						readonly: true,
+						readonly: true
 					},
 					friendlyname: {
 						type: "string",
 						required: true,
 						title: "Friendly Name",
-						maxLength: 255,
+						maxLength: 255
 					},
 					authorized: {
 						type: "boolean",
-						title: "Is Authorized?",
+						title: "Is Authorized?"
 					},
 					lockToDJ: {
 						type: "number",
-						enum: _djs.map((dj) => dj.ID),
-						title: "Lock To DJ",
+						enum: _djs.map(dj => dj.ID),
+						title: "Lock To DJ"
 					},
 					admin: {
 						type: "boolean",
-						title: "Show Admin Menu?",
+						title: "Allow access to DJ Controls Administration Menu?"
 					},
 					makeCalls: {
 						type: "boolean",
-						title: "Can start remote broadcasts?",
+						title: "Can start remote broadcasts?"
 					},
 					answerCalls: {
 						type: "boolean",
-						title: "Can answer/broadcast remote audio calls?",
+						title: "Can answer/broadcast remote audio calls?"
 					},
 					silenceDetection: {
 						type: "boolean",
 						title: "Monitor / Report Silence?",
-						readonly: rSilence && data && rSilence.ID !== data.ID,
+						readonly: rSilence && data && rSilence.ID !== data.ID
 					},
 					recordAudio: {
 						type: "boolean",
 						title: "Record audio?",
-						readonly: rRecord && data && rRecord.ID !== data.ID,
+						readonly: rRecord && data && rRecord.ID !== data.ID
 					},
 					delaySystem: {
 						type: "boolean",
 						title: "Delay System Connected?",
-						readonly: rDelay && data && rDelay.ID !== data.ID,
+						readonly: rDelay && data && rDelay.ID !== data.ID
 					},
 					EAS: {
 						type: "boolean",
 						title: "Emergency Alert System (EAS) Connected?",
-						readonly: rEAS && data && rEAS.ID !== data.ID,
-					},
-				},
+						readonly: rEAS && data && rEAS.ID !== data.ID
+					}
+				}
 			},
 			options: {
 				fields: {
 					ID: {
-						type: "hidden",
+						type: "hidden"
 					},
 					host: {
 						helper:
-							"This string hash identifies the host depending on the application and the machine. It cannot be edited.",
+							"This string hash identifies the host depending on the application and the machine. It cannot be edited."
 					},
 					app: {
 						helper:
-							"This is the name of the application and its version running on this host. It cannot be edited.",
+							"This is the name of the application and its version running on this host. It cannot be edited."
 					},
 					friendlyname: {
 						helper:
-							"Give a more descriptive name for this host. For example, you may want to specify the name of the person/DJ who is using this host.",
+							"Give a more descriptive name for this host. For example, you may want to specify the name of the person/DJ who is using this host."
 					},
 					authorized: {
 						rightLabel: "Yes",
 						helper:
-							"If not checked, connection attempts to WWSU by this host will be rejected.",
+							"If not checked, connection attempts to WWSU by this host will be rejected."
 					},
 					admin: {
 						rightLabel: "Yes",
 						helper:
-							"(wwsu-dj-controls only) If checked, administration menu items will be visible and accessible. You should only do this for hosts running on the machines of directors.",
+							"(wwsu-dj-controls only) If checked, administration menu items will be visible and accessible. You should only do this for hosts running on the machines of directors."
 					},
 					lockToDJ: {
 						type: "select",
 						helpers: [
 							"(wwsu-dj-controls only) Lock this host to a specific DJ (or to no one) to prevent starting live [in-studio] broadcasts from this host (remote broadcasts allowed only). Also, this prevents starting a remote broadcast unless a broadcast is on the schedule for that moment (or up to 5 minutes before start time) and this DJ is either a host or a co-host of that broadcast.",
-							"Setting this to None means anyone can start any kind of broadcast at any time from this host, including in-studio broadcasts and unscheduled broadcasts.",
+							"Setting this to None means anyone can start any kind of broadcast at any time from this host, including in-studio broadcasts and unscheduled broadcasts."
 						],
-						optionLabels: _djs.map((dj) => dj.name),
+						optionLabels: _djs.map(dj => dj.name)
 					},
 					makeCalls: {
 						rightLabel: "Yes",
-						helper: "(wwsu-dj-controls only)",
+						helper: "(wwsu-dj-controls only)"
 					},
 					answerCalls: {
 						rightLabel: "Yes",
 						helper:
-							"(wwsu-dj-controls only) Can this host be chosen for the audio call when starting a remote broadcast? <strong>You should not check this box except for hosts which can stream the audio over WWSU's airwaves.</strong> You should also ensure the correct output audio device is selected in the Audio Settings of DJ Controls.",
+							"(wwsu-dj-controls only) Can this host be chosen to receive and broadcast the audio call when starting a remote broadcast? <strong>You should not check this box except for hosts which can stream the audio over WWSU's airwaves.</strong> You should also ensure the correct output audio device is selected in the Audio Settings of DJ Controls."
 					},
 					silenceDetection: {
 						rightLabel: "Yes",
 						helpers: [
 							"(wwsu-dj-controls only) Should this host be responsible for monitoring and reporting silence? <strong>Make sure the input device is properly set in audio settings</strong>; it should receive audio from the WWSU airwaves.",
-							"If this check box is disabled / read-only, then another host is already set for silence detection. Please turn off silence detection on the other host first.",
-						],
+							"If this check box is disabled / read-only, then another host is already set for silence detection. Please turn off silence detection on the other host first."
+						]
 					},
 					recordAudio: {
 						rightLabel: "Yes",
 						helpers: [
 							"(wwsu-dj-controls only) Should this host be responsible for recording on-air programming? <strong>Make sure the input device is properly set in audio settings</strong>; it should receive audio from the WWSU airwaves.",
-							"If this check box is disabled / read-only, then another host is already set for recording audio. Please turn off audio recording on the other host first.",
-						],
+							"If this check box is disabled / read-only, then another host is already set for recording audio. Please turn off audio recording on the other host first."
+						]
 					},
 					delaySystem: {
 						rightLabel: "Yes",
 						helpers: [
 							"(wwsu-dj-controls only) Is the delay system connected to this host's computer? <strong>Make sure the serial port is correctly chosen in serial port settings</strong>.",
-							"If this check box is disabled / read-only, then another host is already set for the delay system. Please turn off delay system on the other host first.",
-						],
+							"If this check box is disabled / read-only, then another host is already set for the delay system. Please turn off delay system on the other host first."
+						]
 					},
 					EAS: {
 						rightLabel: "Yes",
 						helpers: [
 							"(wwsu-dj-controls only) Is the emergency alert system connected to this host's computer? <strong>Make sure the serial port is correctly chosen in serial port settings</strong>.",
-							"If this check box is disabled / read-only, then another host is already set for the EAS. Please turn off EAS on the other host first.",
-						],
-					},
+							"If this check box is disabled / read-only, then another host is already set for the EAS. Please turn off EAS on the other host first."
+						]
+					}
 				},
 				form: {
 					buttons: {
@@ -383,17 +390,17 @@ class WWSUhosts extends WWSUdb {
 								if (typeof value.lockToDJ === "undefined")
 									value.lockToDJ = null;
 
-								this.edit(value, (success) => {
+								this.edit(value, success => {
 									if (success) {
 										this.hostModal.iziModal("close");
 									}
 								});
-							},
-						},
-					},
-				},
+							}
+						}
+					}
+				}
 			},
-			data: data ? data : [],
+			data: data ? data : []
 		});
 	}
 
@@ -457,12 +464,12 @@ class WWSUhosts extends WWSUdb {
 							{ title: "Admin Menu?" },
 							{ title: "Remote Audio" },
 							{ title: "Responsibilities" },
-							{ title: "Actions" },
+							{ title: "Actions" }
 						],
 						columnDefs: [{ responsivePriority: 1, targets: 5 }],
 						order: [
 							[0, "asc"],
-							[1, "asc"],
+							[1, "asc"]
 						],
 						pageLength: 100,
 						buttons: ["copy", "csv", "excel", "pdf", "print", "colvis"],
@@ -471,16 +478,16 @@ class WWSUhosts extends WWSUdb {
 							$(".btn-host-edit").unbind("click");
 							$(".btn-host-delete").unbind("click");
 
-							$(".btn-host-edit").click((e) => {
+							$(".btn-host-edit").click(e => {
 								let host = this.find().find(
-									(host) => host.ID === parseInt($(e.currentTarget).data("id"))
+									host => host.ID === parseInt($(e.currentTarget).data("id"))
 								);
 								this.showHostForm(host);
 							});
 
-							$(".btn-host-delete").click((e) => {
+							$(".btn-host-delete").click(e => {
 								let host = this.find().find(
-									(host) => host.ID === parseInt($(e.currentTarget).data("id"))
+									host => host.ID === parseInt($(e.currentTarget).data("id"))
 								);
 								this.manager.get("WWSUutil").confirmDialog(
 									`Are you sure you want to remove the host "${host.friendlyname}"?
@@ -496,7 +503,7 @@ class WWSUhosts extends WWSUdb {
 									}
 								);
 							});
-						},
+						}
 					});
 
 					this.table
@@ -517,46 +524,46 @@ class WWSUhosts extends WWSUdb {
 		this.manager.get("WWSUanimations").add("hosts-update-table", () => {
 			if (this.table) {
 				this.table.clear();
-				this.find().forEach((host) => {
+				this.find().forEach(host => {
 					this.table.row.add([
 						host.friendlyname,
 						`${
 							host.authorized
-								? `<i class="fas fa-check-circle text-success" title="${host.friendlyname} is authorized to connect to WWSU."></i>`
-								: ``
+								? `<span class="badge badge-success" title="${host.friendlyname} is authorized to connect to WWSU."><i class="fas fa-check-circle p-1"></i>Yes</span>`
+								: `<span class="badge badge-danger" title="${host.friendlyname} is NOT authorized to connect to WWSU; they will be denied access on any attempts."><i class="far fa-times-circle p-1"></i>No</span>`
 						}`,
 						`${
 							host.admin
-								? `<i class="fas fa-check-circle text-primary" title="${host.friendlyname} has access to the administration menu."></i>`
-								: ``
+								? `<span class="badge badge-success" title="${host.friendlyname} has access to the DJ Controls administration menu."><i class="fas fa-check-circle p-1"></i>Yes</span>`
+								: `<span class="badge badge-danger" title="${host.friendlyname} does not have access to the DJ Controls administration menu."><i class="far fa-times-circle p-1"></i>No</span>`
 						}`,
-						`${
+						`<ul>${
 							host.makeCalls
-								? `<i class="fas fa-broadcast-tower text-indigo" title="${host.friendlyname} can start remote broadcasts."></i>`
+								? `<li><span class="badge bg-indigo" title="${host.friendlyname} can start remote broadcasts."><i class="fas fa-broadcast-tower p-1"></i>Can Start Remotes</span></li>`
 								: ``
 						}${
 							host.answerCalls
-								? `<i class="fas fa-volume-up text-indigo" title="${host.friendlyname} can play audio for remote broadcasts over the airwaves."></i>`
+								? `<li><span class="badge bg-indigo" title="${host.friendlyname} can play audio for remote broadcasts over the airwaves via its configured Output Device."><i class="fas fa-volume-up p-1"></i>Can Broadcast Remotes</span></li>`
 								: ``
-						}`,
-						`${
+						}</ul>`,
+						`<ul>${
 							host.silenceDetection
-								? `<i class="fas fa-volume-mute text-orange" title="${host.friendlyname} is monitoring for, and reporting, silence on the air."></i>`
+								? `<li><span class="badge bg-orange" title="${host.friendlyname} is monitoring for, and reporting, silence on the air, via its configured Silence Detection Input Devices."><i class="fas fa-volume-mute p-1"></i>Silence Detection</span></li>`
 								: ``
 						}${
 							host.recordAudio
-								? `<i class="fas fa-circle text-primary" title="${host.friendlyname} is recording audio from the airwaves."></i>`
+								? `<li><span class="badge badge-primary" title="${host.friendlyname} is recording on-air audio from its configured Record Audio Input Devices and saving them to its configured file path."><i class="fas fa-circle p-1"></i>Record On-Air Audio</span></li>`
 								: ``
 						}${
 							host.delaySystem
-								? `<i class="fas fa-hourglass-start text-fuchsia" title="${host.friendlyname} is monitoring the status of the delay system and will trigger it when someone clicks the dump button."></i>`
+								? `<li><span class="badge bg-fuchsia" title="${host.friendlyname} is monitoring the status of the delay system via its configured Serial Port and will trigger it when someone clicks the dump button in DJ Controls."><i class="fas fa-hourglass-start p-1"></i>Monitor / Operate Delay System</span></li>`
 								: ``
 						}${
 							host.EAS
-								? `<i class="fas fa-bolt text-danger" title="${host.friendlyname} is monitoring the Emergency Alert System (EAS)."></i>`
+								? `<li><span class="badge badge-danger" title="${host.friendlyname} is monitoring the Emergency Alert System (EAS) via its configured Serial Port."><i class="fas fa-bolt p-1"></i>Monitor / Operate EAS</span></li>`
 								: ``
-						}`,
-						`<div class="btn-group"><button class="btn btn-sm btn-warning btn-host-edit" data-id="${host.ID}" title="Edit Host"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-danger btn-host-delete" data-id="${host.ID}" title="Remove Host"><i class="fas fa-trash"></i></button></div>`,
+						}</ul>`,
+						`<div class="btn-group"><button class="btn btn-sm btn-warning btn-host-edit" data-id="${host.ID}" title="Edit Host"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-danger btn-host-delete" data-id="${host.ID}" title="Remove Host"><i class="fas fa-trash"></i></button></div>`
 					]);
 				});
 				this.table.draw();

@@ -220,7 +220,7 @@ class WWSUreq {
 		this.usernameField = options.usernameField || null;
 		this.loginID = null;
 
-		// Storing authorization tokens in memory
+		// Storing authorization tokens in memory (instead of cookies or localStorage, which is insecure)
 		this._token = null;
 		this._time = null;
 		this._expiration = null;
@@ -277,7 +277,7 @@ class WWSUreq {
 						title: "Error Authorizing",
 						body:
 							"There was an error authorizing. Did you type your password in correctly?",
-						autoHide: true,
+						autohide: true,
 						delay: 10000,
 						icon: "fas fa-skull-crossbones fa-lg",
 					});
@@ -293,7 +293,7 @@ class WWSUreq {
 								? `Failed to authenticate; please try again. ${token.errToken}`
 								: `Failed to authenticate; unknown error.`
 						}`,
-						autoHide: true,
+						autohide: true,
 						delay: 10000,
 						icon: "fas fa-skull-crossbones fa-lg",
 					});
@@ -323,7 +323,9 @@ class WWSUreq {
 			// Otherwise, try the request, and for safe measures, prompt for login if we end up getting an auth error
 		} else {
 			this._tryRequest(opts, (body) => {
-				if (body === -1) {
+				if (body === -1 || typeof body.errToken !== "undefined") {
+
+					// For auth/host paths, we want to get a new token immediately; there is no login form for host authorization
 					if (this.authPath !== "/auth/host") {
 						this.token = null;
 						this._promptLogin((username, password) =>
@@ -388,9 +390,8 @@ class WWSUreq {
 			} else {
 				doRequest(() => {});
 			}
-		} catch (e) {
+		} catch (unusedE) {
 			// eslint-disable-next-line standard/no-callback-literal
-			console.error(e);
 			cb(0);
 		}
 	}
@@ -452,7 +453,7 @@ class WWSUreq {
 				class: "bg-danger",
 				title: "Authorization error",
 				body: `There is no ${this.authName} available to authorize. Please report this to the engineer.`,
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -464,7 +465,7 @@ class WWSUreq {
 				class: "bg-danger",
 				title: "Authorization error",
 				body: `A username field was not specified for ${this.authName} authorization. Please report this to the engineer.`,
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -479,7 +480,7 @@ class WWSUreq {
 			{
 				headerColor: "",
 				overlayClose: false,
-				zindex: 5000,
+				zindex: 10000,
 				timeout: false,
 				closeOnEscape: true,
 				closeButton: true,
@@ -604,7 +605,7 @@ class WWSUutil {
 				title: "Error in getUrlParameter function",
 				body:
 					"There was an error in the getUrlParameter function. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -667,7 +668,7 @@ class WWSUutil {
 				title: "hexrgb error",
 				body:
 					"There was an error in the hexrgb function. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -777,7 +778,7 @@ class WWSUutil {
 							hidden: confirmText ? false : true,
 							validator: function (callback) {
 								let value = this.getValue();
-								if (confirmText && value !== confirmText) {
+								if (confirmText && value !== `${confirmText}`) {
 									callback({
 										status: false,
 										message: `You must type <strong>${confirmText}</strong> to confirm your action.`,

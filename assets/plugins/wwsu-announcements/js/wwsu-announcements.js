@@ -36,6 +36,10 @@ class WWSUannouncements extends WWSUdb {
 			headerColor: "",
 			zindex: 1100,
 		});
+
+		this.on("change", "WWSUannouncements", () => {
+			this.updateTable();
+		})
 	}
 
 	// Initialize the connection and get initial data; should be called on socket connect event.
@@ -155,7 +159,7 @@ class WWSUannouncements extends WWSUdb {
 							title: "Error adding announcement",
 							body:
 								"There was an error adding the announcement. Please report this to the engineer.",
-							autoHide: true,
+							autohide: true,
 							delay: 10000,
 							icon: "fas fa-skull-crossbones fa-lg",
 						});
@@ -182,7 +186,7 @@ class WWSUannouncements extends WWSUdb {
 				title: "Error adding announcement",
 				body:
 					"There was an error adding the announcement. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -215,7 +219,7 @@ class WWSUannouncements extends WWSUdb {
 							title: "Error editing announcement",
 							body:
 								"There was an error editing the announcement. Please report this to the engineer.",
-							autoHide: true,
+							autohide: true,
 							delay: 10000,
 							icon: "fas fa-skull-crossbones fa-lg",
 						});
@@ -242,7 +246,7 @@ class WWSUannouncements extends WWSUdb {
 				title: "Error editing announcement",
 				body:
 					"There was an error editing the announcement. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -272,7 +276,7 @@ class WWSUannouncements extends WWSUdb {
 								title: "Error removing announcement",
 								body:
 									"There was an error removing the announcement. Please report this to the engineer.",
-								autoHide: true,
+								autohide: true,
 								delay: 10000,
 								icon: "fas fa-skull-crossbones fa-lg",
 							});
@@ -299,7 +303,7 @@ class WWSUannouncements extends WWSUdb {
 				title: "Error removing announcement",
 				body:
 					"There was an error removing the announcement. Please report this to the engineer.",
-				autoHide: true,
+				autohide: true,
 				delay: 10000,
 				icon: "fas fa-skull-crossbones fa-lg",
 			});
@@ -337,7 +341,7 @@ class WWSUannouncements extends WWSUdb {
 									: moment.tz.guess()
 							)
 							.format("LLLL"),
-						`<span class="text-${announcement.level}"><i class="fas fa-dot-circle"></i></span>`,
+						`<span class="badge badge-${announcement.level}">${announcement.level}</span>`,
 						`<div class="btn-group"><button class="btn btn-sm btn-warning btn-announcement-edit" data-id="${announcement.ID}" title="Edit Announcement"><i class="fas fa-edit"></i></button><button class="btn btn-sm btn-danger btn-announcement-delete" data-id="${announcement.ID}" title="Delete Announcement"><i class="fas fa-trash"></i></button></div>`,
 					]);
 				});
@@ -356,6 +360,26 @@ class WWSUannouncements extends WWSUdb {
 		this.formModal.title = data ? `Edit Announcement` : `New Announcement`;
 		this.formModal.footer = ``;
 		this.formModal.body = ``;
+
+		// Make timezone corrections in initial data
+		if (data) {
+			data.starts = moment
+				.tz(
+					data.starts,
+					this.manager.get("WWSUMeta")
+						? this.manager.get("WWSUMeta").meta.timezone
+						: moment.tz.guess()
+				)
+				.toISOString(true);
+			data.expires = moment
+				.tz(
+					data.expires,
+					this.manager.get("WWSUMeta")
+						? this.manager.get("WWSUMeta").meta.timezone
+						: moment.tz.guess()
+				)
+				.toISOString(true);
+		}
 
 		// Create form
 		$(this.formModal.body).alpaca({

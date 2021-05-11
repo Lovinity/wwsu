@@ -71,7 +71,7 @@ class WWSUsubscriptions extends WWSUevents {
                         class: 'bg-warning',
                         title: 'Subscription failed',
                         body: 'Unable to subscribe you to that event at this time. Please contact the engineer.',
-                        autoHide: true,
+                        autohide: true,
                         delay: 10000,
                         icon: 'fas fa-skull-crossbones fa-lg',
                     });
@@ -93,7 +93,7 @@ class WWSUsubscriptions extends WWSUevents {
                     class: 'bg-danger',
                     title: 'Subscription failed',
                     body: 'Unable to subscribe you to that event at this time. Please contact the engineer.',
-                    autoHide: true,
+                    autohide: true,
                     delay: 10000,
                     icon: 'fas fa-skull-crossbones fa-lg',
                 });
@@ -115,7 +115,7 @@ class WWSUsubscriptions extends WWSUevents {
                         class: 'bg-warning',
                         title: 'Un-subscription failed',
                         body: 'Unable to un-subscribe you to that event at this time (calendar-once). Please contact the engineer.',
-                        autoHide: true,
+                        autohide: true,
                         delay: 10000,
                         icon: 'fas fa-skull-crossbones fa-lg',
                     });
@@ -127,7 +127,7 @@ class WWSUsubscriptions extends WWSUevents {
                                     class: 'bg-warning',
                                     title: 'Un-subscription failed',
                                     body: 'Unable to un-subscribe you to that event at this time (calendar-all). Please contact the engineer.',
-                                    autoHide: true,
+                                    autohide: true,
                                     delay: 10000,
                                     icon: 'fas fa-skull-crossbones fa-lg',
                                 });
@@ -150,7 +150,7 @@ class WWSUsubscriptions extends WWSUevents {
                                 class: 'bg-danger',
                                 title: 'Un-subscription failed',
                                 body: 'Unable to un-subscribe you to that event at this time (calendar-all). Please contact the engineer.',
-                                autoHide: true,
+                                autohide: true,
                                 delay: 10000,
                                 icon: 'fas fa-skull-crossbones fa-lg',
                             });
@@ -163,7 +163,7 @@ class WWSUsubscriptions extends WWSUevents {
                     class: 'bg-danger',
                     title: 'Un-subscription failed',
                     body: 'Unable to un-subscribe you to that event at this time (calendar-once). Please contact the engineer.',
-                    autoHide: true,
+                    autohide: true,
                     delay: 10000,
                     icon: 'fas fa-skull-crossbones fa-lg',
                 });
