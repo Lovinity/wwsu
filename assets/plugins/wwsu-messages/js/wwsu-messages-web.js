@@ -18,10 +18,10 @@ class WWSUmessagesweb extends WWSUdb {
 
     this.endpoints = {
       get: "/messages/get-web",
-      send: "/messages/send-web",
+      send: "/messages/send-web"
     };
     this.data = {
-      get: {},
+      get: {}
     };
 
     this.assignSocketEvent("messages", this.manager.socket);
@@ -37,7 +37,7 @@ class WWSUmessagesweb extends WWSUdb {
 
     // Prune old messages (over 1 hour old) every minute.
     this.prune = setInterval(() => {
-      this.find().forEach((message) => {
+      this.find().forEach(message => {
         if (
           moment(
             this.manager.get("WWSUMeta")
@@ -53,6 +53,25 @@ class WWSUmessagesweb extends WWSUdb {
     }, 60000);
 
     this.firstLoad = true;
+
+    // Event handlers
+    this.on("remove", "WWSUmessagesweb", (query, db) => {
+      this.read = this.read.filter(value => value !== query);
+      this.notified = this.notified.filter(value => value !== query);
+    });
+    this.on("change", "WWSUmessagesweb", db => {
+      this.updateMessages();
+    });
+    this.on("newMessage", "WWSUmessagesweb", message => {
+      $(document).Toasts("create", {
+        class: "bg-primary",
+        title: `New Message from ${message.fromFriendly}`,
+        autohide: true,
+        delay: 15000,
+        body: `${message.message}<p><strong>To reply:</strong> Click "Chat with DJ" in the left menu.</p>`,
+        icon: "fas fa-comment fa-lg"
+      });
+    });
   }
 
   /**
@@ -86,6 +105,8 @@ class WWSUmessagesweb extends WWSUdb {
     // Generate current chat status HTML
     this.updateChatStatus(this.manager.get("WWSUMeta").meta);
 
+    $(this.chatForm).html(``);
+
     // Generate Alpaca form
     $(this.chatForm).alpaca({
       schema: {
@@ -93,29 +114,20 @@ class WWSUmessagesweb extends WWSUdb {
         properties: {
           nickname: {
             type: "string",
-            title: "Nickname",
-            default: "",
-            required: true,
+            title: "Nickname"
           },
           message: {
             type: "string",
             title: "Message",
-            default: "",
-            required: true,
-          },
-        },
+            required: true
+          }
+        }
       },
       options: {
         fields: {
           nickname: {
-            helper: "This is the name the DJ and other listeners will see you.",
-            events: {
-              change: (form, e) => {
-                this.manager
-                  .get("WWSUrecipientsweb")
-                  .editRecipientWeb(form.getValue());
-              },
-            },
+            helper:
+              "This is the name the DJ and other listeners will see you. If you leave blank, a random name will be given to you."
           },
           message: {
             type: "tinymce",
@@ -124,9 +136,9 @@ class WWSUmessagesweb extends WWSUdb {
                 "undo redo | bold italic underline strikethrough | fontselect fontsizeselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | fullscreen preview | link | ltr rtl",
               plugins:
                 "autoresize preview paste searchreplace autolink save directionality visualblocks visualchars fullscreen link table hr pagebreak nonbreaking toc insertdatetime advlist lists wordcount textpattern noneditable help",
-              menubar: "file edit view insert format tools table help",
-            },
-          },
+              menubar: "file edit view insert format tools table help"
+            }
+          }
         },
         form: {
           buttons: {
@@ -142,18 +154,25 @@ class WWSUmessagesweb extends WWSUdb {
                 let value = form.getValue();
                 value.private = false; // Public message
 
-                // Get recipient nickname
-                value.nickname = this.manager.get("WWSUrecipientsweb")
-                  ? this.manager.get("WWSUrecipientsweb").recipient.label
-                  : "Unknown Visitor";
+                // Update nickname
+                if (value.nickname && value.nickname !== "") {
+                  this.manager
+                    .get("WWSUrecipientsweb")
+                    .editRecipientWeb(value.nickname);
+                } else {
+                  value.nickname = this.manager
+                    .get("WWSUrecipientsweb")
+                    .recipient.label.replace("Web ", "")
+                    .match(/\(([^)]+)\)/)[1];
+                }
 
                 // Send message
-                this.send(value, (success) => {
+                this.send(value, success => {
                   if (success) {
                     form.clear();
                   }
                 });
-              },
+              }
             },
             submitPrivate: {
               title: "Send Privately",
@@ -167,23 +186,41 @@ class WWSUmessagesweb extends WWSUdb {
                 let value = form.getValue();
                 value.private = true; // Private message
 
-                // Get recipient nickname
-                value.nickname = this.manager.get("WWSUrecipientsweb")
-                  ? this.manager.get("WWSUrecipientsweb").recipient.label
-                  : "Unknown Visitor";
+                // Update nickname
+                if (value.nickname && value.nickname !== "") {
+                  this.manager
+                    .get("WWSUrecipientsweb")
+                    .editRecipientWeb(value.nickname);
+                } else {
+                  value.nickname = this.manager
+                    .get("WWSUrecipientsweb")
+                    .recipient.label.replace("Web ", "")
+                    .match(/\(([^)]+)\)/)[1];
+                }
 
                 // Send message
-                this.send(value, (success) => {
+                this.send(value, success => {
                   if (success) {
                     form.clear();
                   }
                 });
-              },
-            },
-          },
+              }
+            }
+          }
         },
-      },
+
+        data: {
+          nickname: this.manager.get("WWSUrecipientsweb")
+            ? this.manager
+                .get("WWSUrecipientsweb")
+                .recipient.label.replace("Web ", "")
+                .match(/\(([^)]+)\)/)[1]
+            : "Unknown Visitor"
+        }
+      }
     });
+
+    this.updateMessages();
   }
 
   // Initialize connection. Call this on socket connect event.
@@ -207,7 +244,7 @@ class WWSUmessagesweb extends WWSUdb {
         .get("noReq")
         .request(
           { method: "post", url: this.endpoints.send, data },
-          (response) => {
+          response => {
             if (response !== "OK") {
               $(document).Toasts("create", {
                 class: "bg-warning",
@@ -216,7 +253,7 @@ class WWSUmessagesweb extends WWSUdb {
                   "There was an error sending the message. Either you are sending too many messages too quickly (no more than 3 per minute allowed), or the DJ opted to disallow messages during their show. If neither are true, please contact the engineer at wwsu4@wright.edu.",
                 autohide: true,
                 delay: 30000,
-                icon: "fas fa-skull-crossbones fa-lg",
+                icon: "fas fa-skull-crossbones fa-lg"
               });
               if (typeof cb === "function") {
                 cb(false);
@@ -243,7 +280,7 @@ class WWSUmessagesweb extends WWSUdb {
           "There was an error sending the message. Please report this to the engineer at wwsu4@wright.edu.",
         autohide: true,
         delay: 10000,
-        icon: "fas fa-skull-crossbones fa-lg",
+        icon: "fas fa-skull-crossbones fa-lg"
       });
       if (typeof cb === "function") {
         cb(false);
@@ -383,5 +420,88 @@ class WWSUmessagesweb extends WWSUdb {
           </div>`);
         }
       });
+  }
+
+  /**
+   * Update messages to be displayed.
+   */
+  updateMessages() {
+    let unreadMessages = 0;
+
+    if (!this.manager.get("WWSUrecipientsweb").recipient.host) return;
+
+    // Check for and notify of new messages
+    this.find()
+      .filter(
+        msg =>
+          msg.to === "website" ||
+          msg.to.startsWith(
+            this.manager.get("WWSUrecipientsweb").recipient.host
+          )
+      )
+      .forEach(msg => {
+        // Count unread messages
+        if (this.read.indexOf(msg.ID) === -1) unreadMessages++;
+
+        // Notify on new messages
+        if (!this.firstLoad && this.notified.indexOf(msg.ID) === -1) {
+          this.notified.push(msg.ID);
+          this.emitEvent("newMessage", [msg]);
+        }
+      });
+
+    // Update unread messages stuff
+    if (unreadMessages <= 0) {
+      $(this.menuNew).html(`0`);
+      $(this.menuNew).removeClass(`badge-danger`);
+      $(this.menuNew).addClass(`badge-secondary`);
+      $(this.menuIcon).removeClass(`pulse-success`);
+    } else {
+      $(this.menuNew).html(unreadMessages);
+      $(this.menuNew).removeClass(`badge-secondary`);
+      $(this.menuNew).addClass(`badge-danger`);
+      $(this.menuIcon).addClass(`pulse-success`);
+    }
+
+    // Update messages HTML
+    let chatHTML = ``;
+
+    let query = {
+      to: [
+        "website",
+        "DJ",
+        "DJ-private",
+        this.manager.get("WWSUrecipientsweb").recipient.host
+      ]
+    };
+
+    $(this.chatMessages).html(``);
+
+    this.find(query)
+      .sort(
+        (a, b) => moment(a.createdAt).valueOf() - moment(b.createdAt).valueOf()
+      )
+      .map(message => {
+        chatHTML += `<div class="message" id="message-${message.ID}">
+                ${this.messageHTML(message)}
+                </div>`;
+        this.manager
+          .get("WWSUutil")
+          .waitForElement(`#message-${message.ID}`, () => {
+            $(`#message-${message.ID}`).unbind("click");
+
+            $(`#message-${message.ID}`).click(() => {
+              if (this.read.indexOf(message.ID) === -1) {
+                this.read.push(message.ID);
+                this.updateMessages();
+              }
+            });
+          });
+      });
+
+    $(this.chatMessages).html(chatHTML);
+
+    // Mark this is no longer first loaded
+    this.firstLoad = false;
   }
 }
