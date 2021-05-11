@@ -80,8 +80,8 @@ module.exports = {
             await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.live.after)
 
             // Queue a show return if there is one
-            if (typeof sails.config.custom.showcats[ sails.models.meta.memory.show ] !== 'undefined') {
-              await sails.helpers.songs.queue([ sails.config.custom.showcats[ sails.models.meta.memory.show ][ 'Show Returns' ] ], 'Bottom', 1)
+            if (typeof sails.config.custom.showcats[ sails.models.meta.memory.show.split(" - ")[1] ] !== 'undefined') {
+              await sails.helpers.songs.queue([ sails.config.custom.showcats[ sails.models.meta.memory.show.split(" - ")[1] ][ 'Show Returns' ] ], 'Bottom', 1)
             } else {
               await sails.helpers.songs.queue([ sails.config.custom.showcats[ 'Default' ][ 'Show Returns' ] ], 'Bottom', 1)
             }
@@ -112,8 +112,8 @@ module.exports = {
             // Queue after break
             await sails.helpers.break.executeArray(sails.config.custom.specialBreaks.remote.after)
             // Queue a show return if there is one
-            if (typeof sails.config.custom.showcats[ sails.models.meta.memory.show ] !== 'undefined') {
-              await sails.helpers.songs.queue([ sails.config.custom.showcats[ sails.models.meta.memory.show ][ 'Show Returns' ] ], 'Bottom', 1)
+            if (typeof sails.config.custom.showcats[ sails.models.meta.memory.show.split(" - ")[1] ] !== 'undefined') {
+              await sails.helpers.songs.queue([ sails.config.custom.showcats[ sails.models.meta.memory.show.split(" - ")[1] ][ 'Show Returns' ] ], 'Bottom', 1)
             } else {
               await sails.helpers.songs.queue([ sails.config.custom.showcats[ 'Default' ][ 'Show Returns' ] ], 'Bottom', 1)
             }

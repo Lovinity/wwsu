@@ -37,7 +37,7 @@ module.exports = {
           await sails.helpers.songs.queue([ sails.config.custom.sportscats[ sails.models.meta.memory.show ][ 'Sports Closers' ] ], 'Bottom', 1)
         }
       } else {
-        if (typeof sails.config.custom.showcats[ sails.models.meta.memory.show ] !== 'undefined') { await sails.helpers.songs.queue([ sails.config.custom.showcats[ sails.models.meta.memory.show ][ 'Show Closers' ] ], 'Bottom', 1) }
+        if (typeof sails.config.custom.showcats[ sails.models.meta.memory.show.split(" - ")[1] ] !== 'undefined') { await sails.helpers.songs.queue([ sails.config.custom.showcats[ sails.models.meta.memory.show.split(" - ")[1] ][ 'Show Closers' ] ], 'Bottom', 1) }
       }
 
       // Queue ending stuff
