@@ -549,7 +549,7 @@ class WWSUcalendar extends CalendarDb {
 																"prerecord",
 																"genre",
 																"playlist"
-															].indexOf(schedule.type || calendar.type) !== -1
+															].indexOf(schedule ? schedule.type : calendar.type) !== -1
 																? `<li>Does NOT notify subscribers.</li>`
 																: ``
 														}
@@ -560,7 +560,7 @@ class WWSUcalendar extends CalendarDb {
 																"remote",
 																"prerecord",
 																"playlist"
-															].indexOf(schedule.type || calendar.type) !== -1
+															].indexOf(schedule ? schedule.type : calendar.type) !== -1
 																? `<li>Does NOT email DJs; you will need to let them know of the change.</li>`
 																: ``
 														}

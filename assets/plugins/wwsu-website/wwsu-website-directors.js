@@ -138,106 +138,148 @@ navigation.addItem(
 // Initialize Calendar
 var calendarEl = document.getElementById("calendar");
 
-var fullCalendar = new FullCalendar.Calendar(calendarEl, {
-  headerToolbar: {
-    start: "prev,next today",
-    center: "title",
-    end: "dayGridMonth,timeGridWeek,timeGridDay,listWeek"
-  },
-  initialView: "timeGridWeek",
-  navLinks: true, // can click day/week names to navigate views
-  selectable: false,
-  selectMirror: true,
-  nowIndicator: true,
-  editable: false,
-  eventStartEditable: false,
-  eventDurationEditable: false,
-  eventResourceEditable: false,
-  themeSystem: "bootstrap",
-  dayMaxEvents: 5,
-  events: function(info, successCallback, failureCallback) {
-    animations.add("calendar-refetch", () => {
-      $("#calendar").block({
-        message: "<h1>Loading...</h1>",
-        css: { border: "3px solid #a00" },
-        timeout: 30000,
-        onBlock: () => {
-          calendar.getEvents(
-            events => {
-              events = events
-                .filter(event => {
-                  // Filter out events by filters
-                  if (event.scheduleType === "canceled-changed") return false;
-                  var temp = document.getElementById(`filter-${event.type}`);
-                  if (temp !== null && temp.checked) {
-                    return true;
-                  } else {
-                    return false;
-                  }
-                })
-                .map(event => {
-                  var borderColor;
-                  var title = `${event.type}: ${event.hosts} - ${event.name}`;
-                  if (
-                    ["canceled", "canceled-system"].indexOf(
-                      event.scheduleType
-                    ) !== -1
-                  ) {
-                    borderColor = "#ff0000";
-                    title += ` (CANCELED)`;
-                  } else if (
-                    ["updated", "updated-system"].indexOf(
-                      event.scheduleType
-                    ) !== -1
-                  ) {
-                    borderColor = "#ffff00";
-                    title += ` (changed this occurrence)`;
-                  } else if (
-                    ["unscheduled"].indexOf(event.scheduleType) !== -1
-                  ) {
-                    borderColor = "#00ff00";
-                    title += ` (unscheduled/unauthorized)`;
-                  } else {
-                    borderColor = "#0000ff";
-                  }
-                  return {
-                    id: event.unique,
-                    groupId: event.calendarID,
-                    start: moment.parseZone(event.start).toISOString(true),
-                    end: moment.parseZone(event.end).toISOString(true),
-                    title: title,
-                    backgroundColor:
-                      ["canceled", "canceled-system"].indexOf(
-                        event.scheduleType
-                      ) === -1
-                        ? event.color
-                        : "#161616",
-                    textColor: util.getContrastYIQ(event.color)
-                      ? "#161616"
-                      : "#e6e6e6",
-                    borderColor: borderColor,
-                    extendedProps: {
-                      event: event
-                    }
-                  };
-                });
-              successCallback(events);
-              fullCalendar.updateSize();
-              $("#calendar").unblock();
-            },
-            moment(info.start)
-              .subtract(1, "days")
-              .toISOString(true),
-            moment(info.end).toISOString(true)
-          );
-        }
-      });
-    });
-  },
+let fullCalendar = new FullCalendar.Calendar(calendarEl, {
+	headerToolbar: {
+		start: "prev,next today",
+		center: "title",
+		end: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
+	},
+	initialView: "timeGridWeek",
+	navLinks: true, // can click day/week names to navigate views
+	selectable: true,
+	selectMirror: true,
+	nowIndicator: true,
+	editable: true,
+	eventResourceEditable: false,
+	themeSystem: "bootstrap",
+	dayMaxEvents: 5,
+	slotDuration: "00:15:00",
+	events: function (info, successCallback, failureCallback) {
+		animations.add("calendar-update", () => {
+			$("#calendar").block({
+				message: "<h1>Loading...</h1>",
+				css: { border: "3px solid #a00" },
+				timeout: 30000,
+				onBlock: () => {
+					calendar.getEvents(
+						(events) => {
+							events = events
+								.filter((event) => {
+									// Filter out events by filters
+									if (event.scheduleType === "canceled-changed") return false;
+									let temp = document.getElementById(`filter-${event.type}`);
+									if (temp !== null && temp.checked) {
+										return true;
+									} else {
+										return false;
+									}
+								})
+								.map((event) => {
+									let borderColor;
+									let title = `${event.type}: ${event.hosts} - ${event.name}`;
+									if (
+										["canceled", "canceled-system"].indexOf(
+											event.scheduleType
+										) !== -1
+									) {
+										borderColor = "#ff0000";
+										title += ` (CANCELED)`;
+									} else if (
+										["updated", "updated-system"].indexOf(
+											event.scheduleType
+										) !== -1
+									) {
+										borderColor = "#ffff00";
+										title += ` (changed this occurrence)`;
+									} else if (
+										["unscheduled"].indexOf(event.scheduleType) !== -1
+									) {
+										borderColor = "#00ff00";
+										title += ` (unscheduled/unauthorized)`;
+									} else {
+										borderColor = "#0000ff";
+									}
+									return {
+										id: event.unique,
+										start: moment.parseZone(event.start).toISOString(true),
+										end: moment.parseZone(event.end).toISOString(true),
+										title: title,
+										backgroundColor:
+											["canceled", "canceled-system"].indexOf(
+												event.scheduleType
+											) === -1
+												? event.color
+												: "#161616",
+										textColor: util.getContrastYIQ(event.color)
+											? "#161616"
+											: "#e6e6e6",
+										borderColor: borderColor,
+										extendedProps: {
+											event: event,
+										},
+									};
+								});
+							successCallback(events);
+							fullCalendar.updateSize();
+							$("#calendar").unblock();
+						},
+						moment(info.start).subtract(1, "days").toISOString(true),
+						moment(info.end).toISOString(true)
+					);
+				},
+			});
+		});
+	},
 
-  eventClick: function(info) {
-    calendar.showClickedEvent(info.event.extendedProps.event);
-  }
+	eventClick: function (info) {
+		calendar.showClickedEvent(info.event.extendedProps.event);
+	},
+
+	select: function (info) {
+		calendar.newOccurrence(info.startStr, info.endStr);
+	},
+
+	eventDrop: function (info) {
+		let duration = moment(info.event.end).diff(info.event.start, "minutes");
+		if (duration > 60 * 24) {
+			$(document).Toasts("create", {
+				class: "bg-warning",
+				title: "Multi-day Events Not Allowed",
+				body:
+					"Occurrences may not last more than 24 hours. Consider setting up a recurring schedule.",
+				autohide: true,
+				delay: 15000,
+			});
+			return;
+		}
+		calendar.showOccurrenceForm(
+			info.event.extendedProps.event,
+			info.event.startStr,
+			duration
+		);
+		info.revert();
+	},
+
+	eventResize: function (info) {
+		let duration = moment(info.event.end).diff(info.event.start, "minutes");
+		if (duration > 60 * 24) {
+			$(document).Toasts("create", {
+				class: "bg-warning",
+				title: "Multi-day Events Not Allowed",
+				body:
+					"Occurrences may not last more than 24 hours. Consider setting up a recurring schedule.",
+				autohide: true,
+				delay: 15000,
+			});
+			return;
+		}
+		calendar.showOccurrenceForm(
+			info.event.extendedProps.event,
+			info.event.startStr,
+			duration
+		);
+		info.revert();
+	},
 });
 fullCalendar.render();
 
@@ -271,6 +313,51 @@ $(".btn-manage-events").click(() => {
       fullCalendar.refetchEvents();
     });
   }
+});
+// Add click events to filter group buttons
+$("#filter-group-broadcasts").on("click", (e) => {
+	[
+		"genre",
+		"event",
+		"onair-booking",
+		"prod-booking",
+		"office-hours",
+	].map((type) => $(`#filter-${type}`).prop("checked", false));
+	["show", "sports", "remote", "prerecord", "playlist"].map((type) =>
+		$(`#filter-${type}`).prop("checked", true)
+	);
+	fullCalendar.refetchEvents();
+});
+$("#filter-group-bookings").on("click", (e) => {
+	[
+		"show",
+		"sports",
+		"remote",
+		"prerecord",
+		"genre",
+		"playlist",
+		"event",
+		"office-hours",
+	].map((type) => $(`#filter-${type}`).prop("checked", false));
+	["onair-booking", "prod-booking"].map((type) =>
+		$(`#filter-${type}`).prop("checked", true)
+	);
+	fullCalendar.refetchEvents();
+});
+$("#filter-group-clear").on("click", (e) => {
+	[
+		"show",
+		"sports",
+		"remote",
+		"prerecord",
+		"genre",
+		"playlist",
+		"event",
+		"office-hours",
+		"onair-booking",
+		"prod-booking",
+	].map((type) => $(`#filter-${type}`).prop("checked", false));
+	fullCalendar.refetchEvents();
 });
 
 // execute updateCalendar function each time calendar has been changed, but add a 1-second buffer so we don't update a million times at once.

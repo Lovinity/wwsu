@@ -127,21 +127,21 @@
       environment="production"
       reconnection="true"
     ></script>
-    <script src="/plugins/wwsu-modules/js/wwsu-modules.js?v=202105102106"></script>
-    <script src="/plugins/wwsu-sails/js/wwsu.js?t=202105102106"></script>
-    <script src="/plugins/wwsu-navigation/js/wwsu-navigation.js?t=202105102106"></script>
-    <script src="/plugins/wwsu-directors/js/wwsu-directors.js?t=202105102106"></script>
-    <script src="/plugins/wwsu-djs/js/wwsu-djs.js?t=202105102106"></script>
-    <script src="/plugins/wwsu-timesheet/js/wwsu-timesheet.js?t=202105102106"></script>
-    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-web.js?t=202105102106"></script>
-    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-class.js?t=202105102106"></script>
-    <script src="/plugins/wwsu-meta/js/wwsu-meta.js?t=202105102106"></script>
-    <script src="/plugins/wwsu-hosts/js/wwsu-hosts.js?t=202105102106"></script>
-    <script src="/plugins/wwsu-recipients/js/wwsu-recipients.js?t=202105102106"></script>
-    <script src="/plugins/wwsu-announcements/js/wwsu-announcements.js?t=202105102106"></script>
-    <script src="/plugins/wwsu-discipline/js/wwsu-discipline.js?t=202105102106"></script>
-    <script src="/plugins/wwsu-messages/js/wwsu-messages.js?t=202105102106"></script>
-    <script src="/plugins/wwsu-shootout/js/wwsu-shootout.js?t=202105102106"></script>
+    <script src="/plugins/wwsu-modules/js/wwsu-modules.js?v=202105121604"></script>
+    <script src="/plugins/wwsu-sails/js/wwsu.js?t=202105121604"></script>
+    <script src="/plugins/wwsu-navigation/js/wwsu-navigation.js?t=202105121604"></script>
+    <script src="/plugins/wwsu-directors/js/wwsu-directors.js?t=202105121604"></script>
+    <script src="/plugins/wwsu-djs/js/wwsu-djs.js?t=202105121604"></script>
+    <script src="/plugins/wwsu-timesheet/js/wwsu-timesheet.js?t=202105121604"></script>
+    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-web.js?t=202105121604"></script>
+    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-class.js?t=202105121604"></script>
+    <script src="/plugins/wwsu-meta/js/wwsu-meta.js?t=202105121604"></script>
+    <script src="/plugins/wwsu-hosts/js/wwsu-hosts.js?t=202105121604"></script>
+    <script src="/plugins/wwsu-recipients/js/wwsu-recipients.js?t=202105121604"></script>
+    <script src="/plugins/wwsu-announcements/js/wwsu-announcements.js?t=202105121604"></script>
+    <script src="/plugins/wwsu-discipline/js/wwsu-discipline.js?t=202105121604"></script>
+    <script src="/plugins/wwsu-messages/js/wwsu-messages.js?t=202105121604"></script>
+    <script src="/plugins/wwsu-shootout/js/wwsu-shootout.js?t=202105121604"></script>
   </head>
 
   <body class="hold-transition sidebar-mini">
@@ -385,6 +385,35 @@
                       <h4 class="card-title">Filter Calendar by Event Type</h4>
                     </div>
                     <div class="card-body container-fluid">
+                      <div class="row p-2">
+												<div class="col-lg-4 col-md-6 col-12">
+													<button
+														class="btn btn-danger"
+														id="filter-group-broadcasts"
+														title="Turn all filters off except broadcasts"
+													>
+														All Broadcasts
+													</button>
+												</div>
+												<div class="col-lg-4 col-md-6 col-12">
+													<button
+														class="btn bg-teal"
+														id="filter-group-bookings"
+														title="Turn all filters off except on-air and prod studio bookings"
+													>
+														All Bookings
+													</button>
+												</div>
+												<div class="col-lg-4 col-md-6 col-12">
+													<button
+														class="btn btn-secondary"
+														id="filter-group-clear"
+														title="Turn all filter switches off"
+													>
+														Clear All
+													</button>
+												</div>
+											</div>
                       <div class="row p-2">
                         <div
                           class="col-md-4 col-sm-6 custom-control custom-switch custom-switch-on-danger"
@@ -1023,7 +1052,7 @@
       </footer>
     </div>
     <!-- ./wrapper -->
-    <script src="/plugins/wwsu-website/wwsu-website-directors.js?t=202105102106"></script>
+    <script src="/plugins/wwsu-website/wwsu-website-directors.js?t=202105121604"></script>
 
     <%- body %>
   </body>
