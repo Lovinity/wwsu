@@ -26,10 +26,12 @@ module.exports = {
     sails.log.debug('Helper messages.get called.')
     try {
       var searchto = moment().subtract(1, 'hours').toDate() // Get messages sent within the last hour
-      //
+
       // First, grab data pertaining to the host that is retrieving messages (create the host record if it does not exist)
-      var thehost = await sails.models.hosts.findOrCreate({ host: inputs.host }, { host: inputs.host, friendlyname: inputs.host })
+      var thehost = await sails.models.hosts.findOne({ host: inputs.host });
       sails.log.silly(thehost)
+
+      if (!thehost) { return exits.error(new Error('No host found in the database')) }
 
       // Get messages
       var records = await sails.models.messages.find({ status: 'active', or: [{ createdAt: { '>': searchto } }, { to: 'emergency' }] })

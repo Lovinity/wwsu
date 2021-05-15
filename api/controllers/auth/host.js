@@ -34,7 +34,7 @@ module.exports = {
         { host: inputs.username },
         {
           host: inputs.username,
-          friendlyname: `UNKNOWN ${inputs.username.substr(
+          friendlyname: `Unknown ${inputs.username.substr(
             inputs.username.length - 8
           )}`,
         }

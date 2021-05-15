@@ -120,7 +120,7 @@ module.exports.sockets = {
 
       var record = await sails.models.hosts.findOrCreate(
         { host: handshake._query.host },
-        { host: handshake._query.host, friendlyname: handshake._query.host }
+        { host: handshake._query.host, friendlyname: `Unknown ${handshake._query.host.substr(handshake._query.host.length - 8)}` }
       );
 
       if (!record.authorized) {
