@@ -46,7 +46,7 @@ module.exports.bootstrap = async function(done) {
   // Load calendardb
   sails.log.verbose(`BOOTSTRAP: Initiating calendar`);
   sails.models.calendar.calendardb = new CalendarDb(
-    await sails.models.calendar.find({ active: true }),
+    await sails.models.calendar.find(),
     await sails.models.schedule.find(),
     await sails.models.clockwheels.find()
   );
