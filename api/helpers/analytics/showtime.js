@@ -957,7 +957,7 @@ module.exports = {
               description: record.description,
               amount: record.amount
             });
-            DJs[index].overall.reputationScore -= 20 * record.amount;
+            DJs[record.dj].overall.reputationScore -= 20 * record.amount;
 
             if (
               moment(sails.config.custom.startOfSemester).isBefore(
@@ -971,7 +971,7 @@ module.exports = {
                 description: record.description,
                 amount: record.amount
               });
-              DJs[index].semester.reputationScore -= 20 * record.amount;
+              DJs[record.dj].semester.reputationScore -= 20 * record.amount;
             }
 
             if (
@@ -986,7 +986,7 @@ module.exports = {
                 description: record.description,
                 amount: record.amount
               });
-              DJs[index].week.reputationScore -= 20 * record.amount;
+              DJs[record.dj].week.reputationScore -= 20 * record.amount;
             }
 
             if (
@@ -1000,7 +1000,7 @@ module.exports = {
                 description: record.description,
                 amount: record.amount
               });
-              DJs[index].range.reputationScore -= 20 * record.amount;
+              DJs[record.dj].range.reputationScore -= 20 * record.amount;
             }
           }
         }
