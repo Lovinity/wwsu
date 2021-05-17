@@ -45,9 +45,7 @@ module.exports = {
         );
         if (eventNow.length < 1) {
           calendar = await sails.models.calendar.find({
-            hosts: hosts,
-            name: name,
-            type: "show"
+            name: name
           });
           // Create a new main calendar event if it does not exist for this show
           if (!calendar || !calendar[0]) {
@@ -98,9 +96,7 @@ module.exports = {
         );
         if (eventNow.length < 1) {
           calendar = await sails.models.calendar.find({
-            hosts: hosts,
-            name: name,
-            type: "remote"
+            name: name
           });
           if (!calendar || !calendar[0]) {
             calendar = await sails.models.calendar
@@ -192,9 +188,7 @@ module.exports = {
         );
         if (eventNow.length < 1) {
           calendar = await sails.models.calendar.find({
-            hosts: hosts,
             name: name,
-            type: "prerecord"
           });
           if (!calendar || !calendar[0]) {
             calendar = await sails.models.calendar
@@ -246,9 +240,7 @@ module.exports = {
         );
         if (eventNow.length < 1) {
           calendar = await sails.models.calendar.find({
-            hosts: hosts,
             name: name,
-            type: "playlist"
           });
           if (!calendar || !calendar[0]) {
             calendar = await sails.models.calendar
@@ -298,7 +290,6 @@ module.exports = {
         if (eventNow.length < 1) {
           calendar = await sails.models.calendar.find({
             name: sails.models.meta.memory.genre,
-            type: "genre"
           });
           if (!calendar || !calendar[0]) {
             calendar = await sails.models.calendar
