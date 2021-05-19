@@ -252,6 +252,7 @@ module.exports = {
         );
 
         if (currentRecord) {
+          var event = currentRecord.event.split(": ");
           if (!inputs.problemTerminated) {
             // Log if actualEnd was 10 or more minutes before scheduledEnd
             if (
@@ -266,7 +267,6 @@ module.exports = {
                 currentRecord.event.toLowerCase().startsWith("prerecord:") ||
                 currentRecord.event.toLowerCase().startsWith("playlist:"))
             ) {
-              var event = currentRecord.event.split(": ");
               await sails.models.logs
                 .create({
                   attendanceID: currentRecord.ID,
@@ -299,7 +299,6 @@ module.exports = {
                 currentRecord.event.toLowerCase().startsWith("prerecord:") ||
                 currentRecord.event.toLowerCase().startsWith("playlist:"))
             ) {
-              var event = currentRecord.event.split(": ");
               await sails.models.logs
                 .create({
                   attendanceID: currentRecord.ID,
@@ -319,7 +318,6 @@ module.exports = {
                 });
             }
           } else {
-            var event = currentRecord.event.split(": ");
             await sails.models.logs
               .create({
                 attendanceID: currentRecord.ID,
@@ -343,6 +341,12 @@ module.exports = {
           var temp = (async (cID) => {
             var stats = await sails.helpers.attendance.recalculate(cID);
             var topStats = await sails.helpers.attendance.calculateStats();
+            var djStats = await sails.helpers.analytics.showtime([
+              currentRecord.dj,
+              currentRecord.cohostDJ1,
+              currentRecord.cohostDJ2,
+              currentRecord.cohostDJ3,
+            ])[0];
 
             // Send analytic emails to DJs
             await sails.helpers.emails.queueDjs(
@@ -378,9 +382,9 @@ module.exports = {
     stats.webMessages
   }</li>
   ${
-    topStats[0].topShows.indexOf(currentRecord.event) !== -1
+    topStats[0].topShows.indexOf(event[1]) !== -1
       ? `<li><strong>Congratulations! Your broadcast placed number ${
-          topStats[0].topShows.indexOf(currentRecord.event) + 1
+          topStats[0].topShows.indexOf(event[1]) + 1
         } in the top ${
           topStats[0].topShows.length
         } shows of the last week!</strong></li>`
@@ -524,9 +528,9 @@ module.exports = {
   <li><strong>Messages sent/received with online listeners:</strong> ${
     topStats[1][currentRecord.calendarID].semester.messages
   }</li>
-  <li><strong>Remote credits earned:</strong> ${
-    topStats[1][currentRecord.calendarID].semester.remoteCredits
-  }</li>
+  <li><strong>Remote credits earned:</strong> <ul>${
+    djStats.map((stat) => `<li>${stat.name}: ${stat.semester.remoteCredits}</li>`).join("")
+  }</ul></li>
   </ul>
 
   <hr>
@@ -565,9 +569,9 @@ module.exports = {
   <li><strong>Messages sent/received with online listeners:</strong> ${
     topStats[1][currentRecord.calendarID].overall.messages
   }</li>
-  <li><strong>Remote credits earned:</strong> ${
-    topStats[1][currentRecord.calendarID].overall.remoteCredits
-  }</li>
+  <li><strong>Remote credits earned:</strong> <ul>${
+    djStats.map((stat) => `<li>${stat.name}: ${stat.overall.remoteCredits}</li>`).join("")
+  }</ul></li>
   </ul>`
       : ``
   }
