@@ -41,7 +41,7 @@ module.exports = {
             // If the current RadioDJ is also not status 5, we have a huge problem! Trigger critical status, and wait for a good RadioDJ to report
             if (!status || status.status !== 5) {
               // End the current show/log
-              await sails.helpers.attendance.createRecord(undefined, false, true);
+              await sails.helpers.attendance.createRecord(undefined, false, false, true);
 
               sails.models.status.errorCheck.waitForGoodRadioDJ = true
               await sails.helpers.status.change.with({ name: `radiodj-${instance.name}`, label: `RadioDJ ${instance.label}`, status: 1, data: `None of the configured RadioDJs are operational! System is waiting for one to report online. Please ensure RadioDJ is running and the REST server is online, configured properly, and accessible. You may have to play a track in RadioDJ before REST begins working.` })

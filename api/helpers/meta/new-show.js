@@ -2,7 +2,7 @@ module.exports = {
   friendlyName: "meta.newShow",
 
   description:
-    "Trigger this helper when a new show / playlist / genre starts after calling meta.change.",
+    "Trigger this helper when a new show / playlist / genre starts AFTER calling meta.change and meta.changeDjs.",
 
   inputs: {},
 
@@ -352,7 +352,7 @@ module.exports = {
         .fetch();
 
       // Create a new attendance record and update meta with the new attendance ID
-      attendance = await sails.helpers.attendance.createRecord(eventNow);
+      attendance = await sails.helpers.attendance.createRecord(eventNow, true);
       toUpdate.attendanceID = attendance.newID;
 
       // Make a log that the broadcast started
