@@ -38,30 +38,66 @@ module.exports = {
       // Store the current ID in a variable; we want to start a new record before processing the old one
       var currentID = sails.models.meta.memory.attendanceID;
 
+      // Create default rotation if inputs.event is null
+      if (inputs.event === null) {
+        inputs.event = {
+          type: "genre",
+          hosts: "Unknown Hosts",
+          name: "Default Rotation",
+          hostDJ: null,
+          cohostDJ1: null,
+          cohostDJ2: null,
+          cohostDJ3: null,
+        };
+      }
+
       // Add a new attendance record if event is specified.
       if (inputs.event) {
-        if (inputs.event === null) {
-          inputs.event = {
-            type: "genre",
-            hosts: "Unknown Hosts",
-            name: "Default Rotation",
-            hostDJ: null,
-            cohostDJ1: null,
-            cohostDJ2: null,
-            cohostDJ3: null,
-          };
+        // If useMeta provided, make a separate event using the info provided in meta
+        var nowEvent = _.cloneDeep(inputs.event);
+        if (inputs.useMeta) {
+          nowEvent = Object.assign(nowEvent, {
+            hostDJ: sails.models.meta.memory.dj,
+            cohostDJ1: sails.models.meta.memory.cohostDJ1,
+            cohostDJ2: sails.models.meta.memory.cohostDJ2,
+            cohostDJ3: sails.models.meta.memory.cohostDJ3,
+            logo: sails.models.meta.memory.showLogo,
+            description: sails.models.meta.memory.topic,
+          });
+
+          nowEvent = Object.assign(nowEvent, {
+            hosts: await sails.helpers.calendar.generateHosts(nowEvent),
+          });
         }
 
         // Create the new attendance record
         var created = null;
 
-        if (inputs.event.unique && inputs.event.calendarID) {
+        if (nowEvent.unique && nowEvent.calendarID) {
+          returnData.unique = nowEvent.unique;
+          created = await sails.models.attendance
+            .create({
+              calendarID: nowEvent.calendarID,
+              unique: nowEvent.unique,
+              dj: nowEvent.hostDJ,
+              cohostDJ1: nowEvent.cohostDJ1,
+              cohostDJ2: nowEvent.cohostDJ2,
+              cohostDJ3: nowEvent.cohostDJ3,
+              happened: inputs.unscheduled ? 2 : 1,
+              event: `${nowEvent.type}: ${nowEvent.hosts} - ${nowEvent.name}`,
+              scheduledStart: moment(nowEvent.start).toISOString(true),
+              scheduledEnd: moment(nowEvent.end).toISOString(true),
+              actualStart: moment().toISOString(true),
+            })
+            .fetch();
+
           // Log if any specified DJs do not match the DJs that were on the schedule
           let scheduledDJs = [];
           let onAirDJs = [];
           ["dj", "cohostDJ1", "cohostDJ2", "cohostDJ3"].map((dj) => {
             if (inputs.event[dj]) scheduledDJs.push(inputs.event[dj]);
-            if (sails.models.meta.memory[dj]) onAirDJs.push(sails.models.meta.memory[dj]);
+            if (sails.models.meta.memory[dj])
+              onAirDJs.push(sails.models.meta.memory[dj]);
           });
 
           if (_.difference(onAirDJs, scheduledDJs)) {
@@ -70,9 +106,9 @@ module.exports = {
                 attendanceID: created.ID,
                 logtype: "unspecified-djs",
                 loglevel: "info",
-                logsubtype: `${inputs.event.hosts} - ${inputs.event.name}`,
+                logsubtype: `${nowEvent.hosts} - ${nowEvent.name}`,
                 logIcon: sails.models.calendar.calendardb.getIconClass(
-                  inputs.event
+                  nowEvent
                 ),
                 title: `One or more specified DJs for this broadcast were not on the event schedule.`,
                 event: `Listed on the schedule: ${inputs.event.hosts} - ${inputs.event.name}<br />Specified on the air: ${sails.models.meta.memory.show}`,
@@ -84,46 +120,13 @@ module.exports = {
               });
           }
 
-          // If useMeta, combine meta info
-          if (inputs.useMeta) {
-            inputs.event = Object.assign(inputs.event, {
-              dj: sails.models.meta.memory.dj,
-              cohostDJ1: sails.models.meta.memory.cohostDJ1,
-              cohostDJ2: sails.models.meta.memory.cohostDJ2,
-              cohostDJ3: sails.models.meta.memory.cohostDJ3,
-              logo: sails.models.meta.memory.showLogo,
-              description: sails.models.meta.memory.topic,
-            });
-
-            inputs.event = Object.assign(inputs.event, {
-              hosts: await sails.helpers.calendar.generateHosts(inputs.event),
-            });
-          }
-
-          returnData.unique = inputs.event.unique;
-          created = await sails.models.attendance
-            .create({
-              calendarID: inputs.event.calendarID,
-              unique: inputs.event.unique,
-              dj: inputs.event.hostDJ,
-              cohostDJ1: inputs.event.cohostDJ1,
-              cohostDJ2: inputs.event.cohostDJ2,
-              cohostDJ3: inputs.event.cohostDJ3,
-              happened: inputs.unscheduled ? 2 : 1,
-              event: `${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name}`,
-              scheduledStart: moment(inputs.event.start).toISOString(true),
-              scheduledEnd: moment(inputs.event.end).toISOString(true),
-              actualStart: moment().toISOString(true),
-            })
-            .fetch();
-
           // Log if actualStart was 5 or more minutes before scheduledStart
           if (
             moment()
               .add(5, "minutes")
-              .isSameOrBefore(moment(inputs.event.start)) &&
+              .isSameOrBefore(moment(nowEvent.start)) &&
             ["show", "sports", "remote", "prerecord", "playlist"].indexOf(
-              inputs.event.type
+              nowEvent.type
             ) !== -1
           ) {
             await sails.models.logs
@@ -131,12 +134,12 @@ module.exports = {
                 attendanceID: created.ID,
                 logtype: "sign-on-early",
                 loglevel: "orange",
-                logsubtype: `${inputs.event.hosts} - ${inputs.event.name}`,
+                logsubtype: `${nowEvent.hosts} - ${nowEvent.name}`,
                 logIcon: sails.models.calendar.calendardb.getIconClass(
-                  inputs.event
+                  nowEvent
                 ),
                 title: `The broadcast started 5 or more minutes early.`,
-                event: `${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name}`,
+                event: `${nowEvent.type}: ${nowEvent.hosts} - ${nowEvent.name}`,
                 createdAt: moment().toISOString(true),
               })
               .fetch()
@@ -149,9 +152,9 @@ module.exports = {
           if (
             moment()
               .subtract(10, "minutes")
-              .isSameOrAfter(moment(inputs.event.start)) &&
+              .isSameOrAfter(moment(nowEvent.start)) &&
             ["show", "sports", "remote", "prerecord", "playlist"].indexOf(
-              inputs.event.type
+              nowEvent.type
             ) !== -1
           ) {
             await sails.models.logs
@@ -159,12 +162,12 @@ module.exports = {
                 attendanceID: created.ID,
                 logtype: "sign-on-late",
                 loglevel: "warning",
-                logsubtype: `${inputs.event.hosts} - ${inputs.event.name}`,
+                logsubtype: `${nowEvent.hosts} - ${nowEvent.name}`,
                 logIcon: sails.models.calendar.calendardb.getIconClass(
-                  inputs.event
+                  nowEvent
                 ),
                 title: `The broadcast started 10 or more minutes late.`,
-                event: `${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name}`,
+                event: `${nowEvent.type}: ${nowEvent.hosts} - ${nowEvent.name}`,
                 createdAt: moment().toISOString(true),
               })
               .fetch()
@@ -173,31 +176,15 @@ module.exports = {
               });
           }
         } else {
-          // If useMeta, combine meta info
-          if (inputs.useMeta) {
-            inputs.event = Object.assign(inputs.event, {
-              dj: sails.models.meta.memory.dj,
-              cohostDJ1: sails.models.meta.memory.cohostDJ1,
-              cohostDJ2: sails.models.meta.memory.cohostDJ2,
-              cohostDJ3: sails.models.meta.memory.cohostDJ3,
-              logo: sails.models.meta.memory.showLogo,
-              description: sails.models.meta.memory.topic,
-            });
-
-            inputs.event = Object.assign(inputs.event, {
-              hosts: await sails.helpers.calendar.generateHosts(inputs.event),
-            });
-          }
-
           created = await sails.models.attendance
             .create({
               unique: "",
-              dj: inputs.event.hostDJ,
-              cohostDJ1: inputs.event.cohostDJ1,
-              cohostDJ2: inputs.event.cohostDJ2,
-              cohostDJ3: inputs.event.cohostDJ3,
+              dj: nowEvent.hostDJ,
+              cohostDJ1: nowEvent.cohostDJ1,
+              cohostDJ2: nowEvent.cohostDJ2,
+              cohostDJ3: nowEvent.cohostDJ3,
               happened: inputs.unscheduled ? 2 : 1,
-              event: `${inputs.event.type}: ${inputs.event.hosts} - ${inputs.event.name}`,
+              event: `${nowEvent.type}: ${nowEvent.hosts} - ${nowEvent.name}`,
               actualStart: moment().toISOString(true),
               scheduledStart: null,
               scheduledEnd: null,
@@ -210,10 +197,10 @@ module.exports = {
         // Switch to the new record in the system
         await sails.helpers.meta.change.with({
           attendanceID: created.ID,
-          calendarUnique: inputs.event.unique || null,
-          calendarID: inputs.event.calendarID || null,
-          scheduledStart: inputs.event.start || null,
-          scheduledEnd: inputs.event.end || null,
+          calendarUnique: nowEvent.unique || null,
+          calendarID: nowEvent.calendarID || null,
+          scheduledStart: nowEvent.start || null,
+          scheduledEnd: nowEvent.end || null,
         });
       } else if (inputs.event === null) {
         var created = await sails.models.attendance
@@ -528,9 +515,9 @@ module.exports = {
   <li><strong>Messages sent/received with online listeners:</strong> ${
     topStats[1][currentRecord.calendarID].semester.messages
   }</li>
-  <li><strong>Remote credits earned:</strong> <ul>${
-    djStats.map((stat) => `<li>${stat.name}: ${stat.semester.remoteCredits}</li>`).join("")
-  }</ul></li>
+  <li><strong>Remote credits earned:</strong> <ul>${djStats
+    .map((stat) => `<li>${stat.name}: ${stat.semester.remoteCredits}</li>`)
+    .join("")}</ul></li>
   </ul>
 
   <hr>
@@ -569,9 +556,9 @@ module.exports = {
   <li><strong>Messages sent/received with online listeners:</strong> ${
     topStats[1][currentRecord.calendarID].overall.messages
   }</li>
-  <li><strong>Remote credits earned:</strong> <ul>${
-    djStats.map((stat) => `<li>${stat.name}: ${stat.overall.remoteCredits}</li>`).join("")
-  }</ul></li>
+  <li><strong>Remote credits earned:</strong> <ul>${djStats
+    .map((stat) => `<li>${stat.name}: ${stat.overall.remoteCredits}</li>`)
+    .join("")}</ul></li>
   </ul>`
       : ``
   }
