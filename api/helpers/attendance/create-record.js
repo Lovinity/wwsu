@@ -61,7 +61,7 @@ module.exports = {
           let onAirDJs = [];
           ["dj", "cohostDJ1", "cohostDJ2", "cohostDJ3"].map((dj) => {
             if (inputs.event[dj]) scheduledDJs.push(inputs.event[dj]);
-            if (sails.models.memory[dj]) onAirDJs.push(sails.models.memory[dj]);
+            if (sails.models.meta.memory[dj]) onAirDJs.push(sails.models.meta.memory[dj]);
           });
 
           if (_.difference(onAirDJs, scheduledDJs)) {
