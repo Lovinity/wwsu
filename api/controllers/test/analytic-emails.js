@@ -1,48 +1,367 @@
 module.exports = {
+  friendlyName: "Analytic Emails",
 
-    friendlyName: 'Analytic Emails',
+  description: "Analytic Emails test.",
 
-    description: 'Analytic Emails test.',
-
-    inputs: {
-
+  inputs: {
+    ID: {
+      type: "number",
+      required: true
     },
+    problemTerminated: {
+      type: "boolean",
+      defaultsTo: false
+    }
+  },
 
-    fn: async function (inputs) {
-        var stats = await sails.helpers.attendance.calculateStats();
-        var weekly = stats[ 0 ];
-        var overall = stats[ 1 ];
-        var body = `<p>Dear directors,</p>
-          <p>Here is the weekly analytic report for on-air programming.</p>
-          
-          <p><strong>Top 3 shows/remotes/prerecords for this week:</strong>
-          <ul>
-          <li>1. ${weekly.topShows[ 0 ]}</li>
-          <li>2. ${weekly.topShows[ 1 ]}</li>
-          <li>3. ${weekly.topShows[ 2 ]}</li>
-          </ul>
-          Top 3 shows are calculated based on listener:showtime ratio, web messages sent/received (interactivity), number of breaks taken in an hour (4 is best), and reputation (followed all on-air regulations, did show on-time, etc)</p>
+  fn: async function (inputs) {
+    // Add actualEnd
+    var currentRecord = await sails.models.attendance.findOne(
+      { ID: inputs.ID },
+    );
 
-          <p><strong>Top Genre of the week:</strong> ${weekly.topGenre}</p>
-          <p><strong>Top Playlist of the week:</strong> ${weekly.topPlaylist}</p>
-          <p><strong>Tracks liked on the website:</strong> ${weekly.tracksLiked}</p>
-          <p><strong>Track requests placed on the website:</strong> ${weekly.tracksRequested}</p>
-          <p><strong>Messages sent/received between listeners and DJs:</strong> ${weekly.webMessagesExchanged}</p>
+    if (currentRecord) {
+      var event = currentRecord.event.split(": ");
+      if (!inputs.problemTerminated) {
+        // Log if actualEnd was 10 or more minutes before scheduledEnd
+        if (
+          currentRecord &&
+          currentRecord.scheduledEnd &&
+          moment()
+            .add(10, "minutes")
+            .isSameOrBefore(moment(currentRecord.scheduledEnd)) &&
+          (currentRecord.event.toLowerCase().startsWith("show:") ||
+            currentRecord.event.toLowerCase().startsWith("sports:") ||
+            currentRecord.event.toLowerCase().startsWith("remote:") ||
+            currentRecord.event.toLowerCase().startsWith("prerecord:") ||
+            currentRecord.event.toLowerCase().startsWith("playlist:"))
+        ) {
+          await sails.models.logs
+            .create({
+              attendanceID: currentRecord.ID,
+              logtype: "sign-off-early",
+              loglevel: "warning",
+              logsubtype: `${event[1]}`,
+              logIcon: sails.models.calendar.calendardb.getIconClass({
+                type: event[0],
+              }),
+              title: `The broadcast signed off 10 or more minutes early.`,
+              event: `${currentRecord.event}`,
+              createdAt: moment().toISOString(true),
+            })
+            .fetch()
+            .tolerate((err) => {
+              sails.log.error(err);
+            });
+        }
 
-          <p><strong>Live shows performed:</strong> ${overall[ -1 ].week.shows}</p>
-          <p><strong>Remote shows performed:</strong> ${overall[ -1 ].week.remotes}</p>
-          <p><strong>Prerecorded shows aired:</strong> ${overall[ -1 ].week.prerecords}</p>
-          <p><strong>Sports broadcasts performed:</strong> ${overall[ -2 ].week.sports}</p>
-          <p><strong>Playlists aired:</strong> ${overall[ -4 ].week.playlists}</p>
-          
-          <p><strong>Total on-air minutes of shows/remotes/prerecords:</strong> ${overall[ -1 ].week.showtime}</p>
-          <p><strong>Total online listener minutes during shows/remotes/prerecords:</strong>: ${overall[ -1 ].week.listeners}</p>
-          <p><strong>Listener to showtime ratio of shows/remotes/prerecords (higher is better):</strong> ${overall[ -1 ].week.ratio}</p>
-          <p><strong>Total on-air minutes of sports broadcasts:</strong> ${overall[ -2 ].week.showtime}</p>
-          <p><strong>Total online listener minutes during sports:</strong>: ${overall[ -2 ].week.listeners}</p>
-          <p><strong>Listener to showtime ratio of sports (higher is better):</strong> ${overall[ -2 ].week.ratio}</p>`;
+        // Log if actualEnd was 5 or more minutes after scheduledEnd
+        if (
+          currentRecord &&
+          currentRecord.scheduledEnd &&
+          moment()
+            .subtract(5, "minutes")
+            .isSameOrAfter(moment(currentRecord.scheduledEnd)) &&
+          (currentRecord.event.toLowerCase().startsWith("show:") ||
+            currentRecord.event.toLowerCase().startsWith("sports:") ||
+            currentRecord.event.toLowerCase().startsWith("remote:") ||
+            currentRecord.event.toLowerCase().startsWith("prerecord:") ||
+            currentRecord.event.toLowerCase().startsWith("playlist:"))
+        ) {
+          await sails.models.logs
+            .create({
+              attendanceID: currentRecord.ID,
+              logtype: "sign-off-late",
+              loglevel: "orange",
+              logsubtype: `${event[1]}`,
+              logIcon: sails.models.calendar.calendardb.getIconClass({
+                type: event[0],
+              }),
+              title: `The broadcast signed off 5 or more minutes late.`,
+              event: `${currentRecord.event}`,
+              createdAt: moment().toISOString(true),
+            })
+            .fetch()
+            .tolerate((err) => {
+              sails.log.error(err);
+            });
+        }
+      } else {
+        await sails.models.logs
+          .create({
+            attendanceID: currentRecord.ID,
+            logtype: "sign-off-problem",
+            loglevel: "yellow",
+            logsubtype: `${event[1]}`,
+            logIcon: sails.models.calendar.calendardb.getIconClass({
+              type: event[0],
+            }),
+            title: `The broadcast was signed off due to a system problem or CRON being disabled.`,
+            event: `${currentRecord.event}`,
+            createdAt: moment().toISOString(true),
+          })
+          .fetch()
+          .tolerate((err) => {
+            sails.log.error(err);
+          });
+      }
 
-        await sails.helpers.emails.queueDjsDirectors(`Weekly Analytics Report`, body);
+      // Calculate attendance stats and weekly analytics in the background; this takes several seconds
+      var temp = (async (cID) => {
+        var stats = await sails.helpers.attendance.recalculate(cID);
+        var topStats = await sails.helpers.attendance.calculateStats();
+        let _djStats = await sails.helpers.analytics.showtime([
+          currentRecord.dj,
+          currentRecord.cohostDJ1,
+          currentRecord.cohostDJ2,
+          currentRecord.cohostDJ3,
+        ])[0];
+
+        let djStats = [];
+        for (let key in _djStats) {
+          if (!Object.prototype.hasOwnProperty.call(_djStats, key)) continue;
+          djStats.push(_djStats[key]);
+        }
+
+        // Send analytic emails to DJs
+        await sails.helpers.emails.queueDjs(
+          {
+            hostDJ: currentRecord.dj,
+            cohostDJ1: currentRecord.cohostDJ1,
+            cohostDJ2: currentRecord.cohostDJ2,
+            cohostDJ3: currentRecord.cohostDJ3,
+          },
+          `Analytics for ${currentRecord.event}`,
+          `<p>Hello!</p>
+      
+<p>Congratulations on another successful episode of ${
+            currentRecord.event
+          }! Below, you will find analytics for this episode.</p>
+<ul>
+<li><strong>Signed On:</strong> ${moment(currentRecord.actualStart).format(
+            "LLLL"
+          )}</li>
+<li><strong>Signed Off:</strong> ${moment(currentRecord.actualEnd).format(
+            "LLLL"
+          )}</li>
+<li><strong>Showtime:</strong> ${moment
+            .duration(stats.showTime, "minutes")
+            .format("h [hours], m [minutes]")}</li>
+<li><strong>Online Listener Time*:</strong> ${moment
+            .duration(stats.listenerMinutes, "minutes")
+            .format("h [hours], m [minutes]")}</li>
+<li><strong>Listener to Showtime Ratio (higher ratio = better performing broadcast):</strong> ${
+            stats.showTime > 0 ? stats.listenerMinutes / stats.showTime : 0
+          }</li>
+<li><strong>Messages sent / received with listeners:</strong> ${
+            stats.webMessages
+          }</li>
+${
+  topStats[0].topShows.indexOf(event[1]) !== -1
+    ? `<li><strong>Congratulations! Your broadcast placed number ${
+        topStats[0].topShows.indexOf(event[1]) + 1
+      } in the top ${
+        topStats[0].topShows.length
+      } shows of the last week!</strong></li>`
+    : ``
+}
+</ul>
+
+<hr>
+
+<p>If any issues were discovered during your broadcast, they will be listed below. These issues were logged for the directors; repeat issues could result in intervention. If an issue was caused by a technical problem, please email the directors.</p>
+<ul>
+${
+  inputs.problemTerminated
+    ? `<li><strong>This broadcast was terminated early automatically due to a critical system problem.</strong> This will not be held against you.</li>`
+    : ``
+}
+${
+  stats.unauthorized
+    ? `<li><strong>This broadcast was unscheduled / unauthorized.</strong> You should ensure the directors scheduled your show in and that you go on the air during your scheduled time (or request a re-schedule if applicable).</li>`
+    : ``
+}
+${
+  stats.missedIDs.length > 0 && typeof stats.missedIDs.map === "function"
+    ? `<li><strong>You failed to take a required top-of-the-hour ID break at these times</strong>; it is mandatory by the FCC to take a break at the top of every hour before :05 after. For prerecords and playlists, ensure your audio cut-offs allow for the top-of-hour ID break to air on time:<br />
+${stats.missedIDs.map((record) => moment(record).format("LT")).join("<br />")}
+</li>`
+    : ``
+}
+${
+  stats.silence.length > 0 && typeof stats.silence.map === "function"
+    ? `<li><strong>There was excessive silence / very low audio at these times;</strong> please avoid excessive silence on the air as this violates FCC regulations:</strong><br />
+${stats.silence.map((record) => moment(record).format("LT")).join("<br />")}
+</li>`
+    : ``
+}
+${
+  stats.badPlaylist
+    ? `<li><strong>The broadcast did not successfully air due to a bad playlist.</strong> Please ensure the tracks you added/uploaded for this broadcast were not corrupted. If they are not corrupt, please let the directors know.</li>`
+    : ``
+}
+${
+  stats.signedOnEarly
+    ? `<li><strong>You signed on 5 or more minutes early.</strong> Please avoid doing this, especially if there's a scheduled show before yours.</li>`
+    : ``
+}
+${
+  stats.signedOnLate
+    ? `<li><strong>You signed on 10 or more minutes late.</strong> Please inform directors in advance if you are going to be late for your show.</li>`
+    : ``
+}
+${
+  stats.signedOffEarly
+    ? `<li><strong>You signed off 10 or more minutes early.</strong> Please inform directors in advance if you are going to end your show early.</li>`
+    : ``
+}
+${
+  stats.signedOffLate
+    ? `<li><strong>You signed off 5 or more minutes late.</strong> Please avoid doing this, especially if there's a scheduled show after yours.</li>`
+    : ``
+}
+</ul>
+
+<hr>
+
+<p>Here is a break-down of the number of online listeners tuned in during your broadcast and at what time:</p>
+<ul>${stats.listeners
+            .map(
+              (stat) =>
+                `<li><strong>${moment(stat.time).format("LT")}</strong>: ${
+                  stat.listeners
+                }</li>`
+            )
+            .join("")}</ul>
+
+<hr>
+
+<p>Here are the messages (if any) sent/received between you and online listeners:</p>
+<ul>${stats.messages
+            .map(
+              (message) =>
+                `<li><strong>${moment(message.createdAt).format("LT")} by ${
+                  message.fromFriendly
+                }</strong>: ${message.message}</li>`
+            )
+            .join("")}</ul>
+
+<hr>
+
+<p>Here is your full show log:</p>
+<ul>${stats.logs
+            .map(
+              (log) =>
+                `<li><strong>${moment(log.createdAt).format("LT")}: ${
+                  log.title
+                }</strong><br />${log.event}${
+                  log.trackArtist ? `<br />Artist: ${log.trackArtist}` : ``
+                }${log.trackTitle ? `<br />Title: ${log.trackTitle}` : ``}${
+                  log.trackAlbum ? `<br />Album: ${log.trackAlbum}` : ``
+                }${log.trackLabel ? `<br />Label: ${log.trackLabel}` : ``}</li>`
+            )
+            .join("")}</ul>
+
+<hr>
+
+${
+  topStats[1][currentRecord.calendarID]
+    ? `<p>Here are analytics for ${
+        currentRecord.event
+      } for <strong>this semester</strong> so far:</p>
+<ul>
+<li><strong>On-air time:</strong> ${moment
+        .duration(
+          topStats[1][currentRecord.calendarID].semester.showtime,
+          "minutes"
+        )
+        .format("h [hours], m [minutes]")}</li>
+<li><strong>Online listener time*:</strong> ${moment
+        .duration(
+          topStats[1][currentRecord.calendarID].semester.listeners,
+          "minutes"
+        )
+        .format("h [hours], m [minutes]")}</li>\
+<li><strong>Listeners to Showtime Ratio (higher is better):</strong> ${
+        topStats[1][currentRecord.calendarID].semester.ratio
+      }</li>
+<li><strong>Live episodes aired:</strong> ${
+        topStats[1][currentRecord.calendarID].semester.shows
+      }</li>
+<li><strong>Prerecorded episodes aired:</strong> ${
+        topStats[1][currentRecord.calendarID].semester.prerecords
+      }</li>
+<li><strong>Remote episodes aired:</strong> ${
+        topStats[1][currentRecord.calendarID].semester.remotes
+      }</li>
+<li><strong>Sports broadcasts aired:</strong> ${
+        topStats[1][currentRecord.calendarID].semester.sports
+      }</li>
+<li><strong>Playlist airings:</strong> ${
+        topStats[1][currentRecord.calendarID].semester.playlists
+      }</li>
+<li><strong>Messages sent/received with online listeners:</strong> ${
+        topStats[1][currentRecord.calendarID].semester.messages
+      }</li>
+<li><strong>Remote credits earned:</strong> <ul>${djStats
+        .map((stat) => `<li>${stat.name}: ${stat.semester.remoteCredits}</li>`)
+        .join("")}</ul></li>
+</ul>
+
+<hr>
+
+<p>Here are analytics for ${
+        currentRecord.event
+      } for <strong>the past year</strong>:</p>
+<ul>
+<li><strong>On-air time:</strong> ${moment
+        .duration(
+          topStats[1][currentRecord.calendarID].overall.showtime,
+          "minutes"
+        )
+        .format("h [hours], m [minutes]")}</li>
+<li><strong>Online listener time*:</strong> ${moment
+        .duration(
+          topStats[1][currentRecord.calendarID].overall.listeners,
+          "minutes"
+        )
+        .format("h [hours], m [minutes]")}</li>\
+<li><strong>Listeners to Showtime Ratio (higher is better):</strong> ${
+        topStats[1][currentRecord.calendarID].overall.ratio
+      }</li>
+<li><strong>Live episodes aired:</strong> ${
+        topStats[1][currentRecord.calendarID].overall.shows
+      }</li>
+<li><strong>Prerecorded episodes aired:</strong> ${
+        topStats[1][currentRecord.calendarID].overall.prerecords
+      }</li>
+<li><strong>Remote episodes aired:</strong> ${
+        topStats[1][currentRecord.calendarID].overall.remotes
+      }</li>
+<li><strong>Sports broadcasts aired:</strong> ${
+        topStats[1][currentRecord.calendarID].overall.sports
+      }</li>
+<li><strong>Playlist airings:</strong> ${
+        topStats[1][currentRecord.calendarID].overall.playlists
+      }</li>
+<li><strong>Messages sent/received with online listeners:</strong> ${
+        topStats[1][currentRecord.calendarID].overall.messages
+      }</li>
+<li><strong>Remote credits earned:</strong> <ul>${djStats
+        .map((stat) => `<li>${stat.name}: ${stat.overall.remoteCredits}</li>`)
+        .join("")}</ul></li>
+</ul>`
+    : ``
+}
+
+      <hr>
+      
+<p>*Online listener time is calculated per-listener, per-minute. For example, 5 online listeners tuned in for an entire 30 minute show is (5*30) 2 hours, 30 minutes listener time.</p>`,
+          false,
+          true
+        );
+      })(currentID);
     }
 
-}
+  },
+};

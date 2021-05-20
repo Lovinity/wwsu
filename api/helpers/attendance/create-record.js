@@ -328,12 +328,18 @@ module.exports = {
           var temp = (async (cID) => {
             var stats = await sails.helpers.attendance.recalculate(cID);
             var topStats = await sails.helpers.attendance.calculateStats();
-            var djStats = await sails.helpers.analytics.showtime([
+            let _djStats = await sails.helpers.analytics.showtime([
               currentRecord.dj,
               currentRecord.cohostDJ1,
               currentRecord.cohostDJ2,
               currentRecord.cohostDJ3,
             ])[0];
+
+            let djStats = [];
+            for (let key in _djStats) {
+              if (!Object.prototype.hasOwnProperty.call(_djStats, key)) continue;
+              djStats.push(_djStats[key]);
+            }
 
             // Send analytic emails to DJs
             await sails.helpers.emails.queueDjs(
