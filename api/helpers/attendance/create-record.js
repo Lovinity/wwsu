@@ -100,7 +100,7 @@ module.exports = {
               onAirDJs.push(sails.models.meta.memory[dj]);
           });
 
-          if (_.difference(onAirDJs, scheduledDJs)) {
+          if (_.difference(onAirDJs, scheduledDJs).length > 0) {
             await sails.models.logs
               .create({
                 attendanceID: created.ID,
