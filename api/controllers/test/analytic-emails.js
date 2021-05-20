@@ -360,7 +360,7 @@ ${
           false,
           true
         );
-      })(currentID);
+      })(inputs.ID);
     }
 
   },
