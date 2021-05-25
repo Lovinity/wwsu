@@ -69,14 +69,14 @@ module.exports = {
           );
           if (channel)
             discordMessage = await channel.send(
-              `**From Web (${inputs.nickname})**: ${Discord.Util.cleanContent(inputs.message, channel)}`
+              `**From Web (${inputs.nickname})**: ${await sails.helpers.discord.cleanContent(inputs.message, channel)}`
             );
         } else {
           // General channel
           channel = DiscordClient.channels.resolve("830253279166464042");
           if (channel)
             discordMessage = await channel.send(
-              `**From ${inputs.fromFriendly}**: ${Discord.Util.cleanContent(inputs.message, channel)}`
+              `**From ${inputs.fromFriendly}**: ${await sails.helpers.discord.cleanContent(inputs.message, channel)}`
             );
         }
       }
