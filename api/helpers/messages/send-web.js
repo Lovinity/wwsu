@@ -35,6 +35,9 @@ module.exports = {
   fn: async function(inputs, exits) {
     sails.log.debug("Helper messages.sendWeb called.");
 
+    let channel;
+    let discordMessage;
+    
     try {
       var theid = inputs.host;
       // If no nickname provided, use host as the nickname
@@ -95,8 +98,6 @@ module.exports = {
         sails.log.verbose(`Sending public message.`);
 
         // Send public messages in Discord as well. TODO: move these into config.custom
-        let channel;
-        let discordMessage;
         if (sails.models.meta.memory.discordChannel) {
           channel = DiscordClient.channels.resolve(
             sails.models.meta.memory.discordChannel
@@ -113,7 +114,7 @@ module.exports = {
               `**From Web (${inputs.nickname})**: ${inputs.message}`
             );
         }
-        
+
         records = await sails.models.messages
           .create({
             status: "active",

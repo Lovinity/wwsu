@@ -33,6 +33,10 @@ module.exports = {
   fn: async function(inputs, exits) {
     sails.log.debug("Helper messages.send called.");
     sails.log.silly(`Parameters passed: ${JSON.stringify(inputs)}`);
+    
+    let channel;
+    let discordMessage;
+
     try {
       // Filter disallowed HTML
       inputs.message = await sails.helpers.sanitize(inputs.message);
@@ -59,8 +63,6 @@ module.exports = {
 
       // Send public messages in Discord as well. TODO: move these into config.custom
       if (inputs.to === "web-public") {
-        let channel;
-        let discordMessage;
         if (sails.models.meta.memory.discordChannel) {
           channel = DiscordClient.channels.resolve(
             sails.models.meta.memory.discordChannel
