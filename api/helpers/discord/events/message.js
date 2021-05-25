@@ -13,7 +13,11 @@ module.exports = {
 
   fn: async function(inputs) {
     // Ignore DM messages and messages from self
-    if (inputs.message.author.id === DiscordClient.user.id || !inputs.message.guild) return;
+    if (
+      inputs.message.author.id === DiscordClient.user.id ||
+      !inputs.message.guild
+    )
+      return;
 
     // Determine if we should ignore this message based on criteria. Also determine if the message should be sent publicly or simply logged.
     // TODO: Migrate these settings to config.custom
@@ -36,7 +40,10 @@ module.exports = {
     );
     if (relevantEvent) {
       ignoreMessage = false;
-      if (sails.models.meta.memory.discordChannel && relevantEvent.discordChannel === sails.models.meta.memory.discordChannel) {
+      if (
+        sails.models.meta.memory.discordChannel &&
+        relevantEvent.discordChannel === sails.models.meta.memory.discordChannel
+      ) {
         sendPublic = true;
       }
     }
@@ -73,5 +80,12 @@ module.exports = {
         discordMessage: inputs.message.id
       })
       .fetch();
+
+    // React to the message to indicate it was sent to public locations. Remove the reaction after 15 seconds.
+    if (sendPublic) {
+      inputs.message
+        .react("✅")
+        .then(reaction => setTimeout(() => reaction.remove(), 15000));
+    }
   }
 };
