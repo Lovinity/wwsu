@@ -25,7 +25,9 @@ module.exports = {
           or: [
             { to: ['website', `website-${inputs.host}`] },
             { from: { startsWith: 'website' }, to: 'DJ' },
-            { from: `website-${inputs.host}`, to: 'DJ-private' }
+            { from: { startsWith: 'discord-' }, to: 'DJ' },
+            { from: `website-${inputs.host}`, to: 'DJ-private' },
+            { from: { startsWith: 'discord-' }, to: 'DJ-private' },
           ]
         })
       sails.log.verbose(`Messages records retrieved: ${records.length}`)
