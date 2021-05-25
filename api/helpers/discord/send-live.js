@@ -42,7 +42,7 @@ module.exports = {
         ).format("LT")}`
       )
       .setFooter(
-        `Tune in on WWSU 106.9 FM or click the embed title to listen online${inputs.event.discordChannel ? `<br />💬 Please use the <#${inputs.event.discordChannel}> channel to talk about the broadcast; your messages there will be sent to the hosts' control panel and to website listeners.` : `💬 Please use the <#830253279166464042> channel to talk about the broadcast; your messages there will be sent to the hosts' control panel and website listeners.`}`
+        `Tune in on WWSU 106.9 FM or click the embed title to listen online<br />${inputs.event.discordChannel ? `💬 Please use the <#${inputs.event.discordChannel}> channel to talk about the broadcast; your messages there will be sent to the hosts' control panel and to website listeners.` : `💬 Please use the <#830253279166464042> channel to talk about the broadcast; your messages there will be sent to the hosts' control panel and website listeners.`}`
       );
     if (inputs.event.banner) embed = embed.setImage(`https://server.wwsu1069.org/uploads/calendar/banner/${inputs.event.banner}`);
     if (inputs.event.logo) embed = embed.setThumbnail(`https://server.wwsu1069.org/uploads/calendar/logo/${inputs.event.logo}`);
