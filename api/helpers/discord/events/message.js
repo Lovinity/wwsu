@@ -65,7 +65,7 @@ module.exports = {
           inputs.message.member && inputs.message.member.nickname
             ? inputs.message.member.nickname
             : inputs.message.author.username
-        }#${inputs.message.author.discriminator})`,
+        })`,
         to: sendPublic ? "DJ" : "log",
         toFriendly: sendPublic ? "Public" : "(log only)",
         message: inputs.message.cleanContent,
