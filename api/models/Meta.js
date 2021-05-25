@@ -159,7 +159,12 @@ module.exports = {
     lastID: {
       type: 'ref',
       columnType: 'datetime'
-    }
+    },
+
+    discordChannel: {
+      type: 'string',
+      allowNull: true,
+    },
 
   },
 

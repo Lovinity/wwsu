@@ -460,10 +460,12 @@ module.exports = {
       toUpdate.calendarID = eventNow.calendarID;
       toUpdate.calendarUnique = eventNow.unique;
       toUpdate.showLogo = eventNow.logo;
+      toUpdate.discordChannel = eventNow.discordChannel;
     } else {
       toUpdate.calendarID = null;
       toUpdate.calendarUnique = null;
       toUpdate.showLogo = null;
+      toUpdate.discordChannel = null;
     }
 
     await sails.helpers.meta.change.with(toUpdate);

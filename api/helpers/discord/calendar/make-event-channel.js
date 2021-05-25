@@ -6,13 +6,13 @@ module.exports = {
   inputs: {
     event: {
       type: "json",
-      required: true,
-    },
+      required: true
+    }
   },
 
   exits: {},
 
-  fn: async function (inputs) {
+  fn: async function(inputs) {
     // Do not make channels for events that are not a broadcast or are a sports broadcast
     if (
       ["show", "remote", "prerecord", "playlist"].indexOf(inputs.event.type) ===
@@ -33,7 +33,7 @@ module.exports = {
         channel = await channel.edit(
           {
             name: await sails.helpers.discord.toChannelName(inputs.event.name),
-            topic: `${inputs.event.type}: ${inputs.event.description}`,
+            topic: `${inputs.event.type}: ${inputs.event.description}`
           },
           "Event changed in the system"
         );
@@ -51,12 +51,17 @@ module.exports = {
         topic: `${inputs.event.type}: ${inputs.event.description}`,
         rateLimitPerUser: 15,
         reason: reason,
-        parent: sails.config.custom.discord.categories.defaultShow,
+        parent: sails.config.custom.discord.categories.defaultShow
       }
     );
+
+    // Be sure to update current meta DiscordChannel if the event calendar ID is on the air right now.
+    if (sails.models.meta.memory.calendarID === inputs.event.calendarID) {
+      await sails.helpers.meta.change.with({ discordChannel: channel.id });
+    }
 
     // You should update discordChannel in the database from whatever called this helper. We do not do it here because it will trigger multiple messages.
 
     return channel;
-  },
+  }
 };
