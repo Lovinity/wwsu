@@ -627,12 +627,12 @@
 
 .dark-mode .info-box .info-box .bg-info,
 .dark-mode .info-box .info-box .bg-gradient-info {
-  color: #fff;
+  color: #1f2d3d;
 }
 
 .dark-mode .info-box .info-box .bg-info .progress-bar,
 .dark-mode .info-box .info-box .bg-gradient-info .progress-bar {
-  background-color: #fff;
+  background-color: #1f2d3d;
 }
 
 .dark-mode .info-box .info-box .bg-warning,
@@ -1307,7 +1307,7 @@
 .direct-chat-teal .right > .direct-chat-text {
   background-color: #20c997;
   border-color: #20c997;
-  color: #fff;
+  color: #1f2d3d;
 }
 
 .direct-chat-teal .right > .direct-chat-text::after, .direct-chat-teal .right > .direct-chat-text::before {
@@ -1405,7 +1405,7 @@
 .dark-mode .direct-chat-info .right > .direct-chat-text {
   background-color: #3498db;
   border-color: #3498db;
-  color: #fff;
+  color: #1f2d3d;
 }
 
 .dark-mode .direct-chat-info .right > .direct-chat-text::after, .dark-mode .direct-chat-info .right > .direct-chat-text::before {
@@ -1595,7 +1595,7 @@
 .dark-mode .direct-chat-teal .right > .direct-chat-text {
   background-color: #20c997;
   border-color: #20c997;
-  color: #fff;
+  color: #1f2d3d;
 }
 
 .dark-mode .direct-chat-teal .right > .direct-chat-text::after, .dark-mode .direct-chat-teal .right > .direct-chat-text::before {
@@ -1605,7 +1605,7 @@
 .dark-mode .direct-chat-cyan .right > .direct-chat-text {
   background-color: #3498db;
   border-color: #3498db;
-  color: #fff;
+  color: #1f2d3d;
 }
 
 .dark-mode .direct-chat-cyan .right > .direct-chat-text::after, .dark-mode .direct-chat-cyan .right > .direct-chat-text::before {

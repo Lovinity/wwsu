@@ -233,7 +233,12 @@ function () {
       if (this.encNode) this.encNode.onaudioprocess = null;
       if (this.stream) this.stopTracks();
       if (this.audioCtx) this.audioCtx.close();
-      if (this.worker) this.worker.terminate();
+
+      if (this.worker) {
+        this.worker.terminate();
+        this.worker = null;
+      }
+
       if (this.workerURL) URL.revokeObjectURL(this.workerURL);
       if (this.blobURL) URL.revokeObjectURL(this.blobURL);
     } // Without pitch shift:
@@ -284,7 +289,7 @@ function () {
     value: function initWorker() {
       var _this2 = this;
 
-      if (!this.stream) throw new Error("missing audio initialization"); // https://stackoverflow.com/a/19201292
+      if (this.worker) return Promise.resolve(); // https://stackoverflow.com/a/19201292
 
       var blob = new Blob(["(", inlineWorker.toString(), ")()"], {
         type: "application/javascript"
@@ -310,12 +315,16 @@ function () {
               break;
 
             case "init-error":
+              _this2.close();
+
               reject(new Error(msg.data));
               break;
             // TODO(Kagami): Error handling.
 
             case "error":
             case "internal-error":
+              _this2.close();
+
               console.error("Worker error:", msg.data);
               if (_this2.reject) _this2.reject(msg.data);
               break;
@@ -373,6 +382,7 @@ function () {
       this.encNode.disconnect();
       this.encNode.onaudioprocess = null;
       this.stopTracks();
+      this.audioCtx.close();
       this.worker.postMessage({
         type: "stop",
         data: null
@@ -484,6 +494,7 @@ function () {
       var recordBtn = this.recordBtn = document.createElement("button");
       recordBtn.className = "vmsg-button vmsg-record-button";
       recordBtn.textContent = "●";
+      recordBtn.title = "Start Recording";
       recordBtn.addEventListener("click", function () {
         return _this7.startRecording();
       });
@@ -492,6 +503,7 @@ function () {
       stopBtn.className = "vmsg-button vmsg-stop-button";
       stopBtn.style.display = "none";
       stopBtn.textContent = "■";
+      stopBtn.title = "Stop Recording";
       stopBtn.addEventListener("click", function () {
         return _this7.stopRecording();
       });
@@ -500,6 +512,7 @@ function () {
       audio.autoplay = true;
       var timer = this.timer = document.createElement("span");
       timer.className = "vmsg-timer";
+      timer.title = "Preview Recording";
       timer.addEventListener("click", function () {
         if (audio.paused) {
           if (_this7.recorder.blobURL) {
@@ -514,6 +527,7 @@ function () {
       var saveBtn = this.saveBtn = document.createElement("button");
       saveBtn.className = "vmsg-button vmsg-save-button";
       saveBtn.textContent = "✓";
+      saveBtn.title = "Save Recording";
       saveBtn.disabled = true;
       saveBtn.addEventListener("click", function () {
         return _this7.close(_this7.recorder.blob);
@@ -558,6 +572,7 @@ function () {
 
       pitchWrapper.appendChild(pitchSlider);
       this.popup.appendChild(pitchWrapper);
+      recordBtn.focus();
     }
   }, {
     key: "drawError",
@@ -607,6 +622,7 @@ function () {
       this.recordBtn.style.display = "none";
       this.stopBtn.style.display = "";
       this.saveBtn.disabled = true;
+      this.stopBtn.focus();
       this.recorder.startRecording();
     }
   }, {
@@ -615,6 +631,7 @@ function () {
       clearTimeout(this.tid);
       this.tid = 0;
       this.stopBtn.disabled = true;
+      this.recordBtn.focus();
       this.recorder.stopRecording();
     }
   }, {

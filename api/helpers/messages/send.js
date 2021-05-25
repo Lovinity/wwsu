@@ -40,6 +40,9 @@ module.exports = {
       // Filter profanity
       inputs.message = await sails.helpers.filterProfane(inputs.message);
 
+      // Truncate after 1024 characters
+      inputs.message = await sails.helpers.truncateText(inputs.message, 1024);
+
       // Grab data pertaining to the host that is retrieving messages. Create if not exists.
       var stuff = await sails.models.hosts.findOne({ host: inputs.from });
       sails.log.silly(`Host: ${stuff}`);
@@ -54,8 +57,40 @@ module.exports = {
         inputs.from + sails.config.custom.hostSecret
       )}`;
 
+      // Send public messages in Discord as well. TODO: move these into config.custom
+      if (inputs.to === "web-public") {
+        let channel;
+        let discordMessage;
+        if (sails.models.meta.memory.discordChannel) {
+          channel = DiscordClient.channels.resolve(
+            sails.models.meta.memory.discordChannel
+          );
+          if (channel)
+            discordMessage = await channel.send(
+              `**From Web (${inputs.nickname})**: ${inputs.message}`
+            );
+        } else {
+          // General channel
+          channel = DiscordClient.channels.resolve("830253279166464042");
+          if (channel)
+            discordMessage = await channel.send(
+              `**From ${inputs.fromFriendly}**: ${inputs.message}`
+            );
+        }
+      }
+
       // Create the message
-      var records = await sails.models.messages.create(inputs).fetch();
+      var records = await sails.models.messages
+        .create({
+          from: inputs.from,
+          fromFriendly: inputs.fromFriendly,
+          to: inputs.to,
+          toFriendly: inputs.toFriendly,
+          message: inputs.message,
+          discordChannel: channel ? channel.id : null,
+          discordMessage: discordMessage ? discordMessage.id : null
+        })
+        .fetch();
       if (!records) {
         return exits.error(
           new Error("Internal error: Could not save message in database.")

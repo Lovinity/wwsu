@@ -1,26 +1,26 @@
 {
-  "_from": "fullcalendar@^5.5.1",
-  "_id": "fullcalendar@5.6.0",
+  "_from": "fullcalendar@^5.7.0",
+  "_id": "fullcalendar@5.7.0",
   "_inBundle": false,
-  "_integrity": "sha512-7wk/QVrjMkh5c4cKo8Lk6QdOAp833beBmlltmPPEphPA1b+g4PPeQjnihBU4JHPi6Du2rAu0H2cE+gTXEebKjA==",
+  "_integrity": "sha512-kOuzocipmY8o1oCVUSsKbv+eSqBbVpIZMUdxgramZPj7Rb4qs4GpVE7UgFt6kUQO6fC/CLazEpVfa3TUlSMkFA==",
   "_location": "/fullcalendar",
   "_phantomChildren": {},
   "_requested": {
     "type": "range",
     "registry": true,
-    "raw": "fullcalendar@^5.5.1",
+    "raw": "fullcalendar@^5.7.0",
     "name": "fullcalendar",
     "escapedName": "fullcalendar",
-    "rawSpec": "^5.5.1",
+    "rawSpec": "^5.7.0",
     "saveSpec": null,
-    "fetchSpec": "^5.5.1"
+    "fetchSpec": "^5.7.0"
   },
   "_requiredBy": [
     "/"
   ],
-  "_resolved": "https://registry.npmjs.org/fullcalendar/-/fullcalendar-5.6.0.tgz",
-  "_shasum": "d840a43a27f2ff856af313c84a627ac8b3238d8f",
-  "_spec": "fullcalendar@^5.5.1",
+  "_resolved": "https://registry.npmjs.org/fullcalendar/-/fullcalendar-5.7.0.tgz",
+  "_shasum": "b4b2ddb5f5aa1e6513cc2a4a64f66fe156bf1705",
+  "_spec": "fullcalendar@^5.7.0",
   "_where": "C:\\Users\\user\\adminlte-wwsu",
   "author": {
     "name": "Adam Shaw",
@@ -35,13 +35,13 @@
   "deprecated": false,
   "description": "An easily consumable combination of standard plugins",
   "devDependencies": {
-    "@fullcalendar/bootstrap": "~5.6.0",
-    "@fullcalendar/core": "~5.6.0",
-    "@fullcalendar/daygrid": "~5.6.0",
-    "@fullcalendar/google-calendar": "~5.6.0",
-    "@fullcalendar/interaction": "~5.6.0",
-    "@fullcalendar/list": "~5.6.0",
-    "@fullcalendar/timegrid": "~5.6.0"
+    "@fullcalendar/bootstrap": "~5.7.0",
+    "@fullcalendar/core": "~5.7.0",
+    "@fullcalendar/daygrid": "~5.7.0",
+    "@fullcalendar/google-calendar": "~5.7.0",
+    "@fullcalendar/interaction": "~5.7.0",
+    "@fullcalendar/list": "~5.7.0",
+    "@fullcalendar/timegrid": "~5.7.0"
   },
   "docs": "https://fullcalendar.io/docs/initialize-globals",
   "homepage": "https://fullcalendar.io/",
@@ -55,5 +55,5 @@
     "homepage": "https://github.com/fullcalendar/fullcalendar"
   },
   "title": "FullCalendar Standard Bundle",
-  "version": "5.6.0"
+  "version": "5.7.0"
 }

@@ -119,7 +119,8 @@ class WWSUmessagesweb extends WWSUdb {
           message: {
             type: "string",
             title: "Message",
-            required: true
+            required: true,
+            maxLength: 1024
           }
         }
       },
@@ -130,14 +131,7 @@ class WWSUmessagesweb extends WWSUdb {
               "This is the name the DJ and other listeners will see you. If you leave blank, a random name will be given to you."
           },
           message: {
-            type: "tinymce",
-            options: {
-              toolbar:
-                "undo redo | bold italic underline strikethrough | fontselect fontsizeselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | fullscreen preview | link | ltr rtl",
-              plugins:
-                "autoresize preview paste searchreplace autolink save directionality visualblocks visualchars fullscreen link table hr pagebreak nonbreaking toc insertdatetime advlist lists wordcount textpattern noneditable help",
-              menubar: "file edit view insert format tools table help"
-            }
+            "type": "markdown"
           }
         },
         form: {
@@ -262,9 +256,9 @@ class WWSUmessagesweb extends WWSUdb {
               $(document).Toasts("create", {
                 class: "bg-success",
                 title: "Message sent",
-                body: "Your message was sent! <strong>You may need to erase the contents in the messages field</strong> before sending a new message.",
+                body: "Your message was sent!",
                 autohide: true,
-                delay: 10000,
+                delay: 5000,
               });
               if (typeof cb === "function") {
                 cb(true);
@@ -318,7 +312,7 @@ class WWSUmessagesweb extends WWSUdb {
               40
             )}</div>
             <div class="direct-chat-text bg-success">
-                ${message.message}
+                ${discordMarkdown.toHTML(message.message)}
             </div>
         </div>`;
     } else {
@@ -343,7 +337,7 @@ class WWSUmessagesweb extends WWSUdb {
                   40
                 )}</div>
                 <div class="direct-chat-text bg-danger">
-                    ${message.message}
+                    ${discordMarkdown.toHTML(message.message)}
                 </div>
             </div>`;
         // Read message
@@ -367,7 +361,7 @@ class WWSUmessagesweb extends WWSUdb {
                   40
                 )}</div>
                 <div class="direct-chat-text bg-secondary">
-                    ${message.message}
+                    ${discordMarkdown.toHTML(message.message)}
                 </div>
             </div>`;
       }

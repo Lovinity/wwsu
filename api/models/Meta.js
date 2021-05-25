@@ -453,6 +453,11 @@ module.exports = {
       allowNull: true,
       description: "The host ID who was called for the remote broadcast (null: no calls in progress)"
     },
+    discordChannel: {
+      type: 'string',
+      allowNull: true,
+      description: 'If not null, this is the discord channel pertaining to the current broadcast (the Discord bot should take these messages and publish them to internal chat system and count them in analytics).'
+    },
   },
 
   // DO NOT change any values in meta.memory directly! Instead, use sails.helpers.meta.change. This is populated in bootstrap.js via meta.template.

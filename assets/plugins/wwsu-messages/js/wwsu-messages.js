@@ -99,22 +99,15 @@ class WWSUmessages extends WWSUdb {
 					message: {
 						type: "string",
 						title: "Message",
-						default: "",
-						required: true
+						required: true,
+						maxLength: 1024
 					}
 				}
 			},
 			options: {
 				fields: {
 					message: {
-						type: "tinymce",
-						options: {
-							toolbar:
-								"undo redo | bold italic underline strikethrough | fontselect fontsizeselect | alignleft aligncenter alignright alignjustify | outdent indent |  numlist bullist | forecolor backcolor removeformat | pagebreak | fullscreen preview | link | ltr rtl",
-							plugins:
-								"autoresize preview paste searchreplace autolink save directionality visualblocks visualchars fullscreen link table hr pagebreak nonbreaking toc insertdatetime advlist lists wordcount textpattern noneditable help",
-							menubar: "file edit view insert format tools table help"
-						}
+						"type": "markdown"
 					}
 				},
 				form: {
@@ -207,9 +200,9 @@ class WWSUmessages extends WWSUdb {
 								class: "bg-success",
 								title: "Message sent",
 								body:
-									"Your message was sent! <strong>You may need to erase the contents of the message field</strong> before sending a new message.",
+									"Your message was sent!",
 								autohide: true,
-								delay: 10000
+								delay: 5000
 							});
 							if (typeof cb === "function") {
 								cb(true);

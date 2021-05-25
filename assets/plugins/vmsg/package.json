@@ -1,28 +1,28 @@
 {
-  "_from": "vmsg@^0.3.6",
-  "_id": "vmsg@0.3.6",
+  "_from": "vmsg@0.4.0",
+  "_id": "vmsg@0.4.0",
   "_inBundle": false,
-  "_integrity": "sha512-nDv5WMk+Z3srbrGWwXuMiGo4GugOarsxcKgIjLJu6uRAUrmvSkRG9RxRphDtK+xUk11LqdKFeSjhozTbuqRyXw==",
+  "_integrity": "sha512-46BBqRSfqdFGUpO2j+Hpz8T9YE5uWG0/PWal1PT+R1o8NEthtjG/XWl4HzbB8hIHpg/UtmKvsxL2OKQBrIYcHQ==",
   "_location": "/vmsg",
   "_phantomChildren": {},
   "_requested": {
-    "type": "range",
+    "type": "version",
     "registry": true,
-    "raw": "vmsg@^0.3.6",
+    "raw": "vmsg@0.4.0",
     "name": "vmsg",
     "escapedName": "vmsg",
-    "rawSpec": "^0.3.6",
+    "rawSpec": "0.4.0",
     "saveSpec": null,
-    "fetchSpec": "^0.3.6"
+    "fetchSpec": "0.4.0"
   },
   "_requiredBy": [
-    "/",
-    "/mp3-mediarecorder"
+    "#USER",
+    "/"
   ],
-  "_resolved": "https://registry.npmjs.org/vmsg/-/vmsg-0.3.6.tgz",
-  "_shasum": "a1bf0e0de3179918cd7e8a0cc41c6da813860878",
-  "_spec": "vmsg@^0.3.6",
-  "_where": "C:\\Users\\user\\AdminLTE",
+  "_resolved": "https://registry.npmjs.org/vmsg/-/vmsg-0.4.0.tgz",
+  "_shasum": "b61684226274afcf441b5348cc596c80fc50bf9f",
+  "_spec": "vmsg@0.4.0",
+  "_where": "C:\\Users\\user\\adminlte-wwsu",
   "author": {
     "name": "Kagami Hiiragi"
   },
@@ -68,5 +68,5 @@
     "start": "parcel demo/index.html"
   },
   "typings": "vmsg.d.ts",
-  "version": "0.3.6"
+  "version": "0.4.0"
 }

@@ -161,13 +161,6 @@ navigation
     false
   )
   .addItem(
-    "#nav-discord",
-    "#section-discord",
-    "WWSU Discord - WWSU 106.9 FM Listener's Corner",
-    "/discord",
-    false
-  )
-  .addItem(
     "#nav-schedule",
     "#section-schedule",
     "Schedule - WWSU 106.9 FM Listener's Corner",
@@ -1088,17 +1081,6 @@ function loadGenres() {
 function onlineSocket(doOneSignal = false) {
   recipients.addRecipientWeb(device, data => {
     try {
-      try {
-        // Discord iframe
-        $("#section-discord-iframe").attr(
-          "src",
-          `https://titanembeds.com/embed/830253278465097758?defaultchannel=830253279166464042&theme=DiscordDark&username=${data.label
-            .replace("Web ", "")
-            .match(/\(([^)]+)\)/)[1]
-            .replace(/[^a-zA-Z0-9\d\-_\s]+/gi, "")
-            .substring(0, 32)}`
-        );
-      } catch (e2) {}
 
       // Initialize Messages
       messages.initComponents(

@@ -23,6 +23,7 @@ module.exports = {
         tuneIns: null,
         listenerMinutes: null,
         webMessages: null,
+        discordMessages: null,
         missedIDs: [],
         breaks: 0,
         cancellation: false,
@@ -145,11 +146,12 @@ module.exports = {
         toUpdate.listenerMinutes = Math.round(listenerMinutes);
         toUpdate.tuneIns = tuneIns;
 
-        // Calculate web messages
+        // Calculate web and discord messages
         var messages = await sails.models.messages.find({
           status: "active",
           or: [
             { to: { startsWith: "website-" } },
+            { to: { startsWith: "discord-" } },
             { to: "DJ" },
             { to: "DJ-private" },
           ],

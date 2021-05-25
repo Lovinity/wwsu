@@ -70,7 +70,7 @@
     <!-- overlayScrollbars -->
     <script src="/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
     <!-- AdminLTE App -->
-    <script src="/plugins/adminlte/js/adminlte.js?v=202105102107"></script>
+    <script src="/plugins/adminlte/js/adminlte.js?v=202105241147"></script>
     <!-- lodash -->
     <script src="/plugins/lodash/lodash.min.js"></script>
 
@@ -112,8 +112,12 @@
     <link rel="stylesheet" href="/plugins/iziModal/css/iziModal.min.css" />
     <script src="/plugins/iziModal/js/iziModal.min.js"></script>
 
-    <!-- TinyMCE -->
-    <script src="/plugins/tinymce/tinymce.min.js"></script>
+    <!-- SimpleMDE -->
+		<link rel="stylesheet" href="/plugins/simplemde/simplemde.min.css">
+		<script src="/plugins/simplemde/simplemde.min.js"></script>
+
+    <!-- Discord Markdown -->
+    <script src="/plugins/discord-markdown/discord-markdown.min.js"></script>
 
     <!-- AmplitudeJS -->
     <style>
@@ -209,22 +213,22 @@
 
     <!--WWSU-->
     <script src="/plugins/sails.io/sails.io.js" autoConnect="false"></script>
-    <script src="/plugins/wwsu-modules/js/wwsu-modules.js?v=202105102107"></script>
-    <script src="/plugins/wwsu-sails/js/wwsu.js?v=202105102107"></script>
-    <script src="/plugins/wwsu-navigation/js/wwsu-navigation.js?v=202105102107"></script>
-    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-web.js?v=202105102107"></script>
-    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-class.js?v=202105102107"></script>
-    <script src="/plugins/wwsu-meta/js/wwsu-meta.js?v=202105102107"></script>
-    <script src="/plugins/wwsu-directors/js/wwsu-directors.js?v=202105102107"></script>
-    <script src="/plugins/wwsu-subscriptions/js/wwsu-subscriptions.js?v=202105102107"></script>
-    <script src="/plugins/wwsu-likedtracks/js/wwsu-likedtracks.js?v=202105102107"></script>
-    <script src="/plugins/wwsu-announcements/js/wwsu-announcements.js?v=202105102107"></script>
-    <script src="/plugins/wwsu-eas/js/wwsu-eas.js?v=202105102107"></script>
-    <script src="/plugins/wwsu-discipline/js/wwsu-discipline.js?v=202105102107"></script>
-    <script src="/plugins/wwsu-recipients/js/wwsu-recipients-web.js?v=202105102107"></script>
-    <script src="/plugins/wwsu-requests/js/wwsu-requests-web.js?v=202105102107"></script>
-    <script src="/plugins/wwsu-messages/js/wwsu-messages-web.js?v=202105102107"></script>
-    <script src="/plugins/wwsu-songs/js/wwsu-songs.js?v=202105102107"></script>
+    <script src="/plugins/wwsu-modules/js/wwsu-modules.js?v=202105241147"></script>
+    <script src="/plugins/wwsu-sails/js/wwsu.js?v=202105241147"></script>
+    <script src="/plugins/wwsu-navigation/js/wwsu-navigation.js?v=202105241147"></script>
+    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-web.js?v=202105241147"></script>
+    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-class.js?v=202105241147"></script>
+    <script src="/plugins/wwsu-meta/js/wwsu-meta.js?v=202105241147"></script>
+    <script src="/plugins/wwsu-directors/js/wwsu-directors.js?v=202105241147"></script>
+    <script src="/plugins/wwsu-subscriptions/js/wwsu-subscriptions.js?v=202105241147"></script>
+    <script src="/plugins/wwsu-likedtracks/js/wwsu-likedtracks.js?v=202105241147"></script>
+    <script src="/plugins/wwsu-announcements/js/wwsu-announcements.js?v=202105241147"></script>
+    <script src="/plugins/wwsu-eas/js/wwsu-eas.js?v=202105241147"></script>
+    <script src="/plugins/wwsu-discipline/js/wwsu-discipline.js?v=202105241147"></script>
+    <script src="/plugins/wwsu-recipients/js/wwsu-recipients-web.js?v=202105241147"></script>
+    <script src="/plugins/wwsu-requests/js/wwsu-requests-web.js?v=202105241147"></script>
+    <script src="/plugins/wwsu-messages/js/wwsu-messages-web.js?v=202105241147"></script>
+    <script src="/plugins/wwsu-songs/js/wwsu-songs.js?v=202105241147"></script>
   </head>
 
   <body
@@ -346,7 +350,7 @@
                     aria-hidden="true"
                   ></i>
                   <p>
-                    Chat with DJ
+                    Chat with DJ / Listeners
                     <span class="badge badge-secondary right chat-new-messages"
                       >0</span
                     >
@@ -355,14 +359,15 @@
               </li>
               <li class="nav-item">
                 <a
-                  href="#"
+                  href="https://discord.gg/n8npUEp2RA"
                   class="nav-link"
                   id="nav-discord"
-                  title="Chat with other listeners, DJs, and directors via Discord. Account is not required."
-                  aria-label="Chat with other listeners, DJs, and directors via Discord. Account is not required."
+                  target="_blank"
+                  title="Join our Discord server to have more intimate discussions / chats with WWSU DJs, directors, and other listeners. You can also get realtime updates about your favorite shows."
+                  aria-label="Join our Discord server to have more intimate discussions / chats with WWSU DJs, directors, and other listeners. You can also get realtime updates about your favorite shows."
                 >
                   <i class="nav-icon fab fa-discord" aria-hidden="true"></i>
-                  <p>Discord</p>
+                  <p>Discord Server</p>
                 </a>
               </li>
             </ul>
@@ -491,44 +496,6 @@
                   Ban
                 </button>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="section-discord">
-        <div class="content-wrapper" role="main">
-          <!-- Content Header (Page header) -->
-          <div class="content-header">
-            <div class="container-fluid">
-              <div class="row mb-2">
-                <div class="col-sm-6">
-                  <h1 class="m-0 text-dark">Discord Chat</h1>
-                </div>
-                <!-- /.col -->
-              </div>
-              <!-- /.row -->
-            </div>
-            <!-- /.container-fluid -->
-          </div>
-          <!-- /.content-header -->
-
-          <!-- Main content -->
-          <div class="content">
-            <div class="callout callout-warning">
-              <h5>You must agree to the #discord-rules</h5>
-              <p>
-                Breaking any of the rules found in the #discord-rules channel
-                can result in being banned from the chat or from the WWSU
-                website.
-              </p>
-            </div>
-            <div class="embed-responsive embed-responsive-16by9">
-              <iframe
-                class="embed-responsive-item"
-                id="section-discord-iframe"
-                src=""
-              ></iframe>
             </div>
           </div>
         </div>
@@ -825,7 +792,7 @@
     </div>
 
     <!-- Load website script last so the DOM is ready immediately -->
-    <script src="/plugins/wwsu-website/wwsu-website.js?v=202105102107"></script>
+    <script src="/plugins/wwsu-website/wwsu-website.js?v=202105241147"></script>
 
     <%- body %>
   </body>

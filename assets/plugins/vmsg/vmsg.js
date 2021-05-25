@@ -170,7 +170,10 @@ export class Recorder {
     if (this.encNode) this.encNode.onaudioprocess = null;
     if (this.stream) this.stopTracks();
     if (this.audioCtx) this.audioCtx.close();
-    if (this.worker) this.worker.terminate();
+    if (this.worker) {
+      this.worker.terminate();
+      this.worker = null;
+    }
     if (this.workerURL) URL.revokeObjectURL(this.workerURL);
     if (this.blobURL) URL.revokeObjectURL(this.blobURL);
   }
@@ -221,7 +224,7 @@ export class Recorder {
   }
 
   initWorker() {
-    if (!this.stream) throw new Error("missing audio initialization");
+    if (this.worker) return Promise.resolve();
     // https://stackoverflow.com/a/19201292
     const blob = new Blob(
       ["(", inlineWorker.toString(), ")()"],
@@ -238,11 +241,13 @@ export class Recorder {
           resolve();
           break;
         case "init-error":
+          this.close();
           reject(new Error(msg.data));
           break;
         // TODO(Kagami): Error handling.
         case "error":
         case "internal-error":
+          this.close();
           console.error("Worker error:", msg.data);
           if (this.reject) this.reject(msg.data);
           break;
@@ -283,6 +288,7 @@ export class Recorder {
     this.encNode.disconnect();
     this.encNode.onaudioprocess = null;
     this.stopTracks();
+    this.audioCtx.close();
     this.worker.postMessage({type: "stop", data: null});
     return new Promise((resolve, reject) => {
       this.resolve = resolve;
@@ -361,6 +367,7 @@ export class Form {
     const recordBtn = this.recordBtn = document.createElement("button");
     recordBtn.className = "vmsg-button vmsg-record-button";
     recordBtn.textContent = "●";
+    recordBtn.title = "Start Recording";
     recordBtn.addEventListener("click", () => this.startRecording());
     recordRow.appendChild(recordBtn);
 
@@ -368,6 +375,7 @@ export class Form {
     stopBtn.className = "vmsg-button vmsg-stop-button";
     stopBtn.style.display = "none";
     stopBtn.textContent = "■";
+    stopBtn.title = "Stop Recording";
     stopBtn.addEventListener("click", () => this.stopRecording());
     recordRow.appendChild(stopBtn);
 
@@ -376,6 +384,7 @@ export class Form {
 
     const timer = this.timer = document.createElement("span");
     timer.className = "vmsg-timer";
+    timer.title = "Preview Recording";
     timer.addEventListener("click", () => {
       if (audio.paused) {
         if (this.recorder.blobURL) {
@@ -391,6 +400,7 @@ export class Form {
     const saveBtn = this.saveBtn = document.createElement("button");
     saveBtn.className = "vmsg-button vmsg-save-button";
     saveBtn.textContent = "✓";
+    saveBtn.title = "Save Recording";
     saveBtn.disabled = true;
     saveBtn.addEventListener("click", () => this.close(this.recorder.blob));
     recordRow.appendChild(saveBtn);
@@ -430,6 +440,7 @@ export class Form {
     };
     pitchWrapper.appendChild(pitchSlider);
     this.popup.appendChild(pitchWrapper);
+    recordBtn.focus();
   }
 
   drawError(err) {
@@ -473,6 +484,7 @@ export class Form {
     this.recordBtn.style.display = "none";
     this.stopBtn.style.display = "";
     this.saveBtn.disabled = true;
+    this.stopBtn.focus();
     this.recorder.startRecording();
   }
 
@@ -480,6 +492,7 @@ export class Form {
     clearTimeout(this.tid);
     this.tid = 0;
     this.stopBtn.disabled = true;
+    this.recordBtn.focus();
     this.recorder.stopRecording();
   }
 

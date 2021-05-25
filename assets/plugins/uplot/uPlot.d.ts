@@ -30,6 +30,8 @@ declare class uPlot {
 	/** cursor state & opts*/
 	readonly cursor: uPlot.Cursor;
 
+	readonly legend: uPlot.Legend;
+
 //	/** focus opts */
 //	readonly focus: uPlot.Focus;
 
@@ -67,7 +69,10 @@ declare class uPlot {
 	setScale(scaleKey: string, limits: { min: number; max: number }): void;
 
 	/** sets the cursor position (relative to plotting area) */
-	setCursor(opts: {left: number, top: number}): void;
+	setCursor(opts: {left: number, top: number}, fireHook?: boolean): void;
+
+	/** sets the legend to the values of the specified idx */
+	setLegend(opts: {idx: number}, fireHook?: boolean): void;
 
 	// TODO: include other series style opts which are dynamically pulled?
 	/** toggles series visibility or focus */
@@ -98,7 +103,7 @@ declare class uPlot {
 	valToIdx(val: number): number;
 
 	/** updates getBoundingClientRect() cache for cursor positioning. use when plot's position changes (excluding window scroll & resize) */
-	syncRect(): void;
+	syncRect(defer?: boolean): void;
 
 	/** uPlot's path-builder factories */
 	static paths: uPlot.Series.PathBuilderFactories;
@@ -249,6 +254,8 @@ declare namespace uPlot {
 		show?: boolean;	// true
 		/** show series values at current cursor.idx */
 		live?: boolean;	// true
+		/** swiches primary interaction mode to toggle-one/toggle-all */
+		isolate?: boolean; // false
 		/** series indicator line width */
 		width?: Legend.Width;
 		/** series indicator stroke (CSS borderColor) */
@@ -257,6 +264,11 @@ declare namespace uPlot {
 		dash?: Legend.Dash;
 		/** series indicator fill */
 		fill?: Legend.Fill;
+
+		/** current index (readback-only, not for init) */
+		idx?: number;
+		/** current values (readback-only, not for init) */
+		values?: Legend.Values;
 	}
 
 	export namespace Legend {
@@ -267,6 +279,12 @@ declare namespace uPlot {
 		export type Dash   = CSSStyleDeclaration['borderStyle'] | ((self: uPlot, seriesIdx: number) => CSSStyleDeclaration['borderStyle']);
 
 		export type Fill   = CSSStyleDeclaration['background']  | ((self: uPlot, seriesIdx: number) => CSSStyleDeclaration['background']);
+
+		export type Value  = {
+			[key: string]: string | number;
+		};
+
+		export type Values = Value[];
 	}
 
 	export type DateFormatterFactory = (tpl: string) => (date: Date) => string;
@@ -310,7 +328,7 @@ declare namespace uPlot {
 		drawOrder?: DrawOrderKey[];
 
 		/** whether vt & hz lines of series/grid/ticks should be crisp/sharp or sub-px antialiased */
-		pxAlign?: boolean; // true
+		pxAlign?: boolean | number; // true
 
 		series: Series[];
 
@@ -359,6 +377,7 @@ declare namespace uPlot {
 		sub:   (client: uPlot) => void;
 		unsub: (client: uPlot) => void;
 		pub:   (type: string, client: uPlot, x: number, y: number, w: number, h: number, i: number) => void;
+		plots: uPlot[];
 	}
 
 	export namespace Cursor {
@@ -426,6 +445,12 @@ declare namespace uPlot {
 				/** filters received events */
 				sub?: Filter;
 			}
+
+			export type ScaleKeyMatcher = (subScaleKey: string | null, pubScaleKey: string | null) => boolean;
+
+			export type Match = [matchX: ScaleKeyMatcher, matchY: ScaleKeyMatcher];
+
+			export type Values = [xScaleValue: number, yScaleValue: number];
 		}
 
 		export interface Sync {
@@ -435,8 +460,12 @@ declare namespace uPlot {
 			setSeries?: boolean; // true
 			/** sets the x and y scales to sync by values. null will sync by relative (%) position */
 			scales?: Sync.Scales; // [xScaleKey, null]
+			/** fns that match x and y scale keys between publisher and subscriber */
+			match?: Sync.Match;
 			/** event filters */
 			filters?: Sync.Filters;
+			/** sync scales' values at the cursor position (exposed for read-back by subscribers) */
+			values?: Sync.Values,
 		}
 
 		export interface Focus {
@@ -662,7 +691,7 @@ declare namespace uPlot {
 		spanGaps?: boolean;
 
 		/** whether path and point drawing should offset canvas to try drawing crisp lines */
-		pxAlign?: boolean; // true
+		pxAlign?: number | boolean; // 1
 
 		/** legend label */
 		label?: string;
@@ -736,9 +765,17 @@ declare namespace uPlot {
 
 		export type Incrs = number[] | ((self: uPlot, axisIdx: number, scaleMin: number, scaleMax: number, fullDim: number, minSpace: number) => number[]);
 
-		export type Splits = number[] | ((self: uPlot, axisIdx: number, scaleMin: number, scaleMax: number, foundIncr: number, pctSpace: number) => number[]);
+		export type Splits = number[] | ((self: uPlot, axisIdx: number, scaleMin: number, scaleMax: number, foundIncr: number, foundSpace: number) => number[]);
 
-		export type Values = ((self: uPlot, splits: number[], axisIdx: number, foundSpace: number, foundIncr: number) => (string | number | null)[]) | (string | number | null)[][] | string;
+		export type StaticValues = (string | number | null)[];
+
+		export type DynamicValues = (self: uPlot, splits: number[], axisIdx: number, foundSpace: number, foundIncr: number) => StaticValues;
+
+		export type TimeValuesConfig = (string | number | null)[][];
+
+		export type TimeValuesTpl = string;
+
+		export type Values = StaticValues | DynamicValues | TimeValuesTpl | TimeValuesConfig;
 
 		export type Stroke = CanvasRenderingContext2D['strokeStyle'] | ((self: uPlot, axisIdx: number) => CanvasRenderingContext2D['strokeStyle']);
 
@@ -849,8 +886,11 @@ declare namespace uPlot {
 			/** fires after any scale has changed */
 			setScale?:   (self: uPlot, scaleKey: string) => void;
 
-			/** fires after the cursor is moved (debounced by rAF) */
+			/** fires after the cursor is moved */
 			setCursor?:  (self: uPlot) => void;
+
+			/** fires when cursor changes idx and legend updates (or should update) */
+			setLegend?:  (self: uPlot) => void;
 
 			/** fires after a selection is completed */
 			setSelect?:  (self: uPlot) => void;
@@ -871,7 +911,7 @@ declare namespace uPlot {
 			drawAxes?:   (self: uPlot) => void;
 
 			/** fires after each series is drawn */
-			drawSeries?: (self: uPlot, seriesKey: string) => void;
+			drawSeries?: (self: uPlot, seriesIdx: number) => void;
 
 			/** fires after everything is drawn */
 			draw?:       (self: uPlot) => void;
