@@ -73,9 +73,5 @@ module.exports = {
         discordMessage: inputs.message.id
       })
       .fetch();
-
-    // React to the message to indicate it was sent to public locations
-    if (sendPublic)
-      await inputs.message.react("✅");
   }
 };
