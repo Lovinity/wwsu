@@ -68,7 +68,9 @@ class WWSUmessagesweb extends WWSUdb {
 				title: `New Message from ${message.fromFriendly}`,
 				autohide: true,
 				delay: 15000,
-				body: `${discordMarkdown.toHTML(message.message)}<p><strong>To reply:</strong> Click "Chat with DJ" in the left menu.</p>`,
+				body: `${discordMarkdown.toHTML(
+					message.message
+				)}<p><strong>To reply:</strong> Click "Chat with DJ" in the left menu.</p>`,
 				icon: "fas fa-comment fa-lg"
 			});
 		});
@@ -131,13 +133,15 @@ class WWSUmessagesweb extends WWSUdb {
 							"This is the name the DJ and other listeners will see you. If you leave blank, a random name will be given to you."
 					},
 					message: {
-						type: "markdown"
+						type: "markdown",
+						helper: "You are limited to a maximum of 1,024 characters. Each IP address may only send 3 messages per minute."
 					}
 				},
 				form: {
 					buttons: {
 						submit: {
-							title: "Send Publicly",
+							title: "Send Public",
+							styles: "btn btn-primary",
 							click: (form, e) => {
 								form.refreshValidationState(true);
 								if (!form.isValid(true)) {
@@ -169,7 +173,8 @@ class WWSUmessagesweb extends WWSUdb {
 							}
 						},
 						submitPrivate: {
-							title: "Send Privately",
+							title: "Send Private to the DJs/hosts",
+							styles: "btn btn-danger",
 							click: (form, e) => {
 								form.refreshValidationState(true);
 								if (!form.isValid(true)) {
