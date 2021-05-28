@@ -26,7 +26,9 @@ module.exports = {
     },
     originalTime: {
       type: "ref",
-      columnType: "datetime"
+      custom: function(value) {
+        return moment(value).isValid();
+      }
     },
     type: {
       type: "string",
@@ -108,7 +110,9 @@ module.exports = {
 
     newTime: {
       type: "ref",
-      columnType: "datetime"
+      custom: function(value) {
+        return moment(value).isValid();
+      }
     },
 
     oneTime: {
