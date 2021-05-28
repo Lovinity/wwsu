@@ -70,7 +70,7 @@
     <!-- overlayScrollbars -->
     <script src="/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js"></script>
     <!-- AdminLTE App -->
-    <script src="/plugins/adminlte/js/adminlte.js?v=202105250103"></script>
+    <script src="/plugins/adminlte/js/adminlte.js?v=202105281801"></script>
     <!-- lodash -->
     <script src="/plugins/lodash/lodash.min.js"></script>
 
@@ -113,8 +113,8 @@
     <script src="/plugins/iziModal/js/iziModal.min.js"></script>
 
     <!-- SimpleMDE -->
-		<link rel="stylesheet" href="/plugins/simplemde/simplemde.min.css">
-		<script src="/plugins/simplemde/simplemde.min.js"></script>
+    <link rel="stylesheet" href="/plugins/simplemde/simplemde.min.css" />
+    <script src="/plugins/simplemde/simplemde.min.js"></script>
 
     <!-- Discord Markdown -->
     <script src="/plugins/discord-markdown/discord-markdown.min.js"></script>
@@ -213,22 +213,22 @@
 
     <!--WWSU-->
     <script src="/plugins/sails.io/sails.io.js" autoConnect="false"></script>
-    <script src="/plugins/wwsu-modules/js/wwsu-modules.js?v=202105250103"></script>
-    <script src="/plugins/wwsu-sails/js/wwsu.js?v=202105250103"></script>
-    <script src="/plugins/wwsu-navigation/js/wwsu-navigation.js?v=202105250103"></script>
-    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-web.js?v=202105250103"></script>
-    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-class.js?v=202105250103"></script>
-    <script src="/plugins/wwsu-meta/js/wwsu-meta.js?v=202105250103"></script>
-    <script src="/plugins/wwsu-directors/js/wwsu-directors.js?v=202105250103"></script>
-    <script src="/plugins/wwsu-subscriptions/js/wwsu-subscriptions.js?v=202105250103"></script>
-    <script src="/plugins/wwsu-likedtracks/js/wwsu-likedtracks.js?v=202105250103"></script>
-    <script src="/plugins/wwsu-announcements/js/wwsu-announcements.js?v=202105250103"></script>
-    <script src="/plugins/wwsu-eas/js/wwsu-eas.js?v=202105250103"></script>
-    <script src="/plugins/wwsu-discipline/js/wwsu-discipline.js?v=202105250103"></script>
-    <script src="/plugins/wwsu-recipients/js/wwsu-recipients-web.js?v=202105250103"></script>
-    <script src="/plugins/wwsu-requests/js/wwsu-requests-web.js?v=202105250103"></script>
-    <script src="/plugins/wwsu-messages/js/wwsu-messages-web.js?v=202105250103"></script>
-    <script src="/plugins/wwsu-songs/js/wwsu-songs.js?v=202105250103"></script>
+    <script src="/plugins/wwsu-modules/js/wwsu-modules.js?v=202105281801"></script>
+    <script src="/plugins/wwsu-sails/js/wwsu.js?v=202105281801"></script>
+    <script src="/plugins/wwsu-navigation/js/wwsu-navigation.js?v=202105281801"></script>
+    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-web.js?v=202105281801"></script>
+    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-class.js?v=202105281801"></script>
+    <script src="/plugins/wwsu-meta/js/wwsu-meta.js?v=202105281801"></script>
+    <script src="/plugins/wwsu-directors/js/wwsu-directors.js?v=202105281801"></script>
+    <script src="/plugins/wwsu-subscriptions/js/wwsu-subscriptions.js?v=202105281801"></script>
+    <script src="/plugins/wwsu-likedtracks/js/wwsu-likedtracks.js?v=202105281801"></script>
+    <script src="/plugins/wwsu-announcements/js/wwsu-announcements.js?v=202105281801"></script>
+    <script src="/plugins/wwsu-eas/js/wwsu-eas.js?v=202105281801"></script>
+    <script src="/plugins/wwsu-discipline/js/wwsu-discipline.js?v=202105281801"></script>
+    <script src="/plugins/wwsu-recipients/js/wwsu-recipients-web.js?v=202105281801"></script>
+    <script src="/plugins/wwsu-requests/js/wwsu-requests-web.js?v=202105281801"></script>
+    <script src="/plugins/wwsu-messages/js/wwsu-messages-web.js?v=202105281801"></script>
+    <script src="/plugins/wwsu-songs/js/wwsu-songs.js?v=202105281801"></script>
   </head>
 
   <body
@@ -350,7 +350,7 @@
                     aria-hidden="true"
                   ></i>
                   <p>
-                    Chat with DJ / Listeners
+                    Chat with DJ
                     <span class="badge badge-secondary right chat-new-messages"
                       >0</span
                     >
@@ -402,7 +402,9 @@
             <div class="announcements-nowplaying"></div>
 
             <!-- Now Playing Box -->
-            <div class="card card-primary card-outline p-1 m-3 position-relative">
+            <div
+              class="card card-primary card-outline p-1 m-3 position-relative"
+            >
               <div class="ribbon-wrapper nowplaying-ribbon">
                 <div class="ribbon bg-secondary">
                   UNKNOWN
@@ -471,30 +473,40 @@
           </div>
 
           <div class="content">
-            <div class="card card-success card-outline p-1 m-3">
-              <div class="card-body">
-                <div class="chat-status"></div>
-                <p>
-                  Unread messages are in red. Click a message to mark as read.
-                  Sending a message marks all messages as read.
-                </p>
-                <div
-                  class="chat-messages"
-                  style="height: 50vh; overflow-x: auto"
-                >
-                  <!--Chat messages go here-->
+            <div class="chat-status"></div>
+            <p>
+              Unread messages are in red. Click a message to mark as read.
+              Sending a message marks all messages as read.
+            </p>
+            <div class="container-fluid">
+              <div class="row">
+                <div class="col-lg-6 col-12">
+                  <div class="card card-success card-outline p-1">
+                    <div class="card header">
+                      Messages
+                    </div>
+                    <div class="card-body">
+                      <div
+                        class="chat-messages"
+                        style="height: 50vh; overflow-x: auto"
+                      >
+                        <!--Chat messages go here-->
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div class="chat-form">
-                  <!--Chat Alpaca form goes here-->
+                <div class="col-lg-6 col-12">
+                  <div class="card card-primary card-outline p-1">
+                    <div class="card header">
+                      Send Message
+                    </div>
+                    <div class="card-body">
+                      <div class="chat-form">
+                        <!--Chat Alpaca form goes here-->
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div class="card-footer">
-                <button type="button" class="btn btn-warning chat-mute d-none">
-                  Mute
-                </button>
-                <button type="button" class="btn btn-danger chat-ban d-none">
-                  Ban
-                </button>
               </div>
             </div>
           </div>
@@ -792,7 +804,7 @@
     </div>
 
     <!-- Load website script last so the DOM is ready immediately -->
-    <script src="/plugins/wwsu-website/wwsu-website.js?v=202105250103"></script>
+    <script src="/plugins/wwsu-website/wwsu-website.js?v=202105281801"></script>
 
     <%- body %>
   </body>
