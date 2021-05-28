@@ -97,22 +97,46 @@ module.exports = {
       } else {
         sails.log.verbose(`Sending public message.`);
 
-        // Send public messages in Discord as well. TODO: move these into config.custom
-        if (sails.models.meta.memory.discordChannel) {
-          channel = DiscordClient.channels.resolve(
-            sails.models.meta.memory.discordChannel
-          );
-          if (channel)
-            discordMessage = await channel.send(
-              `**From Web (${inputs.nickname})**: ${await sails.helpers.discord.cleanContent(inputs.message, channel)}`
+        // Send public messages in Discord as well if the webchat is enabled. TODO: move these into config.custom
+        if (sails.models.meta.memory.webchat) {
+          if (sails.models.meta.memory.discordChannel) {
+            channel = DiscordClient.channels.resolve(
+              sails.models.meta.memory.discordChannel
             );
-        } else {
-          // General channel
-          channel = DiscordClient.channels.resolve("830253279166464042");
-          if (channel)
-            discordMessage = await channel.send(
-              `**From Web (${inputs.nickname})**: ${await sails.helpers.discord.cleanContent(inputs.message, channel)}`
-            );
+            if (channel)
+              discordMessage = await channel.send(
+                `__Message from **Web (${inputs.nickname})**__` +
+                  "\n" +
+                  `${await sails.helpers.discord.cleanContent(
+                    inputs.message,
+                    channel
+                  )}`
+              );
+          } else if (sails.models.meta.memory.state.startsWith("sports")) {
+            // Sports channel
+            channel = DiscordClient.channels.resolve("830253279166464044");
+            if (channel)
+              discordMessage = await channel.send(
+                `__Message from **Web (${inputs.nickname})**__` +
+                  "\n" +
+                  `${await sails.helpers.discord.cleanContent(
+                    inputs.message,
+                    channel
+                  )}`
+              );
+          } else {
+            // General channel
+            channel = DiscordClient.channels.resolve("830253279166464042");
+            if (channel)
+              discordMessage = await channel.send(
+                `__Message from **Web (${inputs.nickname})**__` +
+                  "\n" +
+                  `${await sails.helpers.discord.cleanContent(
+                    inputs.message,
+                    channel
+                  )}`
+              );
+          }
         }
 
         records = await sails.models.messages

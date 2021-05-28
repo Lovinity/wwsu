@@ -62,7 +62,7 @@ class WWSUmessages extends WWSUdb {
 	/**
 	 * Initialize chat components. This should be called before init (eg. on DOM ready).
 	 *
-	 * @param {string} chatActiveRecipient DOM query string of the chat header where active recipient will be shown.
+	 * @param {string} chatActiveRecipient DOM query string of where the currently selected recipient should be shown.
 	 * @param {string} chatStatus DOM query string where the chat status info box is contained.
 	 * @param {string} chatMessages DOM query string where chat messages should be displayed.
 	 * @param {string} chatForm DOM query string where the Alpaca form for sending messages should be generated.
@@ -107,7 +107,7 @@ class WWSUmessages extends WWSUdb {
 			options: {
 				fields: {
 					message: {
-						"type": "markdown"
+						type: "markdown"
 					}
 				},
 				form: {
@@ -158,6 +158,70 @@ class WWSUmessages extends WWSUdb {
 		this.manager.get("WWSUrecipients").on("change", "WWSUmessages", () => {
 			this.updateRecipient();
 		});
+
+		// Whenever meta changes, update chat status box
+		this.manager
+			.get("WWSUMeta")
+			.on("newMeta", "WWSUmessages", (newMeta, meta) => {
+				if (!meta.webchat) {
+					$(this.chatStatus).html(`<div class="callout callout-danger">
+	  <ul>
+		<li><i class="fas fa-times-circle text-danger p-1"></i> You or someone else has disabled the chat.</li>
+		<li><i class="fas fa-times-circle text-danger p-1"></i> You will not receive any messages from the website nor the Discord server until the broadcast ends.</li>
+	  </ul>
+	  </div>`);
+				} else if (meta.state.startsWith("automation_")) {
+					$(this.chatStatus).html(`<div class="callout callout-warning">
+	  <ul>
+		<li><i class="fas fa-check-circle text-success p-1"></i> The web chat is enabled.</li>
+		<li><i class="fas fa-minus-circle text-warning p-1"></i> Automation is currently running; public messages you send will go to the website and the #general channel of our Discord server. You will only see Discord messages posted in the #general channel.</li>
+		<li><i class="fas fa-times-circle text-danger p-1"></i> You will not be notified of new messages from the web or Discord when in automation; you will only be notified of messages from other hosts / DJ Controls.</li>
+	  </ul>
+	  </div>`);
+				} else if (meta.state.startsWith("prerecord_")) {
+					$(this.chatStatus).html(`<div class="callout callout-info">
+	  <ul>
+		<li><i class="fas fa-check-circle text-success p-1"></i> The web chat is enabled.</li>
+		<li><i class="fas fa-check-circle text-success p-1"></i> A prerecord is currently running; public messages you send will go to the website and the text channel specific to this broadcast in our Discord server. You will only see Discord messages sent in the text channel specific to the current broadcast.</li>
+		<li><i class="fas fa-times-circle text-danger p-1"></i> The current broadcast is prerecorded; you will not be notified of new messages from the web or Discord; you will only be notified of messages from other hosts / DJ Controls.</li>
+	  </ul>
+	  </div>`);
+				} else if (
+					meta.state.startsWith("sports_") ||
+					meta.state.startsWith("sportsremote_")
+				) {
+					$(this.chatStatus).html(`<div class="callout callout-success">
+	  <ul>
+		<li><i class="fas fa-check-circle text-success p-1"></i> The web chat is enabled.</li>
+		<li><i class="fas fa-check-circle text-success p-1"></i> A sports broadcast is on the air; public messages you send will go to the website and the #sports channel of our Discord server. You will only see Discord messages posted in the #sports channel.</li>
+		${
+			this.manager.get("WWSUhosts").isHost
+				? `<li><i class="fas fa-check-circle text-success p-1"></i> You will be notified of new messages from the web and Discord.</li>`
+				: `<li><i class="fas fa-times-circle text-danger p-1"></i> You will not be notified of new messages from the web / Discord because you did not start the current broadcast.</li>`
+		}
+	  </ul>
+	  </div>`);
+				} else if (
+					meta.state.startsWith("live_") ||
+					meta.state.startsWith("remote_")
+				) {
+					$(this.chatStatus).html(`<div class="callout callout-success">
+	  <ul>
+		<li><i class="fas fa-check-circle text-success p-1"></i> The web chat is enabled.</li>
+		<li><i class="fas fa-check-circle text-success p-1"></i> A broadcast is currently running; public messages you send will go to the website and the text channel specific to this broadcast in our Discord server. You will only see Discord messages sent in the text channel specific to the current broadcast.</li>
+		${
+			this.manager.get("WWSUhosts").isHost
+				? `<li><i class="fas fa-check-circle text-success p-1"></i> You will be notified of new messages from the web and Discord.</li>`
+				: `<li><i class="fas fa-times-circle text-danger p-1"></i> You will not be notified of new messages from the web / Discord because you did not start the current broadcast.</li>`
+		}
+	  </ul>
+	  </div>`);
+				} else {
+					$(this.chatStatus).html(`<div class="callout callout-secondary">
+		<p><i class="fas fa-minus-circle text-secondary p-1"></i> We do not currently know the status of the web chat.</p>
+	  </div>`);
+				}
+			});
 	}
 
 	// Initialize connection. Call this on socket connect event.
@@ -199,8 +263,7 @@ class WWSUmessages extends WWSUdb {
 							$(document).Toasts("create", {
 								class: "bg-success",
 								title: "Message sent",
-								body:
-									"Your message was sent!",
+								body: "Your message was sent!",
 								autohide: true,
 								delay: 5000
 							});
@@ -338,8 +401,6 @@ class WWSUmessages extends WWSUdb {
 		this.manager.get("WWSUanimations").add("change-recipient", () => {
 			if (!recipient) {
 				$(this.chatActiveRecipient).html(`(Select a recipient)`);
-				$(this.chatStatus).html(`<h5>Select a Recipient</h5>
-            <p>Please select a recipient to send a message.</p>`);
 
 				$(this.chatMessages).html(``);
 
@@ -349,58 +410,6 @@ class WWSUmessages extends WWSUdb {
 				$(this.chatActiveRecipient).html(
 					`${jdenticon.toSvg(recipient.host, 24)} ${recipient.label}`
 				);
-				$(this.chatStatus).html(`<div class="row">
-            <div class="col-6 col-md-4 col-lg-3">
-            ${jdenticon.toSvg(recipient.host, 48)}
-            </div>
-            <div class="col-6 col-md-8 col-lg-9">
-            <h5>${recipient.label}</h5>
-            <p>
-            ${
-							recipient.group === "website"
-								? `${
-										recipient.host === "website"
-											? `${
-													this.manager.get("WWSUMeta").meta.webchat
-														? `Web messages are active; visitors can send you messages.<br />Messages you send to "Web Public" will be visible by all visitors.`
-														: `Web messages are NOT active; visitors cannot send you messages.`
-											  }`
-											: `${
-													this.manager.get("WWSUMeta").meta.webchat
-														? `${
-																recipient.status !== 0
-																	? `Visitor is currently online and should receive your message.<br />Messages you send will only be visible to this visitor.`
-																	: `Visitor is offline and was last seen ${moment
-																			.tz(
-																				recipient.time,
-																				this.manager.get("WWSUMeta")
-																					? this.manager.get("WWSUMeta").meta
-																							.timezone
-																					: moment.tz.guess()
-																			)
-																			.format(
-																				"llll"
-																			)}. They will not receive your message unless they come back online within an hour of you sending your message.<br />Messages you send will only be visible to this visitor.`
-														  }`
-														: `Web messages are NOT active; visitors cannot send you messages.`
-											  }`
-								  }`
-								: `${
-										recipient.status !== 0
-											? `Computer/host is online. However, this does not necessarily mean someone is around and will see your message.`
-											: `Computer/host is offline and was last seen ${moment
-													.tz(
-														recipient.time,
-														this.manager.get("WWSUMeta")
-															? this.manager.get("WWSUMeta").meta.timezone
-															: moment.tz.guess()
-													)
-													.format(
-														"llll"
-													)}. They will not receive your message unless they come back online within an hour of you sending your message.`
-								  }`
-						}</p>
-            </div>`);
 
 				let chatHTML = ``;
 
@@ -509,8 +518,8 @@ class WWSUmessages extends WWSUdb {
 							message.from,
 							40
 						)}</div>
-            <div class="direct-chat-text bg-success">
-                ${message.message}
+            <div class="direct-chat-text bg-success dark-mode">
+			${discordMarkdown.toHTML(message.message)}
             </div>
         </div>`;
 		} else {
@@ -538,8 +547,8 @@ class WWSUmessages extends WWSUdb {
 									message.from,
 									40
 								)}</div>
-                <div class="direct-chat-text bg-danger">
-                    ${message.message}
+                <div class="direct-chat-text bg-danger dark-mode">
+				${discordMarkdown.toHTML(message.message)}
                 </div>
             </div>`;
 				// Read message
@@ -566,8 +575,8 @@ class WWSUmessages extends WWSUdb {
 									message.from,
 									40
 								)}</div>
-                <div class="direct-chat-text bg-secondary">
-                    ${message.message}
+                <div class="direct-chat-text bg-secondary dark-mode">
+				${discordMarkdown.toHTML(message.message)}
                 </div>
             </div>`;
 			}

@@ -24,7 +24,7 @@ module.exports = {
 
     // Convert attachments to markdown and append to message.
     if (inputs.message.attachments && inputs.message.attachments.size > 0) {
-      inputs.message.attachments.forEach(attachment => {
+      inputs.message.attachments.each(attachment => {
         message += "\n" + `![attachment](${attachment.url})`;
       });
     }

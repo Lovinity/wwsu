@@ -406,7 +406,7 @@ class WWSUcalendar extends CalendarDb {
 								() => {
 									this.inactiveCalendar(
 										this.occurrenceModal,
-										{ ID: event.ID },
+										{ ID: event.calendarID },
 										success => {
 											this.eventsModal.body = `<div class="alert alert-warning">
                                 Event changes take several seconds to reflect in the system. Please close and re-open this window.
@@ -531,12 +531,17 @@ class WWSUcalendar extends CalendarDb {
 								true
 							);
 							let calendarID = parseInt($(e.currentTarget).data("calendarid"));
-							let calendar = this.schedule.find({ ID: calendarID }, true);
 							this.showScheduleForm(schedule, calendarID);
 						});
 
 						// Prompt before deleting a schedule
 						$(".btn-schedule-delete").click(e => {
+							let schedule = this.schedule.find(
+								{ ID: parseInt($(e.currentTarget).data("scheduleid")) },
+								true
+							);
+							let calendarID = parseInt($(e.currentTarget).data("calendarid"));
+							let calendar = this.calendar.find({ ID: calendarID }, true);
 							this.manager.get("WWSUutil").confirmDialog(
 								`<p>Are you sure you want to delete that schedule?</p>
                         <ul>
@@ -1036,6 +1041,7 @@ class WWSUcalendar extends CalendarDb {
 	 */
 	inactiveCalendar(modal, data, cb) {
 		// We need to determine if the removal of this calendar (and thus all its schedules) will affect other events
+		console.dir(data);
 		let calendar = this.calendar.find({ ID: data.ID }, true);
 		this.doConflictCheck(modal, calendar, "removeCalendar", () => {
 			try {
@@ -1446,7 +1452,7 @@ class WWSUcalendar extends CalendarDb {
 											() => {
 												this.inactiveCalendar(
 													this.occurrenceModal,
-													{ ID: event.ID },
+													{ ID: event.calendarID },
 													success => {
 														if (success) {
 															this.occurrenceModal.iziModal("close");
@@ -3197,6 +3203,7 @@ class WWSUcalendar extends CalendarDb {
 	 * @param {function} cb Callback fired when there are no conflicts detected or the user agreed to proceed with the conflict resolution steps.
 	 */
 	doConflictCheck(modal, event, action, cb) {
+		console.dir(event);
 		$(`#modal-${modal.id}`).block({
 			message: `<h1>Checking conflicts...</h1><p class="conflict-check-progress"></p>`,
 			css: { border: "3px solid #a00" },

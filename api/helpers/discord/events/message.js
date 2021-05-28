@@ -30,7 +30,16 @@ module.exports = {
       inputs.message.channel.parent.id === "830253279166464040"
     ) {
       ignoreMessage = false;
-      sendPublic = true;
+
+      // Only send the message publicly if meta discordChannel is not specified, and either we are in sports and the message was sent in the sports channel, or we are not in sports and the message was sent in the general channel.
+      if (
+        !sails.models.meta.memory.discordChannel &&
+        ((sails.models.meta.memory.state.startsWith("sports") &&
+          inputs.message.channel.id === "830253279166464044") ||
+          (!sails.models.meta.memory.state.startsWith("sports") &&
+            inputs.message.channel.id === "830253279166464042"))
+      )
+        sendPublic = true;
     }
 
     // If the message was posted in a discord channel pertaining to a calendar event, do not ignore.
@@ -40,6 +49,8 @@ module.exports = {
     );
     if (relevantEvent) {
       ignoreMessage = false;
+
+      // Post publicly if the message was sent in the text channel pertaining to the current broadcast
       if (
         sails.models.meta.memory.discordChannel &&
         relevantEvent.discordChannel === sails.models.meta.memory.discordChannel
@@ -47,6 +58,9 @@ module.exports = {
         sendPublic = true;
       }
     }
+
+    // Force sendPublic false if webchat is disabled
+    if (!sails.models.meta.memory.webchat) sendPublic = false;
 
     // Bail if we did not find any matches
     if (ignoreMessage) return;
@@ -58,8 +72,8 @@ module.exports = {
 
     // Convert attachments to markdown and append to message.
     if (inputs.message.attachments && inputs.message.attachments.size > 0) {
-      inputs.message.attachments.forEach(attachment => {
-        message += "\n" + `![](${attachment.url})`;
+      inputs.message.attachments.each(attachment => {
+        message += "\n" + `![attachment](${attachment.url})`;
       });
     }
 

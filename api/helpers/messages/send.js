@@ -61,22 +61,44 @@ module.exports = {
         inputs.from + sails.config.custom.hostSecret
       )}`;
 
-      // Send public messages in Discord as well. TODO: move these into config.custom
-      if (inputs.to === "website") {
+      // Send public messages in Discord as well if webchat is enabled. TODO: move these into config.custom
+      if (inputs.to === "website" && sails.models.meta.memory.webchat) {
         if (sails.models.meta.memory.discordChannel) {
           channel = DiscordClient.channels.resolve(
             sails.models.meta.memory.discordChannel
           );
           if (channel)
             discordMessage = await channel.send(
-              `**From Web (${inputs.nickname})**: ${await sails.helpers.discord.cleanContent(inputs.message, channel)}`
+              `__Message from **${inputs.fromFriendly}**__` +
+                "\n" +
+                `${await sails.helpers.discord.cleanContent(
+                  inputs.message,
+                  channel
+                )}`
+            );
+        } else if (sails.models.meta.memory.state.startsWith("sports")) {
+          // Sports channel
+          channel = DiscordClient.channels.resolve("830253279166464044");
+          if (channel)
+            discordMessage = await channel.send(
+              `__Message from **${inputs.fromFriendly}**__` +
+                "\n" +
+                `${await sails.helpers.discord.cleanContent(
+                  inputs.message,
+                  channel
+                )}`
             );
         } else {
           // General channel
           channel = DiscordClient.channels.resolve("830253279166464042");
           if (channel)
             discordMessage = await channel.send(
-              `**From ${inputs.fromFriendly}**: ${await sails.helpers.discord.cleanContent(inputs.message, channel)}`
+              `__Message from **${inputs.fromFriendly}**__` +
+                "\n" +
+                `${await sails.helpers.discord.cleanContent(
+                  inputs.message,
+                  channel
+                )}`
             );
         }
       }

@@ -68,7 +68,7 @@ class WWSUmessagesweb extends WWSUdb {
 				title: `New Message from ${message.fromFriendly}`,
 				autohide: true,
 				delay: 15000,
-				body: `${message.message}<p><strong>To reply:</strong> Click "Chat with DJ" in the left menu.</p>`,
+				body: `${discordMarkdown.toHTML(message.message)}<p><strong>To reply:</strong> Click "Chat with DJ" in the left menu.</p>`,
 				icon: "fas fa-comment fa-lg"
 			});
 		});
@@ -311,7 +311,7 @@ class WWSUmessagesweb extends WWSUdb {
 							message.from,
 							40
 						)}</div>
-            <div class="direct-chat-text bg-success">
+            <div class="direct-chat-text bg-success dark-mode">
                 ${discordMarkdown.toHTML(message.message)}
             </div>
         </div>`;
@@ -336,7 +336,7 @@ class WWSUmessagesweb extends WWSUdb {
 									message.from,
 									40
 								)}</div>
-                <div class="direct-chat-text bg-danger">
+                <div class="direct-chat-text bg-danger dark-mode">
                     ${discordMarkdown.toHTML(message.message)}
                 </div>
             </div>`;
@@ -360,7 +360,7 @@ class WWSUmessagesweb extends WWSUdb {
 									message.from,
 									40
 								)}</div>
-                <div class="direct-chat-text bg-secondary">
+                <div class="direct-chat-text bg-secondary dark-mode">
                     ${discordMarkdown.toHTML(message.message)}
                 </div>
             </div>`;
@@ -380,21 +380,22 @@ class WWSUmessagesweb extends WWSUdb {
 					$(this.chatStatus).html(`<div class="callout callout-danger">
           <ul>
             <li><i class="fas fa-times-circle text-danger p-1"></i> The DJ / host has disabled the web chat for their broadcast. You can chat with others in our Discord server instead.</li>
+            <li><i class="fas fa-times-circle text-danger p-1"></i> You will also not receive any messages from our Discord server in this web chat at this time.</li>
           </ul>
           </div>`);
 				} else if (meta.state.startsWith("automation_")) {
 					$(this.chatStatus).html(`<div class="callout callout-warning">
           <ul>
             <li><i class="fas fa-check-circle text-success p-1"></i> The web chat is enabled.</li>
-            <li><i class="fas fa-minus-circle text-warning p-1"></i> Public messages will also be sent to the #general channel of WWSU's Discord server.</li>
-            <li><i class="fas fa-times-circle text-danger p-1"></i> Probably, no one is in the studio at this time; DJs / hosts might not see your message.</li>
+            <li><i class="fas fa-minus-circle text-warning p-1"></i> Public messages you send will also appear in the #general text channel of our Discord server. And messages sent in #general will appear in this web chat.</li>
+            <li><i class="fas fa-times-circle text-danger p-1"></i> There is likely no DJ in the studio at this time; your messages might not be seen by them.</li>
           </ul>
           </div>`);
 				} else if (meta.state.startsWith("prerecord_")) {
 					$(this.chatStatus).html(`<div class="callout callout-info">
           <ul>
             <li><i class="fas fa-check-circle text-success p-1"></i> The web chat is enabled.</li>
-            <li><i class="fas fa-check-circle text-success p-1"></i> Public messages will also be sent to the Discord text channel specific for this broadcast.</li>
+            <li><i class="fas fa-check-circle text-success p-1"></i> Public messages will also be sent to the Discord text channel specific for this broadcast. And messages sent in the broadcast's text channel will appear in this web chat.</li>
             <li><i class="fas fa-minus-circle text-warning p-1"></i> The current broadcast is prerecorded; there is probably no one in the studio. However, your messages will be sent to the hosts' email when the broadcast ends.</li>
           </ul>
           </div>`);
@@ -405,8 +406,8 @@ class WWSUmessagesweb extends WWSUdb {
 					$(this.chatStatus).html(`<div class="callout callout-success">
           <ul>
             <li><i class="fas fa-check-circle text-success p-1"></i> The web chat is enabled.</li>
-            <li><i class="fas fa-check-circle text-success p-1"></i> Public messages will also be sent to the Discord #sports text channel.</li>
-            <li><i class="fas fa-check-circle text-info p-1"></i> Your message will be sent directly to the broadcast hosts. But they might not reply as this is a sports broadcast.</li>
+            <li><i class="fas fa-check-circle text-success p-1"></i> Public messages will also be sent to the #sports text channel in our Discord server. And messages sent in #sports will appear in this web chat.</li>
+            <li><i class="fas fa-check-circle text-info p-1"></i> Your message will be sent directly to the broadcast hosts, and they will be notified on their control panel. But they might not reply as this is a sports broadcast.</li>
           </ul>
           </div>`);
 				} else if (
@@ -416,13 +417,13 @@ class WWSUmessagesweb extends WWSUdb {
 					$(this.chatStatus).html(`<div class="callout callout-success">
           <ul>
             <li><i class="fas fa-check-circle text-success p-1"></i> The web chat is enabled.</li>
-            <li><i class="fas fa-check-circle text-success p-1"></i> Public messages will also be sent to the Discord text channel specific for this broadcast.</li>
-            <li><i class="fas fa-check-circle text-success p-1"></i> Your message will be sent directly to the broadcast hosts, and they will be notified.</li>
+            <li><i class="fas fa-check-circle text-success p-1"></i> Public messages will also be sent to the Discord text channel specific for this broadcast. And messages sent in the broadcast's text channel will appear in this web chat.</li>
+            <li><i class="fas fa-check-circle text-success p-1"></i> Your message will be sent directly to the broadcast hosts, and they will be notified on their control panel.</li>
           </ul>
           </div>`);
 				} else {
 					$(this.chatStatus).html(`<div class="callout callout-secondary">
-            <p>It is unknown at this time how your sent messages will be treated.</p>
+            <p><i class="fas fa-minus-circle text-secondary p-1"></i> We do not currently know the status of the web chat.</p>
           </div>`);
 				}
 			});

@@ -76,7 +76,12 @@ module.exports = {
           host: find,
           device: inputs.device,
           group: inputs.group,
-          label: inputs.group === "website" ? `Web (${inputs.label})` : inputs.label,
+          label:
+            inputs.group === "website"
+              ? `Web (${inputs.label})`
+              : inputs.group === "discord"
+              ? `Discord (${inputs.label})`
+              : inputs.label,
           status: 5,
           answerCalls: answerCalls,
           makeCalls: makeCalls,
@@ -175,19 +180,28 @@ module.exports = {
       // If the recipient group is display, update sails.models.status if there are at least instances connections.
       if (inputs.group === "display") {
         var maps = sails.config.custom.displaysigns
-          .filter(
-            display =>
-              inputs.host === `display-${display.name}` &&
-              sails.models.recipients.sockets[recipient.ID].length >=
-                display.instances
-          )
+          .filter(display => inputs.host === `display-${display.name}`)
           .map(async display => {
-            await sails.helpers.status.change.with({
-              name: `display-${display.name}`,
-              label: `Display ${display.label}`,
-              status: 5,
-              data: "Display sign is online."
-            });
+            if (
+              sails.models.recipients.sockets[recipient.ID].length >=
+              display.instances
+            ) {
+              await sails.helpers.status.change.with({
+                name: `display-${display.name}`,
+                label: `Display ${display.label}`,
+                status: 5,
+                data: "Display signs are online."
+              });
+            } else {
+              await sails.helpers.status.change.with({
+                name: `display-${display.name}`,
+                label: `Display ${display.label}`,
+                status: display.level,
+                data: `${
+                  sails.models.recipients.sockets[recipient.ID].length
+                } out of ${display.instances} displays are operational.`
+              });
+            }
             return true;
           });
         await Promise.all(maps);
