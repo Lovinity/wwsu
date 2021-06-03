@@ -1,65 +1,298 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+  <head>
+    <title>WWSU Display</title>
+    <script>
+      if (typeof module === "object") {
+        window.module = module;
+        module = undefined;
+      }
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
 
-<head>
-    <script>if (typeof module === 'object') {
-            window.module = module;
-            module = undefined;
-        }</script>
+    <!-- Clock styling -->
     <style>
-        .pace {
-            -webkit-pointer-events: none;
-            pointer-events: none;
+      .clock-container {
+        width: 200px;
+        height: 200px;
+        position: absolute;
+        left: 50%;
+        margin-left: -100px;
+        top: 50%;
+        margin-top: -100px;
+      }
 
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            user-select: none;
-        }
+      .clock {
+        width: 100%;
+        height: 100%;
+        margin: auto;
+        position: relative;
+      }
 
-        .pace-inactive {
-            display: none;
-        }
+      .clock div,
+      .faceBox {
+        border: 0;
+        background-color: black;
+        position: absolute;
+        transform-origin: center bottom;
+        -webkit-transform-origin: center bottom;
+        -moz-transform-origin: center bottom;
+        -o-transform-origin: center bottom;
+        transform: rotate(0deg);
+      }
 
-        .pace .pace-progress {
-            background: #29d;
-            position: fixed;
-            z-index: 2000;
-            top: 0;
-            right: 100%;
-            width: 100%;
-            height: 2px;
-        }
+      .dark-mode .clock div,
+      .dark-mode .faceBox {
+        background-color: white;
+      }
+
+      .clock .clock-hour {
+        border-radius: 0.5em 0.5em 0 0;
+        width: 3%;
+        height: 20%;
+        top: 30%;
+        left: 47.5%;
+        z-index: 30;
+      }
+
+      .clock .clock-minute {
+        border-radius: 0.33em;
+        width: 2%;
+        height: 36.66%;
+        top: 13.33%;
+        left: 48.33%;
+        z-index: 20;
+      }
+
+      .clock .clock-second {
+        border-radius: 0.2em;
+        width: 0.83%;
+        height: 46.66%;
+        top: 3.33%;
+        left: 49.16%;
+        z-index: 10;
+        background-color: red;
+      }
+
+      .clock .clock-center {
+        height: 6.66%;
+        width: 6.66%;
+        border-radius: 50%;
+        top: 46.66%;
+        left: 46.66%;
+        z-index: 50;
+        transform: rotate(0deg);
+      }
+
+      .smallTick {
+        width: 3.33%;
+        height: 16.66%;
+        background-color: black;
+      }
+
+      .dark-mode .smallTick {
+        background-color: white;
+      }
+
+      .mediumTick {
+        width: 8.33%;
+        height: 26.66%;
+        background-color: black;
+      }
+
+      .dark-mode .mediumTick {
+        background-color: white;
+      }
+
+      .largeTick {
+        width: 13.33%;
+        height: 26.66%;
+        background-color: black;
+        position: relative;
+      }
+
+      .dark-mode .largeTick {
+        background-color: white;
+      }
+
+      .tickNum {
+        font-family: Arial, sans-serif;
+        font-size: 0.75em;
+        line-height: 0;
+        color: black;
+        position: relative;
+        top: 3.33%;
+        left: -0.66%;
+        z-index: 1;
+      }
+
+      .dark-mode .tickNum {
+        color: white;
+      }
+
+      .faceBox {
+        border: 0;
+        width: 0;
+        height: 50%;
+        top: 0;
+        left: 50%;
+        position: absolute;
+        text-align: center;
+        overflow: visible;
+        margin: 0 auto;
+      }
     </style>
+
+    <!-- Pace styling -->
+    <style>
+      .pace {
+        -webkit-pointer-events: none;
+        pointer-events: none;
+
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+      }
+
+      .pace-inactive {
+        display: none;
+      }
+
+      .pace .pace-progress {
+        background: #29d;
+        position: fixed;
+        z-index: 2000;
+        top: 0;
+        right: 100%;
+        width: 100%;
+        height: 2px;
+      }
+    </style>
+
+    <!-- Slides styling -->
+    <style>
+      .scale-wrapper {
+        position: absolute;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+      }
+
+      .scale-content {
+        -ms-transform-origin: top left;
+        -webkit-transform-origin: top left;
+        transform-origin: top left;
+        position: absolute;
+      }
+    </style>
+
+    <!-- Pace -->
     <script src="/plugins/pace-progress/pace.min.js"></script>
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="/plugins/fontawesome-free/css/all.min.css" />
+    <!-- Theme style (TODO: use min when it is working again) -->
+    <link rel="stylesheet" href="/plugins/adminlte/css/adminlte.css" />
+    <!-- overlayScrollbars -->
+    <link
+      rel="stylesheet"
+      href="/plugins/overlayScrollbars/css/OverlayScrollbars.min.css"
+    />
+
+    <!-- jQuery -->
     <script src="/plugins/jquery/jquery.min.js"></script>
-    <script src="/plugins/jquery-ui/jquery-ui.min.js"></script>
-    <script src="/plugins/lodash/lodash.min.js"></script>
+    <!-- JQuery BlockUI -->
+    <script src="/plugins/jquery-blockui/jquery.blockUI.js"></script>
+    <!-- JQuery Marquee -->
     <script src="/plugins/marquee/js/marquee.js"></script>
-    <script src="/plugins/fontawesome-free/js/fontawesome.js"></script>
-    <script src="/plugins/material/js/material.min.js"></script>
+
+    <!-- Bootstrap -->
+    <script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap multipleselect -->
+    <link
+      rel="stylesheet"
+      href="/plugins/bootstrap-multiselect/css/bootstrap-multiselect.css"
+    />
+    <script src="/plugins/bootstrap-multiselect/js/bootstrap-multiselect.min.js"></script>
+    <!-- AdminLTE -->
+    <script src="/plugins/adminlte/js/adminlte.js"></script>
+
+    <!-- lodash -->
+    <script src="/plugins/lodash/lodash.min.js"></script>
+    <!-- Taffy -->
+    <script src="/plugins/taffydb/taffy-min.js"></script>
+    <!-- Moment -->
+    <script src="/plugins/moment/moment.min.js"></script>
+    <!-- Moment timezone -->
+    <script src="/plugins/moment-timezone/moment-timezone-with-data.js"></script>
+    <!-- Moment Duration Format -->
+    <script src="/plugins/moment-duration-format/moment-duration-format.js"></script>
+    <!-- Moment Recur -->
+    <script src="/plugins/moment-recur-ts/moment-recur-ts.min.js"></script>
+    <!-- Jdenticon -->
+    <script src="/plugins/jdenticon/jdenticon.min.js"></script>
+    <!-- Howler -->
+    <script src="/plugins/howler/howler.min.js"></script>
+
+    <!-- Bootstrap Slider -->
+    <link
+      rel="stylesheet"
+      href="/plugins/bootstrap-slider/css/bootstrap-slider.min.css"
+    />
+    <script src="/plugins/bootstrap-slider/bootstrap-slider.min.js"></script>
+
+    <!-- Chart.js -->
+    <script src="/plugins/chart.js/Chart.bundle.min.js"></script>
+    <link rel="stylesheet" href="/plugins/chart.js/Chart.min.css" />
+
+    <!-- TinyMCE -->
+    <script src="/plugins/tinymce/tinymce.min.js"></script>
+
+    <!-- Datatables -->
+    <script src="/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="/plugins/datatables-details/css/datatables-details.css"
+    />
+
+    <!-- Datatables Responsive -->
+    <script src="/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="/plugins/datatables-responsive/css/responsive.bootstrap4.min.css"
+    />
+
+    <!--izi-->
+    <link rel="stylesheet" href="/plugins/iziModal/css/iziModal.min.css" />
+    <link rel="stylesheet" href="/plugins/iziToast/css/iziToast.min.css" />
+    <script src="/plugins/iziModal/js/iziModal.min.js"></script>
+    <script src="/plugins/iziToast/js/iziToast.min.js"></script>
+
+    <!--FullCalendar-->
+    <script src="/plugins/fullcalendar/main.js"></script>
+    <link rel="stylesheet" href="/plugins/fullcalendar/main.min.css" />
+
+    <!-- Animate CSS -->
+    <link rel="stylesheet" href="/plugins/animate/css/animate.css" />
+
+    <!--WWSU-->
     <script
       src="/plugins/sails.io/sails.io.js"
       autoConnect="false"
       environment="production"
       reconnection="true"
     ></script>
-    <script src="/plugins/moment/moment.min.js"></script>
-    <script src="/plugins/moment-duration-format/moment-duration-format.js"></script>
-    <script src="/plugins/moment-recur-ts/moment-recur-ts.js"></script>
-    <script src="/plugins/moment-timezone/moment-timezone-with-data.js"></script>
-    <script src="/plugins/iziToast/js/iziToast.min.js"></script>
-    <script src="/plugins/taffydb/taffy-min.js"></script>
-    <script src="/plugins/jdenticon/jdenticon.min.js"></script>
-    <script src="/plugins/howler/howler.min.js"></script>
-    <link rel="stylesheet" href="/plugins/iziToast/css/iziToast.min.css">
-    <link rel="stylesheet" href="/plugins/material/css/material.min.css">
-    <link rel="stylesheet" href="/plugins/animate/css/animate.css">
-    <link rel="stylesheet" href="/plugins/quill/css/quill.display.css">
-    <link rel="stylesheet" href="/plugins/fontawesome-free/css/fontawesome.min.css" type="text/css">
-
     <script src="/plugins/wwsu-modules/js/wwsu-modules.js?t=202105102106"></script>
     <script src="/plugins/wwsu-sails/js/wwsu.js?t=202105102106"></script>
-    <script src="/plugins/wwsu-display/js/wwsu-slides.js?t=202105102106"></script>
     <script src="/plugins/wwsu-meta/js/wwsu-meta.js?t=202105102106"></script>
     <script src="/plugins/wwsu-calendar/js/wwsu-calendar-web.js?t=202105102106"></script>
     <script src="/plugins/wwsu-calendar/js/wwsu-calendar-class.js?t=202105102106"></script>
@@ -70,479 +303,13 @@
     <script src="/plugins/wwsu-messages/js/wwsu-messages-web.js?t=202105102106"></script>
     <script src="/plugins/wwsu-status/js/wwsu-status.js?t=202105102106"></script>
     <script src="/plugins/wwsu-shootout/js/wwsu-shootout.js?t=202105102106"></script>
-    <meta charset="UTF-8">
-    <meta http-equiv="Cache-control" content="no-cache">
-    <meta http-equiv="Expires" content="-1">
-    <title>WWSU Display Sign</title>
-    <style>
-        .content {
-            padding: 5px;
-            min-height: 100%;
-            width: 100%;
-            margin: 0 auto -225px;
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-
-        .foot {
-            position: relative;
-        }
-
-        .footer {
-            position: fixed;
-            left: 0;
-            bottom: 0;
-            width: 100%;
-            text-align: center;
-            z-index: 1000;
-        }
-
-        #wrapper {
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 98;
-            display: none;
-        }
-
-        #nowplaying-seek {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            margin: 0px, 20px, -56px, 20px;
-        }
-
-        #nowplaying {
-            transition: color 0.5s ease-in-out, background-color 0.5s ease-in-out, opacity 0.5s linear;
-        }
-
-        #nowplaying-line1 {
-            overflow: hidden;
-        }
-
-        #nowplaying-line2 {
-            overflow: hidden;
-        }
-
-        #dj-alert {
-            z-index: 1010;
-        }
-
-        #eas-alert {
-            z-index: 1011;
-        }
-
-        #alert-marquee {
-            overflow: hidden;
-        }
-
-        .pulsate {
-            animation: pulsate 2s ease-out;
-            animation-iteration-count: infinite;
-            opacity: 1;
-        }
-
-        @keyframes pulsate {
-            0% {
-                transform: scale(0.1, 0.1);
-                opacity: 0.0;
-            }
-
-            50% {
-                opacity: 1.0;
-            }
-
-            100% {
-                transform: scale(1.2, 1.2);
-                opacity: 0.0;
-            }
-        }
-
-        .pulsate-alert {
-            animation: alertPulse 2s ease-out;
-            animation-iteration-count: infinite;
-            opacity: 1;
-        }
-
-        @keyframes alertPulse {
-            0% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.5;
-            }
-
-            100% {
-                opacity: 1;
-            }
-        }
-
-        .loader2 {
-            border: 16px solid #455A64;
-            /* Light grey */
-            border-top: 16px solid #F44336;
-            /* Blue */
-            border-radius: 50%;
-            width: 50%;
-            height: 50%;
-            animation: spin 2s linear infinite;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        .overlay {
-            position: fixed;
-            display: block;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.8);
-            z-index: 149;
-        }
-
-        .toast {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 150;
-        }
-
-        .text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            -ms-transform: translate(-50%, -50%);
-        }
-
-        #bg-canvas {
-            position: absolute;
-            height: 100%;
-            width: 100%;
-            top: 0;
-            left: 0;
-            transition: all ease 0.45s;
-        }
-
-        .bgoverlay {
-            background: url(/images/display/40030526_10155721802451728_4111960418849652736_o.jpg) no-repeat center center fixed;
-            -webkit-background-size: cover;
-            -moz-background-size: cover;
-            -o-background-size: cover;
-            background-size: cover;
-            position: fixed;
-            display: block;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            opacity: 0.25;
-        }
-
-        .task {
-            position: relative;
-        }
-
-        .tcontent {
-            z-index: 9;
-            position: relative;
-        }
-
-        .tbg {
-            z-index: 1;
-            width: 0px;
-            height: 95%;
-            position: absolute;
-            left: 0px;
-            top: 0px;
-        }
-
-        .tprogress {
-            z-index: 5;
-            width: 0px;
-            height: 5%;
-            position: absolute;
-            left: 0px;
-            bottom: 0px;
-            background: #FFC107;
-        }
-
-        .content {
-            padding: 20px;
-            min-height: 100%;
-            margin: 0 auto -240px;
-        }
-
-        #wrapper {
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 98;
-            display: none;
-        }
-
-        .order-progress {
-            height: 100%;
-            top: 0;
-            left: 0;
-            z-index: 10;
-            position: absolute;
-        }
-
-        .notification {
-            position: absolute;
-            top: 55px;
-            right: 12px;
-        }
-
-        section {
-            padding: 0.5em;
-            width: 400px;
-            float: left;
-        }
-
-        #clock {
-            width: 330px;
-            height: 330px;
-            border-radius: 50%;
-            border: solid 2px black;
-            margin: auto;
-            position: relative;
-            background: #ffffff;
-        }
-
-        #clock div,
-        .faceBox {
-            border: 0;
-            background-color: black;
-            position: absolute;
-            transform-origin: center bottom;
-            -webkit-transform-origin: center bottom;
-            -moz-transform-origin: center bottom;
-            -o-transform-origin: center bottom;
-            transform: rotate(0deg);
-        }
-
-        #clock #hour {
-            border-radius: 0.75em 0.75em 0 0;
-            width: 0.5em;
-            height: 6em;
-            top: 9em;
-            left: 14.25em;
-            z-index: 30;
-        }
-
-        #clock #minute {
-            border-radius: 0.5em;
-            width: 0.5em;
-            height: 11em;
-            top: 4em;
-            left: 14.5em;
-            z-index: 20;
-        }
-
-        #clock #second {
-            border-radius: 0.25em;
-            width: 0.25em;
-            height: 14em;
-            top: 1em;
-            left: 14.75em;
-            z-index: 10;
-            background-color: red;
-        }
-
-        #clock #center {
-            height: 1em;
-            width: 1em;
-            border-radius: 50%;
-            top: 14.25em;
-            left: 14.25em;
-            z-index: 50;
-            transform: rotate(0deg);
-        }
-
-        .smallTick {
-            width: 0.1em;
-            height: 0.5em;
-            background-color: black;
-        }
-
-        .mediumTick {
-            width: 0.25em;
-            height: 0.8em;
-            background-color: black;
-        }
-
-        .largeTick {
-            width: 0.4em;
-            height: 0.8em;
-            background-color: black;
-            position: relative;
-        }
-
-        .tickNum {
-            font-family: Arial, sans-serif;
-            font-size: 2em;
-            line-height: 0;
-            color: black;
-            position: relative;
-            top: 1em;
-            left: -0.2em;
-            z-index: 1;
-        }
-
-        .faceBox {
-            border: 0;
-            width: 0;
-            height: 15em;
-            top: 0;
-            left: 15em;
-            position: absolute;
-            text-align: center;
-            overflow: visible;
-            margin: 0 auto;
-        }
-
-        .bs-callout {
-            padding: 10px;
-            margin: 10px 0;
-            border: 0px solid #eee;
-            border-left-width: 5px;
-        }
-
-        .bs-callout h4 {
-            margin-top: 0;
-            margin-bottom: 5px;
-        }
-
-        .bs-callout p:last-child {
-            margin-bottom: 0;
-        }
-
-        .bs-callout code {
-            border-radius: 3px;
-        }
-
-        .bs-callout+.bs-callout {
-            margin-top: -5px;
-        }
-
-        .bs-callout-default {
-            border-color: #9e9e9e;
-            background: #383838;
-        }
-
-        .bs-callout-default h4 {
-            color: #cfd8dc;
-        }
-
-        .bs-callout-trivial {
-            border-color: #9e9e9e;
-            background: #383838;
-        }
-
-        .bs-callout-trivial h4 {
-            color: #cfd8dc;
-        }
-
-        .bs-callout-secondary {
-            border-color: #9e9e9e;
-            background: #383838;
-        }
-
-        .bs-callout-secondary h4 {
-            color: #cfd8dc;
-        }
-
-        .bs-callout-primary {
-            border-color: #e70d2f;
-            background: rgba(115, 6, 23, 1);
-        }
-
-        .bs-callout-primary h4 {
-            color: #faced5;
-        }
-
-        .bs-callout-success {
-            border-color: #5cb85c;
-            background: #1D441F;
-        }
-
-        .bs-callout-success h4 {
-            color: #c8e6c9;
-        }
-
-        .bs-callout-danger {
-            border-color: #f44336;
-            background: #721818;
-        }
-
-        .bs-callout-danger h4 {
-            color: #ffcdd2;
-        }
-
-        .bs-callout-warning {
-            border-color: #ffc107;
-            background: #4F3C03;
-        }
-
-        .bs-callout-warning h4 {
-            color: #ffecb3;
-        }
-
-        .bs-callout-info {
-            border-color: #2196f3;
-            background: #0C3B69;
-        }
-
-        .bs-callout-info h4 {
-            color: #bbdefb;
-        }
-
-        .bs-callout-urgent {
-            border-color: #ff9800;
-            background: #702700;
-        }
-
-        .bs-callout-urgent h4 {
-            color: #ffe0b2;
-        }
-
-        .scale-wrapper {
-            position: absolute;
-            left: 0px;
-            top: 0px;
-            right: 0px;
-            bottom: 0px;
-        }
-
-        .scale-content {
-            -ms-transform-origin: top left;
-            -webkit-transform-origin: top left;
-            transform-origin: top left;
-            position: absolute;
-        }
-    </style>
-</head>
-<%- body %>
+    <script src="/plugins/wwsu-display/js/wwsu-slides.js?t=202105102106"></script>
+    <link
+      rel="stylesheet"
+      href="/plugins/wwsu-navigation/css/wwsu-navigation-flash.css"
+    />
+  </head>
+
+  <%- body %>
 
 </html>

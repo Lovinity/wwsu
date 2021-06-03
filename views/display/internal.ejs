@@ -1,116 +1,130 @@
 <body
-  style="
-    background-color: #000000;
-    overflow-y: hidden;
-    overflow-x: hidden;
-    font-size: 1.25vw;
+  class="
+    hold-transition
+    sidebar-mini
+    layout-fixed layout-navbar-fixed layout-footer-fixed
+    dark-mode
   "
+  style="overflow: hidden"
 >
   <canvas
     id="wrapper"
-    style="width: 100%; height: 100%; background: #000000"
+    style="width: 100%; height: 100%; background: #000000; display: none"
   ></canvas>
-
-  <div id="bg-canvas" style="display: inline; opacity: 0.3"></div>
 
   <div
     class="content"
     id="dj-alert"
-    style="background: #000000; display: none"
+    style="
+      background: #000000;
+      display: none;
+      z-index: 99999;
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
+      text-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3);
+    "
   ></div>
 
   <div
     class="content"
     id="eas-alert"
-    style="background: #0000ff; display: none"
-  ></div>
-
-  <div id="no-connection" class="overlay" style="display: none">
-    <div class="text container-fluid" style="text-align: center">
-      <h2 style="text-align: center; font-size: 7em; color: #f44336">
-        Lost Connection to WWSU!
-      </h2>
-      <h2 style="text-align: center; font-size: 3em; color: #f44336">
-        Display sign lost connection. Trying to re-connect...
-      </h2>
-    </div>
-  </div>
-
-  <div
-    class="shadow-4"
     style="
-      position: absolute;
-      top: 0;
+      background: #0000ff;
+      display: none;
+      z-index: 90000;
+      position: fixed;
       left: 0;
-      background: #ffffff;
-      height: 15%;
-      width: 20%;
-    "
-  >
-    <img src="../../images/display/logo_true.png" style="width: 100%" />
-  </div>
-
-  <div
-    class="shadow-4"
-    id="nowplaying"
-    style="
-      position: absolute;
       top: 0;
-      left: 20%;
-      background: #000000;
-      height: 15%;
-      width: 80%;
-      text-align: center;
-    "
-  >
-    <div style="color: #ffeb3b; font-size: 3.5vh" id="nowplaying-time"></div>
-    <div style="color: #ffffff; font-size: 3.5vh" id="nowplaying-lines">
-      <div id="nowplaying-line1"></div>
-      <div id="nowplaying-line2"></div>
-    </div>
-  </div>
-
-  <div
-    class="content"
-    id="slides"
-    style="
-      background-color: rgba(0, 0, 0, 0);
-      position: absolute;
-      top: 15%;
-      right: 0%;
-      height: 80%;
-      width: 100%;
+      width: 100vw;
+      height: 100vh;
+      text-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3);
     "
   ></div>
 
-  <div class="footer" style="color: #ffffff; text-align: center">
-    <div class="foot">
-      <div
-        class="p-1 m-1"
-        style="height: 5%; text-align: center; font-size: 4vh;"
-        id="slide-badges"
-      ></div>
-      <div
-        style="height: 5%; background-color: #787878; text-align: center"
-        id="status-div"
-        class="shadow-4"
-      >
+  <!-- All other content -->
+  <div class="wrapper" id="content">
+    <!-- Navbar (broadcast operations buttons and times) -->
+    <nav
+      class="main-header navbar navbar-dark navbar-gray-dark"
+      id="nowplaying"
+      style="
+        height: 15vh;
+        position: fixed;
+        top: 0;
+        width: 100%;
+        overflow-y: hidden;
+        overflow-x: auto;
+      "
+    >
+      <ul class="navbar-nav" style="width: 100%">
         <div
-          class="m-1"
+          class="text-center font-weight-bold"
+          style="
+            color: #ffeb3b;
+            font-size: 3vh;
+            text-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3);
+          "
+          id="nowplaying-time"
+        >
+          DISCONNECTED FROM WWSU
+        </div>
+        <div
           style="
             color: #ffffff;
-            font-size: 4vh;
-            text-shadow: 2px 4px 3px rgba(0, 0, 0, 0.3);
+            font-size: 3vh;
+            text-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
           "
-          id="status-line"
+          id="nowplaying-lines"
         >
-          DISPLAY SIGN NOT CONNECTED TO WWSU
+          <div class="text-center" id="nowplaying-line1"></div>
+          <div class="text-center" id="nowplaying-line2"></div>
         </div>
+      </ul>
+    </nav>
+    <!-- /.navbar -->
+
+    <!-- Main Sidebar Menu -->
+    <aside
+      class="main-sidebar sidebar-dark-danger elevation-2"
+      style="width: 300px"
+    >
+      <!-- Sidebar -->
+      <div class="sidebar" style="margin-top: 0px">
+        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+          <img src="images/display/logo_menu.jpg" style="width: 100%" />
+        </div>
+
+        <!-- Sidebar Menu -->
+        <nav class="mt-2 sidebar-nav"></nav>
+        <!-- /.sidebar-menu -->
       </div>
-    </div>
+      <!-- /.sidebar -->
+    </aside>
+
+    <div
+      style="
+        margin-left: 315px;
+        margin-right: 5px;
+        margin-top: 16vh;
+        position: relative;
+      "
+      class="content-wrapper"
+      id="slide-contents"
+    ></div>
+
+    <!-- Main Footer -->
+    <footer
+      class="main-footer text-center text-white"
+      style="height: 7vh; font-size: 3vh"
+    >
+      This is a prototype of our new Display Sign design. More features to come!
+    </footer>
   </div>
-  <script>
-    if (window.module) module = window.module;
-  </script>
-  <script src="../../plugins/wwsu-display/internal.js?t=<%= timestamp %>"></script>
+  <!-- ./wrapper -->
+
+  <script src="/plugins/wwsu-display/internal.js?t=202105102106"></script>
 </body>

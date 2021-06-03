@@ -1,13 +1,44 @@
 "use strict";
 
-// TODO: Move burnguard to a WWSU class
+// AnimateCSS JQuery extension
+$.fn.extend({
+  animateCss: function (animationName, callback) {
+    let animationEnd = (function (el) {
+      let animations = {
+        animation: "animationend",
+        OAnimation: "oAnimationEnd",
+        MozAnimation: "mozAnimationEnd",
+        WebkitAnimation: "webkitAnimationEnd",
+      };
 
-// Initialize socket
-io.sails.url = "https://server.wwsu1069.org";
-let socket = io.sails.connect();
+      for (let t in animations) {
+        if (el.style[t] !== undefined) {
+          return animations[t];
+        }
+      }
+    })(document.createElement("div"));
 
-// DEPRECATED
-let isLightTheme = false;
+    this.addClass("animated " + animationName).one(animationEnd, function () {
+      $(this).removeClass("animated " + animationName);
+
+      if (typeof callback === "function") {
+        callback();
+      }
+    });
+
+    return this;
+  },
+});
+
+// Sounds
+let sounds = {
+  lifethreatening: new Howl({
+    src: ["/sounds/display/lifethreatening.mp3"],
+  }),
+  severeeas: new Howl({ src: ["/sounds/display/severeeas.mp3"] }),
+  displaymessage: new Howl({ src: ["/sounds/display/displaymessage.mp3"] }),
+  goingonair: new Howl({ src: ["/sounds/display/goingonair.mp3"] }),
+};
 
 // Define hexrgb constants
 let hexChars = "a-f\\d";
@@ -16,27 +47,41 @@ let match6or8Hex = `#?[${hexChars}]{6}([${hexChars}]{2})?`;
 let nonHexChars = new RegExp(`[^#${hexChars}]`, "gi");
 let validHexSize = new RegExp(`^${match3or4Hex}$|^${match6or8Hex}$`, "i");
 
+// Define HTML elements
+let content = document.getElementById("slide-contents");
+let easAlert = document.getElementById("eas-alert");
+let nowplaying = document.getElementById("nowplaying");
+let nowplayingtime = document.getElementById("nowplaying-time");
+let nowplayingline1 = document.getElementById("nowplaying-line1");
+let nowplayingline2 = document.getElementById("nowplaying-line2");
+let wrapper = document.getElementById("wrapper");
+
+// Define connections
+io.sails.url = "https://server.wwsu1069.org";
+let socket = io.sails.connect();
+
 // Add WWSU modules
 let wwsumodules = new WWSUmodules(socket);
 wwsumodules
   .add("WWSUanimations", WWSUanimations)
   .add(`WWSUutil`, WWSUutil)
-  .add("noReq", WWSUreq, { host: `display-internal` })
+  .add("WWSUslides", WWSUslides)
+  .add("noReq", WWSUreq, { host: `display-public` })
   .add("WWSUMeta", WWSUMeta)
-  .add("WWSUdirectors", WWSUdirectors, { host: `display-internal` })
+  .add("WWSUdirectors", WWSUdirectors, { host: `display-public` })
   .add("WWSUeas", WWSUeas)
   .add("WWSUannouncements", WWSUannouncements, {
-    types: ["display-internal", "display-internal-sticky"]
+    types: ["display-public", "display-public-sticky"],
   })
   .add("WWSUcalendar", WWSUcalendar)
   .add("WWSUrecipientsweb", WWSUrecipientsweb)
   .add("WWSUstatus", WWSUstatus)
-  .add("WWSUshootout", WWSUshootout)
   .add("WWSUmessagesweb", WWSUmessagesweb);
 
 // Reference modules to variables
 let animations = wwsumodules.get("WWSUanimations");
 let util = wwsumodules.get("WWSUutil");
+let slides = wwsumodules.get("WWSUslides");
 let Meta = wwsumodules.get("WWSUMeta");
 let noReq = wwsumodules.get("noReq");
 let Announcements = wwsumodules.get("WWSUannouncements");
@@ -46,370 +91,143 @@ let Recipients = wwsumodules.get("WWSUrecipientsweb");
 let Messages = wwsumodules.get("WWSUmessagesweb");
 let Status = wwsumodules.get("WWSUstatus");
 let Eas = wwsumodules.get("WWSUeas");
-let Shootout = wwsumodules.get("WWSUshootout");
 
-// Add event listeners
-Eas.on("newAlert", "renderer", record => {
+// Assign other (deprecated) data managers
+let calendar = [];
+let sportsdb = new WWSUdb(TAFFY());
+
+// Assign event listeners
+Directors.on("change", "renderer", (db) => processDirectors(db));
+Calendar.on("calendarUpdated", "renderer", () => updateCalendar());
+Eas.on("newAlert", "renderer", (record) => {
   newEas.push(record);
   if (record.severity === "Extreme") easExtreme = true;
   doEas();
 });
-Eas.on("change", "renderer", db => processEas(db));
-Status.on("change", "renderer", db => processStatus(db.get()));
-Directors.on("change", "renderer", () => {
-  updateCalendar();
-});
-Calendar.on("calendarUpdated", "renderer", (data, db) => {
-  updateCalendar();
-});
-Announcements.on("update", "renderer", data => {
-  WWSUslides.removeSlide(`attn-${data.ID}`);
+Eas.on("change", "renderer", (db) => processEas(db));
+Meta.on("newMeta", "renderer", (data) => processNowPlaying(data));
+Meta.on("metaTick", "renderer", () => nowPlayingTick());
+
+Announcements.on("update", "renderer", (data) => {
+  slides.remove(`attn-${data.ID}`);
   createAnnouncement(data);
 });
-Announcements.on("insert", "renderer", data => createAnnouncement(data));
-Announcements.on("remove", "renderer", data =>
-  WWSUslides.removeSlide(`attn-${data}`)
-);
-Announcements.on("replace", "renderer", db => {
-  console.dir(db.get());
+Announcements.on("insert", "renderer", (data) => {
+  createAnnouncement(data);
+});
+Announcements.on("remove", "renderer", (data) => {
+  slides.remove(`attn-${data}`);
+});
+Announcements.on("replace", "renderer", (db) => {
   // Remove all announcement slides
-  WWSUslides.allSlides()
-    .filter(slide => slide.name.startsWith(`attn-`))
-    .map(slide => WWSUslides.removeSlide(slide.name));
+  [...slides.slides.values()]
+    .filter((slide) => slide.name.startsWith(`attn-`))
+    .map((slide) => slides.remove(slide.name));
 
   // Add slides for each announcement
-  db.each(data => createAnnouncement(data));
-});
-Meta.on("newMeta", "renderer", data => {
-  processNowPlaying(data);
-
-  try {
-    for (let key in data) {
-      if (Object.prototype.hasOwnProperty.call(data, key)) {
-        // Do a status update if a state change was returned; this could impact power saving mode
-        if (key === "state") {
-          processStatus(Status.find());
-        }
-      }
-    }
-  } catch (e) {
-    iziToast.show({
-      title: "An error occurred - Please check the logs",
-      message: "Error occurred on meta event."
-    });
-    console.error(e);
-  }
-});
-Meta.on("metaTick", "renderer", () => {
-  clockTick();
-  processNowPlaying({});
+  db.each((data) => createAnnouncement(data));
 });
 
-// Assign additional event handlers
-socket.on("display-refresh", () => {
-  // Reload the display sign when this event is called
-  window.location.reload(true);
-});
-
-// Display messages sent to the display
-Messages.on("insert", "renderer", data => {
-  iziToast.show({
-    title: "Message",
-    message: data[key].message,
-    timeout: 60000,
-    backgroundColor: "#FFF59D",
-    color: "#FFF59D",
-    progressBarColor: "#FFF59D",
-    overlayColor: "rgba(255, 255, 54, 0.1)",
-    closeOnClick: true,
-    titleSize: "2em",
-    messageSize: "1.5em",
-    balloon: true,
-    zindex: 999
-  });
-  sounds.displaymessage.play();
-});
-
-// When a socket connection is established
 socket.on("connect", () => {
-  Recipients.addRecipientDisplay("display-internal", (data, success) => {
-    Meta.init();
-    Directors.init();
-    Calendar.init();
-    Status.init();
-    Announcements.init();
-    Messages.init();
-    Eas.init();
-    Shootout.init();
-    // Remove the lost connection overlay
-    if (disconnected) {
-      // noConnection.style.display = "none";
-      disconnected = false;
-      clearTimeout(restart);
-      clearTimeout(slidetimer);
+  Recipients.addRecipientDisplay("display-public", (data, success) => {
+    if (success) {
+      Meta.init();
+      Calendar.init();
+      Directors.init();
+      Eas.init();
+      Announcements.init();
+      Messages.init();
+
+      weeklyDJSocket();
+      if (disconnected) {
+        // noConnection.style.display = "none";
+        disconnected = false;
+        clearTimeout(restart);
+      }
+    } else {
+      $(document).Toasts("create", {
+        class: "bg-danger",
+        title: "Error registering",
+        body: "There was an error registering this display sign with WWSU. I will try again in 60 seconds. Please report this to the engineer at wwsu4@wright.edu if this error keeps happening.",
+        autohide: true,
+        delay: 60000,
+        icon: "fas fa-skull-crossbones fa-lg",
+      });
+      setTimeout(() => {
+        window.location.reload(true);
+      }, 60000);
     }
   });
 });
 
-// When a socket connection is lost
 socket.on("disconnect", () => {
   console.log("Lost connection");
   try {
     socket._raw.io._reconnection = true;
     socket._raw.io._reconnectionAttempts = Infinity;
   } catch (e) {
-    iziToast.show({
-      title: "An error occurred - Please check the logs",
-      message: "Error occurred trying to make socket reconnect indefinitely."
-    });
     console.error(e);
+    $(document).Toasts("create", {
+      class: "bg-danger",
+      title: "Error reconnecting",
+      body: "There was an error attempting to reconnect to WWSU. Please report this to the engineer at wwsu4@wright.edu.",
+      icon: "fas fa-skull-crossbones fa-lg",
+    });
   }
-  // Show the lost connection overlay
   if (!disconnected) {
     // noConnection.style.display = "inline";
     disconnected = true;
-    processStatus(Status.find());
+    // process now playing so that it displays that we are disconnected.
+    processNowPlaying(Meta.meta);
+    /*
+           restart = setTimeout(function () {
+           window.location.reload(true);
+           }, 300000);
+           */
   }
 });
 
-// Sound alerts
-let sounds = {
-  // Director auto clockout warning
-  clockOut: new Howl({ src: ["/sounds/display/clockout.mp3"] }),
-
-  // Statuses
-  critical: new Howl({ src: ["/sounds/display/critical.mp3"] }),
-  disconnected: new Howl({ src: ["/sounds/display/disconnected.mp3"] }),
-  warning: new Howl({ src: ["/sounds/display/warning.mp3"] }),
-  ping: new Howl({ src: ["/sounds/display/ping.mp3"] }),
-
-  // Message sent
-  displaymessage: new Howl({ src: ["/sounds/display/displaymessage.mp3"] }),
-
-  // EAS
-  lifethreatening: new Howl({
-    src: ["/sounds/display/lifethreatening.mp3"]
-  }),
-  severeeas: new Howl({ src: ["/sounds/display/severeeas.mp3"] }),
-
-  // Notices for broadcasts going on the air
-  live: new Howl({ src: ["/sounds/display/live.mp3"] }),
-  remote: new Howl({ src: ["/sounds/display/remote.mp3"] }),
-  sports: new Howl({ src: ["/sounds/display/sports.mp3"] }),
-
-  // Shootout scoreboard
-  point1: new Howl({ src: ["/sounds/display/shootout/1point.mp3"] }),
-  point2: new Howl({ src: ["/sounds/display/shootout/2points.mp3"] }),
-  point3: new Howl({ src: ["/sounds/display/shootout/3points.mp3"] }),
-  beat: new Howl({ src: ["/sounds/display/shootout/beat.mp3"], loop: true }),
-  begin: new Howl({ src: ["/sounds/display/shootout/begin.mp3"] }),
-  buzzer: new Howl({ src: ["/sounds/display/shootout/buzzer.mp3"] }),
-  countdown: new Howl({ src: ["/sounds/display/shootout/countdown.mp3"] }),
-  whistle: new Howl({ src: ["/sounds/display/shootout/whistle.mp3"] }),
-  shortbuzz: new Howl({ src: ["/sounds/display/shootout/shortbuzz.mp3"] })
-};
-
-// When begin plays, we should start a timer for the clock
-sounds.begin.on("play", () => {
-  shootoutTimer = setTimeout(() => {
-    shootoutTimeB = shootoutTime;
-    shootoutTimeLeft = shootoutTime;
-    shootoutStartTimer();
-    sounds.beat.play();
-  }, 2900);
-})
-
-/*
-      DEFAULT SLIDES
-  */
-
-// Initialize slides manager
-WWSUslides = WWSUslides(wwsumodules);
-
-// Director hours
-WWSUslides.newSlide({
-  name: `hours-directors`,
-  label: `Directors`,
-  weight: 999999,
-  isSticky: false,
-  color: `success`,
-  active: true,
-  transitionIn: `fadeIn`,
-  transitionOut: `fadeOut`,
-  displayTime: 5,
-  fitContent: false,
-  html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.75vh;" class="container-full p-2 m-1"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: One-time office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: One-time cancellation.</span><span class="text-white">9AM - 5PM</span>: Regular office hours.</span></p>`
+socket.on("display-refresh", () => {
+  if (isStudio) {
+    setTimeout(() => {
+      window.location.reload(true);
+    }, 5000);
+  } else {
+    window.location.reload(true);
+  }
 });
 
-// Assistant Director hours
-WWSUslides.newSlide({
-  name: `hours-assistants`,
-  label: `Assistants`,
-  weight: 999998,
-  isSticky: false,
-  color: `success`,
-  active: true,
-  transitionIn: `fadeIn`,
-  transitionOut: `fadeOut`,
-  displayTime: 5,
-  fitContent: false,
-  html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.75vh;" class="container-full p-2 m-1"></div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: One-time office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: One-time cancellation.</span><span class="text-white">9AM - 5PM/span>: Regular office hours.</span></p>`
+// Display messages sent to the display
+Messages.on("insert", "renderer", (data) => {
+  $(document).Toasts("create", {
+    class: "bg-primary",
+    title: "Message!",
+    body: data.message,
+    autohide: true,
+    delay: 60000,
+  });
+  if (!isStudio) {
+    sounds.displaymessage.play();
+  }
 });
 
-// System Status
-WWSUslides.newSlide({
-  name: `system`,
-  label: `System`,
-  weight: -1000000,
-  isSticky: false,
-  color: `danger`,
-  active: false,
-  transitionIn: `fadeIn`,
-  transitionOut: `fadeOut`,
-  displayTime: 15,
-  fitContent: false,
-  html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">System Status</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.75vh;" class="container-full p-2 m-1"></div>`
+socket.on("analytics-weekly-dj", (data) => {
+  try {
+    processWeeklyStats(data);
+  } catch (e) {
+    $(document).Toasts("create", {
+      class: "bg-danger",
+      title: "Error updating analytics",
+      body: "There was an error updating weekly analytics. Please report this to the engineer at wwsu4@wright.edu.",
+      autohide: true,
+      delay: 180000,
+      icon: "fas fa-skull-crossbones fa-lg",
+    });
+    console.error(e);
+  }
 });
 
-// Shootout scoreboard
-WWSUslides.newSlide({
-  name: `shootout`,
-  label: `Shootout`,
-  weight: -2000000,
-  isSticky: true,
-  color: `success`,
-  active: false,
-  transitionIn: `fadeIn`,
-  transitionOut: `fadeOut`,
-  displayTime: 15,
-  fitContent: false,
-  html: `<div class="text-white">
-  
-  <div style="font-size: 8vh; text-align: center;">
-  Basketball Shootout
-</div>
-
-<div class="container-full" style="font-size: 6vh; text-align: center;">
-  <div class="row">
-    <div class="col-6">
-      Round: <span class="shootout-round">0</span>
-    </div>
-    <div class="col-6">
-      Time: <span class="shootout-time">0:00.0</span>
-    </div>
-  </div>
-</div>
-
-<div class="container" style="font-size: 8vh;">
-
-  <div class="row p-1 shootout-player1 shadow-2 d-none">
-    <div class="col-10 shootout-name1 bg-dark">
-      Jon Doe
-    </div>
-    <div class="col-2 shootout-score1 bg-secondary" style="text-align: center;">
-      0
-    </div>
-  </div>
-
-  <div class="row p-1 shootout-player2 shadow-2 d-none">
-    <div class="col-10 shootout-name2 bg-dark">
-      Jon Doe
-    </div>
-    <div class="col-2 shootout-score2 bg-secondary" style="text-align: center;">
-      0
-    </div>
-  </div>
-
-  <div class="row p-1 shootout-player3 shadow-2 d-none">
-    <div class="col-10 shootout-name3 bg-dark">
-      Jon Doe
-    </div>
-    <div class="col-2 shootout-score3 bg-secondary" style="text-align: center;">
-      0
-    </div>
-  </div>
-
-  <div class="row  p-1 shootout-player4 shadow-2 d-none">
-    <div class="col-10 shootout-name4 bg-dark">
-      Jon Doe
-    </div>
-    <div class="col-2 shootout-score4 bg-secondary" style="text-align: center;">
-      0
-    </div>
-  </div>
-</div>
-
-</div>`
-});
-
-// Director auto-clockout message
-WWSUslides.newSlide({
-  name: `director-clockout`,
-  label: `Director Auto Clock Out`,
-  weight: 800000,
-  isSticky: true,
-  color: `danger`,
-  active: false,
-  transitionIn: `fadeIn`,
-  transitionOut: `fadeOut`,
-  displayTime: 60,
-  fitContent: true,
-  html: `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Automatic Director Clockout at Midnight</h1><span style="color: #FFFFFF;">All directors who are still clocked in must clock out before midnight.<br>Otherwise, the system will automatically clock you out and flag your timesheet.<br>If you are still doing hours, you can clock back in after midnight.</span>`
-});
-
-// Weather alerts
-WWSUslides.newSlide({
-  name: `eas-alerts`,
-  label: `EAS Alerts`,
-  weight: -800000,
-  isSticky: false,
-  color: `danger`,
-  active: false,
-  transitionIn: `fadeIn`,
-  transitionOut: `fadeOut`,
-  displayTime: 15,
-  fitContent: true,
-  html: `<h1 style="text-align: center; font-size: 3em; color: ${
-    !isLightTheme ? `#ffffff` : `#000000`
-  }">WWSU EAS - Active Alerts</h1><h2 style="text-align: center; font-size: 1.5em; color: ${
-    !isLightTheme ? `#ffffff` : `#000000`
-  }">Clark, Greene, and Montgomery counties</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="eas-alerts"></div>`
-});
-
-// Define HTML elements
-let statusLine = document.getElementById("status-line");
-let djAlert = document.getElementById("dj-alert");
-let easAlert = document.getElementById("eas-alert");
-let nowplaying = document.getElementById("nowplaying");
-let nowplayingtime = document.getElementById("nowplaying-time");
-let nowplayingline1 = document.getElementById("nowplaying-line1");
-let nowplayingline2 = document.getElementById("nowplaying-line2");
-let flashInterval = null;
-let statusMarquee = ``;
-
-// Define other letiables
-// LINT says directorpresent is never used. That is a lie.
-// eslint-disable-next-line no-unused-lets
-let disconnected = true;
-let slidetimer = false;
-let prevStatus = 5;
-let offlineTimer;
-let globalStatus = 5;
-let officeHoursTimer;
-let directorNotify;
-let innercontent;
-let stuff;
-let doShade = false;
-let isActive = false;
-
-let colors = ["#FF0000", "#00FF00", "#0000FF"];
-let color = 0;
-let delay = 300000;
-let scrollDelay = 15000;
-
-let queueUnknown = false;
-let queueReminder = false;
-
+// Prepare other letiables
 let newEas = [];
 let prevEas = [];
 let easActive = false;
@@ -418,15 +236,324 @@ let easActive = false;
 let easDelay = 5;
 let easExtreme = false;
 
-let shootoutInactivity;
-let shootoutTimer;
-let shootoutTime = 0;
-let shootoutTimeB = 0;
-let shootoutTimeLeft = 0;
-let shootoutScore = [0, 0, 0, 0];
-let shootoutStart = moment();
+// Define additional letiables
+let flashInterval = null;
+let disconnected = true;
+// LINT LIES: directorpresent is used.
+// eslint-disable-next-line no-unused-lets
+let directorpresent = false;
+let nowPlayingTimer;
+let calendarTimer;
+let directorCalendarTimer;
+let temp;
+let queueUnknown = false;
+let queueReminder = false;
 
-// burnGuard is a periodic line that sweeps across the screen to prevent burn-in. Define / construct it.
+// The URL should contain a query parameter "studio=true" for the display sign that is placed in the OnAir studio.
+// This disables all audio warnings (such as shows going on the air and the EAS) so they do not interfere with a live broadcast.
+// However, this enables an audio warning when a producer is about to go live in 10 seconds (for live and sports [live] shows where someone is expected to be in the studio).
+// This audio warning helps alert guests in the station to be quiet as the producer might be about to turn the microphones on.
+let isStudio = window.location.search.indexOf("studio=true") !== -1;
+
+// Set to light mode if darkmode=false was set in URL
+if (window.location.search.indexOf("darkmode=false") !== -1)
+  $("body").removeClass("dark-mode");
+
+// Set burnGuard height and width to window height and width.
+wrapper.width = window.innerWidth;
+wrapper.height = window.innerHeight;
+
+// Add slide categories
+slides.addCategory("social", "SOCIAL MEDIA");
+slides.addCategory("events", "EVENTS");
+slides.addCategory("announcements", "ANNOUNCEMENTS");
+slides.addCategory("directors", "DIRECTORS");
+slides.addCategory("weather", "WEATHER");
+
+// Add intro slide
+slides.add({
+  name: `wwsu`,
+  category: `social`,
+  label: `WWSU 106.9 FM`,
+  icon: `fas fa-broadcast-tower`,
+  isSticky: false,
+  color: `primary`,
+  active: true,
+  transitionIn: `bounceInUp`,
+  transitionOut: `fadeOutRight`,
+  displayTime: 14,
+  fitContent: false,
+  html: `<div style="text-align: center; width: 100%;"><img src="images/display/wwsu.png" style="height: 20vh; width: auto;">
+  <p style="font-size: 5vh; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">106.9 FM / Dayton's Wright Choice</p>
+  </div>
+                        <div id="slide-wwsu-bottom" style="text-shadow: 1px 4px 1px rgba(0,0,0,0.3);">
+                        <h1 style="text-align: center; font-size: 10vh; color: #FFFFFF">Website: <span class="text-lightblue">wwsu1069.org</span></h1>
+<h1 style="text-align: center; font-size: 10vh; color: #FFFFFF">Office Line: <span class="text-warning">937-775-5554</span></h1>
+<h1 style="text-align: center; font-size: 10vh; color: #FFFFFF">Request Line: <span class="text-warning">937-775-5555</span></h1>
+        </div>
+        </div>`,
+  reset: true,
+  fnStart: (slide) => {
+    setTimeout((slide) => {
+      $("#slide-wwsu-bottom").animateCss("fadeOut", function () {
+        var temp = document.getElementById("slide-wwsu-bottom");
+        if (temp !== null) {
+          temp.innerHTML = `<h1 style="text-align: center; font-size: 10vh; color: #FFFFFF">Follow Us <span class="text-warning">@wwsu1069</span> On</h1>
+        <div style="width: 100%; align-items: center; justify-content: center;" class="d-flex flex-nowrap p-3 m-3">
+        <div class="flex-item m-1" style="width: 20%; text-align: center;"><img src="images/display/facebook.png"></div>
+        <div class="flex-item m-1" style="width: 20%; text-align: center;"><img src="images/display/twitter.png"></div>
+        <div class="flex-item m-1" style="width: 20%; text-align: center;"><img src="images/display/instagram.png"></div>`;
+          $("#slide-wwsu-bottom").animateCss("fadeIn");
+        }
+      });
+    }, 7000);
+  },
+});
+
+// Only display weeklyStats for non-studio display sign
+if (!isStudio) {
+  slides.addCategory("analytics", "ANALYTICS");
+  slides.add({
+    name: `weekly-stats`,
+    category: `analytics`,
+    label: `Weekly Stats`,
+    isSticky: false,
+    color: `success`,
+    active: true,
+    transitionIn: `fadeInDown`,
+    transitionOut: `fadeOutDown`,
+    displayTime: 15,
+    fitContent: false,
+    html: `<h1 style="text-align: center; font-size: 5vh;">Analytics last 7 days</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 3vh;" class="container-full p-2 m-1 scale-content" id="analytics">Not Yet Loaded</div>`,
+  });
+}
+
+// On the Air
+slides.add({
+  name: `on-air`,
+  category: `events`,
+  label: `On the Air Now`,
+  icon: `fas fa-microphone`,
+  isSticky: false,
+  color: `danger`,
+  active: false,
+  transitionIn: `zoomInDown`,
+  transitionOut: `bounceOut`,
+  displayTime: 10,
+  fitContent: false,
+  html: ``,
+});
+
+// Weather alerts
+slides.add({
+  name: `eas-alerts`,
+  category: `weather`,
+  label: `Active Alerts`,
+  icon: `fas fa-bolt`,
+  isSticky: false,
+  color: `warning`,
+  active: false,
+  transitionIn: `fadeIn`,
+  transitionOut: `fadeOut`,
+  displayTime: 15,
+  fitContent: false,
+  html: ``,
+});
+
+// Upcoming shows
+let upcomingTable;
+slides.add({
+  name: `calendar`,
+  category: `events`,
+  label: `Upcoming Events`,
+  icon: `fas fa-calendar-day`,
+  isSticky: false,
+  color: `info`,
+  active: true,
+  transitionIn: `fadeInDown`,
+  transitionOut: `fadeOutUp`,
+  displayTime: 20,
+  fitContent: false,
+  html: `<h2 style="text-align: center; font-size: 5vh; text-shadow: 1px 3px 1px rgba(0,0,0,0.3);">Upcoming Events (Next 24 Hours)</h2><table id="slide-calendar-table" class="table table-striped display responsive bg-dark" style="width: 100%; font-size: 2vh; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);"></table>`,
+});
+util.waitForElement(`#slide-calendar-table`, () => {
+  // Generate table
+  upcomingTable = $(`#slide-calendar-table`).DataTable({
+    paging: false,
+    data: [],
+    columns: [
+      { title: "Type" },
+      { title: "Hosts" },
+      { title: "Name" },
+      { title: "Scheduled Time" },
+    ],
+    order: [],
+    searching: false,
+    pageLength: 10,
+    language: {
+      emptyTable: "No events in the next 24 hours",
+    },
+  });
+});
+
+// Promote Random Radio Shows and Events
+slides.add({
+  name: `show-info`,
+  category: `events`,
+  label: `Featured Show`,
+  icon: `fas fa-star`,
+  isSticky: false,
+  color: `success`,
+  active: true,
+  transitionIn: `fadeIn`,
+  transitionOut: `fadeOut`,
+  displayTime: 10,
+  fitContent: false,
+  reset: true,
+  html: ``,
+  fnStart: (slide) => {
+    slide.displayTime = 10;
+    let tcalendar = calendar.filter(
+      (event) =>
+        ["show", "remote", "sports", "prerecord", "playlist"].indexOf(
+          event.type
+        ) !== -1
+    );
+    if (tcalendar.length > 0) {
+      let index = Math.floor(Math.random() * tcalendar.length);
+      if (typeof tcalendar[index] !== "undefined") {
+        slide.displayTime =
+          tcalendar[index].description !== null
+            ? 10 + Math.floor(tcalendar[index].description.length / 20)
+            : 10;
+        if (tcalendar[index].banner) slide.displayTime = slide.displayTime + 5;
+        $(`#section-slide-show-info-contents`).html(`
+        <div class="card card-widget widget-user-2 shadow-sm" style="text-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3);">
+              <div class="widget-user-header bg-${Calendar.getColorClass(
+                tcalendar[index]
+              )}" style="font-size: 5vh">
+                <div class="widget-user-image">
+                  ${
+                    tcalendar[index].logo
+                      ? `<img
+                  class="img-circle elevation-2"
+                  src="uploads/calendar/logo/${tcalendar[index].logo}"
+                  alt="User Avatar"
+                  style="width: 12vh"
+                />`
+                      : ``
+                  }
+                </div>
+                <!-- /.widget-user-image -->
+                <h3
+                  class="widget-user-desc"
+                  style="font-size: 5vh; margin-left: 13vh;"
+                >
+                  ${tcalendar[index].name}
+                </h3>
+                <h3
+                  class="widget-user-username"
+                  style="font-size: 5vh; margin-left: 13vh;"
+                >
+                ${tcalendar[index].hosts}
+                </h3>
+              </div>
+              <div class="card-body" style="font-size: 4vh;">
+                <div class="container-fluid">
+                  <div class="row">
+                  ${
+                    tcalendar[index].banner
+                      ? `<div class="col-6">
+                  <img
+                    class="elevation-2"
+                    src="uploads/calendar/banner/${tcalendar[index].banner}"
+                    style="max-height: 55vh; max-width: 100%;"
+                  />
+                </div>
+                <div class="col-6">
+                <p class="text-teal">
+                ${moment
+                  .tz(
+                    tcalendar[index].start,
+                    Meta.meta ? Meta.meta.timezone : moment.tz.guess()
+                  )
+                  .format("MM/DD hh:mm A")} - ${moment
+                          .tz(
+                            tcalendar[index].end,
+                            Meta.meta ? Meta.meta.timezone : moment.tz.guess()
+                          )
+                          .format("hh:mm A")}</p>
+                  <p>${
+                    tcalendar[index].description || "No description provided"
+                  }</p>
+                </div>`
+                      : `<div class="col-12">
+                      <p class="text-teal">
+                      ${moment
+                        .tz(
+                          tcalendar[index].start,
+                          Meta.meta ? Meta.meta.timezone : moment.tz.guess()
+                        )
+                        .format("MM/DD hh:mm A")} - ${moment
+                          .tz(
+                            tcalendar[index].end,
+                            Meta.meta ? Meta.meta.timezone : moment.tz.guess()
+                          )
+                          .format("hh:mm A")}</p>
+                        <p>${
+                          tcalendar[index].description ||
+                          "No description provided"
+                        }</p>
+              </div>`
+                  }
+                  </div>
+                </div>
+              </div>
+            </div>
+        `);
+      }
+    }
+  },
+});
+
+// Director hours
+slides.add({
+  name: `hours-directors`,
+  category: `directors`,
+  label: `Director Office Hours`,
+  icon: `fas fa-clock`,
+  isSticky: false,
+  color: `info`,
+  active: false,
+  transitionIn: `fadeInDown`,
+  transitionOut: `fadeOutUp`,
+  displayTime: 15,
+  fitContent: false,
+  html: ``,
+});
+
+// Assistant hours
+slides.add({
+  name: `hours-assistants`,
+  category: `directors`,
+  label: `Assistant Office Hours`,
+  icon: `fas fa-clock`,
+  isSticky: false,
+  color: `info`,
+  active: false,
+  transitionIn: `fadeInDown`,
+  transitionOut: `fadeOutUp`,
+  displayTime: 15,
+  fitContent: false,
+  html: ``,
+});
+
+// Create restart function to restart the screen after 15 seconds if it does not connect.
+let restart = setTimeout(() => {
+  window.location.reload(true);
+}, 15000);
+
+// Burnguard is the line that sweeps across the screen to prevent screen burn-in
 let $burnGuard = $("<div>")
   .attr("id", "burnGuard")
   .css({
@@ -437,1154 +564,226 @@ let $burnGuard = $("<div>")
     top: "0px",
     left: "0px",
     display: "none",
-    "z-index": 9999
+    "z-index": 9999,
   })
   .appendTo("body");
 
-// This function triggers a burn guard sweep.
+let colors = ["#FF0000", "#00FF00", "#0000FF"];
+let Scolor = 0;
+let delay = 301111; // We have a 1111 at the end because the calendar update causes the burn guard to jitter; this allows the line to be at different spots on the screen instead of the same one when it happens
+let scrollDelay = 15000;
+
 function burnGuardAnimate() {
   try {
-    color = ++color % 3;
-    let rColor = colors[color];
+    Scolor = ++Scolor % 3;
+    let rColor = colors[Scolor];
     $burnGuard
       .css({
         left: "0px",
-        "background-color": rColor
+        "background-color": rColor,
       })
       .show()
       .animate(
         {
-          left: $(window).width() + "px"
+          left: $(window).width() + "px",
         },
         scrollDelay,
         "linear",
-        function() {
+        function () {
           $(this).hide();
         }
       );
     setTimeout(burnGuardAnimate, delay);
   } catch (e) {
+    console.error(e);
     iziToast.show({
       title: "An error occurred - Please check the logs",
-      message: "Error occurred during the burnGuardAnimate function."
+      message: "Error occurred during burnGuardAnimate.",
     });
-    console.error(e);
   }
 }
-
 setTimeout(burnGuardAnimate, 5000);
 
-// Define default settings for iziToast (overlaying messages)
-iziToast.settings({
-  titleColor: "#000000",
-  messageColor: "#000000",
-  backgroundColor: "rgba(244, 67, 54, 0.8);",
-  color: "rgba(244, 67, 54);",
-  close: false,
-  progressBarColor: "rgba(244, 67, 54, 1)",
-  overlay: true,
-  overlayColor: "rgba(244, 67, 54, 0.1)",
-  zindex: 1000,
-  layout: 1,
-  closeOnClick: true,
-  position: "center",
-  timeout: 30000
-});
-
-$.fn.extend({
-  // Add an animateCss function to JQuery to trigger an animation of an HTML element with animate.css
-  animateCss: function(animationName, callback) {
-    let animationEnd = (function(el) {
-      let animations = {
-        animation: "animationend",
-        OAnimation: "oAnimationEnd",
-        MozAnimation: "mozAnimationEnd",
-        WebkitAnimation: "webkitAnimationEnd"
-      };
-
-      for (let t in animations) {
-        if (el.style[t] !== undefined) {
-          return animations[t];
-        }
+// Replace all Status data with that of body request
+function weeklyDJSocket() {
+  console.log("attempting weeklyDJ socket");
+  noReq.request(
+    { method: "POST", url: "/analytics/weekly-dj", data: {} },
+    (body) => {
+      try {
+        processWeeklyStats(body);
+      } catch (e) {
+        console.error(e);
+        console.log("FAILED WEEKLYDJ CONNECTION");
+        setTimeout(weeklyDJSocket, 10000);
       }
-    })(document.createElement("div"));
-
-    this.addClass("animated " + animationName).one(animationEnd, function() {
-      $(this).removeClass("animated " + animationName);
-
-      if (typeof callback === "function") {
-        callback();
-      }
-    });
-
-    return this;
-  }
-});
-
-// Define a reload timer; terminates if socket connection gets established. This ensures if no connection is made, page will refresh itself to try again.
-let restart = setTimeout(() => {
-  window.location.reload(true);
-}, 15000);
-
-/**
- * Function should be called every second.
- */
-function clockTick() {
-  // At 11:55PM, display director clock-out message and play message
-  if (
-    moment.parseZone(Meta.meta.time).hour() === 23 &&
-    moment.parseZone(Meta.meta.time).minute() >= 55
-  ) {
-    if (!directorNotify) {
-      directorNotify = true;
-      WWSUslides.slide(`director-clockout`).active = true;
-      sounds.clockOut.play();
     }
-  } else if (directorNotify) {
-    WWSUslides.slide(`director-clockout`).active = false;
-    directorNotify = false;
-  }
-
-  // Refresh hours every midnight
-  if (
-    moment.parseZone(Meta.meta.time).hour() === 0 &&
-    moment.parseZone(Meta.meta.time).minute() === 0 &&
-    moment.parseZone(Meta.meta.time).second() < 3
-  ) {
-    updateCalendar();
-  }
-
-  // If status is critical, play ping sound every minute
-  if (moment.parseZone(Meta.meta.time).second() === 0 && globalStatus < 2) {
-    sounds.ping.play();
-  }
+  );
 }
 
-// Define data-specific functions
-
-/**
- * Process statuses from WWSU.
- *
- * @param {TaffyDB} db All current status records
- */
-function processStatus(db) {
+// Process Director data when received by updating local database and marking if a director is present.
+function processDirectors(db) {
+  // Run data manipulation process
   try {
-    // These are used for alternating gray shades to make status table easier to read
-    let secondRow = false;
-
-    globalStatus = 5;
-    statusMarquee = `<div class="row bg-dark-1">
-                      <div class="col-3 text-warning">
-                      <strong>System</strong>
-                      </div>
-                      <div class="col-9 text-white">
-                      <strong>Information</strong>
-                      </div>
-                    </div><div class="row ${
-                      secondRow ? `bg-dark-3` : `bg-dark-2`
-                    }">`;
-
-    // Add status info to table for each status, and determine current global status (worst of all statuses)
-    db.forEach(thestatus => {
+    // Check for present directors
+    directorpresent = false;
+    db.each((director) => {
       try {
-        if (thestatus.status === 5) return; // Skip good statuses
-        if (!secondRow) {
-          secondRow = true;
-        } else {
-          secondRow = false;
-        }
-        statusMarquee += `</div><div class="row ${
-          secondRow ? `bg-dark-3` : `bg-dark-2`
-        }">`;
-
-        switch (thestatus.status) {
-          case 1:
-            statusMarquee += `<div class="col-2">
-                      <span class="m-1 badge badge-danger">${thestatus.label}</span>
-                      </div>
-                      <div class="col text-white">
-                      <strong>CRITICAL</strong>: ${thestatus.data}
-                      </div>`;
-            if (globalStatus > 1) {
-              globalStatus = 1;
-            }
-            break;
-          case 2:
-            statusMarquee += `<div class="col-2">
-                      <span class="m-1 badge badge-urgent">${thestatus.label}</span>
-                      </div>
-                      <div class="col text-white">
-                      <strong>Urgent</strong>: ${thestatus.data}
-                      </div>`;
-            if (globalStatus > 2) {
-              globalStatus = 2;
-            }
-            break;
-          case 3:
-            statusMarquee += `<div class="col-2">
-                      <span class="m-1 badge badge-warning">${thestatus.label}</span>
-                      </div>
-                      <div class="col text-white">
-                      <strong>Warning</strong>: ${thestatus.data}
-                      </div>`;
-            if (globalStatus > 3) {
-              globalStatus = 3;
-            }
-            break;
-          case 4:
-            statusMarquee += `<div class="col-2">
-                      <span class="m-1 badge badge-info">${thestatus.label}</span>
-                      </div>
-                      <div class="col text-white">
-                      <strong>Info</strong>: ${thestatus.data}
-                      </div>`;
-            if (globalStatus > 4) {
-              globalStatus = 4;
-            }
-            break;
-          case 5:
-            statusMarquee += `<div class="col-2">
-                      <span class="m-1 badge badge-success">${thestatus.label}</span>
-                      </div>
-                      <div class="col text-white">
-                      <strong>Good</strong>: ${thestatus.data}
-                      </div>`;
-            if (globalStatus > 5) {
-              globalStatus = 5;
-            }
-            break;
-          default:
+        if (director.present > 0) {
+          directorpresent = true;
         }
       } catch (e) {
-        iziToast.show({
-          title: "An error occurred - Please check the logs",
-          message: `Error occurred during Status iteration in processStatus call.`
-        });
         console.error(e);
       }
     });
-
-    statusMarquee += `</div>`;
-
-    if (disconnected) {
-      globalStatus = 0;
-    }
-
-    let status = document.getElementById("status-div");
-    let color = "rgba(158, 158, 158, 0.3)";
-    clearInterval(flashInterval);
-
-    // Do stuff depending on global status
-    switch (globalStatus) {
-      case 0:
-        color = "rgba(244, 67, 54, 0.5)";
-        statusLine.innerHTML =
-          "No connection to WWSU! The server might be offline and WWSU not functional";
-        if (globalStatus !== prevStatus) {
-          offlineTimer = setTimeout(() => {
-            sounds.disconnected.play();
-          }, 180000);
-        }
-        // Flash screen for major outages every second
-        flashInterval = setInterval(() => {
-          $("html, body").css("background-color", "#D32F2F");
-          setTimeout(() => {
-            $("html, body").css("background-color", "#000000");
-          }, 250);
-        }, 1000);
-
-        WWSUslides.slide(`system`).isSticky = true;
-        WWSUslides.slide(`system`).active = true;
-        break;
-      case 1:
-        color = "rgba(244, 67, 54, 0.5)";
-        statusLine.innerHTML =
-          "WWSU is critically unstable and is not functioning properly!";
-        clearTimeout(offlineTimer);
-        if (globalStatus !== prevStatus) {
-          sounds.critical.play();
-        }
-        // Flash screen for major outages every second
-        flashInterval = setInterval(() => {
-          $("html, body").css("background-color", "#D32F2F");
-          setTimeout(() => {
-            $("html, body").css("background-color", "#000000");
-          }, 250);
-        }, 1000);
-
-        WWSUslides.slide(`system`).isSticky = true;
-        WWSUslides.slide(`system`).active = true;
-        break;
-      case 2:
-        color = "rgba(245, 124, 0, 0.5)";
-        statusLine.innerHTML =
-          "WWSU is experiencing issues that may impact operation";
-        clearTimeout(offlineTimer);
-        if (globalStatus !== prevStatus) {
-          sounds.warning.play();
-        }
-        // Flash screen for partial outages every 5 seconds
-        // Flash screen for major outages every second
-        flashInterval = setInterval(() => {
-          $("html, body").css("background-color", "#FF9800");
-          setTimeout(() => {
-            $("html, body").css("background-color", "#000000");
-          }, 250);
-        }, 5000);
-
-        WWSUslides.slide(`system`).isSticky = false;
-        WWSUslides.slide(`system`).active = true;
-        break;
-      case 3:
-        statusLine.innerHTML = "WWSU is experiencing minor issues";
-        clearTimeout(offlineTimer);
-        color = "rgba(251, 192, 45, 0.5)";
-
-        WWSUslides.slide(`system`).isSticky = false;
-        WWSUslides.slide(`system`).active = true;
-        break;
-      case 4:
-        statusLine.innerHTML = "WWSU is operational; information available";
-        clearTimeout(offlineTimer);
-        color = "rgba(18, 129, 147, 0.5)";
-
-        WWSUslides.slide(`system`).isSticky = false;
-        WWSUslides.slide(`system`).active = true;
-        break;
-      case 5:
-        statusLine.innerHTML = "WWSU is operational";
-        clearTimeout(offlineTimer);
-        color = "rgba(76, 175, 80, 0.5)";
-        WWSUslides.slide(`system`).active = false;
-        WWSUslides.slide(`system`).isSticky = false;
-        break;
-      default:
-        statusLine.innerHTML = "WWSU status is unknown";
-        color = "rgba(158, 158, 158, 0.3)";
-        WWSUslides.slide(`system`).active = false;
-        WWSUslides.slide(`system`).isSticky = false;
-    }
-
-    prevStatus = globalStatus;
-
-    status.style.backgroundColor = color;
-    status.style.color = "rgba(255, 255, 255, 1)";
-    statusLine.style.color = "rgba(255, 255, 255, 1)";
-
-    // Update status html
-    WWSUslides.slide(
-      `system`
-    ).html = `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">System Status</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.75vh;" class="container-full p-2 m-1">${statusMarquee}</div>`;
   } catch (e) {
-    iziToast.show({
-      title: "An error occurred - Please check the logs",
-      message: "Error occurred during the call of Status[0]."
-    });
     console.error(e);
   }
 }
 
-// Update the calendar data
 function updateCalendar() {
-  // Set / reset 1-second timer so we are not updating on literally every update pushed through sockets
-  clearTimeout(officeHoursTimer);
-  officeHoursTimer = setTimeout(() => {
+  // Do a 3 second timer to prevent frequent calendar updates
+  clearTimeout(calendarTimer);
+  calendarTimer = setTimeout(() => {
     Calendar.getEvents(
-      events => {
-        let directorHours = [];
-        let tasks = [];
+      (events) => {
+        upcomingTable.clear();
 
-        directorHours = events
+        let noEvents = true;
+        let activeEvents = 0;
+        let innercontent = ``;
+        let today = [];
+        let color;
+        let scheduleInfo = ``;
+
+        // Update calendar array
+        calendar = events
           .filter(
-            event =>
-              ["office-hours"].indexOf(event.type) !== -1 &&
-              moment(event.end)
-                .add(1, "days")
-                .startOf("day")
-                .isAfter(moment())
+            (event) =>
+              [
+                "genre",
+                "playlist",
+                "onair-booking",
+                "prod-booking",
+                "task",
+              ].indexOf(event.type) === -1 &&
+              moment(event.end).isAfter(moment(Meta.meta.time))
           )
           .sort(
             (a, b) => moment(a.start).valueOf() - moment(b.start).valueOf()
           );
 
-        tasks = events
+        // Update upcoming events next 24 hours
+        calendar
           .filter(
-            event =>
-              ["tasks"].indexOf(event.type) !== -1 &&
-              moment(event.end)
+            (event) =>
+              [
+                "genre",
+                "playlist",
+                "onair-booking",
+                "prod-booking",
+                "office-hours",
+                "task",
+              ].indexOf(event.type) === -1 &&
+              moment
+                .parseZone(Meta.meta.time)
                 .add(1, "days")
-                .startOf("day")
-                .isAfter(moment())
+                .isSameOrAfter(event.start)
           )
-          .sort(
-            (a, b) => moment(a.start).valueOf() - moment(b.start).valueOf()
-          );
-
-        // Sort director hours by start time
-        let compare = function(a, b) {
-          try {
-            if (moment(a.start).valueOf() < moment(b.start).valueOf()) {
-              return -1;
-            }
-            if (moment(a.start).valueOf() > moment(b.start).valueOf()) {
-              return 1;
-            }
-            return 0;
-          } catch (e) {
-            console.error(e);
-            iziToast.show({
-              title: "An error occurred - Please check the logs",
-              message: `Error occurred in the compare function of Calendar.sort in the Calendar[0] call.`
-            });
-          }
-        };
-
-        // Format office hours
-        let calendar = {};
-        let asstcalendar = {};
-
-        Directors.find({ assistant: false }).forEach(director => {
-          calendar[director.ID] = {};
-          calendar[director.ID]["director"] = director;
-          calendar[director.ID][0] = ``;
-          calendar[director.ID][1] = ``;
-          calendar[director.ID][2] = ``;
-          calendar[director.ID][3] = ``;
-          calendar[director.ID][4] = ``;
-          calendar[director.ID][5] = ``;
-          calendar[director.ID][6] = ``;
-        });
-
-        Directors.find({ assistant: true }).forEach(director => {
-          asstcalendar[director.ID] = {};
-          asstcalendar[director.ID]["director"] = director;
-          asstcalendar[director.ID][0] = ``;
-          asstcalendar[director.ID][1] = ``;
-          asstcalendar[director.ID][2] = ``;
-          asstcalendar[director.ID][3] = ``;
-          asstcalendar[director.ID][4] = ``;
-          asstcalendar[director.ID][5] = ``;
-          asstcalendar[director.ID][6] = ``;
-        });
-
-        directorHours.sort(compare).map(event => {
-          // First, get the director
-          let temp = Directors.find({ ID: event.director }, true);
-
-          // No temp record? Exit immediately. Also, default to assistant director = true if it is not provided.
-          if (typeof temp === `undefined`) {
-            return null;
-          }
-          let assistant;
-          if (typeof temp.assistant !== "undefined") {
-            assistant = temp.assistant;
-          } else {
-            assistant = true;
-          }
-
-          // null start or end? Use a default to prevent errors.
-          if (!moment(event.start).isValid()) {
-            event.start = moment.parseZone(Meta.meta.time).startOf("day");
-          }
-          if (!moment(event.end).isValid()) {
-            event.end = moment
-              .parseZone(Meta.meta.time)
-              .add(1, "days")
-              .startOf("day");
-          }
-
-          // Cycle through each day of the week, and add in director hours
-          for (let i = 0; i < 7; i++) {
-            let looptime = moment
-              .parseZone(Meta.meta.time)
-              .startOf("day")
-              .add(i, "days");
-            let looptime2 = moment
-              .parseZone(Meta.meta.time)
-              .startOf("day")
-              .add(i + 1, "days");
-            let bg;
-            if (
-              (moment(event.start).isSameOrAfter(looptime) &&
-                moment(event.start).isBefore(looptime2)) ||
-              (moment(event.start).isBefore(looptime) &&
-                moment(event.end).isAfter(looptime))
-            ) {
-              event.startT =
-                moment(event.start).minutes() === 0
-                  ? moment
-                      .tz(
-                        event.start,
-                        Meta.meta ? Meta.meta.timezone : moment.tz.guess()
-                      )
-                      .format("h")
-                  : moment
-                      .tz(
-                        event.start,
-                        Meta.meta ? Meta.meta.timezone : moment.tz.guess()
-                      )
-                      .format("h:mm");
-              if (
-                (moment.parseZone(event.start).hours() < 12 &&
-                  moment.parseZone(event.end).hours() >= 12) ||
-                (moment.parseZone(event.start).hours() >= 12 &&
-                  moment.parseZone(event.end).hours() < 12)
-              ) {
-                event.startT += moment
-                  .tz(
-                    event.start,
-                    Meta.meta ? Meta.meta.timezone : moment.tz.guess()
-                  )
-                  .format("A");
-              }
-              event.endT =
-                moment.parseZone(event.end).minutes() === 0
-                  ? moment
-                      .tz(
-                        event.end,
-                        Meta.meta ? Meta.meta.timezone : moment.tz.guess()
-                      )
-                      .format("hA")
-                  : moment
-                      .tz(
-                        event.end,
-                        Meta.meta ? Meta.meta.timezone : moment.tz.guess()
-                      )
-                      .format("h:mmA");
-
-              // Update strings if need be, if say, start time was before this day, or end time is after this day.
-              if (
-                moment(event.end).isAfter(
-                  moment
-                    .parseZone(Meta.meta.time)
-                    .startOf("day")
-                    .add(i + 1, "days")
+          .map((event) => {
+            try {
+              event.startT = moment
+                .tz(
+                  event.start,
+                  Meta.meta ? Meta.meta.timezone : moment.tz.guess()
                 )
-              ) {
-                event.endT = moment
-                  .tz(
-                    event.end,
-                    Meta.meta ? Meta.meta.timezone : moment.tz.guess()
-                  )
-                  .format("MM/DD h:mmA");
-              }
-              if (
-                moment(event.start).isBefore(
-                  moment
-                    .parseZone(Meta.meta.time)
-                    .add(i, "days")
-                    .startOf("day")
+                .format("MM/DD hh:mm A");
+              event.endT = moment
+                .tz(
+                  event.end,
+                  Meta.meta ? Meta.meta.timezone : moment.tz.guess()
                 )
-              ) {
-                event.startT = moment
-                  .tz(
-                    event.start,
-                    Meta.meta ? Meta.meta.timezone : moment.tz.guess()
-                  )
-                  .format("MM/DD h:mmA");
-              }
+                .format("hh:mm A");
 
-              let endText = `<span class="text-white${
-                moment(Meta.meta.time).isAfter(moment(event.end))
-                  ? ` text-muted`
-                  : ``
-              }">${event.startT} - ${event.endT}</span>`;
-              if (
-                ["updated", "updated-system"].indexOf(event.scheduleType) !== -1
-              ) {
-                endText = `<span class="text-warning${
-                  moment(Meta.meta.time).isAfter(moment(event.end))
-                    ? ` text-muted`
-                    : ``
-                }">${event.startT} - ${event.endT}</span>`;
-              }
+              color = event.color;
               if (
                 ["canceled", "canceled-system", "canceled-changed"].indexOf(
                   event.scheduleType
                 ) !== -1
               ) {
-                endText = `<strike><span class="text-danger">${event.startT} - ${event.endT}</span></strike>`;
+                color = `#161616`;
+              } else {
+                activeEvents++;
               }
 
-              // Push the final products into our formatted letiable
-              if (!assistant) {
-                calendar[event.director][
-                  i
-                ] += `<div class="m-1 text-white" style="${bg ||
-                  ``}">${endText}</div>`;
+              scheduleInfo = `<span class="text-teal">${event.startT} - ${event.endT}</span>`;
+
+              if (["canceled-changed"].indexOf(event.scheduleType) !== -1) {
+                scheduleInfo = `<span class="badge badge-warning">RE-SCHEDULED</span><br /><s><span class="text-teal">${event.startT} - ${event.endT}</span></s>`;
               }
-              if (assistant) {
-                asstcalendar[event.director][
-                  i
-                ] += `<div class="m-1 text-white" style="${bg ||
-                  ``}">${endText}</div>`;
+              if (
+                ["updated", "updated-system"].indexOf(event.scheduleType) !==
+                  -1 &&
+                event.timeChanged
+              ) {
+                scheduleInfo = `<span class="badge badge-warning">Temporary Time</span><br /><span class="text-teal">${event.startT} - ${event.endT}</span>`;
               }
+              if (
+                ["canceled", "canceled-system"].indexOf(event.scheduleType) !==
+                -1
+              ) {
+                scheduleInfo = `<span class="badge badge-danger">CANCELED</span><br /></s><span class="text-teal">${event.startT} - ${event.endT}</span></s>`;
+              }
+
+              let image;
+              if (event.type === "show") {
+                image = `<i class="img-circle img-size-36 fas fa-microphone" style="font-size: 36px; background: ${color};"></i>`;
+              } else if (event.type === "prerecord") {
+                image = `<i class="img-circle img-size-36 fas fa-play-circle" style="font-size: 36px; background: ${color};"></i>`;
+              } else if (event.type === "remote") {
+                image = `<i class="img-circle img-size-36 fas fa-broadcast-tower" style="font-size: 36px; background: ${color};"></i>`;
+              } else if (event.type === "sports") {
+                image = `<i class="img-circle img-size-36 fas fa-trophy" style="font-size: 36px; background: ${color};"></i>`;
+              } else {
+                image = `<i class="img-circle img-size-36 fas fa-calendar" style="font-size: 36px; background: ${color};"></i>`;
+              }
+
+              if (event.logo)
+                image = `<img class="img-circle img-size-36" src="/uploads/calendar/logo/${event.logo}" style="background: ${color};">`;
+
+              noEvents = false;
+
+              upcomingTable.row.add([
+                `${image} <span class="p-1 text-${Calendar.getColorClass(
+                  event
+                )}">${event.type}</span>`,
+                event.hosts,
+                `<span class="text-warning font-weight-bold">${event.name}</span>`,
+                scheduleInfo,
+              ]);
+            } catch (e) {
+              console.error(e);
             }
-          }
-        });
+          });
 
-        // Director hours slide
-        innercontent = ``;
+        upcomingTable.draw();
 
-        stuff = `<div class="row shadow-2 bg-dark-1">
-     <div class="col-3 text-info">
-     <strong>Director</strong>
-     </div>
-     <div class="col text-info">
-     <strong>Today</strong>
-     </div>
-     <div class="col text-info">
-     <strong>${moment
-       .parseZone(Meta.meta.time)
-       .add(1, "days")
-       .format("ddd MM/DD")}</strong>
-     </div>
-     <div class="col text-info">
-     <strong>${moment
-       .parseZone(Meta.meta.time)
-       .add(2, "days")
-       .format("ddd MM/DD")}</strong>
-     </div>
-     <div class="col text-info">
-     <strong>${moment
-       .parseZone(Meta.meta.time)
-       .add(3, "days")
-       .format("ddd MM/DD")}</strong>
-     </div>
-     <div class="col text-info">
-     <strong>${moment
-       .parseZone(Meta.meta.time)
-       .add(4, "days")
-       .format("ddd MM/DD")}</strong>
-     </div>
-     <div class="col text-info">
-     <strong>${moment
-       .parseZone(Meta.meta.time)
-       .add(5, "days")
-       .format("ddd MM/DD")}</strong>
-     </div>
-     <div class="col text-info">
-     <strong>${moment
-       .parseZone(Meta.meta.time)
-       .add(6, "days")
-       .format("ddd MM/DD")}</strong>
-     </div>
-     </div>`;
-        doShade = false;
-        isActive = false;
-        WWSUslides.slide(`hours-directors`).displayTime = 7;
-        for (let director in calendar) {
-          if (Object.prototype.hasOwnProperty.call(calendar, director)) {
-            isActive = true;
-            let temp = calendar[director].director;
-            WWSUslides.slide(`hours-directors`).displayTime += 3;
-            stuff += `<div class="row shadow-2 ${
-              doShade ? `bg-dark-3` : `bg-dark-2`
-            }">
-     <div class="col-3 shadow-2" style="background-color: ${
-       temp.present
-         ? temp.present === 2
-           ? `rgba(102, 16, 242, 0.25)`
-           : `rgba(56, 142, 60, 0.25)`
-         : `rgba(211, 47, 47, 0.25)`
-     };">
-                <div class="container">
-  <div class="row">
-    <div class="col-4">
-                ${
-                  temp.avatar && temp.avatar !== ""
-                    ? `<img src="${temp.avatar}" width="48" class="rounded-circle">`
-                    : jdenticon.toSvg(`Director ${temp.name}`, 48)
-                }
-    </div>
-    <div class="col-8">
-      <span class="text-white">${temp.name}</span><br />
-      <span class="text-warning" style="font-size: 0.75em;">${
-        temp.position
-      }</span><br />
-      ${
-        temp.present
-          ? temp.present === 2
-            ? `<span class="text-success"><strong>REMOTE</strong></span>`
-            : `<span class="text-success"><strong>IN</strong></span>`
-          : `<span class="text-danger"><strong>OUT</strong></span>`
-      }
-    </div>
-  </div>
-</div>
-     </div>
-     <div class="col" style="font-size: 0.75em;">
-     ${calendar[director][0]}
-     </div>
-     <div class="col" style="font-size: 0.75em;">
-     ${calendar[director][1]}
-     </div>
-     <div class="col" style="font-size: 0.75em;">
-     ${calendar[director][2]}
-     </div>
-     <div class="col" style="font-size: 0.75em;">
-     ${calendar[director][3]}
-     </div>
-     <div class="col" style="font-size: 0.75em;">
-     ${calendar[director][4]}
-     </div>
-     <div class="col" style="font-size: 0.75em;">
-     ${calendar[director][5]}
-     </div>
-     <div class="col" style="font-size: 0.75em;">
-     ${calendar[director][6]}
-     </div>
-     </div>`;
-            if (doShade) {
-              doShade = false;
-            } else {
-              doShade = true;
-            }
-          }
+        // Update display time (7 seconds + 3 for every event)
+        slides.slides.get(`calendar`).displayTime = 7 + 3 * activeEvents;
+
+        // Do not randomly promote shows if we are not in automation
+        if (activeEvents > 0 && Meta.meta.state.startsWith("automation_")) {
+          slides.slides.get(`show-info`).active = true;
+        } else {
+          slides.slides.get(`show-info`).active = false;
         }
 
-        WWSUslides.slide(`hours-directors`).active = isActive;
-        WWSUslides.slide(
-          `hours-directors`
-        ).html = `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Directors</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.75vh;" class="container-full p-2 m-1">${stuff}</div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: One-time office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: One-time cancellation.</span><span class="text-white">9AM - 5PM</span>: Regular office hours.</span></p>`;
-
-        // Assistant hours slide
-        innercontent = ``;
-
-        stuff = `<div class="row shadow-2 bg-dark-1">
-     <div class="col-3 text-info">
-     <strong>Director</strong>
-     </div>
-     <div class="col text-info">
-     <strong>Today</strong>
-     </div>
-     <div class="col text-info">
-     <strong>${moment
-       .parseZone(Meta.meta.time)
-       .add(1, "days")
-       .format("ddd MM/DD")}</strong>
-     </div>
-     <div class="col text-info">
-     <strong>${moment
-       .parseZone(Meta.meta.time)
-       .add(2, "days")
-       .format("ddd MM/DD")}</strong>
-     </div>
-     <div class="col text-info">
-     <strong>${moment
-       .parseZone(Meta.meta.time)
-       .add(3, "days")
-       .format("ddd MM/DD")}</strong>
-     </div>
-     <div class="col text-info">
-     <strong>${moment
-       .parseZone(Meta.meta.time)
-       .add(4, "days")
-       .format("ddd MM/DD")}</strong>
-     </div>
-     <div class="col text-info">
-     <strong>${moment
-       .parseZone(Meta.meta.time)
-       .add(5, "days")
-       .format("ddd MM/DD")}</strong>
-     </div>
-     <div class="col text-info">
-     <strong>${moment
-       .parseZone(Meta.meta.time)
-       .add(6, "days")
-       .format("ddd MM/DD")}</strong>
-     </div>
-     </div>`;
-        doShade = false;
-        isActive = false;
-        WWSUslides.slide(`hours-assistants`).displayTime = 7;
-        for (let director2 in asstcalendar) {
-          if (Object.prototype.hasOwnProperty.call(asstcalendar, director2)) {
-            isActive = true;
-            let temp2 = asstcalendar[director2].director;
-            WWSUslides.slide(`hours-assistants`).displayTime += 3;
-            stuff += `<div class="row shadow-2 ${
-              doShade ? `bg-dark-3` : `bg-dark-2`
-            }">
-     <div class="col-3 shadow-2" style="background-color: ${
-       temp2.present
-         ? temp2.present === 2
-           ? `rgba(102, 16, 242, 0.25)`
-           : `rgba(56, 142, 60, 0.25)`
-         : `rgba(211, 47, 47, 0.25)`
-     };">
-                <div class="container">
-  <div class="row">
-    <div class="col-4">
-                ${
-                  temp2.avatar && temp2.avatar !== ""
-                    ? `<img src="${temp2.avatar}" width="48" class="rounded-circle">`
-                    : jdenticon.toSvg(`Director ${temp2.name}`, 48)
-                }
-    </div>
-    <div class="col-8">
-      <span class="text-white">${temp2.name}</span><br />
-      <span class="text-warning" style="font-size: 0.8em;">${
-        temp2.position
-      }</span><br />
-      ${
-        temp2.present
-          ? temp2.present === 2
-            ? `<span class="text-success"><strong>REMOTE</strong></span>`
-            : `<span class="text-success"><strong>IN</strong></span>`
-          : `<span class="text-danger"><strong>OUT</strong></span>`
-      }
-    </div>
-  </div>
-</div>
-     </div>
-     <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director2][0]}
-     </div>
-     <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director2][1]}
-     </div>
-     <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director2][2]}
-     </div>
-     <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director2][3]}
-     </div>
-     <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director2][4]}
-     </div>
-     <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director2][5]}
-     </div>
-     <div class="col" style="font-size: 0.75em;">
-     ${asstcalendar[director2][6]}
-     </div>
-     </div>`;
-            if (doShade) {
-              doShade = false;
-            } else {
-              doShade = true;
-            }
-          }
-        }
-
-        WWSUslides.slide(`hours-assistants`).active = isActive;
-        WWSUslides.slide(
-          `hours-assistants`
-        ).html = `<h1 style="text-align: center; font-size: 3em; color: #FFFFFF">Office Hours - Assistant Directors</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 1.75vh;" class="container-full p-2 m-1">${stuff}</div><p class="text-white"><span class="m-3"><span class="text-warning">9AM - 5PM</span>: One-time office hours.</span> <span class="m-3"><span class="text-danger"><strike>9AM - 5PM</strike></span>: One-time cancellation.</span><span class="text-white">9AM - 5PM</span>: Regular office hours.</span></p>`;
+        updateDirectorsCalendar();
       },
       undefined,
-      moment
-        .parseZone(Meta.meta ? Meta.meta.time : undefined)
-        .add(7, "days")
-        .toISOString(true)
+      moment.parseZone(Meta.meta.time).add(7, "days").toISOString(true)
     );
-  }, 1000);
-}
-
-// Add a slide for an announcement
-function createAnnouncement(data) {
-  if (data.type.startsWith(`display-internal`)) {
-    WWSUslides.newSlide({
-      name: `attn-${data.ID}`,
-      label: data.title,
-      weight: 0,
-      isSticky: data.type === `display-internal-sticky`,
-      color: data.level,
-      active: true,
-      starts: moment(data.starts),
-      expires: moment(data.expires),
-      transitionIn: `fadeIn`,
-      transitionOut: `fadeOut`,
-      displayTime: data.displayTime || 15,
-      fitContent: true,
-      html: `<div style="overflow-y: hidden; text-shadow: 2px 4px 3px rgba(0,0,0,0.3);" class="text-white" id="content-attn-${data.ID}">${data.announcement}</div>`
-    });
-  }
-}
-
-// This function is called whenever meta is changed. The parameter response contains only the meta that has changed / to be updated.
-function processNowPlaying(response) {
-  if (response) {
-    try {
-      if (typeof response.state !== "undefined") {
-        queueUnknown = true;
-        setTimeout(() => {
-          queueUnknown = false;
-        }, 3000);
-        switch (response.state) {
-          case "automation_on":
-          case "automation_break":
-            nowplaying.style.background = "#495057";
-            break;
-          case "automation_genre":
-            nowplaying.style.background = "#2E4F54";
-          case "automation_playlist":
-            nowplaying.style.background = "#0056B2";
-            break;
-          case "automation_prerecord":
-          case "automation_live":
-          case "automation_remote":
-          case "automation_sports":
-          case "automation_sportsremote":
-            nowplaying.style.background = "#7E3F0A";
-            break;
-          case "live_on":
-          case "live_break":
-          case "live_returning":
-            nowplaying.style.background = "#9E0C1A";
-            break;
-          case "prerecord_on":
-          case "prerecord_break":
-            nowplaying.style.background = "#773B57";
-            break;
-          case "sports_on":
-          case "sports_break":
-          case "sports_halftime":
-          case "sports_returning":
-          case "sportsremote_on":
-          case "sportsremote_break":
-          case "sportsremote_returning":
-          case "sportsremote_halftime":
-          case "sportsremote_break_disconnected":
-            nowplaying.style.background = "#186429";
-            break;
-          case "remote_on":
-          case "remote_break":
-          case "remote_returning":
-            nowplaying.style.background = "#6610f2";
-            break;
-          default:
-            nowplaying.style.background = "#212529";
-        }
-      }
-
-      // First, process now playing information
-      easDelay -= 1;
-
-      let temp;
-      let countdown;
-      let countdowntext;
-      let countdownclock;
-
-      if (disconnected || typeof Meta.meta.state === "undefined") {
-        djAlert.style.display = "none";
-      }
-
-      let countDown =
-        Meta.meta.countdown !== null
-          ? Math.round(
-              moment(Meta.meta.countdown).diff(
-                moment(Meta.meta.time),
-                "seconds"
-              )
-            )
-          : 1000000;
-      if (countDown < 0) {
-        countDown = 0;
-      }
-      if (countDown > 29) {
-        queueReminder = false;
-      }
-
-      if (typeof response.line1 !== "undefined") {
-        let line1Timer = setTimeout(() => {
-          nowplayingline1.innerHTML = Meta.meta.line1;
-          nowplayingline1.className = ``;
-          if (Meta.meta.line1.length >= 80) {
-            $("#nowplaying-line1").marquee({
-              // duration in milliseconds of the marquee
-              speed: 100,
-              // gap in pixels between the tickers
-              gap: 100,
-              // time in milliseconds before the marquee will start animating
-              delayBeforeStart: 0,
-              // 'left' or 'right'
-              direction: "left",
-              // true or false - should the marquee be duplicated to show an effect of continues flow
-              duplicated: true
-            });
-          }
-        }, 5000);
-
-        $("#nowplaying-line1").animateCss("fadeOut", () => {
-          clearTimeout(line1Timer);
-          nowplayingline1.innerHTML = Meta.meta.line1;
-          if (Meta.meta.line1.length >= 80) {
-            $("#nowplaying-line1").marquee({
-              // duration in milliseconds of the marquee
-              speed: 100,
-              // gap in pixels between the tickers
-              gap: 100,
-              // time in milliseconds before the marquee will start animating
-              delayBeforeStart: 0,
-              // 'left' or 'right'
-              direction: "left",
-              // true or false - should the marquee be duplicated to show an effect of continues flow
-              duplicated: true
-            });
-          } else {
-            $("#nowplaying-line1").animateCss("fadeIn");
-          }
-        });
-      }
-
-      if (typeof response.line2 !== "undefined") {
-        let line2Timer = setTimeout(() => {
-          nowplayingline2.innerHTML = Meta.meta.line2;
-          nowplayingline2.className = ``;
-          if (Meta.meta.line2.length >= 80) {
-            $("#nowplaying-line2").marquee({
-              // duration in milliseconds of the marquee
-              speed: 100,
-              // gap in pixels between the tickers
-              gap: 100,
-              // time in milliseconds before the marquee will start animating
-              delayBeforeStart: 0,
-              // 'left' or 'right'
-              direction: "left",
-              // true or false - should the marquee be duplicated to show an effect of continues flow
-              duplicated: true
-            });
-          }
-        }, 5000);
-
-        $("#nowplaying-line2").animateCss("fadeOut", () => {
-          clearTimeout(line2Timer);
-          nowplayingline2.innerHTML = Meta.meta.line2;
-          if (Meta.meta.line2.length >= 80) {
-            $("#nowplaying-line2").marquee({
-              // duration in milliseconds of the marquee
-              speed: 100,
-              // gap in pixels between the tickers
-              gap: 100,
-              // time in milliseconds before the marquee will start animating
-              delayBeforeStart: 0,
-              // 'left' or 'right'
-              direction: "left",
-              // true or false - should the marquee be duplicated to show an effect of continues flow
-              duplicated: true
-            });
-          } else {
-            $("#nowplaying-line2").animateCss("fadeIn");
-          }
-        });
-      }
-
-      nowplayingtime.innerHTML = `${
-        disconnected
-          ? "DISPLAY DISCONNECTED FROM WWSU"
-          : moment
-              .tz(
-                Meta.meta.time,
-                Meta.meta ? Meta.meta.timezone : moment.tz.guess()
-              )
-              .format("LLLL") || "Unknown WWSU Time"
-      }`;
-
-      if (
-        (Meta.meta.state === "automation_live" ||
-          Meta.meta.state.startsWith("live_")) &&
-        countDown < 60 &&
-        (!Meta.meta.queueCalculating || djAlert.style.display === "inline")
-      ) {
-        djAlert.style.display = "inline";
-        countdown = document.getElementById("countdown");
-        countdowntext = document.getElementById("countdown-text");
-        countdownclock = document.getElementById("countdown-clock");
-        if (!countdown || !countdowntext || !countdownclock) {
-          temp = Meta.meta.show.split(" - ");
-          djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
-                    <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
-                    <div class="m-3 bg-primary text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div>
-                    </div></div>`;
-          countdown = document.getElementById("countdown");
-          countdowntext = document.getElementById("countdown-text");
-          countdownclock = document.getElementById("countdown-clock");
-          countdowntext.innerHTML = `<span class="text-danger">${temp[0]}</span><br />is going live in`;
-          sounds.live.play();
-        }
-        countdownclock.innerHTML = countDown;
-        if (countDown <= 10) {
-          queueReminder = true;
-          $("#dj-alert").css("background-color", "#F44336");
-          setTimeout(() => {
-            $("#dj-alert").css("background-color", `#000000`);
-          }, 250);
-        }
-
-        // When a remote broadcast is about to start
-      } else if (
-        (Meta.meta.state === "automation_remote" ||
-          Meta.meta.state.startsWith("remote_")) &&
-        countDown < 60 &&
-        (!Meta.meta.queueCalculating || djAlert.style.display === "inline")
-      ) {
-        djAlert.style.display = "inline";
-        countdown = document.getElementById("countdown");
-        countdowntext = document.getElementById("countdown-text");
-        countdownclock = document.getElementById("countdown-clock");
-        if (!countdown || !countdowntext || !countdownclock) {
-          temp = Meta.meta.show.split(" - ");
-          djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
-                    <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
-<div class="m-3 bg-purple text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`;
-          countdown = document.getElementById("countdown");
-          countdowntext = document.getElementById("countdown-text");
-          countdownclock = document.getElementById("countdown-clock");
-          countdowntext.innerHTML = "Remote Broadcast starting in";
-          sounds.remote.play();
-        }
-        countdownclock.innerHTML = countDown;
-        // Sports broadcast about to begin
-      } else if (
-        (Meta.meta.state === "automation_sports" ||
-          Meta.meta.state.startsWith("sports_") ||
-          Meta.meta.state === "automation_sportsremote" ||
-          Meta.meta.state.startsWith("sportsremote_")) &&
-        countDown < 60 &&
-        (!Meta.meta.queueCalculating || djAlert.style.display === "inline")
-      ) {
-        djAlert.style.display = "inline";
-        countdown = document.getElementById("countdown");
-        countdowntext = document.getElementById("countdown-text");
-        countdownclock = document.getElementById("countdown-clock");
-        if (!countdown || !countdowntext || !countdownclock) {
-          djAlert.innerHTML = `<div class="animated flash" id="slide-interrupt"><div style="text-align: center; color: #ffffff;" id="countdown">
-                    <h1 style="font-size: 5em; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="countdown-text"></h1>
-<div class="m-3 bg-success text-white shadow-8 rounded-circle" style="font-size: 15em; text-shadow: 4px 8px 8px rgba(0,0,0,0.3);" id="countdown-clock">?</div></div></div>`;
-          countdown = document.getElementById("countdown");
-          countdowntext = document.getElementById("countdown-text");
-          countdownclock = document.getElementById("countdown-clock");
-          countdowntext.innerHTML = `<span class="text-success">${Meta.meta.show}</span><br />about to broadcast in`;
-          sounds.sports.play();
-        }
-        countdownclock.innerHTML = countDown;
-        if (
-          Meta.meta.state === "automation_sports" ||
-          Meta.meta.state.startsWith("sports_")
-        ) {
-          if (countDown <= 10) {
-            queueReminder = true;
-            $("#dj-alert").css("background-color", "#4CAF50");
-            setTimeout(() => {
-              $("#dj-alert").css("background-color", `#000000`);
-            }, 250);
-          }
-        }
-        // Nothing special to show
-      } else {
-        djAlert.style.display = "none";
-        djAlert.innerHTML = ``;
-      }
-    } catch (e) {
-      console.error(e);
-      iziToast.show({
-        title: "An error occurred - Please check the logs",
-        message: "Error occurred during processNowPlaying."
-      });
-    }
-  }
+  }, 3000);
 }
 
 // Check for new Eas alerts and push them out when necessary.
@@ -1602,7 +801,7 @@ function processEas(db) {
     // eslint-disable-next-line no-unused-lets
     let displayTime = 7;
 
-    db.each(dodo => {
+    db.each((dodo) => {
       try {
         prevEas.push(dodo.ID);
 
@@ -1613,76 +812,67 @@ function processEas(db) {
           easExtreme = true;
         }
 
-        let color =
-          typeof dodo.color !== "undefined" &&
-          /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(dodo.color)
-            ? hexRgb(dodo.color)
-            : hexRgb("#787878");
-        let borderclass = "black";
-        color.red = Math.round(color.red / 2);
-        color.green = Math.round(color.green / 2);
-        color.blue = Math.round(color.blue / 2);
+        let colorClass = "secondary";
         if (typeof dodo["severity"] !== "undefined") {
           if (dodo["severity"] === "Extreme") {
-            borderclass = "danger";
+            colorClass = "danger";
           } else if (dodo["severity"] === "Severe") {
-            borderclass = "warning";
+            colorClass = "orange";
           } else if (dodo["severity"] === "Moderate") {
-            borderclass = "primary";
+            colorClass = "warning";
+          } else {
+            colorClass = "primary";
           }
         }
         // LINT LIES: This letiable is used.
         // eslint-disable-next-line no-unused-lets
-        color = `rgb(${color.red}, ${color.green}, ${color.blue});`;
-        if (isLightTheme) {
-          color = `rgb(${color.red / 4 + 191}, ${color.green / 4 +
-            191}, ${color.blue / 4 + 191});`;
-        }
-        innercontent += `<div style="width: 32%;" class="d-flex align-items-stretch m-1 ${
-          !isLightTheme ? `text-white` : `text-dark`
-        } border border-${borderclass} rounded shadow-4 ${
-          !isLightTheme ? `bg-dark-4` : `bg-light-1`
-        }">
-                        <div class="m-1" style="text-align: center; width: 100%"><span class="${
-                          !isLightTheme ? `text-white` : `text-dark`
-                        }" style="font-size: 1.5em;">${
-          typeof dodo["alert"] !== "undefined" ? dodo["alert"] : "Unknown Alert"
-        }</span><br />
-                        <span style="font-size: 1em;" class="${
-                          !isLightTheme ? `text-white` : `text-dark`
-                        }">${
-          moment(dodo["starts"]).isValid()
-            ? moment
-                .tz(
-                  dodo["starts"],
-                  Meta.meta ? Meta.meta.timezone : moment.tz.guess()
-                )
-                .format("MM/DD h:mmA")
-            : "UNKNOWN"
-        } - ${
-          moment(dodo["expires"]).isValid()
-            ? moment
-                .tz(
-                  dodo["expires"],
-                  Meta.meta ? Meta.meta.timezone : moment.tz.guess()
-                )
-                .format("MM/DD h:mmA")
-            : "UNKNOWN"
-        }</span><br />
-<span style="font-size: 1em;" class="${
-          !isLightTheme ? `text-white` : `text-dark`
-        }">${
-          typeof dodo["counties"] !== "undefined"
-            ? dodo["counties"]
-            : "Unknown Counties"
-        }</span><br /></div>
-                        </div>
-                        `;
+
+        innercontent += `<div class="col-4">
+          <div class="card card-${colorClass}">
+              <div class="card-header">
+                <h3 class="card-title text-center" style="font-size: 2vh;"><strong>${
+                  typeof dodo["alert"] !== "undefined"
+                    ? dodo["alert"]
+                    : "Unknown Alert"
+                }</strong></h3>
+              </div>
+
+              <div class="card-body" style="font-size: 2vh;">
+                <p>Counties: ${
+                  typeof dodo["counties"] !== "undefined"
+                    ? dodo["counties"]
+                    : "Unknown Counties"
+                }</p>
+              </div>
+
+              <div class="card-footer" style="font-size: 2vh;">
+              Effective ${
+                moment(dodo["starts"]).isValid()
+                  ? moment
+                      .tz(
+                        dodo["starts"],
+                        Meta.meta ? Meta.meta.timezone : moment.tz.guess()
+                      )
+                      .format("MM/DD h:mm A")
+                  : "UNKNOWN"
+              } - ${
+            moment(dodo["expires"]).isValid()
+              ? moment
+                  .tz(
+                    dodo["expires"],
+                    Meta.meta ? Meta.meta.timezone : moment.tz.guess()
+                  )
+                  .format("MM/DD h:mm A")
+              : "UNKNOWN"
+          }
+              </div>
+            </div>
+          </div>`;
       } catch (e) {
         console.error(e);
         iziToast.show({
           title: "An error occurred - Please check the logs",
-          message: `Error occurred during Eas iteration in processEas.`
+          message: `Error occurred during Eas iteration in processEas.`,
         });
       }
     });
@@ -1691,15 +881,11 @@ function processEas(db) {
       innercontent = `<strong class="text-white">No active alerts</strong>`;
     }
 
-    WWSUslides.slide(`eas-alerts`).active = makeActive;
-    WWSUslides.slide(`eas-alerts`).displayTime = displayTime;
-    WWSUslides.slide(
+    slides.slides.get(`eas-alerts`).active = makeActive;
+    slides.slides.get(`eas-alerts`).displayTime = displayTime;
+    slides.slides.get(
       `eas-alerts`
-    ).html = `<h1 style="text-align: center; font-size: 3em; color: ${
-      !isLightTheme ? `#ffffff` : `#000000`
-    }">WWSU EAS - Active Alerts</h1><h2 style="text-align: center; font-size: 1.5em; color: ${
-      !isLightTheme ? `#ffffff` : `#000000`
-    }">Clark, Greene, and Montgomery counties of Ohio</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap">${innercontent}</div>`;
+    ).html = `<h1 style="text-align: center; font-size: 7vh;">WWSU Emergency Alert System</h1><h2 style="text-align: center; font-size: 5vh;">Active Alerts</h2><h3 style="text-align: center; font-size: 3vh;">Clark, Greene, and Montgomery counties of Ohio</h3><div class="container-fluid"><div class="row">${innercontent}</div></div>`;
 
     // Do EAS events
     doEas();
@@ -1707,7 +893,7 @@ function processEas(db) {
     console.error(e);
     iziToast.show({
       title: "An error occurred - Please check the logs",
-      message: "Error occurred during the call of Eas[0]."
+      message: "Error occurred during the call of Eas[0].",
     });
   }
 }
@@ -1761,17 +947,17 @@ function doEas() {
         color4 = `rgb(${color4.red}, ${color4.green}, ${color4.blue})`;
         easAlert.style.display = "inline";
         easAlert.style.backgroundColor = `#0000ff`;
-        easAlert.innerHTML = `<div class="animated heartBeat" id="slide-interrupt-eas"><div style="text-align: center; color: #ffffff;">
-                    <h1 style="font-size: 7vh;">WWSU Emergency Alert System</h1>
-                    <div id="eas-alert-text" class="m-3 text-white" style="font-size: 5vh;">${alert}</div>
-                    <div class="m-1 text-white" style="font-size: 3vh;">Effective ${
+        easAlert.innerHTML = `<div class="animated flash slower" id="slide-interrupt-eas"><div style="text-align: center; color: #ffffff;">
+                    <h1 class="text-warning" style="font-size: 10vh;">WWSU Emergency Alert System</h1>
+                    <div id="eas-alert-text" class="m-3 text-white" style="font-size: 7vh;">${alert}</div>
+                    <div class="m-1 text-lime" style="font-size: 5vh;">Effective ${
                       moment(newEas[0]["starts"]).isValid()
                         ? moment
                             .tz(
                               newEas[0]["starts"],
                               Meta.meta ? Meta.meta.timezone : moment.tz.guess()
                             )
-                            .format("MM/DD h:mmA")
+                            .format("MM/DD h:mm A")
                         : "UNKNOWN"
                     } - ${
           moment(newEas[0]["expires"]).isValid()
@@ -1780,24 +966,22 @@ function doEas() {
                   newEas[0]["expires"],
                   Meta.meta ? Meta.meta.timezone : moment.tz.guess()
                 )
-                .format("MM/DD h:mmA")
+                .format("MM/DD h:mm A")
             : "UNKNOWN"
         }</div>
-                    <div class="m-1 text-white" style="font-size: 3vh;">for the counties ${
+                    <div class="m-1 text-lime" style="font-size: 5vh;">for the counties ${
                       typeof newEas[0]["counties"] !== "undefined"
                         ? newEas[0]["counties"]
                         : "Unknown Counties"
                     }</div>
-                    <div id="alert-marquee" class="marquee m-3 shadow-4" style="color: #FFFFFF; background: rgb(${Math.round(
-                      color2.red / 4
-                    )}, ${Math.round(color2.green / 4)}, ${Math.round(
-          color2.blue / 4
-        )}); font-size: 5vh;">${text}</div>
+                    <div id="alert-marquee" class="marquee shadow-4 p-5 text-white" style="font-size: 7vh;">${text}</div>
                     </div></div>`;
-        sounds.severeeas.play();
+        if (!isStudio) {
+          sounds.severeeas.play();
+        }
         if (easExtreme) {
           easAlert.style.display = "inline";
-          easAlert.innerHTML += `<h2 style="text-align: center; font-size: 5vh;" class="text-white"><strong>LIFE-THREATENING ALERTS IN EFFECT!</strong> Please stand by for details...</h2>`;
+          easAlert.innerHTML += `<div style="text-align: center; font-size: 7vh;" class="text-white m-5 p-5"><strong class="text-danger">LIFE-THREATENING ALERTS IN EFFECT!</strong><br /> Please stand by for details...</div>`;
         }
         $("#alert-marquee")
           .bind("finished", () => {
@@ -1812,21 +996,21 @@ function doEas() {
               console.error(e);
               iziToast.show({
                 title: "An error occurred - Please check the logs",
-                message: `Error occurred in the finished bind of #alert-marquee in doEas.`
+                message: `Error occurred in the finished bind of #alert-marquee in doEas.`,
               });
             }
           })
           .marquee({
             // duration in milliseconds of the marquee
-            speed: 180,
+            speed: 250,
             // gap in pixels between the tickers
-            gap: 50,
+            gap: 300,
             // time in milliseconds before the marquee will start animating
-            delayBeforeStart: 2000,
+            delayBeforeStart: 3000,
             // 'left' or 'right'
             direction: "left",
             // true or false - should the marquee be duplicated to show an effect of continues flow
-            duplicated: false
+            duplicated: false,
           });
         /*
         clearInterval(flashInterval);
@@ -1857,16 +1041,15 @@ function doEas() {
       clearInterval(flashInterval);
       let voiceCount = 180;
       flashInterval = setInterval(() => {
-        $("#eas-alert").css("background-color", "#D50000");
+        $("#eas-alert").addClass("bg-danger");
         setTimeout(() => {
-          $("#eas-alert").css(
-            "background-color",
-            !isLightTheme ? `#320000` : `#f6cccc`
-          );
+          $("#eas-alert").removeClass("bg-danger");
           voiceCount++;
           if (voiceCount > 179) {
             voiceCount = 0;
-            sounds.lifethreatening.play();
+            if (!isStudio) {
+              sounds.lifethreatening.play();
+            }
           }
         }, 250);
       }, 1000);
@@ -1874,18 +1057,12 @@ function doEas() {
       // Display the extreme alerts
       easAlert.style.display = "inline";
       easAlert.innerHTML = `<div id="slide-interrupt-eas">
-            <h1 style="text-align: center; font-size: 7vh; color: ${
-              !isLightTheme ? `#ffffff` : `#000000`
-            };">WWSU Emergency Alert System</h1>
-            <h2 style="text-align: center; font-size: 5vh;" class="${
-              !isLightTheme ? `text-white` : `text-dark`
-            }">Extreme Alerts in effect</h2>
-            <h2 style="text-align: center; font-size: 5vh;" class="${
-              !isLightTheme ? `text-white` : `text-dark`
-            }">SEEK SHELTER NOW!!!</h2>
-            <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="alerts"></div></div>`;
+            <h1 style="text-align: center; font-size: 10vh;">WWSU Emergency Alert System</h1>
+            <h2 style="text-align: center; font-size: 7vh;" class="text-danger">Life Threatening Alerts in Effect</h2>
+            <h2 style="text-align: center; font-size: 7vh;" class="text-warning"><strong>TAKE ACTION NOW TO PROTECT YOUR LIFE!</strong></h2>
+            <div class="container-fluid"> <div class="row" id="alerts"></div></div></div>`;
       let innercontent = document.getElementById("alerts");
-      Eas.find({ severity: "Extreme" }).forEach(dodo => {
+      Eas.find({ severity: "Extreme" }).forEach((dodo) => {
         try {
           let color = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(dodo.color)
             ? hexRgb(dodo.color)
@@ -1895,51 +1072,52 @@ function doEas() {
           color = `rgb(${Math.round(color.red / 4)}, ${Math.round(
             color.green / 4
           )}, ${Math.round(color.blue / 4)});`;
-          innercontent.innerHTML += `<div style="width: 32%;${
-            !isLightTheme ? `background-color: ${color}` : ``
-          }" class="d-flex align-items-stretch m-1 ${
-            !isLightTheme ? `text-white` : `text-dark bg-light-1`
-          } border border-${borderclass} rounded shadow-4">
-                        <div class="m-1" style="text-align: center; width: 100%"><span style="font-size: 5vh;">${
-                          typeof dodo["alert"] !== "undefined"
-                            ? dodo["alert"]
-                            : "Unknown Alert"
-                        }</span><br />
-                        <span style="font-size: 2vh;" class="${
-                          !isLightTheme ? `text-white` : `text-dark`
-                        }">${
-            moment(dodo["starts"]).isValid()
-              ? moment
-                  .tz(
-                    dodo["starts"],
-                    Meta.meta ? Meta.meta.timezone : moment.tz.guess()
-                  )
-                  .format("MM/DD h:mmA")
-              : "UNKNOWN"
-          } - ${
+          innercontent.innerHTML += `<div class="col-4">
+          <div class="card card-danger">
+              <div class="card-header">
+                <h3 class="card-title text-center" style="font-size: 3vh;"><strong>${
+                  typeof dodo["alert"] !== "undefined"
+                    ? dodo["alert"]
+                    : "Unknown Alert"
+                }</strong></h3>
+              </div>
+
+              <div class="card-body" style="font-size: 3vh;">
+                <p>Counties: ${
+                  typeof dodo["counties"] !== "undefined"
+                    ? dodo["counties"]
+                    : "Unknown Counties"
+                }</p>
+              </div>
+
+              <div class="card-footer" style="font-size: 3vh;">
+              Effective ${
+                moment(dodo["starts"]).isValid()
+                  ? moment
+                      .tz(
+                        dodo["starts"],
+                        Meta.meta ? Meta.meta.timezone : moment.tz.guess()
+                      )
+                      .format("MM/DD h:mm A")
+                  : "UNKNOWN"
+              } - ${
             moment(dodo["expires"]).isValid()
               ? moment
                   .tz(
                     dodo["expires"],
                     Meta.meta ? Meta.meta.timezone : moment.tz.guess()
                   )
-                  .format("MM/DD h:mmA")
+                  .format("MM/DD h:mm A")
               : "UNKNOWN"
-          }</span><br />
-<span style="font-size: 1em;" class="${
-            !isLightTheme ? `text-white` : `text-dark`
-          }">${
-            typeof dodo["counties"] !== "undefined"
-              ? dodo["counties"]
-              : "Unknown Counties"
-          }</span><br />
-                        </div>
-                        `;
+          }
+              </div>
+            </div>
+          </div>`;
         } catch (e) {
           console.error(e);
           iziToast.show({
             title: "An error occurred - Please check the logs",
-            message: `Error occurred during Eas iteration in doEas.`
+            message: `Error occurred during Eas iteration in doEas.`,
           });
         }
       });
@@ -1964,8 +1142,302 @@ function doEas() {
     console.error(e);
     iziToast.show({
       title: "An error occurred - Please check the logs",
-      message: "Error occurred during doEas."
+      message: "Error occurred during doEas.",
     });
+  }
+}
+
+// This function is called whenever meta is changed. The parameter response contains only the meta that has changed / to be updated.
+function processNowPlaying(response) {
+  if (response) {
+    try {
+      if (typeof response.state !== "undefined") {
+        queueUnknown = true;
+        setTimeout(() => {
+          queueUnknown = false;
+        }, 3000);
+        switch (response.state) {
+          case "automation_on":
+          case "automation_break":
+            nowplaying.style.background = Calendar.getColor({ type: "" });
+            break;
+          case "automation_genre":
+            nowplaying.style.background = Calendar.getColor({ type: "genre" });
+          case "automation_playlist":
+            nowplaying.style.background = Calendar.getColor({
+              type: "playlist",
+            });
+            break;
+          case "automation_prerecord":
+          case "automation_live":
+          case "automation_remote":
+          case "automation_sports":
+          case "automation_sportsremote":
+            nowplaying.style.background = "#7E3F0A";
+            break;
+          case "live_on":
+          case "live_break":
+          case "live_returning":
+            nowplaying.style.background = Calendar.getColor({ type: "show" });
+            break;
+          case "prerecord_on":
+          case "prerecord_break":
+            nowplaying.style.background = Calendar.getColor({
+              type: "prerecord",
+            });
+            break;
+          case "sports_on":
+          case "sports_break":
+          case "sports_halftime":
+          case "sports_returning":
+          case "sportsremote_on":
+          case "sportsremote_break":
+          case "sportsremote_returning":
+          case "sportsremote_halftime":
+          case "sportsremote_break_disconnected":
+            nowplaying.style.background = Calendar.getColor({ type: "sports" });
+            break;
+          case "remote_on":
+          case "remote_break":
+          case "remote_returning":
+            nowplaying.style.background = Calendar.getColor({ type: "remote" });
+            break;
+          default:
+            nowplaying.style.background = Calendar.getColor({ type: "" });
+        }
+
+        if (calendar.length > 0 && response.state.startsWith("automation_")) {
+          slides.slides.get(`show-info`).active = true;
+        } else {
+          slides.slides.get(`show-info`).active = false;
+        }
+      }
+
+      // First, process now playing information
+      easDelay -= 1;
+
+      if (
+        typeof response.state !== `undefined` ||
+        typeof response.topic !== `undefined` ||
+        typeof response.show !== `undefined`
+      ) {
+        if (
+          Meta.meta.state.startsWith("live_") ||
+          Meta.meta.state.startsWith("remote_") ||
+          Meta.meta.state.startsWith("sports_") ||
+          Meta.meta.state.startsWith("sportsremote_") ||
+          Meta.meta.state.startsWith("prerecord_")
+        ) {
+          slides.slides.get(`on-air`).active = true;
+          let eventType = ``;
+          if (Meta.meta.state.startsWith("live_")) eventType = "show";
+          if (Meta.meta.state.startsWith("prerecord_")) eventType = "prerecord";
+          if (Meta.meta.state.startsWith("remote_")) eventType = "remote";
+          if (
+            Meta.meta.state.startsWith("sports_") ||
+            Meta.meta.state.startsWith("sportsremote_")
+          )
+            eventType = "sports";
+
+          let showInfo = Meta.meta.show.split(" - ");
+          let innercontent = `<div class="card card-widget widget-user-2 shadow-sm" style="height: 70vh;">
+          <div class="widget-user-header bg-${Calendar.getColorClass({
+            type: eventType,
+          })}" style="font-size: 5vh">
+            <div class="widget-user-image">
+            ${
+              Meta.meta.showLogo
+                ? `<img
+            class="img-circle elevation-2"
+            src="uploads/calendar/logo/${Meta.meta.showLogo}"
+            alt="User Avatar"
+            style="width: 12vh"
+          />`
+                : ``
+            }
+            </div>
+            <h3
+              class="widget-user-desc"
+              style="font-size: 5vh; margin-left: 13vh; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);"
+            >
+              ${showInfo[1]}
+            </h3>
+            <h3
+              class="widget-user-username"
+              style="font-size: 5vh; margin-left: 13vh; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);"
+            >
+            ${showInfo[0]}
+            </h3>
+          </div>
+          <div class="card-body" style="font-size: 4vh; text-shadow: 1px 2px 1px rgba(0,0,0,0.3); height: 45vh;">
+            <div class="container-fluid">
+              <div class="row">
+                <div class="col-6">
+                  ${Meta.meta.topic}
+                </div>
+                <div class="col-6" style="font-size: 5vh;">
+                  <p class="text-danger">Tune in: wwsu1069.org</p>
+                  ${
+                    Meta.meta.webchat
+                      ? `<p class="text-info">Chat with DJ: wwsu1069.org</p>`
+                      : ``
+                  }
+                  <p class="text-warning">Request line: 937-775-5555</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>`;
+          if (Meta.meta.topic.length > 2) {
+            slides.slides.get(`on-air`).displayTime = 20;
+          } else {
+            slides.slides.get(`on-air`).displayTime = 10;
+          }
+          slides.slides.get(
+            `on-air`
+          ).html = `<h1 class="p-1" style="text-align: center; font-size: 5vh; text-shadow: 1px 4px 1px rgba(0,0,0,0.3);">On the Air Right Now</h1>${innercontent}</div>`;
+        } else {
+          slides.slides.get(`on-air`).active = false;
+        }
+      }
+      let countDown =
+        Meta.meta.countdown !== null
+          ? Math.round(
+              moment(Meta.meta.countdown).diff(
+                moment(Meta.meta.time),
+                "seconds"
+              )
+            )
+          : 1000000;
+      if (countDown < 0) {
+        countDown = 0;
+      }
+      if (countDown > 29) {
+        queueReminder = false;
+      }
+      if (typeof response.line1 !== "undefined") {
+        let line1Timer = setTimeout(() => {
+          nowplayingline1.innerHTML = Meta.meta.line1;
+          nowplayingline1.className = `text-center`;
+          if (Meta.meta.line1.length >= 80) {
+            $("#nowplaying-line1").marquee({
+              // duration in milliseconds of the marquee
+              speed: 100,
+              // gap in pixels between the tickers
+              gap: 100,
+              // time in milliseconds before the marquee will start animating
+              delayBeforeStart: 0,
+              // 'left' or 'right'
+              direction: "left",
+              // true or false - should the marquee be duplicated to show an effect of continues flow
+              duplicated: true,
+            });
+          }
+        }, 5000);
+        $("#nowplaying-line1").animateCss("fadeOut", () => {
+          clearTimeout(line1Timer);
+          nowplayingline1.innerHTML = Meta.meta.line1;
+          if (Meta.meta.line1.length >= 80) {
+            $("#nowplaying-line1").marquee({
+              // duration in milliseconds of the marquee
+              speed: 100,
+              // gap in pixels between the tickers
+              gap: 100,
+              // time in milliseconds before the marquee will start animating
+              delayBeforeStart: 0,
+              // 'left' or 'right'
+              direction: "left",
+              // true or false - should the marquee be duplicated to show an effect of continues flow
+              duplicated: true,
+            });
+          } else {
+            $("#nowplaying-line1").animateCss("fadeIn");
+          }
+        });
+      }
+      if (typeof response.line2 !== "undefined") {
+        let line2Timer = setTimeout(() => {
+          nowplayingline2.innerHTML = Meta.meta.line2;
+          nowplayingline2.className = `text-center`;
+          if (Meta.meta.line2.length >= 80) {
+            $("#nowplaying-line2").marquee({
+              // duration in milliseconds of the marquee
+              speed: 100,
+              // gap in pixels between the tickers
+              gap: 100,
+              // time in milliseconds before the marquee will start animating
+              delayBeforeStart: 0,
+              // 'left' or 'right'
+              direction: "left",
+              // true or false - should the marquee be duplicated to show an effect of continues flow
+              duplicated: true,
+            });
+          }
+        }, 5000);
+        $("#nowplaying-line2").animateCss("fadeOut", () => {
+          clearTimeout(line2Timer);
+          nowplayingline2.innerHTML = Meta.meta.line2;
+          if (Meta.meta.line2.length >= 80) {
+            $("#nowplaying-line2").marquee({
+              // duration in milliseconds of the marquee
+              speed: 100,
+              // gap in pixels between the tickers
+              gap: 100,
+              // time in milliseconds before the marquee will start animating
+              delayBeforeStart: 0,
+              // 'left' or 'right'
+              direction: "left",
+              // true or false - should the marquee be duplicated to show an effect of continues flow
+              duplicated: true,
+            });
+          } else {
+            $("#nowplaying-line2").animateCss("fadeIn");
+          }
+        });
+      }
+      nowplayingtime.innerHTML = `${
+        disconnected
+          ? "DISPLAY DISCONNECTED FROM WWSU"
+          : moment
+              .tz(
+                Meta.meta.time,
+                Meta.meta ? Meta.meta.timezone : moment.tz.guess()
+              )
+              .format("LLLL") || "Unknown WWSU Time"
+      }`;
+
+      // For the display that is in the studio, if going live or sports (live) and the countdown drops to 10 seconds, announce an audio warning to guests in the studio
+      if (
+        [
+          "automation_live",
+          "automation_sports",
+          "live_returning",
+          "sports_returning",
+        ].indexOf(Meta.meta.state) !== -1
+      ) {
+        if (countDown <= 10 && isStudio) {
+          if (!queueReminder) {
+            sounds.goingonair.play();
+          }
+          queueReminder = true;
+        }
+      }
+    } catch (e) {
+      console.error(e);
+      iziToast.show({
+        title: "An error occurred - Please check the logs",
+        message: "Error occurred during processNowPlaying.",
+      });
+    }
+  }
+}
+
+function nowPlayingTick() {
+  processNowPlaying({});
+
+  // Every minute, re-process the calendar
+  if (moment(Meta.meta.time).second() === 0) {
+    updateCalendar();
   }
 }
 
@@ -2008,142 +1480,489 @@ function hexRgb(hex, options = {}) {
     console.error(e);
     iziToast.show({
       title: "An error occurred - Please check the logs",
-      message: "Error occurred during hexRgb."
+      message: "Error occurred during hexRgb.",
     });
   }
 }
 
-Shootout.on("insert", "displayinternal", data => {
-  processShootout(data);
-});
-Shootout.on("update", "displayinternal", data => {
-  processShootout(data);
-});
-Shootout.on("replace", "displayinternal", data => {
-  data.get().map(datum => {
-    // On replaces, do not process certain triggers
-    if (["timeStart", "timeStop", "timeResume"].indexOf(datum.name) !== -1)
-      return;
-
-    processShootout(datum);
-  });
-});
-
-function processShootout(data) {
-  // Disable slide after 10 minutes of inactivity
-  clearTimeout(shootoutInactivity);
-  shootoutInactivity = setTimeout(() => {
-    WWSUslides.slide(`shootout`).active = false;
-  }, 1000 * 60 * 10);
-
-  if (data.name === "time") {
-    shootoutTime = parseFloat(data.value);
-    $(".shootout-time").html(
-      moment
-        .duration(shootoutTime, "seconds")
-        .format("mm:ss", { trim: false, precision: 1 })
-    );
-  } else if (data.name === "turn") {
-    for (let i = 1; i <= 4; i++) {
-      if (parseInt(data.value) === i) {
-        $(`.shootout-name${i}`).removeClass("bg-dark");
-        $(`.shootout-name${i}`).addClass("bg-success");
-      } else {
-        $(`.shootout-name${i}`).removeClass("bg-success");
-        $(`.shootout-name${i}`).addClass("bg-dark");
-      }
-    }
-  } else if (data.name.startsWith("name")) {
-    let player = data.name.replace("name", "");
-    if (!data.value || data.value.length < 1) {
-      $(`.shootout-player${player}`).addClass("d-none");
-    } else {
-      $(`.shootout-player${player}`).removeClass("d-none");
-      $(`.shootout-name${player}`).html(data.value);
-    }
-  } else if (data.name.startsWith("score")) {
-    let score = parseInt(data.name.replace("score", ""));
-    switch (parseInt(data.value) - shootoutScore[score - 1]) {
-      case 1:
-        sounds.point1.play();
-        break;
-      case 2:
-        sounds.point2.play();
-        break;
-      case 3:
-        sounds.point3.play();
-        break;
-    }
-    shootoutScore[score - 1] = parseInt(data.value);
-    $(`.shootout-score${score}`).html(data.value);
-    $(`.shootout-score${score}`).animateCss("heartBeat");
-  } else if (data.name === "timeStart") {
-    sounds.beat.stop();
-    clearTimeout(shootoutTimer);
-    clearInterval(shootoutTimer);
-    sounds.begin.play();
-    $(`.shootout-time`).html(
-      moment
-        .duration(shootoutTime, "seconds")
-        .format("mm:ss", { trim: false, precision: 1 })
-    );
-  } else if (data.name === "timeStop") {
-    clearTimeout(shootoutTimer);
-    clearInterval(shootoutTimer);
-    sounds.whistle.play();
-  } else if (data.name === "timeResume") {
-    clearTimeout(shootoutTimer);
-    clearInterval(shootoutTimer);
-    shootoutTimeB = shootoutTimeLeft;
-    sounds.shortbuzz.play();
-    shootoutStartTimer();
-  } else if (data.name === "active") {
-    if (parseInt(data.value) === 1) {
-      WWSUslides.slide(`shootout`).active = true;
-    } else {
-      clearTimeout(shootoutInactivity);
-      WWSUslides.slide(`shootout`).active = false;
-    }
-  } else {
-    $(`.shootout-${data.name}`).html(data.value);
+function createAnnouncement(data) {
+  if (data.type.startsWith(`display-public`)) {
+    slides.add({
+      name: `attn-${data.ID}`,
+      category: `announcements`,
+      label: data.title,
+      weight: 0,
+      isSticky: data.type === `display-public-sticky`,
+      color: data.level,
+      active: true,
+      starts: moment(data.starts),
+      expires: moment(data.expires),
+      transitionIn: `fadeIn`,
+      transitionOut: `fadeOut`,
+      displayTime: data.displayTime || 15,
+      fitContent: true,
+      html: `<div class="bg-dark">${data.announcement}</div>`,
+    });
   }
 }
 
-function shootoutStartTimer() {
-  shootoutStart = moment();
-  $(`.shootout-time`).removeClass("text-warning");
-  $(`.shootout-time`).removeClass("text-danger");
-  clearTimeout(shootoutTimer);
-  clearInterval(shootoutTimer);
-  shootoutTimer = setInterval(() => {
-    shootoutTimeLeft =
-      shootoutTimeB - moment().diff(moment(shootoutStart), "seconds", true);
+function processWeeklyStats(data) {
+  if (!isStudio) {
+    slides.slides.get(
+      `weekly-stats`
+    ).html = `            <h1 style="text-align: center; font-size: 5vh">
+    Analytics last 7 days
+  </h1>
 
-    if (shootoutTimeLeft <= 0) {
-      shootoutTimeLeft = 0;
-      clearTimeout(shootoutTimer);
-      sounds.buzzer.play();
-      sounds.beat.stop();
-      $(`.shootout-time`).removeClass("text-warning");
-      $(`.shootout-time`).addClass("text-danger");
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-7">
+        <div
+          class="card card-success"
+          style="text-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3)"
+        >
+          <div class="card-header">
+            <h3 class="card-title" style="font-size: 4vh">
+              Top 3 Shows
+            </h3>
+          </div>
+
+          <div class="card-body">
+            <div class="container-fluid">
+              <div class="row p-1">
+                <div class="col-1">
+                  <img
+                    src="images/display/first.png"
+                    style="height: 5vh; width: auto"
+                  />
+                </div>
+                <div
+                  class="col-11 text-warning text-weight-bold"
+                  style="font-size: 3vh"
+                >
+                  ${data.topShows[0]}
+                </div>
+              </div>
+              <div class="row p-1">
+                <div class="col-1">
+                  <img
+                    src="images/display/second.png"
+                    style="height: 5vh; width: auto"
+                  />
+                </div>
+                <div class="col-11" style="font-size: 3vh">
+                ${data.topShows[1]}
+                </div>
+              </div>
+              <div class="row p-1">
+                <div class="col-1">
+                  <img
+                    src="images/display/third.png"
+                    style="height: 5vh; width: auto"
+                  />
+                </div>
+                <div class="col-11" style="font-size: 3vh">
+                ${data.topShows[2]}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- /.card-body -->
+
+          <div class="card-footer">
+            Based on online listeners : showtime ratio, FCC
+            compliance, and messages sent / received
+          </div>
+        </div>
+      </div>
+      <div class="col-5">
+        <div
+          class="card card-info"
+          style="text-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3)"
+        >
+          <div class="card-header">
+            <h3 class="card-title" style="font-size: 4vh">
+              Other Top Stats
+            </h3>
+          </div>
+
+          <div class="card-body">
+            <div class="container-fluid">
+              <div class="row p-1">
+                <div class="col-5" style="font-size: 3vh">
+                  Top Genre:
+                </div>
+                <div
+                  class="col-7 text-warning text-weight-bold"
+                  style="font-size: 3vh"
+                >
+                ${data.topGenre}
+                </div>
+              </div>
+              <div class="row p-1">
+                <div class="col-5" style="font-size: 3vh">
+                  Top Playlist:
+                </div>
+                <div
+                  class="col-7 text-warning text-weight-bold"
+                  style="font-size: 3vh"
+                >
+                ${data.topPlaylist}
+                </div>
+              </div>
+              <div class="row p-1">
+                <div class="col-5" style="font-size: 3vh">
+                  Peak Listeners:
+                </div>
+                <div
+                  class="col-7 text-warning text-weight-bold"
+                  style="font-size: 3vh"
+                >
+                  ${data.listenerPeak || 0} (${moment(
+      data.listenerPeakTime
+    ).format("MM/DD h:mm A")})
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row" style="text-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3)">
+      <div class="col-3">
+        <div class="small-box bg-danger">
+          <div class="inner">
+            <h3 style="font-size: 4vh;">${Math.round(data.onAir / 6) / 10}</h3>
+
+            <p style="font-size: 3vh;">On-Air Hours<br /><small>Live, remote, sports, & prerecord</small></p>
+          </div>
+          <div class="icon">
+            <i class="fas fa-microphone"></i>
+          </div>
+          <div class="small-box-footer" style="font-size: 2.5vh;">${
+            Math.round((data.onAir / 60 / (24 * 7)) * 1000) / 10
+          }% of the week</div>
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="small-box bg-info">
+          <div class="inner">
+            <h3 style="font-size: 4vh;">${
+              Math.round((data.listeners || 0) / 6) / 10
+            }</h3>
+
+            <p style="font-size: 3vh;">Online Listener Hours</p>
+          </div>
+          <div class="icon">
+            <i class="fas fa-headphones"></i>
+          </div>
+          <div class="small-box-footer" style="font-size: 2.5vh;">
+          ${
+            data.listeners > 0
+              ? Math.round((data.onAirListeners / data.listeners) * 1000) / 10
+              : 0
+          }% during On-Air Program
+          </div>
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="small-box bg-primary">
+          <div class="inner">
+            <h3 style="font-size: 4vh;">${data.tracksRequested}</h3>
+
+            <p style="font-size: 3vh;">Track Requests Placed</p>
+          </div>
+          <div class="icon">
+            <i class="fas fa-compact-disc"></i>
+          </div>
+          <div class="small-box-footer" style="font-size: 2.5vh;">${
+            data.tracksLiked
+          } Tracks Liked</div>
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="small-box bg-success">
+          <div class="inner">
+            <h3 style="font-size: 4vh;">${
+              data.webMessagesExchanged + data.discordMessagesExchanged
+            }</h3>
+
+            <p style="font-size: 3vh;">Messages Exchanged</p>
+          </div>
+          <div class="icon">
+            <i class="fas fa-comments"></i>
+          </div>
+          <div class="small-box-footer" style="font-size: 2.5vh;">${
+            data.discordMessagesExchanged
+          } were in Discord</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+  }
+}
+
+/**
+ * Update director office hours
+ */
+function updateDirectorsCalendar() {
+  clearTimeout(directorCalendarTimer);
+  directorCalendarTimer = setTimeout(() => {
+    try {
+      let directorHours = {};
+
+      Directors.db().each((director) => {
+        directorHours[director.ID] = {
+          director: director,
+          hours: [],
+          html: ``,
+        };
+      });
+
+      // A list of Office Hours for the directors
+
+      // Define a comparison function that will order calendar events by start time when we run the iteration
+      var compare = function (a, b) {
+        try {
+          if (moment(a.start).valueOf() < moment(b.start).valueOf()) {
+            return -1;
+          }
+          if (moment(a.start).valueOf() > moment(b.start).valueOf()) {
+            return 1;
+          }
+          if (a.ID < b.ID) {
+            return -1;
+          }
+          if (a.ID > b.ID) {
+            return 1;
+          }
+          return 0;
+        } catch (e) {
+          console.error(e);
+          $(document).Toasts("create", {
+            class: "bg-danger",
+            title: "Calendar sort error",
+            subtitle: trackID,
+            autohide: true,
+            delay: 10000,
+            body: `There was a problem in the calendar sort function. Please report this to the engineer at wwsu4@wright.edu.`,
+          });
+        }
+      };
+
+      calendar
+        .sort(compare)
+        .filter((event) => event.type === "office-hours")
+        .map((event) => {
+          // null start or end? Use a default to prevent errors.
+          if (!moment(event.start).isValid()) {
+            event.start = moment(Meta.meta.time).startOf("day");
+          }
+          if (!moment(event.end).isValid()) {
+            event.end = moment(Meta.meta.time).add(1, "days").startOf("day");
+          }
+
+          event.startT =
+            moment(event.start).minutes() === 0
+              ? moment(event.start).format("h")
+              : moment(event.start).format("h:mm");
+          if (
+            (moment(event.start).hours() < 12 &&
+              moment(event.end).hours() >= 12) ||
+            (moment(event.start).hours() >= 12 &&
+              moment(event.end).hours() < 12)
+          ) {
+            event.startT += " " + moment(event.start).format("A");
+          }
+          event.endT =
+            moment(event.end).minutes() === 0
+              ? moment(event.end).format("h A")
+              : moment(event.end).format("h:mm A");
+
+          event.startD1 = moment(event.start).format("ddd");
+          event.startD2 = moment(event.start).format("MM/DD");
+
+          let html = `<div class="row">
+          <div class="col-2">${event.startD1}</div>
+          <div class="col-3">${event.startD2}</div>
+          <div class="col-7">${event.startT} - ${event.endT}</div>
+        </div>`;
+
+          if (event.timeChanged) {
+            html = `<div class="row">
+            <div class="col-2">${event.startD1}</div>
+            <div class="col-3">${event.startD2}</div>
+          <div class="col-7 text-teal">${event.startT} - ${event.endT} (Temp Hours)</div>
+        </div>`;
+          }
+          if (moment(Meta.meta.time).isAfter(moment(event.end))) {
+            html = `<div class="row">
+            <div class="col-2">${event.startD1}</div>
+            <div class="col-3">${event.startD2}</div>
+            <div class="col-7 text-muted"><s>${event.startT} - ${event.endT}</s> (Passed)</div>
+          </div>`;
+          }
+          if (event.scheduleType && event.scheduleType.startsWith("canceled")) {
+            html = `<div class="row">
+            <div class="col-2">${event.startD1}</div>
+            <div class="col-3">${event.startD2}</div>
+            <div class="col-7 text-danger"><s>${event.startT} - ${event.endT}</s> (Canceled)</div>
+          </div>`;
+          }
+
+          if (
+            typeof directorHours[event.director] !== "undefined" &&
+            typeof directorHours[event.director].hours !== "undefined"
+          ) {
+            directorHours[event.director].hours.push(html);
+          }
+        });
+
+      // Build outer director HTML
+      for (let key in directorHours) {
+        if (!Object.prototype.hasOwnProperty.call(directorHours, key)) continue;
+
+        directorHours[key].html = `
+          <div class="col" style="min-width: 20.4vw; max-width: 20.4vw;">
+                  <div
+                    class="p-2 card card-${
+                      directorHours[key].director.present
+                        ? directorHours[key].director.present === 2
+                          ? `indigo`
+                          : `success`
+                        : `danger`
+                    } card-outline position-relative"
+                  >
+                    <div class="ribbon-wrapper ribbon-lg">
+                    ${
+                      directorHours[key].director.present
+                        ? directorHours[key].director.present === 2
+                          ? `<div
+                        class="ribbon bg-indigo"
+                        title="This director is currently doing remote hours."
+                      >
+                        REMOTE
+                      </div>`
+                          : `<div
+                        class="ribbon bg-success"
+                        title="This director is currently doing WWSU office hours."
+                      >
+                        IN OFFICE
+                      </div>`
+                        : `<div
+                      class="ribbon bg-danger"
+                      title="This director is currently clocked out."
+                    >
+                      OUT OF OFFICE
+                    </div>`
+                    }
+                    </div>
+                    <div class="card-body box-profile">
+                      <div class="container-fluid">
+                        <div class="row">
+                          <div class="col-4 p-1">
+                          ${
+                            directorHours[key].director.avatar &&
+                            directorHours[key].director.avatar !== ""
+                              ? `<img class="profile-user-img img-fluid img-circle" width="48" src="uploads/directors/${directorHours[key].director.avatar}">`
+                              : `<div class="text-center">
+                              <div class="bg-danger profile-user-img img-fluid img-circle">${jdenticon.toSvg(
+                                `Director ${directorHours[key].director.name}`,
+                                72
+                              )}</div>
+                              </div>`
+                          }
+                          </div>
+                          <div class="col-8">
+                            <p class="profile-username font-weight-bold" style="font-size: 2vh;">
+                              ${directorHours[key].director.name}
+                            </p>
+
+                            <p class="text-warning" style="font-size: 1.66vh;">
+                            ${directorHours[key].director.position}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <ul class="list-group list-group-unbordered mb-3">
+                        <li class="list-group-item font-weight-bold">
+                          <div class="container-fluid" style="font-size: 1.3vh;">
+                            ${directorHours[key].hours.join("")}
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+          `;
+      }
+
+      // Director Office Hours slide
+      let displayTime = 5;
+      let innerHTML = ``;
+      let directorsActive = false;
+
+      for (let key in directorHours) {
+        if (!Object.prototype.hasOwnProperty.call(directorHours, key)) continue;
+        if (directorHours[key].director.assistant) continue;
+
+        innerHTML += directorHours[key].html;
+        displayTime += 3;
+        directorsActive = true;
+      }
+      slides.slides.get(
+        `hours-directors`
+      ).html = `<h1 style="text-align: center; font-size: 5vh; text-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3);">
+        Director Office Hours (next 7 days)
+      </h1>
+
+      <div class="container-fluid" style="text-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3);">
+        <div class="row">
+          ${innerHTML}
+        </div>
+      </div>
+        `;
+      slides.slides.get(`hours-directors`).displayTime = displayTime;
+      slides.slides.get(`hours-directors`).active = directorsActive;
+
+      // Assistant Director Office Hours slide
+      displayTime = 5;
+      innerHTML = ``;
+      directorsActive = false;
+
+      for (let key in directorHours) {
+        if (!Object.prototype.hasOwnProperty.call(directorHours, key)) continue;
+        if (!directorHours[key].director.assistant) continue;
+
+        innerHTML += directorHours[key].html;
+        displayTime += 3;
+        directorsActive = true;
+      }
+      slides.slides.get(
+        `hours-assistants`
+      ).html = `<h1 style="text-align: center; font-size: 5vh; text-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3);">
+              Assistant Office Hours (next 7 days)
+            </h1>
+      
+            <div class="container-fluid" style="text-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3);">
+              <div class="row">
+                ${innerHTML}
+              </div>
+            </div>
+              `;
+      slides.slides.get(`hours-assistants`).displayTime = displayTime;
+      slides.slides.get(`hours-assistants`).active = directorsActive;
+    } catch (e) {
+      console.error(e);
+      $(document).Toasts("create", {
+        class: "bg-danger",
+        title: "Directors Calendar Error",
+        subtitle: trackID,
+        autohide: true,
+        delay: 10000,
+        body: `There was a problem loading director office hours. Please report this to the engineer at wwsu4@wright.edu.`,
+      });
     }
-
-    $(`.shootout-time`).html(
-      moment
-        .duration(shootoutTimeLeft, "seconds")
-        .format("mm:ss", { trim: false, precision: 1 })
-    );
-
-    if (
-      shootoutTimeLeft > 0 &&
-      shootoutTimeLeft <= 10 &&
-      parseInt(shootoutTimeLeft * 10) % 10 === 0 &&
-      !sounds.countdown.playing()
-    ) {
-      sounds.countdown.play();
-      $(`.shootout-time`).animateCss("pulse");
-      $(`.shootout-time`).removeClass("text-danger");
-      $(`.shootout-time`).addClass("text-warning");
-    }
-  }, 100);
+  }, 1000);
 }
