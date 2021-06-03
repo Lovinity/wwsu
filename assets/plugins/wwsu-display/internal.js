@@ -1501,6 +1501,7 @@ function createAnnouncement(data) {
       transitionOut: `fadeOut`,
       displayTime: data.displayTime || 15,
       fitContent: true,
+      reset: true,
       html: `<div class="bg-dark">${data.announcement}</div>`,
     });
   }
