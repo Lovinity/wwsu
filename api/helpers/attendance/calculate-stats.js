@@ -126,26 +126,30 @@ module.exports = {
             stat.week.showtime > 0
         );
 
-        sails.models.attendance.weeklyAnalytics.topShows.push([
+        sails.models.attendance.weeklyAnalytics.topShows.push(
           records[0]
             ? records[0].name
                 .replace("show: ", "")
                 .replace("remote: ", "")
                 .replace("prerecord: ", "")
-            : "",
+            : ""
+        );
+        sails.models.attendance.weeklyAnalytics.topShows.push(
           records[1]
             ? records[1].name
                 .replace("show: ", "")
                 .replace("remote: ", "")
                 .replace("prerecord: ", "")
-            : "",
+            : ""
+        );
+        sails.models.attendance.weeklyAnalytics.topShows.push(
           records[2]
             ? records[2].name
                 .replace("show: ", "")
                 .replace("remote: ", "")
                 .replace("prerecord: ", "")
-            : "",
-        ]);
+            : ""
+        );
 
         // Next, genres
         records = stats2.filter(
@@ -172,7 +176,8 @@ module.exports = {
           );
 
         // Finally, populate other stats
-        sails.models.attendance.weeklyAnalytics.onAir = stats[-1].week.showtime + stats[-2].week.showtime;
+        sails.models.attendance.weeklyAnalytics.onAir =
+          stats[-1].week.showtime + stats[-2].week.showtime;
         sails.models.attendance.weeklyAnalytics.onAirListeners =
           stats[-1].week.listeners + stats[-2].week.listeners;
         sails.models.attendance.weeklyAnalytics.listeners =
