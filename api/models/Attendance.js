@@ -81,6 +81,16 @@ module.exports = {
       allowNull: true
     },
 
+    listenerPeak: {
+      type: 'number',
+      allowNull: true
+    },
+
+    listenerPeakTime: {
+      type: 'ref',
+      columnType: 'datetime'
+    },
+
     webMessages: {
       type: 'number',
       allowNull: true

@@ -22,6 +22,8 @@ module.exports = {
         showTime: null,
         tuneIns: null,
         listenerMinutes: null,
+        listenerPeak: null,
+        listenerPeakTime: null,
         webMessages: null,
         discordMessages: null,
         missedIDs: [],
@@ -34,7 +36,7 @@ module.exports = {
         signedOnLate: false,
         signedOffEarly: false,
         signedOffLate: false,
-        badPlaylist: false
+        badPlaylist: false,
       };
 
       // Get logs
@@ -115,9 +117,11 @@ module.exports = {
           });
         }
 
-        // Calculate listener minutes and listener tune-ins
+        // Calculate listener minutes, listener peak, and listener tune-ins
         var prevTime = moment(record.actualStart);
         var listenerMinutes = 0;
+        var listenerPeak = 0;
+        var listenerPeakTime = null;
         var tuneIns = 0;
 
         if (listenerRecords && listenerRecords.length > 0) {
@@ -133,6 +137,10 @@ module.exports = {
             if (listener.listeners > prevListeners) {
               tuneIns += listener.listeners - prevListeners;
             }
+            if (listener.listeners > listenerPeak) {
+              listenerPeak = listener.listeners;
+              listenerPeakTime = moment(listener.createdAt).toISOString(true);
+            }
             prevListeners = listener.listeners;
             prevTime = moment(listener.createdAt);
           });
@@ -144,6 +152,8 @@ module.exports = {
           prevListeners;
 
         toUpdate.listenerMinutes = Math.round(listenerMinutes);
+        toUpdate.listenerPeak = listenerPeak;
+        toUpdate.listenerPeakTime = listenerPeakTime;
         toUpdate.tuneIns = tuneIns;
 
         // Calculate web and discord messages

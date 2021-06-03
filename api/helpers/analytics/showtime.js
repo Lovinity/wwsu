@@ -69,6 +69,8 @@ module.exports = {
         showtime: 0,
         tuneins: 0,
         listeners: 0,
+        listenerPeak: 0,
+        listenerPeakTime: null,
         ratio: 1,
         messages: 0,
         shows: 0,
@@ -94,6 +96,8 @@ module.exports = {
         showtime: 0,
         tuneins: 0,
         listeners: 0,
+        listenerPeak: 0,
+        listenerPeakTime: null,
         ratio: 1,
         messages: 0,
         shows: 0,
@@ -119,6 +123,8 @@ module.exports = {
         showtime: 0,
         tuneins: 0,
         listeners: 0,
+        listenerPeak: 0,
+        listenerPeakTime: null,
         ratio: 1,
         messages: 0,
         shows: 0,
@@ -144,6 +150,8 @@ module.exports = {
         showtime: 0,
         tuneins: 0,
         listeners: 0,
+        listenerPeak: 0,
+        listenerPeakTime: null,
         ratio: 1,
         messages: 0,
         shows: 0,
@@ -172,6 +180,8 @@ module.exports = {
         showtime: 0,
         tuneins: 0,
         listeners: 0,
+        listenerPeak: 0,
+        listenerPeakTime: null,
         ratio: 1,
         messages: 0,
         shows: 0,
@@ -197,6 +207,8 @@ module.exports = {
         showtime: 0,
         tuneins: 0,
         listeners: 0,
+        listenerPeak: 0,
+        listenerPeakTime: null,
         ratio: 1,
         messages: 0,
         shows: 0,
@@ -222,6 +234,8 @@ module.exports = {
         showtime: 0,
         tuneins: 0,
         listeners: 0,
+        listenerPeak: 0,
+        listenerPeakTime: null,
         ratio: 1,
         messages: 0,
         shows: 0,
@@ -247,6 +261,8 @@ module.exports = {
         showtime: 0,
         tuneins: 0,
         listeners: 0,
+        listenerPeak: 0,
+        listenerPeakTime: null,
         ratio: 1,
         messages: 0,
         shows: 0,
@@ -276,6 +292,8 @@ module.exports = {
         showtime: 0,
         tuneins: 0,
         listeners: 0,
+        listenerPeak: 0,
+        listenerPeakTime: null,
         ratio: 1,
         messages: 0,
         shows: 0,
@@ -301,6 +319,8 @@ module.exports = {
         showtime: 0,
         tuneins: 0,
         listeners: 0,
+        listenerPeak: 0,
+        listenerPeakTime: null,
         ratio: 1,
         messages: 0,
         shows: 0,
@@ -326,6 +346,8 @@ module.exports = {
         showtime: 0,
         tuneins: 0,
         listeners: 0,
+        listenerPeak: 0,
+        listenerPeakTime: null,
         ratio: 1,
         messages: 0,
         shows: 0,
@@ -351,6 +373,8 @@ module.exports = {
         showtime: 0,
         tuneins: 0,
         listeners: 0,
+        listenerPeak: 0,
+        listenerPeakTime: null,
         ratio: 1,
         messages: 0,
         shows: 0,
@@ -380,6 +404,8 @@ module.exports = {
         showtime: 0,
         tuneins: 0,
         listeners: 0,
+        listenerPeak: 0,
+        listenerPeakTime: null,
         ratio: 1,
         messages: 0,
         shows: 0,
@@ -405,6 +431,8 @@ module.exports = {
         showtime: 0,
         tuneins: 0,
         listeners: 0,
+        listenerPeak: 0,
+        listenerPeakTime: null,
         ratio: 1,
         messages: 0,
         shows: 0,
@@ -430,6 +458,8 @@ module.exports = {
         showtime: 0,
         tuneins: 0,
         listeners: 0,
+        listenerPeak: 0,
+        listenerPeakTime: null,
         ratio: 1,
         messages: 0,
         shows: 0,
@@ -455,6 +485,8 @@ module.exports = {
         showtime: 0,
         tuneins: 0,
         listeners: 0,
+        listenerPeak: 0,
+        listenerPeakTime: null,
         ratio: 1,
         messages: 0,
         shows: 0,
@@ -484,6 +516,8 @@ module.exports = {
         showtime: 0,
         tuneins: 0,
         listeners: 0,
+        listenerPeak: 0,
+        listenerPeakTime: null,
         ratio: 1,
         messages: 0,
         shows: 0,
@@ -509,6 +543,8 @@ module.exports = {
         showtime: 0,
         tuneins: 0,
         listeners: 0,
+        listenerPeak: 0,
+        listenerPeakTime: null,
         ratio: 1,
         messages: 0,
         shows: 0,
@@ -534,6 +570,8 @@ module.exports = {
         showtime: 0,
         tuneins: 0,
         listeners: 0,
+        listenerPeak: 0,
+        listenerPeakTime: null,
         ratio: 1,
         messages: 0,
         shows: 0,
@@ -559,6 +597,8 @@ module.exports = {
         showtime: 0,
         tuneins: 0,
         listeners: 0,
+        listenerPeak: 0,
+        listenerPeakTime: null,
         ratio: 1,
         messages: 0,
         shows: 0,
@@ -590,6 +630,8 @@ module.exports = {
             showtime: 0,
             tuneins: 0,
             listeners: 0,
+            listenerPeak: 0,
+            listenerPeakTime: null,
             ratio: 1,
             messages: 0,
             shows: 0,
@@ -623,6 +665,8 @@ module.exports = {
             showtime: 0,
             tuneins: 0,
             listeners: 0,
+            listenerPeak: 0,
+            listenerPeakTime: null,
             ratio: 1,
             messages: 0,
             shows: 0,
@@ -656,6 +700,8 @@ module.exports = {
             showtime: 0,
             tuneins: 0,
             listeners: 0,
+            listenerPeak: 0,
+            listenerPeakTime: null,
             ratio: 1,
             messages: 0,
             shows: 0,
@@ -689,6 +735,8 @@ module.exports = {
             showtime: 0,
             tuneins: 0,
             listeners: 0,
+            listenerPeak: 0,
+            listenerPeakTime: null,
             ratio: 1,
             messages: 0,
             shows: 0,
@@ -730,6 +778,8 @@ module.exports = {
             showtime: 0,
             tuneins: 0,
             listeners: 0,
+            listenerPeak: 0,
+            listenerPeakTime: null,
             ratio: 1,
             messages: 0,
             remoteCredits: 0,
@@ -766,6 +816,8 @@ module.exports = {
             showtime: 0,
             tuneins: 0,
             listeners: 0,
+            listenerPeak: 0,
+            listenerPeakTime: null,
             ratio: 1,
             messages: 0,
             remoteCredits: 0,
@@ -802,6 +854,8 @@ module.exports = {
             showtime: 0,
             tuneins: 0,
             listeners: 0,
+            listenerPeak: 0,
+            listenerPeakTime: null,
             ratio: 1,
             messages: 0,
             remoteCredits: 0,
@@ -838,6 +892,8 @@ module.exports = {
             showtime: 0,
             tuneins: 0,
             listeners: 0,
+            listenerPeak: 0,
+            listenerPeakTime: null,
             ratio: 1,
             messages: 0,
             remoteCredits: 0,
@@ -1036,6 +1092,11 @@ module.exports = {
             DJs[record[dj]].overall.tuneins += record.tuneIns;
             DJs[record[dj]].overall.listeners += record.listenerMinutes;
             DJs[record[dj]].overall.messages += record.webMessages;
+
+            if (record.listenerPeak > DJs[record[dj]].overall.listenerPeak) {
+              DJs[record[dj]].overall.listenerPeak = record.listenerPeak;
+              DJs[record[dj]].overall.listenerPeakTime = record.listenerPeakTime;
+            }
             if (
               moment(sails.config.custom.startOfSemester).isBefore(
                 moment(record.createdAt)
@@ -1045,6 +1106,11 @@ module.exports = {
               DJs[record[dj]].semester.tuneins += record.tuneIns;
               DJs[record[dj]].semester.listeners += record.listenerMinutes;
               DJs[record[dj]].semester.messages += record.webMessages;
+
+              if (record.listenerPeak > DJs[record[dj]].semester.listenerPeak) {
+                DJs[record[dj]].semester.listenerPeak = record.listenerPeak;
+                DJs[record[dj]].semester.listenerPeakTime = record.listenerPeakTime;
+              }
             }
             if (
               moment()
@@ -1055,6 +1121,11 @@ module.exports = {
               DJs[record[dj]].week.tuneins += record.tuneIns;
               DJs[record[dj]].week.listeners += record.listenerMinutes;
               DJs[record[dj]].week.messages += record.webMessages;
+
+              if (record.listenerPeak > DJs[record[dj]].week.listenerPeak) {
+                DJs[record[dj]].week.listenerPeak = record.listenerPeak;
+                DJs[record[dj]].week.listenerPeakTime = record.listenerPeakTime;
+              }
             }
             if (
               moment(record.createdAt).isSameOrAfter(moment(start)) &&
@@ -1064,6 +1135,11 @@ module.exports = {
               DJs[record[dj]].range.tuneins += record.tuneIns;
               DJs[record[dj]].range.listeners += record.listenerMinutes;
               DJs[record[dj]].range.messages += record.webMessages;
+
+              if (record.listenerPeak > DJs[record[dj]].range.listenerPeak) {
+                DJs[record[dj]].range.listenerPeak = record.listenerPeak;
+                DJs[record[dj]].range.listenerPeakTime = record.listenerPeakTime;
+              }
             }
           }
         });
@@ -1072,6 +1148,11 @@ module.exports = {
         shows[0].overall.tuneins += record.tuneIns;
         shows[0].overall.listeners += record.listenerMinutes;
         shows[0].overall.messages += record.webMessages;
+
+        if (record.listenerPeak > shows[0].overall.listenerPeak) {
+          shows[0].overall.listenerPeak = record.listenerPeak;
+          shows[0].overall.listenerPeakTime = record.listenerPeakTime;
+        }
         if (
           moment(sails.config.custom.startOfSemester).isBefore(
             moment(record.createdAt)
@@ -1081,6 +1162,11 @@ module.exports = {
           shows[0].semester.tuneins += record.tuneIns;
           shows[0].semester.listeners += record.listenerMinutes;
           shows[0].semester.messages += record.webMessages;
+
+          if (record.listenerPeak > shows[0].semester.listenerPeak) {
+            shows[0].semester.listenerPeak = record.listenerPeak;
+            shows[0].semester.listenerPeakTime = record.listenerPeakTime;
+          }
         }
         if (
           moment()
@@ -1091,6 +1177,11 @@ module.exports = {
           shows[0].week.tuneins += record.tuneIns;
           shows[0].week.listeners += record.listenerMinutes;
           shows[0].week.messages += record.webMessages;
+
+          if (record.listenerPeak > shows[0].week.listenerPeak) {
+            shows[0].week.listenerPeak = record.listenerPeak;
+            shows[0].week.listenerPeakTime = record.listenerPeakTime;
+          }
         }
         if (
           moment(record.createdAt).isSameOrAfter(moment(start)) &&
@@ -1100,6 +1191,11 @@ module.exports = {
           shows[0].range.tuneins += record.tuneIns;
           shows[0].range.listeners += record.listenerMinutes;
           shows[0].range.messages += record.webMessages;
+
+          if (record.listenerPeak > shows[0].range.listenerPeak) {
+            shows[0].range.listenerPeak = record.listenerPeak;
+            shows[0].range.listenerPeakTime = record.listenerPeakTime;
+          }
         }
 
         if (
@@ -1111,6 +1207,11 @@ module.exports = {
           shows[-1].overall.tuneins += record.tuneIns;
           shows[-1].overall.listeners += record.listenerMinutes;
           shows[-1].overall.messages += record.webMessages;
+
+          if (record.listenerPeak > shows[-1].overall.listenerPeak) {
+            shows[-1].overall.listenerPeak = record.listenerPeak;
+            shows[-1].overall.listenerPeakTime = record.listenerPeakTime;
+          }
           if (
             moment(sails.config.custom.startOfSemester).isBefore(
               moment(record.createdAt)
@@ -1120,6 +1221,11 @@ module.exports = {
             shows[-1].semester.tuneins += record.tuneIns;
             shows[-1].semester.listeners += record.listenerMinutes;
             shows[-1].semester.messages += record.webMessages;
+
+            if (record.listenerPeak > shows[-1].semester.listenerPeak) {
+              shows[-1].semester.listenerPeak = record.listenerPeak;
+              shows[-1].semester.listenerPeakTime = record.listenerPeakTime;
+            }
           }
           if (
             moment()
@@ -1130,6 +1236,11 @@ module.exports = {
             shows[-1].week.tuneins += record.tuneIns;
             shows[-1].week.listeners += record.listenerMinutes;
             shows[-1].week.messages += record.webMessages;
+
+            if (record.listenerPeak > shows[-1].week.listenerPeak) {
+              shows[-1].week.listenerPeak = record.listenerPeak;
+              shows[-1].week.listenerPeakTime = record.listenerPeakTime;
+            }
           }
           if (
             moment(record.createdAt).isSameOrAfter(moment(start)) &&
@@ -1139,6 +1250,11 @@ module.exports = {
             shows[-1].range.tuneins += record.tuneIns;
             shows[-1].range.listeners += record.listenerMinutes;
             shows[-1].range.messages += record.webMessages;
+
+            if (record.listenerPeak > shows[-1].range.listenerPeak) {
+              shows[-1].range.listenerPeak = record.listenerPeak;
+              shows[-1].range.listenerPeakTime = record.listenerPeakTime;
+            }
           }
         }
 
@@ -1147,6 +1263,11 @@ module.exports = {
           shows[-2].overall.tuneins += record.tuneIns;
           shows[-2].overall.listeners += record.listenerMinutes;
           shows[-2].overall.messages += record.webMessages;
+
+          if (record.listenerPeak > shows[-2].overall.listenerPeak) {
+            shows[-2].overall.listenerPeak = record.listenerPeak;
+            shows[-2].overall.listenerPeakTime = record.listenerPeakTime;
+          }
           if (
             moment(sails.config.custom.startOfSemester).isBefore(
               moment(record.createdAt)
@@ -1156,6 +1277,11 @@ module.exports = {
             shows[-2].semester.tuneins += record.tuneIns;
             shows[-2].semester.listeners += record.listenerMinutes;
             shows[-2].semester.messages += record.webMessages;
+
+            if (record.listenerPeak > shows[-2].semester.listenerPeak) {
+              shows[-2].semester.listenerPeak = record.listenerPeak;
+              shows[-2].semester.listenerPeakTime = record.listenerPeakTime;
+            }
           }
           if (
             moment()
@@ -1166,6 +1292,11 @@ module.exports = {
             shows[-2].week.tuneins += record.tuneIns;
             shows[-2].week.listeners += record.listenerMinutes;
             shows[-2].week.messages += record.webMessages;
+
+            if (record.listenerPeak > shows[-2].week.listenerPeak) {
+              shows[-2].week.listenerPeak = record.listenerPeak;
+              shows[-2].week.listenerPeakTime = record.listenerPeakTime;
+            }
           }
           if (
             moment(record.createdAt).isSameOrAfter(moment(start)) &&
@@ -1175,6 +1306,11 @@ module.exports = {
             shows[-2].range.tuneins += record.tuneIns;
             shows[-2].range.listeners += record.listenerMinutes;
             shows[-2].range.messages += record.webMessages;
+
+            if (record.listenerPeak > shows[-2].range.listenerPeak) {
+              shows[-2].range.listenerPeak = record.listenerPeak;
+              shows[-2].range.listenerPeakTime = record.listenerPeakTime;
+            }
           }
         }
 
@@ -1183,6 +1319,11 @@ module.exports = {
           shows[-3].overall.tuneins += record.tuneIns;
           shows[-3].overall.listeners += record.listenerMinutes;
           shows[-3].overall.messages += record.webMessages;
+
+          if (record.listenerPeak > shows[-3].overall.listenerPeak) {
+            shows[-3].overall.listenerPeak = record.listenerPeak;
+            shows[-3].overall.listenerPeakTime = record.listenerPeakTime;
+          }
           if (
             moment(sails.config.custom.startOfSemester).isBefore(
               moment(record.createdAt)
@@ -1192,6 +1333,11 @@ module.exports = {
             shows[-3].semester.tuneins += record.tuneIns;
             shows[-3].semester.listeners += record.listenerMinutes;
             shows[-3].semester.messages += record.webMessages;
+
+            if (record.listenerPeak > shows[-3].semester.listenerPeak) {
+              shows[-3].semester.listenerPeak = record.listenerPeak;
+              shows[-3].semester.listenerPeakTime = record.listenerPeakTime;
+            }
           }
           if (
             moment()
@@ -1202,6 +1348,11 @@ module.exports = {
             shows[-3].week.tuneins += record.tuneIns;
             shows[-3].week.listeners += record.listenerMinutes;
             shows[-3].week.messages += record.webMessages;
+
+            if (record.listenerPeak > shows[-3].week.listenerPeak) {
+              shows[-3].week.listenerPeak = record.listenerPeak;
+              shows[-3].week.listenerPeakTime = record.listenerPeakTime;
+            }
           }
           if (
             moment(record.createdAt).isSameOrAfter(moment(start)) &&
@@ -1211,6 +1362,11 @@ module.exports = {
             shows[-3].range.tuneins += record.tuneIns;
             shows[-3].range.listeners += record.listenerMinutes;
             shows[-3].range.messages += record.webMessages;
+
+            if (record.listenerPeak > shows[-3].range.listenerPeak) {
+              shows[-3].range.listenerPeak = record.listenerPeak;
+              shows[-3].range.listenerPeakTime = record.listenerPeakTime;
+            }
           }
         }
 
@@ -1219,6 +1375,11 @@ module.exports = {
           shows[-4].overall.tuneins += record.tuneIns;
           shows[-4].overall.listeners += record.listenerMinutes;
           shows[-4].overall.messages += record.webMessages;
+
+          if (record.listenerPeak > shows[-4].overall.listenerPeak) {
+            shows[-4].overall.listenerPeak = record.listenerPeak;
+            shows[-4].overall.listenerPeakTime = record.listenerPeakTime;
+          }
           if (
             moment(sails.config.custom.startOfSemester).isBefore(
               moment(record.createdAt)
@@ -1228,6 +1389,11 @@ module.exports = {
             shows[-4].semester.tuneins += record.tuneIns;
             shows[-4].semester.listeners += record.listenerMinutes;
             shows[-4].semester.messages += record.webMessages;
+
+            if (record.listenerPeak > shows[-4].semester.listenerPeak) {
+              shows[-4].semester.listenerPeak = record.listenerPeak;
+              shows[-4].semester.listenerPeakTime = record.listenerPeakTime;
+            }
           }
           if (
             moment()
@@ -1238,6 +1404,11 @@ module.exports = {
             shows[-4].week.tuneins += record.tuneIns;
             shows[-4].week.listeners += record.listenerMinutes;
             shows[-4].week.messages += record.webMessages;
+
+            if (record.listenerPeak > shows[-4].week.listenerPeak) {
+              shows[-4].week.listenerPeak = record.listenerPeak;
+              shows[-4].week.listenerPeakTime = record.listenerPeakTime;
+            }
           }
           if (
             moment(record.createdAt).isSameOrAfter(moment(start)) &&
@@ -1247,6 +1418,11 @@ module.exports = {
             shows[-4].range.tuneins += record.tuneIns;
             shows[-4].range.listeners += record.listenerMinutes;
             shows[-4].range.messages += record.webMessages;
+
+            if (record.listenerPeak > shows[-4].range.listenerPeak) {
+              shows[-4].range.listenerPeak = record.listenerPeak;
+              shows[-4].range.listenerPeakTime = record.listenerPeakTime;
+            }
           }
         }
 
@@ -1259,6 +1435,11 @@ module.exports = {
           shows[record.calendarID].overall.tuneins += record.tuneIns;
           shows[record.calendarID].overall.listeners += record.listenerMinutes;
           shows[record.calendarID].overall.messages += record.webMessages;
+
+          if (record.listenerPeak > shows[record.calendarID].overall.listenerPeak) {
+            shows[record.calendarID].overall.listenerPeak = record.listenerPeak;
+            shows[record.calendarID].overall.listenerPeakTime = record.listenerPeakTime;
+          }
           if (
             moment(sails.config.custom.startOfSemester).isBefore(
               moment(record.createdAt)
@@ -1269,6 +1450,11 @@ module.exports = {
             shows[record.calendarID].semester.listeners +=
               record.listenerMinutes;
             shows[record.calendarID].semester.messages += record.webMessages;
+
+            if (record.listenerPeak > shows[record.calendarID].semester.listenerPeak) {
+              shows[record.calendarID].semester.listenerPeak = record.listenerPeak;
+              shows[record.calendarID].semester.listenerPeakTime = record.listenerPeakTime;
+            }
           }
           if (
             moment()
@@ -1279,6 +1465,11 @@ module.exports = {
             shows[record.calendarID].week.tuneins += record.tuneIns;
             shows[record.calendarID].week.listeners += record.listenerMinutes;
             shows[record.calendarID].week.messages += record.webMessages;
+
+            if (record.listenerPeak > shows[record.calendarID].week.listenerPeak) {
+              shows[record.calendarID].week.listenerPeak = record.listenerPeak;
+              shows[record.calendarID].week.listenerPeakTime = record.listenerPeakTime;
+            }
           }
           if (
             moment(record.createdAt).isSameOrAfter(moment(start)) &&
@@ -1288,6 +1479,11 @@ module.exports = {
             shows[record.calendarID].range.tuneins += record.tuneIns;
             shows[record.calendarID].range.listeners += record.listenerMinutes;
             shows[record.calendarID].range.messages += record.webMessages;
+
+            if (record.listenerPeak > shows[record.calendarID].range.listenerPeak) {
+              shows[record.calendarID].range.listenerPeak = record.listenerPeak;
+              shows[record.calendarID].range.listenerPeakTime = record.listenerPeakTime;
+            }
           }
         }
 

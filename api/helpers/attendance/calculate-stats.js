@@ -6,7 +6,7 @@ module.exports = {
 
   inputs: {},
 
-  fn: async function(inputs, exits) {
+  fn: async function (inputs, exits) {
     sails.log.debug("Helper attendance.calculateStats called.");
 
     try {
@@ -25,15 +25,18 @@ module.exports = {
         topGenre: "None",
         topPlaylist: "None",
         onAir: 0,
+        listeners: 0,
         onAirListeners: 0,
+        listenerPeak: 0,
+        listenerPeakTime: null,
         tracksLiked: 0,
         tracksRequested: 0,
         webMessagesExchanged: 0,
-        discordMessagesExchanged: 0
+        discordMessagesExchanged: 0,
       };
 
       // Define compare function for sorting records;
-      var compare = function(a, b) {
+      var compare = function (a, b) {
         var aWeek = a.week;
         var bWeek = b.week;
 
@@ -71,98 +74,113 @@ module.exports = {
         return bScore - aScore;
       };
 
+      // Sort array in place
+      stats2.sort(compare);
+
       // Prepare parallel function 1
       var f1 = async () => {
         // Grab count of liked tracks from last week
-        sails.models.attendance.weeklyAnalytics.tracksLiked = await sails.models.songsliked.count(
-          { createdAt: { ">=": earliest.toISOString(true) } }
-        );
+        sails.models.attendance.weeklyAnalytics.tracksLiked =
+          await sails.models.songsliked.count({
+            createdAt: { ">=": earliest.toISOString(true) },
+          });
 
         // Grab count of requested tracks
-        sails.models.attendance.weeklyAnalytics.tracksRequested = await sails.models.requests.count(
-          { createdAt: { ">=": earliest.toISOString(true) } }
-        );
+        sails.models.attendance.weeklyAnalytics.tracksRequested =
+          await sails.models.requests.count({
+            createdAt: { ">=": earliest.toISOString(true) },
+          });
 
         // Grab count of webMessagesExchanged
-        sails.models.attendance.weeklyAnalytics.webMessagesExchanged = await sails.models.messages.count(
-          {
+        sails.models.attendance.weeklyAnalytics.webMessagesExchanged =
+          await sails.models.messages.count({
             status: "active",
             or: [
               { from: { startsWith: "website" } },
-              { to: { startsWith: "website" } }
+              { to: { startsWith: "website" } },
             ],
-            createdAt: { ">=": earliest.toISOString(true) }
-          }
-        );
+            createdAt: { ">=": earliest.toISOString(true) },
+          });
 
         // Grab count of discordMessagesExchanged
-        sails.models.attendance.weeklyAnalytics.discordMessagesExchanged = await sails.models.messages.count(
-          {
+        sails.models.attendance.weeklyAnalytics.discordMessagesExchanged =
+          await sails.models.messages.count({
             status: "active",
             or: [
               { from: { startsWith: "discord-" } },
-              { to: { startsWith: "discord-" } }
+              { to: { startsWith: "discord-" } },
             ],
-            createdAt: { ">=": earliest.toISOString(true) }
-          }
-        );
+            createdAt: { ">=": earliest.toISOString(true) },
+          });
       };
 
       // Prepare parallel function 2
       var f2 = async () => {
+        let records;
         // Start with shows, remotes, and prerecords
-        stats2
-          .filter(
-            stat =>
-              (stat.name.toLowerCase().startsWith("show: ") ||
-                stat.name.toLowerCase().startsWith("remote: ") ||
-                stat.name.toLowerCase().startsWith("prerecord: ")) &&
-              stat.week.showtime > 0
-          )
-          .sort(compare)
-          .map((stat, index) => {
-            if (index > 2) return;
-            sails.models.attendance.weeklyAnalytics.topShows.push(
-              stat.name
+        records = stats2.filter(
+          (stat) =>
+            (stat.name.toLowerCase().startsWith("show: ") ||
+              stat.name.toLowerCase().startsWith("remote: ") ||
+              stat.name.toLowerCase().startsWith("prerecord: ")) &&
+            stat.week.showtime > 0
+        );
+
+        sails.models.attendance.weeklyAnalytics.topShows.push([
+          records[0]
+            ? records[0].name
                 .replace("show: ", "")
                 .replace("remote: ", "")
                 .replace("prerecord: ", "")
-            );
-          });
+            : "",
+          records[1]
+            ? records[1].name
+                .replace("show: ", "")
+                .replace("remote: ", "")
+                .replace("prerecord: ", "")
+            : "",
+          records[2]
+            ? records[2].name
+                .replace("show: ", "")
+                .replace("remote: ", "")
+                .replace("prerecord: ", "")
+            : "",
+        ]);
 
         // Next, genres
-        stats2
-          .filter(
-            stat =>
-              stat.name.toLowerCase().startsWith("genre: ") &&
-              stat.week.showtime > 0
-          )
-          .sort(compare)
-          .map((stat, index) => {
-            if (index > 0) return;
-            sails.models.attendance.topGenre = stat.name.split(" - ")[1];
-          });
+        records = stats2.filter(
+          (stat) =>
+            stat.name.toLowerCase().startsWith("genre: ") &&
+            stat.week.showtime > 0
+        );
+        if (records[0])
+          sails.models.attendance.topGenre = records[0].name.replace(
+            "genre: ",
+            ""
+          );
 
         // Next, playlists
-        stats2
-          .filter(
-            stat =>
-              stat.name.toLowerCase().startsWith("playlist: ") &&
-              stat.week.showtime > 0
-          )
-          .sort(compare)
-          .map((stat, index) => {
-            if (index > 0) return;
-            sails.models.attendance.weeklyAnalytics.topPlaylist = stat.name.replace(
-              "playlist: ",
-              ""
-            );
-          });
+        records = stats2.filter(
+          (stat) =>
+            stat.name.toLowerCase().startsWith("playlist: ") &&
+            stat.week.showtime > 0
+        );
+        if (records[0])
+          sails.models.attendance.topPlaylist = records[0].name.replace(
+            "playlist: ",
+            ""
+          );
 
         // Finally, populate other stats
         sails.models.attendance.weeklyAnalytics.onAir = stats[-1].week.showtime;
         sails.models.attendance.weeklyAnalytics.onAirListeners =
           stats[-1].week.listeners;
+        sails.models.attendance.weeklyAnalytics.listeners =
+          stats[0].week.listeners;
+        sails.models.attendance.weeklyAnalytics.listenerPeak =
+          stats[0].week.listenerPeak;
+        sails.models.attendance.weeklyAnalytics.listenerPeakTime =
+          stats[0].week.listenerPeakTime;
       };
 
       // Execute our parallel functions and wait for them to resolve.
@@ -179,5 +197,5 @@ module.exports = {
     } catch (e) {
       return exits.error(e);
     }
-  }
+  },
 };

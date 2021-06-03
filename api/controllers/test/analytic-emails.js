@@ -6,105 +6,22 @@ module.exports = {
   inputs: {
     ID: {
       type: "number",
-      required: true
+      required: true,
     },
     problemTerminated: {
       type: "boolean",
-      defaultsTo: false
-    }
+      defaultsTo: false,
+    },
   },
 
   fn: async function (inputs) {
     // Add actualEnd
-    var currentRecord = await sails.models.attendance.findOne(
-      { ID: inputs.ID },
-    );
+    var currentRecord = await sails.models.attendance.findOne({
+      ID: inputs.ID,
+    });
 
     if (currentRecord) {
       var event = currentRecord.event.split(": ");
-      if (!inputs.problemTerminated) {
-        // Log if actualEnd was 10 or more minutes before scheduledEnd
-        if (
-          currentRecord &&
-          currentRecord.scheduledEnd &&
-          moment()
-            .add(10, "minutes")
-            .isSameOrBefore(moment(currentRecord.scheduledEnd)) &&
-          (currentRecord.event.toLowerCase().startsWith("show:") ||
-            currentRecord.event.toLowerCase().startsWith("sports:") ||
-            currentRecord.event.toLowerCase().startsWith("remote:") ||
-            currentRecord.event.toLowerCase().startsWith("prerecord:") ||
-            currentRecord.event.toLowerCase().startsWith("playlist:"))
-        ) {
-          await sails.models.logs
-            .create({
-              attendanceID: currentRecord.ID,
-              logtype: "sign-off-early",
-              loglevel: "warning",
-              logsubtype: `${event[1]}`,
-              logIcon: sails.models.calendar.calendardb.getIconClass({
-                type: event[0],
-              }),
-              title: `The broadcast signed off 10 or more minutes early.`,
-              event: `${currentRecord.event}`,
-              createdAt: moment().toISOString(true),
-            })
-            .fetch()
-            .tolerate((err) => {
-              sails.log.error(err);
-            });
-        }
-
-        // Log if actualEnd was 5 or more minutes after scheduledEnd
-        if (
-          currentRecord &&
-          currentRecord.scheduledEnd &&
-          moment()
-            .subtract(5, "minutes")
-            .isSameOrAfter(moment(currentRecord.scheduledEnd)) &&
-          (currentRecord.event.toLowerCase().startsWith("show:") ||
-            currentRecord.event.toLowerCase().startsWith("sports:") ||
-            currentRecord.event.toLowerCase().startsWith("remote:") ||
-            currentRecord.event.toLowerCase().startsWith("prerecord:") ||
-            currentRecord.event.toLowerCase().startsWith("playlist:"))
-        ) {
-          await sails.models.logs
-            .create({
-              attendanceID: currentRecord.ID,
-              logtype: "sign-off-late",
-              loglevel: "orange",
-              logsubtype: `${event[1]}`,
-              logIcon: sails.models.calendar.calendardb.getIconClass({
-                type: event[0],
-              }),
-              title: `The broadcast signed off 5 or more minutes late.`,
-              event: `${currentRecord.event}`,
-              createdAt: moment().toISOString(true),
-            })
-            .fetch()
-            .tolerate((err) => {
-              sails.log.error(err);
-            });
-        }
-      } else {
-        await sails.models.logs
-          .create({
-            attendanceID: currentRecord.ID,
-            logtype: "sign-off-problem",
-            loglevel: "yellow",
-            logsubtype: `${event[1]}`,
-            logIcon: sails.models.calendar.calendardb.getIconClass({
-              type: event[0],
-            }),
-            title: `The broadcast was signed off due to a system problem or CRON being disabled.`,
-            event: `${currentRecord.event}`,
-            createdAt: moment().toISOString(true),
-          })
-          .fetch()
-          .tolerate((err) => {
-            sails.log.error(err);
-          });
-      }
 
       // Calculate attendance stats and weekly analytics in the background; this takes several seconds
       var temp = (async (cID) => {
@@ -119,8 +36,9 @@ module.exports = {
 
         let djStats = [];
         for (let key in _djStats) {
-          if (!Object.prototype.hasOwnProperty.call(_djStats, key)) continue;
-          djStats.push(_djStats[key]);
+          if (Object.prototype.hasOwnProperty.call(_djStats, key)) {
+            djStats.push(_djStats[key]);
+          }
         }
 
         // Send analytic emails to DJs
@@ -362,6 +280,5 @@ ${
         );
       })(inputs.ID);
     }
-
   },
 };
