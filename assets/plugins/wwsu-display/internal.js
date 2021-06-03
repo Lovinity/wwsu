@@ -283,7 +283,7 @@ slides.add({
   transitionOut: `fadeOutRight`,
   displayTime: 14,
   fitContent: false,
-  html: `<div style="text-align: center; width: 100%;"><img src="images/display/wwsu.png" style="height: 20vh; width: auto;">
+  html: `<div style="text-align: center; width: 100%;"><img src="/images/display/wwsu.png" style="height: 20vh; width: auto;">
   <p style="font-size: 5vh; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">106.9 FM / Dayton's Wright Choice</p>
   </div>
                         <div id="slide-wwsu-bottom" style="text-shadow: 1px 4px 1px rgba(0,0,0,0.3);">
@@ -300,9 +300,9 @@ slides.add({
         if (temp !== null) {
           temp.innerHTML = `<h1 style="text-align: center; font-size: 10vh; color: #FFFFFF">Follow Us <span class="text-warning">@wwsu1069</span> On</h1>
         <div style="width: 100%; align-items: center; justify-content: center;" class="d-flex flex-nowrap p-3 m-3">
-        <div class="flex-item m-1" style="width: 20%; text-align: center;"><img src="images/display/facebook.png"></div>
-        <div class="flex-item m-1" style="width: 20%; text-align: center;"><img src="images/display/twitter.png"></div>
-        <div class="flex-item m-1" style="width: 20%; text-align: center;"><img src="images/display/instagram.png"></div>`;
+        <div class="flex-item m-1" style="width: 20%; text-align: center;"><img src="/images/display/facebook.png"></div>
+        <div class="flex-item m-1" style="width: 20%; text-align: center;"><img src="/images/display/twitter.png"></div>
+        <div class="flex-item m-1" style="width: 20%; text-align: center;"><img src="/images/display/instagram.png"></div>`;
           $("#slide-wwsu-bottom").animateCss("fadeIn");
         }
       });
@@ -437,7 +437,7 @@ slides.add({
                     tcalendar[index].logo
                       ? `<img
                   class="img-circle elevation-2"
-                  src="uploads/calendar/logo/${tcalendar[index].logo}"
+                  src="/uploads/calendar/logo/${tcalendar[index].logo}"
                   alt="User Avatar"
                   style="width: 12vh"
                 />`
@@ -466,7 +466,7 @@ slides.add({
                       ? `<div class="col-6">
                   <img
                     class="elevation-2"
-                    src="uploads/calendar/banner/${tcalendar[index].banner}"
+                    src="/uploads/calendar/banner/${tcalendar[index].banner}"
                     style="max-height: 55vh; max-width: 100%;"
                   />
                 </div>
@@ -1249,7 +1249,7 @@ function processNowPlaying(response) {
               Meta.meta.showLogo
                 ? `<img
             class="img-circle elevation-2"
-            src="uploads/calendar/logo/${Meta.meta.showLogo}"
+            src="/uploads/calendar/logo/${Meta.meta.showLogo}"
             alt="User Avatar"
             style="width: 12vh"
           />`
@@ -1532,7 +1532,7 @@ function processWeeklyStats(data) {
               <div class="row p-1">
                 <div class="col-1">
                   <img
-                    src="images/display/first.png"
+                    src="/images/display/first.png"
                     style="height: 5vh; width: auto"
                   />
                 </div>
@@ -1546,7 +1546,7 @@ function processWeeklyStats(data) {
               <div class="row p-1">
                 <div class="col-1">
                   <img
-                    src="images/display/second.png"
+                    src="/images/display/second.png"
                     style="height: 5vh; width: auto"
                   />
                 </div>
@@ -1557,7 +1557,7 @@ function processWeeklyStats(data) {
               <div class="row p-1">
                 <div class="col-1">
                   <img
-                    src="images/display/third.png"
+                    src="/images/display/third.png"
                     style="height: 5vh; width: auto"
                   />
                 </div>
@@ -1864,7 +1864,7 @@ function updateDirectorsCalendar() {
                           ${
                             directorHours[key].director.avatar &&
                             directorHours[key].director.avatar !== ""
-                              ? `<img class="profile-user-img img-fluid img-circle" width="48" src="uploads/directors/${directorHours[key].director.avatar}">`
+                              ? `<img class="profile-user-img img-fluid img-circle" width="48" src="/uploads/directors/${directorHours[key].director.avatar}">`
                               : `<div class="text-center">
                               <div class="bg-danger profile-user-img img-fluid img-circle">${jdenticon.toSvg(
                                 `Director ${directorHours[key].director.name}`,
