@@ -858,7 +858,7 @@ function updateDirectorsCalendar() {
                       <div class="text-center">
                       ${
                         directorHours[directorHour].director.avatar !== ""
-                          ? `<img class="profile-user-img img-fluid img-circle" src="${directorHours[directorHour].director.avatar}" alt="Director Avatar">`
+                          ? `<img class="profile-user-img img-fluid img-circle" src="/uploads/directors/${directorHours[directorHour].director.avatar}" alt="Director Avatar">`
                           : `<div class="bg-${theClass} profile-user-img img-fluid img-circle">${jdenticon.toSvg(
                               `Director ${directorHours[directorHour].director.name}`,
                               96
