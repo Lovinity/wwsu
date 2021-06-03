@@ -172,9 +172,9 @@ module.exports = {
           );
 
         // Finally, populate other stats
-        sails.models.attendance.weeklyAnalytics.onAir = stats[-1].week.showtime;
+        sails.models.attendance.weeklyAnalytics.onAir = stats[-1].week.showtime + stats[-2].week.showtime;
         sails.models.attendance.weeklyAnalytics.onAirListeners =
-          stats[-1].week.listeners;
+          stats[-1].week.listeners + stats[-2].week.listeners;
         sails.models.attendance.weeklyAnalytics.listeners =
           stats[0].week.listeners;
         sails.models.attendance.weeklyAnalytics.listenerPeak =
