@@ -1,5 +1,35 @@
 "use strict";
 
+// AnimateCSS JQuery extension
+$.fn.extend({
+  animateCss: function (animationName, callback) {
+    let animationEnd = (function (el) {
+      let animations = {
+        animation: "animationend",
+        OAnimation: "oAnimationEnd",
+        MozAnimation: "mozAnimationEnd",
+        WebkitAnimation: "webkitAnimationEnd",
+      };
+
+      for (let t in animations) {
+        if (el.style[t] !== undefined) {
+          return animations[t];
+        }
+      }
+    })(document.createElement("div"));
+
+    this.addClass("animated " + animationName).one(animationEnd, function () {
+      $(this).removeClass("animated " + animationName);
+
+      if (typeof callback === "function") {
+        callback();
+      }
+    });
+
+    return this;
+  },
+});
+
 // Sounds
 let sounds = {
   lifethreatening: new Howl({
@@ -18,7 +48,7 @@ let nonHexChars = new RegExp(`[^#${hexChars}]`, "gi");
 let validHexSize = new RegExp(`^${match3or4Hex}$|^${match6or8Hex}$`, "i");
 
 // Define HTML elements
-let content = document.getElementById("slide");
+let content = document.getElementById("slide-contents");
 let easAlert = document.getElementById("eas-alert");
 let nowplaying = document.getElementById("nowplaying");
 let nowplayingtime = document.getElementById("nowplaying-time");
@@ -35,6 +65,7 @@ let wwsumodules = new WWSUmodules(socket);
 wwsumodules
   .add("WWSUanimations", WWSUanimations)
   .add(`WWSUutil`, WWSUutil)
+  .add("WWSUslides", WWSUslides)
   .add("noReq", WWSUreq, { host: `display-public` })
   .add("WWSUMeta", WWSUMeta)
   .add("WWSUdirectors", WWSUdirectors, { host: `display-public` })
@@ -50,6 +81,7 @@ wwsumodules
 // Reference modules to variables
 let animations = wwsumodules.get("WWSUanimations");
 let util = wwsumodules.get("WWSUutil");
+let slides = wwsumodules.get("WWSUslides");
 let Meta = wwsumodules.get("WWSUMeta");
 let noReq = wwsumodules.get("noReq");
 let Announcements = wwsumodules.get("WWSUannouncements");
@@ -62,10 +94,6 @@ let Eas = wwsumodules.get("WWSUeas");
 
 // Assign other (deprecated) data managers
 let calendar = [];
-let Darksky = new WWSUdb(TAFFY()); // DEPRECATED
-let darkskyWorker = new Worker(
-  "../../plugins/wwsu-display/workers/publicDarksky.js"
-);
 let sportsdb = new WWSUdb(TAFFY());
 
 // Assign event listeners
@@ -80,25 +108,21 @@ Eas.on("change", "renderer", (db) => processEas(db));
 Meta.on("newMeta", "renderer", (data) => processNowPlaying(data));
 Meta.on("metaTick", "renderer", () => nowPlayingTick());
 
-// DEPRECATED
-Darksky.assignSocketEvent("darksky", socket);
-Darksky.on("change", "renderer", (db) => processDarksky(db));
-
 Announcements.on("update", "renderer", (data) => {
-  WWSUslides.removeSlide(`attn-${data.ID}`);
+  slides.remove(`attn-${data.ID}`);
   createAnnouncement(data);
 });
 Announcements.on("insert", "renderer", (data) => {
   createAnnouncement(data);
 });
 Announcements.on("remove", "renderer", (data) => {
-  WWSUslides.removeSlide(`attn-${data}`);
+  slides.remove(`attn-${data}`);
 });
 Announcements.on("replace", "renderer", (db) => {
   // Remove all announcement slides
-  WWSUslides.allSlides()
+  [...slides.slides.values()]
     .filter((slide) => slide.name.startsWith(`attn-`))
-    .map((slide) => WWSUslides.removeSlide(slide.name));
+    .map((slide) => slides.remove(slide.name));
 
   // Add slides for each announcement
   db.each((data) => createAnnouncement(data));
@@ -114,7 +138,6 @@ socket.on("connect", () => {
       Announcements.init();
       Messages.init();
 
-      darkskySocket();
       weeklyDJSocket();
       if (disconnected) {
         // noConnection.style.display = "none";
@@ -122,10 +145,13 @@ socket.on("connect", () => {
         clearTimeout(restart);
       }
     } else {
-      iziToast.show({
-        title: "Failed to Connect",
-        message: "Failed to connect to WWSU; recipients registration failed. Display will try again in 60 seconds.",
-        timeout: false,
+      $(document).Toasts("create", {
+        class: "bg-danger",
+        title: "Error registering",
+        body: "There was an error registering this display sign with WWSU. I will try again in 60 seconds. Please report this to the engineer at wwsu4@wright.edu if this error keeps happening.",
+        autohide: true,
+        delay: 60000,
+        icon: "fas fa-skull-crossbones fa-lg",
       });
       setTimeout(() => {
         window.location.reload(true);
@@ -141,9 +167,11 @@ socket.on("disconnect", () => {
     socket._raw.io._reconnectionAttempts = Infinity;
   } catch (e) {
     console.error(e);
-    iziToast.show({
-      title: "An error occurred - Please check the logs",
-      message: "Error occurred trying to make socket reconnect indefinitely.",
+    $(document).Toasts("create", {
+      class: "bg-danger",
+      title: "Error reconnecting",
+      body: "There was an error attempting to reconnect to WWSU. Please report this to the engineer at wwsu4@wright.edu.",
+      icon: "fas fa-skull-crossbones fa-lg",
     });
   }
   if (!disconnected) {
@@ -171,19 +199,12 @@ socket.on("display-refresh", () => {
 
 // Display messages sent to the display
 Messages.on("insert", "renderer", (data) => {
-  iziToast.show({
-    title: "Message",
-    message: data[key].message,
-    timeout: 60000,
-    backgroundColor: "#FFF59D",
-    color: "#FFF59D",
-    progressBarColor: "#FFF59D",
-    overlayColor: "rgba(255, 255, 54, 0.1)",
-    closeOnClick: true,
-    titleSize: "2em",
-    messageSize: "1.5em",
-    balloon: true,
-    zindex: 999,
+  $(document).Toasts("create", {
+    class: "bg-primary",
+    title: "Message!",
+    body: data.message,
+    autohide: true,
+    delay: 60000,
   });
   if (!isStudio) {
     sounds.displaymessage.play();
@@ -194,9 +215,13 @@ socket.on("analytics-weekly-dj", (data) => {
   try {
     processWeeklyStats(data);
   } catch (e) {
-    iziToast.show({
-      title: "An error occurred - Please check the logs",
-      message: "Error occurred on analytics-weekly-dj event.",
+    $(document).Toasts("create", {
+      class: "bg-danger",
+      title: "Error updating analytics",
+      body: "There was an error updating weekly analytics. Please report this to the engineer at wwsu4@wright.edu.",
+      autohide: true,
+      delay: 180000,
+      icon: "fas fa-skull-crossbones fa-lg",
     });
     console.error(e);
   }
@@ -214,14 +239,15 @@ let easExtreme = false;
 // Define additional letiables
 let flashInterval = null;
 let disconnected = true;
-let slides = {};
 // LINT LIES: directorpresent is used.
 // eslint-disable-next-line no-unused-lets
 let directorpresent = false;
 let nowPlayingTimer;
 let calendarTimer;
+let directorCalendarTimer;
 let temp;
 let queueUnknown = false;
+let queueReminder = false;
 
 // The URL should contain a query parameter "studio=true" for the display sign that is placed in the OnAir studio.
 // This disables all audio warnings (such as shows going on the air and the EAS) so they do not interfere with a live broadcast.
@@ -229,280 +255,303 @@ let queueUnknown = false;
 // This audio warning helps alert guests in the station to be quiet as the producer might be about to turn the microphones on.
 let isStudio = window.location.search.indexOf("studio=true") !== -1;
 
-let isLightTheme = false;
-let weatherSlide = [
-  {
-    id: `weather`,
-    icon: `fa-sun`,
-    background: `#424242`,
-    header: `Current Weather`,
-    body: `Unknown`,
-    show: true,
-  },
-  {
-    id: `precipitation`,
-    icon: `fa-umbrella`,
-    background: `#424242`,
-    header: `Precipitation`,
-    body: ``,
-    show: false,
-  },
-  {
-    id: `wind`,
-    icon: `fa-wind`,
-    background: `#424242`,
-    header: `Wind`,
-    body: ``,
-    show: false,
-  },
-  {
-    id: `uv`,
-    icon: `fa-sun`,
-    background: `#424242`,
-    header: `UV Index`,
-    body: ``,
-    show: false,
-  },
-  {
-    id: `visibility`,
-    icon: `fa-car`,
-    background: `#424242`,
-    header: `Visibility`,
-    body: ``,
-    show: false,
-  },
-  {
-    id: `windchill`,
-    icon: `fa-temperature-low`,
-    background: `#424242`,
-    header: `Wind Chill`,
-    body: ``,
-    show: false,
-  },
-  {
-    id: `heatindex`,
-    icon: `fa-temperature-high`,
-    background: `#424242`,
-    header: `Heat Index`,
-    body: ``,
-    show: false,
-  },
-];
-let weatherSlideSlot = -1;
+// Set to light mode if darkmode=false was set in URL
+if (window.location.search.indexOf("darkmode=false") !== -1)
+  $("body").removeClass("dark-mode");
 
-// Change weather block every 7 seconds
-setInterval(() => {
-  let done = false;
-
-  if (weatherSlide.length === 0) {
-    return null;
-  }
-
-  while (!done) {
-    weatherSlideSlot++;
-    if (typeof weatherSlide[weatherSlideSlot] === `undefined`) {
-      weatherSlideSlot = 0;
-    }
-
-    if (weatherSlide[weatherSlideSlot].show || weatherSlideSlot === 0) {
-      document.querySelector(`#weather-background`).style.background =
-        weatherSlide[weatherSlideSlot].background;
-      document.querySelector(
-        `#weather-icon`
-      ).innerHTML = `<i class="fas ${weatherSlide[weatherSlideSlot].icon}" style="font-size: 64px;"></i>`;
-      document.querySelector(
-        `#weather-header`
-      ).innerHTML = `<strong>${weatherSlide[weatherSlideSlot].header}</strong>`;
-      document.querySelector(`#weather-body`).innerHTML =
-        weatherSlide[weatherSlideSlot].body;
-      done = true;
-    }
-  }
-}, 7000);
-
-if (isLightTheme) {
-  document.body.style.backgroundColor = `#ffffff`;
-  document.body.style.color = `#000000`;
-  temp = document.querySelector(`#bg-canvas`);
-  temp.style.opacity = 0.5;
-}
-let queueReminder = false;
-
+// Set burnGuard height and width to window height and width.
 wrapper.width = window.innerWidth;
 wrapper.height = window.innerHeight;
 
-// Initialize slides
-WWSUslides = WWSUslides(wwsumodules);
+// Add slide categories
+slides.addCategory("social", "SOCIAL MEDIA");
+slides.addCategory("events", "EVENTS");
+slides.addCategory("announcements", "ANNOUNCEMENTS");
+slides.addCategory("directors", "DIRECTORS");
+slides.addCategory("weather", "WEATHER");
 
+// Add intro slide
+slides.add({
+  name: `wwsu`,
+  category: `social`,
+  label: `WWSU 106.9 FM`,
+  icon: `fas fa-broadcast-tower`,
+  isSticky: false,
+  color: `primary`,
+  active: true,
+  transitionIn: `bounceInUp`,
+  transitionOut: `fadeOutRight`,
+  displayTime: 14,
+  fitContent: false,
+  html: `<div style="text-align: center; width: 100%;"><img src="images/display/wwsu.png" style="height: 20vh; width: auto;">
+  <p style="font-size: 5vh; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">106.9 FM / Dayton's Wright Choice</p>
+  </div>
+                        <div id="slide-wwsu-bottom" style="text-shadow: 1px 4px 1px rgba(0,0,0,0.3);">
+                        <h1 style="text-align: center; font-size: 10vh; color: #FFFFFF">Website: <span class="text-lightblue">wwsu1069.org</span></h1>
+<h1 style="text-align: center; font-size: 10vh; color: #FFFFFF">Office Line: <span class="text-warning">937-775-5554</span></h1>
+<h1 style="text-align: center; font-size: 10vh; color: #FFFFFF">Request Line: <span class="text-warning">937-775-5555</span></h1>
+        </div>
+        </div>`,
+  reset: true,
+  fnStart: (slide) => {
+    setTimeout((slide) => {
+      $("#slide-wwsu-bottom").animateCss("fadeOut", function () {
+        var temp = document.getElementById("slide-wwsu-bottom");
+        if (temp !== null) {
+          temp.innerHTML = `<h1 style="text-align: center; font-size: 10vh; color: #FFFFFF">Follow Us <span class="text-warning">@wwsu1069</span> On</h1>
+        <div style="width: 100%; align-items: center; justify-content: center;" class="d-flex flex-nowrap p-3 m-3">
+        <div class="flex-item m-1" style="width: 20%; text-align: center;"><img src="images/display/facebook.png"></div>
+        <div class="flex-item m-1" style="width: 20%; text-align: center;"><img src="images/display/twitter.png"></div>
+        <div class="flex-item m-1" style="width: 20%; text-align: center;"><img src="images/display/instagram.png"></div>`;
+          $("#slide-wwsu-bottom").animateCss("fadeIn");
+        }
+      });
+    }, 7000);
+  },
+});
+
+// Only display weeklyStats for non-studio display sign
 if (!isStudio) {
-  WWSUslides.newSlide({
+  slides.addCategory("analytics", "ANALYTICS");
+  slides.add({
     name: `weekly-stats`,
+    category: `analytics`,
     label: `Weekly Stats`,
-    weight: 1000000,
     isSticky: false,
     color: `success`,
     active: true,
-    transitionIn: `fadeIn`,
-    transitionOut: `fadeOut`,
+    transitionIn: `fadeInDown`,
+    transitionOut: `fadeOutDown`,
     displayTime: 15,
     fitContent: false,
-    html: `<h1 style="text-align: center; font-size: 7vh; color: #FFFFFF">Analytics last 7 days</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 3vh;" class="container-full p-2 m-1 text-white scale-content" id="analytics"></div>`,
+    html: `<h1 style="text-align: center; font-size: 5vh;">Analytics last 7 days</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 3vh;" class="container-full p-2 m-1 scale-content" id="analytics">Not Yet Loaded</div>`,
   });
 }
 
 // On the Air
-WWSUslides.newSlide({
+slides.add({
   name: `on-air`,
-  label: `On the Air`,
-  weight: 999999,
+  category: `events`,
+  label: `On the Air Now`,
+  icon: `fas fa-microphone`,
   isSticky: false,
-  color: `primary`,
+  color: `danger`,
   active: false,
-  transitionIn: `fadeIn`,
-  transitionOut: `fadeOut`,
+  transitionIn: `zoomInDown`,
+  transitionOut: `bounceOut`,
   displayTime: 10,
   fitContent: false,
-  html: `<h1 style="text-align: center; font-size: 4vh; color: ${
-    !isLightTheme ? `#ffffff` : `#000000`
-  }">On the Air Right Now</h1><div id="ontheair"></div>`,
-  fnStart: (slide) => {
-    if (calendar.length > 0) {
-      calendar
-        .filter(
-          (event) =>
-            event.unique === Meta.meta.calendarUnique && event.active > 0
-        )
-        .map((event) => {
-          let temp1 = document.querySelector(`#${event.ID}`);
-          if (temp1 !== null) {
-            temp1.classList.add(`pulsate-alert`);
-          }
-        });
-    }
-  },
-  fnEnd: (slide) => {
-    if (calendar.length > 0) {
-      calendar
-        .filter(
-          (event) =>
-            event.unique === Meta.meta.calendarUnique && event.active > 0
-        )
-        .map((event) => {
-          let temp1 = document.querySelector(`#${event.ID}`);
-          if (temp1 !== null) {
-            temp1.classList.remove(`pulsate-alert`);
-          }
-        });
-    }
-  },
+  html: ``,
 });
 
 // Weather alerts
-WWSUslides.newSlide({
+slides.add({
   name: `eas-alerts`,
-  label: `EAS Alerts`,
-  weight: -800000,
+  category: `weather`,
+  label: `Active Alerts`,
+  icon: `fas fa-bolt`,
   isSticky: false,
-  color: `danger`,
+  color: `warning`,
   active: false,
   transitionIn: `fadeIn`,
   transitionOut: `fadeOut`,
   displayTime: 15,
-  fitContent: true,
-  html: `<h1 style="text-align: center; font-size: 3em; color: ${
-    !isLightTheme ? `#ffffff` : `#000000`
-  }">WWSU EAS - Active Alerts</h1><h2 style="text-align: center; font-size: 1.5em; color: ${
-    !isLightTheme ? `#ffffff` : `#000000`
-  }">Clark, Greene, and Montgomery counties</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap" id="eas-alerts"></div>`,
+  fitContent: false,
+  html: ``,
+});
+
+// Upcoming shows
+let upcomingTable;
+slides.add({
+  name: `calendar`,
+  category: `events`,
+  label: `Upcoming Events`,
+  icon: `fas fa-calendar-day`,
+  isSticky: false,
+  color: `info`,
+  active: true,
+  transitionIn: `fadeInDown`,
+  transitionOut: `fadeOutUp`,
+  displayTime: 20,
+  fitContent: false,
+  html: `<h2 style="text-align: center; font-size: 5vh; text-shadow: 1px 3px 1px rgba(0,0,0,0.3);">Upcoming Events (Next 24 Hours)</h2><table id="slide-calendar-table" class="table table-striped display responsive bg-dark" style="width: 100%; font-size: 2vh; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);"></table>`,
+});
+util.waitForElement(`#slide-calendar-table`, () => {
+  // Generate table
+  upcomingTable = $(`#slide-calendar-table`).DataTable({
+    paging: false,
+    data: [],
+    columns: [
+      { title: "Type" },
+      { title: "Hosts" },
+      { title: "Name" },
+      { title: "Scheduled Time" },
+    ],
+    order: [],
+    searching: false,
+    pageLength: 10,
+    language: {
+      emptyTable: "No events in the next 24 hours",
+    },
+  });
 });
 
 // Promote Random Radio Shows and Events
-WWSUslides.newSlide({
+slides.add({
   name: `show-info`,
-  label: `Events`,
-  weight: -1,
+  category: `events`,
+  label: `Featured Show`,
+  icon: `fas fa-star`,
   isSticky: false,
-  color: `primary`,
+  color: `success`,
   active: true,
   transitionIn: `fadeIn`,
   transitionOut: `fadeOut`,
   displayTime: 10,
   fitContent: false,
   reset: true,
-  html: `<h2 style="text-align: center; font-size: 5vh; text-shadow: 1px 2px 1px rgba(0,0,0,0.3); color: ${
-    !isLightTheme ? `#ffffff` : `#000000`
-  };" id="promote-show-name"></h2><h3 style="text-align: center; font-size: 4vh; color: ${
-    !isLightTheme ? `#ffffff` : `#000000`
-  }; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);" id="promote-show-time"></h3><div style="overflow-y: hidden; font-size: 4.5vh; color: ${
-    !isLightTheme ? `#ffffff` : `#000000`
-  }; height: 45vh;" class="${
-    !isLightTheme ? `bg-dark-4 text-white` : `bg-light-1 text-dark`
-  } p-1 m-1 shadow-8" id="promote-show-topic"></div>`,
+  html: ``,
   fnStart: (slide) => {
     slide.displayTime = 10;
-    let tcalendar = calendar.filter((event) => event.active > 0);
+    let tcalendar = calendar.filter(
+      (event) =>
+        ["show", "remote", "sports", "prerecord", "playlist"].indexOf(
+          event.type
+        ) !== -1
+    );
     if (tcalendar.length > 0) {
       let index = Math.floor(Math.random() * tcalendar.length);
       if (typeof tcalendar[index] !== "undefined") {
         slide.displayTime =
-          tcalendar[index].topic !== null
-            ? 10 + Math.floor(tcalendar[index].topic.length / 20)
+          tcalendar[index].description !== null
+            ? 10 + Math.floor(tcalendar[index].description.length / 20)
             : 10;
-        let temp1 = document.querySelector("#promote-show-name");
-        if (temp1 !== null) {
-          temp1.innerHTML = `<strong>${tcalendar[index].name}</strong>`;
-        }
-        temp1 = document.querySelector("#promote-show-time");
-        if (temp1 !== null) {
-          temp1.innerHTML = tcalendar[index].time;
-        }
-        temp1 = document.querySelector("#promote-show-topic");
-        if (temp1 !== null) {
-          temp1.innerHTML = tcalendar[index].topic;
-        }
-        temp1 = document.querySelector(`#${tcalendar[index].ID}`);
-        if (temp1 !== null) {
-          temp1.classList.add(`pulsate-alert`);
-        }
+        if (tcalendar[index].banner) slide.displayTime = slide.displayTime + 5;
+        $(`#section-slide-show-info-contents`).html(`
+        <div class="card card-widget widget-user-2 shadow-sm" style="text-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3);">
+              <div class="widget-user-header bg-${Calendar.getColorClass(
+                tcalendar[index]
+              )}" style="font-size: 5vh">
+                <div class="widget-user-image">
+                  ${
+                    tcalendar[index].logo
+                      ? `<img
+                  class="img-circle elevation-2"
+                  src="uploads/calendar/logo/${tcalendar[index].logo}"
+                  alt="User Avatar"
+                  style="width: 12vh"
+                />`
+                      : ``
+                  }
+                </div>
+                <!-- /.widget-user-image -->
+                <h3
+                  class="widget-user-desc"
+                  style="font-size: 5vh; margin-left: 13vh;"
+                >
+                  ${tcalendar[index].name}
+                </h3>
+                <h3
+                  class="widget-user-username"
+                  style="font-size: 5vh; margin-left: 13vh;"
+                >
+                ${tcalendar[index].hosts}
+                </h3>
+              </div>
+              <div class="card-body" style="font-size: 4vh;">
+                <div class="container-fluid">
+                  <div class="row">
+                  ${
+                    tcalendar[index].banner
+                      ? `<div class="col-6">
+                  <img
+                    class="elevation-2"
+                    src="uploads/calendar/banner/${tcalendar[index].banner}"
+                    style="max-height: 55vh; max-width: 100%;"
+                  />
+                </div>
+                <div class="col-6">
+                <p class="text-teal">
+                ${moment
+                  .tz(
+                    tcalendar[index].start,
+                    Meta.meta ? Meta.meta.timezone : moment.tz.guess()
+                  )
+                  .format("MM/DD hh:mm A")} - ${moment
+                          .tz(
+                            tcalendar[index].end,
+                            Meta.meta ? Meta.meta.timezone : moment.tz.guess()
+                          )
+                          .format("hh:mm A")}</p>
+                  <p>${
+                    tcalendar[index].description || "No description provided"
+                  }</p>
+                </div>`
+                      : `<div class="col-12">
+                      <p class="text-teal">
+                      ${moment
+                        .tz(
+                          tcalendar[index].start,
+                          Meta.meta ? Meta.meta.timezone : moment.tz.guess()
+                        )
+                        .format("MM/DD hh:mm A")} - ${moment
+                          .tz(
+                            tcalendar[index].end,
+                            Meta.meta ? Meta.meta.timezone : moment.tz.guess()
+                          )
+                          .format("hh:mm A")}</p>
+                        <p>${
+                          tcalendar[index].description ||
+                          "No description provided"
+                        }</p>
+              </div>`
+                  }
+                  </div>
+                </div>
+              </div>
+            </div>
+        `);
       }
     }
   },
-  fnEnd: (slide) => {
-    let temp1 = document.querySelector("#promote-show-name");
-    if (temp1 !== null && calendar.length > 0) {
-      calendar
-        .filter((event) => event.active > 0)
-        .map((event) => {
-          let temp1 = document.querySelector(`#${event.ID}`);
-          if (temp1 !== null) {
-            temp1.classList.remove(`pulsate-alert`);
-          }
-        });
-    }
-  },
+});
+
+// Director hours
+slides.add({
+  name: `hours-directors`,
+  category: `directors`,
+  label: `Director Office Hours`,
+  icon: `fas fa-clock`,
+  isSticky: false,
+  color: `info`,
+  active: false,
+  transitionIn: `fadeInDown`,
+  transitionOut: `fadeOutUp`,
+  displayTime: 15,
+  fitContent: false,
+  html: ``,
+});
+
+// Assistant hours
+slides.add({
+  name: `hours-assistants`,
+  category: `directors`,
+  label: `Assistant Office Hours`,
+  icon: `fas fa-clock`,
+  isSticky: false,
+  color: `info`,
+  active: false,
+  transitionIn: `fadeInDown`,
+  transitionOut: `fadeOutUp`,
+  displayTime: 15,
+  fitContent: false,
+  html: ``,
 });
 
 // Create restart function to restart the screen after 15 seconds if it does not connect.
 let restart = setTimeout(() => {
   window.location.reload(true);
 }, 15000);
-
-// Define default settings for iziToast (overlaying messages)
-iziToast.settings({
-  titleColor: "#000000",
-  messageColor: "#000000",
-  backgroundColor: "rgba(244, 67, 54, 0.8);",
-  color: "rgba(244, 67, 54);",
-  close: false,
-  progressBarColor: "rgba(244, 67, 54, 1)",
-  overlay: true,
-  overlayColor: "rgba(244, 67, 54, 0.1)",
-  zindex: 1000,
-  layout: 1,
-  closeOnClick: true,
-  position: "center",
-  timeout: 30000,
-});
 
 // Burnguard is the line that sweeps across the screen to prevent screen burn-in
 let $burnGuard = $("<div>")
@@ -521,7 +570,7 @@ let $burnGuard = $("<div>")
 
 let colors = ["#FF0000", "#00FF00", "#0000FF"];
 let Scolor = 0;
-let delay = 300000;
+let delay = 301111; // We have a 1111 at the end because the calendar update causes the burn guard to jitter; this allows the line to be at different spots on the screen instead of the same one when it happens
 let scrollDelay = 15000;
 
 function burnGuardAnimate() {
@@ -555,35 +604,6 @@ function burnGuardAnimate() {
 }
 setTimeout(burnGuardAnimate, 5000);
 
-$.fn.extend({
-  animateCss: function (animationName, callback) {
-    let animationEnd = (function (el) {
-      let animations = {
-        animation: "animationend",
-        OAnimation: "oAnimationEnd",
-        MozAnimation: "mozAnimationEnd",
-        WebkitAnimation: "webkitAnimationEnd",
-      };
-
-      for (let t in animations) {
-        if (el.style[t] !== undefined) {
-          return animations[t];
-        }
-      }
-    })(document.createElement("div"));
-
-    this.addClass("animated " + animationName).one(animationEnd, function () {
-      $(this).removeClass("animated " + animationName);
-
-      if (typeof callback === "function") {
-        callback();
-      }
-    });
-
-    return this;
-  },
-});
-
 // Replace all Status data with that of body request
 function weeklyDJSocket() {
   console.log("attempting weeklyDJ socket");
@@ -601,16 +621,6 @@ function weeklyDJSocket() {
   );
 }
 
-function darkskySocket() {
-  console.log("attempting darksky socket");
-  try {
-    Darksky.replaceData(noReq, "/darksky/get");
-  } catch (unusedE) {
-    console.log("FAILED CONNECTION");
-    setTimeout(darkskySocket, 10000);
-  }
-}
-
 // Process Director data when received by updating local database and marking if a director is present.
 function processDirectors(db) {
   // Run data manipulation process
@@ -624,32 +634,47 @@ function processDirectors(db) {
         }
       } catch (e) {
         console.error(e);
-        iziToast.show({
-          title: "An error occurred - Please check the logs",
-          message: `Error occurred during Directors iteration in processDirectors.`,
-        });
       }
     });
   } catch (e) {
     console.error(e);
-    iziToast.show({
-      title: "An error occurred - Please check the logs",
-      message: "Error occurred during the call of processDirectors.",
-    });
   }
 }
 
 function updateCalendar() {
-  // Do a 1 second timer to prevent frequent calendar updates
+  // Do a 3 second timer to prevent frequent calendar updates
   clearTimeout(calendarTimer);
   calendarTimer = setTimeout(() => {
     Calendar.getEvents(
       (events) => {
+        upcomingTable.clear();
+
         let noEvents = true;
         let activeEvents = 0;
         let innercontent = ``;
         let today = [];
-        events
+        let color;
+        let scheduleInfo = ``;
+
+        // Update calendar array
+        calendar = events
+          .filter(
+            (event) =>
+              [
+                "genre",
+                "playlist",
+                "onair-booking",
+                "prod-booking",
+                "task",
+              ].indexOf(event.type) === -1 &&
+              moment(event.end).isAfter(moment(Meta.meta.time))
+          )
+          .sort(
+            (a, b) => moment(a.start).valueOf() - moment(b.start).valueOf()
+          );
+
+        // Update upcoming events next 24 hours
+        calendar
           .filter(
             (event) =>
               [
@@ -660,9 +685,11 @@ function updateCalendar() {
                 "office-hours",
                 "task",
               ].indexOf(event.type) === -1 &&
-              moment(event.end).isAfter(moment(Meta.meta.time))
+              moment
+                .parseZone(Meta.meta.time)
+                .add(1, "days")
+                .isSameOrAfter(event.start)
           )
-          .sort((a, b) => moment(a.start).valueOf() - moment(b.start).valueOf())
           .map((event) => {
             try {
               event.startT = moment
@@ -676,117 +703,87 @@ function updateCalendar() {
                   event.end,
                   Meta.meta ? Meta.meta.timezone : moment.tz.guess()
                 )
-                .format("MM/DD hh:mm A");
+                .format("hh:mm A");
 
-              let color = hexRgb(event.color);
-              let line1;
-              let line2;
-              let image;
-
+              color = event.color;
               if (
                 ["canceled", "canceled-system", "canceled-changed"].indexOf(
                   event.scheduleType
                 ) !== -1
               ) {
-                color = hexRgb(`#161616`);
+                color = `#161616`;
               } else {
                 activeEvents++;
               }
-              color.red = Math.round(color.red / 3);
-              color.green = Math.round(color.green / 3);
-              color.blue = Math.round(color.blue / 3);
-              let badgeInfo = ``;
+
+              scheduleInfo = `<span class="text-teal">${event.startT} - ${event.endT}</span>`;
+
               if (["canceled-changed"].indexOf(event.scheduleType) !== -1) {
-                badgeInfo = `<span class="text-white" style="font-size: 1vh;"><strong>${event.scheduleReason}</strong></span>`;
+                scheduleInfo = `<span class="badge badge-warning">RE-SCHEDULED</span><br /><s><span class="text-teal">${event.startT} - ${event.endT}</span></s>`;
               }
               if (
                 ["updated", "updated-system"].indexOf(event.scheduleType) !==
                   -1 &&
                 event.timeChanged
               ) {
-                badgeInfo = `<span class="text-white" style="font-size: 1vh;"><strong>Updated Time (temporary)</strong></span>`;
+                scheduleInfo = `<span class="badge badge-warning">Temporary Time</span><br /><span class="text-teal">${event.startT} - ${event.endT}</span>`;
               }
               if (
                 ["canceled", "canceled-system"].indexOf(event.scheduleType) !==
                 -1
               ) {
-                badgeInfo = `<span class="text-white" style="font-size: 1vh;"><strong>CANCELED</strong></span>`;
-              }
-              line1 = event.hosts;
-              line2 = event.name;
-              if (event.type === "show") {
-                image = `<i class="fas fa-microphone text-white" style="font-size: 36px;"></i>`;
-              } else if (event.type === "prerecord") {
-                image = `<i class="fas fa-play-circle text-white" style="font-size: 36px;"></i>`;
-              } else if (event.type === "remote") {
-                image = `<i class="fas fa-broadcast-tower text-white" style="font-size: 36px;"></i>`;
-              } else if (event.type === "sports") {
-                image = `<i class="fas fa-trophy text-white" style="font-size: 36px;"></i>`;
-              } else {
-                image = `<i class="fas fa-calendar text-white" style="font-size: 36px;"></i>`;
+                scheduleInfo = `<span class="badge badge-danger">CANCELED</span><br /></s><span class="text-teal">${event.startT} - ${event.endT}</span></s>`;
               }
 
-              color = `rgb(${color.red}, ${color.green}, ${color.blue});`;
-              innercontent += `
-                      <div class="row shadow-2 m-1" style="background: ${color}; font-size: 1.5vh; border-color: #F9D91C;" id="calendar-event-${
-                event.unique
-              }">
-                          <div class="col-2 text-white">
-                              ${image}
-                          </div>
-                          <div class="col-10 text-white">
-                              <strong>${line1}${
-                line1 !== "" ? ` - ` : ``
-              }${line2}</strong><br />
-                              ${event.startT} - ${event.endT}<br />
-                              ${badgeInfo}
-                          </div>
-                      </div>`;
+              let image;
+              if (event.type === "show") {
+                image = `<i class="img-circle img-size-36 fas fa-microphone" style="font-size: 36px; background: ${color};"></i>`;
+              } else if (event.type === "prerecord") {
+                image = `<i class="img-circle img-size-36 fas fa-play-circle" style="font-size: 36px; background: ${color};"></i>`;
+              } else if (event.type === "remote") {
+                image = `<i class="img-circle img-size-36 fas fa-broadcast-tower" style="font-size: 36px; background: ${color};"></i>`;
+              } else if (event.type === "sports") {
+                image = `<i class="img-circle img-size-36 fas fa-trophy" style="font-size: 36px; background: ${color};"></i>`;
+              } else {
+                image = `<i class="img-circle img-size-36 fas fa-calendar" style="font-size: 36px; background: ${color};"></i>`;
+              }
+
+              if (event.logo)
+                image = `<img class="img-circle img-size-36" src="/uploads/calendar/logo/${event.logo}" style="background: ${color};">`;
+
               noEvents = false;
-              today.push({
-                name: event.name,
-                type: event.type,
-                active:
-                  ["canceled", "canceled-system", "canceled-changed"].indexOf(
-                    event.scheduleType
-                  ) === -1,
-                ID: `calendar-event-${event.unique}`,
-                topic: event.description,
-                time: `${event.startT} - ${event.endT}`,
-              });
+
+              upcomingTable.row.add([
+                `${image} <span class="p-1 text-${Calendar.getColorClass(
+                  event
+                )}">${event.type}</span>`,
+                event.hosts,
+                `<span class="text-warning font-weight-bold">${event.name}</span>`,
+                scheduleInfo,
+              ]);
             } catch (e) {
               console.error(e);
-              innercontent = `
-                  <div class="row m-1" style="font-size: 1.5vh;">
-                      <div class="col text-white">
-                          <strong>Error fetching events!</strong>
-                      </div>
-                  </div>`;
             }
           });
 
-        if (noEvents) {
-          innercontent = `
-                      <div class="row m-1" style="font-size: 1.5vh;">
-                          <div class="col text-white">
-                              <strong>No events next 24 hours</strong>
-                          </div>
-                      </div>`;
+        upcomingTable.draw();
+
+        // Update display time (7 seconds + 3 for every event)
+        slides.slides.get(`calendar`).displayTime = 7 + 3 * activeEvents;
+
+        // Do not randomly promote shows if we are not in automation
+        if (activeEvents > 0 && Meta.meta.state.startsWith("automation_")) {
+          slides.slides.get(`show-info`).active = true;
+        } else {
+          slides.slides.get(`show-info`).active = false;
         }
 
-        let _innercontent = document.getElementById("events-today");
-        _innercontent.innerHTML = innercontent;
-        calendar = today;
-        if (activeEvents > 0 && Meta.meta.state.startsWith("automation_")) {
-          WWSUslides.slide(`show-info`).active = true;
-        } else {
-          WWSUslides.slide(`show-info`).active = false;
-        }
+        updateDirectorsCalendar();
       },
       undefined,
-      moment.parseZone(Meta.meta.time).add(1, "days").toISOString(true)
+      moment.parseZone(Meta.meta.time).add(7, "days").toISOString(true)
     );
-  }, 1000);
+  }, 3000);
 }
 
 // Check for new Eas alerts and push them out when necessary.
@@ -815,72 +812,62 @@ function processEas(db) {
           easExtreme = true;
         }
 
-        let color =
-          typeof dodo.color !== "undefined" &&
-          /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(dodo.color)
-            ? hexRgb(dodo.color)
-            : hexRgb("#787878");
-        let borderclass = "black";
-        color.red = Math.round(color.red / 2);
-        color.green = Math.round(color.green / 2);
-        color.blue = Math.round(color.blue / 2);
+        let colorClass = "secondary";
         if (typeof dodo["severity"] !== "undefined") {
           if (dodo["severity"] === "Extreme") {
-            borderclass = "danger";
+            colorClass = "danger";
           } else if (dodo["severity"] === "Severe") {
-            borderclass = "warning";
+            colorClass = "orange";
           } else if (dodo["severity"] === "Moderate") {
-            borderclass = "primary";
+            colorClass = "warning";
+          } else {
+            colorClass = "primary";
           }
         }
         // LINT LIES: This letiable is used.
         // eslint-disable-next-line no-unused-lets
-        color = `rgb(${color.red}, ${color.green}, ${color.blue});`;
-        if (isLightTheme) {
-          color = `rgb(${color.red / 4 + 191}, ${color.green / 4 + 191}, ${
-            color.blue / 4 + 191
-          });`;
-        }
-        innercontent += `<div style="width: 32%;" class="d-flex align-items-stretch m-1 ${
-          !isLightTheme ? `text-white` : `text-dark`
-        } border border-${borderclass} rounded shadow-4 ${
-          !isLightTheme ? `bg-dark-4` : `bg-light-1`
-        }">
-                        <div class="m-1" style="text-align: center; width: 100%"><span class="${
-                          !isLightTheme ? `text-white` : `text-dark`
-                        }" style="font-size: 1.5em;">${
-          typeof dodo["alert"] !== "undefined" ? dodo["alert"] : "Unknown Alert"
-        }</span><br />
-                        <span style="font-size: 1em;" class="${
-                          !isLightTheme ? `text-white` : `text-dark`
-                        }">${
-          moment(dodo["starts"]).isValid()
-            ? moment
-                .tz(
-                  dodo["starts"],
-                  Meta.meta ? Meta.meta.timezone : moment.tz.guess()
-                )
-                .format("MM/DD h:mmA")
-            : "UNKNOWN"
-        } - ${
-          moment(dodo["expires"]).isValid()
-            ? moment
-                .tz(
-                  dodo["expires"],
-                  Meta.meta ? Meta.meta.timezone : moment.tz.guess()
-                )
-                .format("MM/DD h:mmA")
-            : "UNKNOWN"
-        }</span><br />
-<span style="font-size: 1em;" class="${
-          !isLightTheme ? `text-white` : `text-dark`
-        }">${
-          typeof dodo["counties"] !== "undefined"
-            ? dodo["counties"]
-            : "Unknown Counties"
-        }</span><br /></div>
-                        </div>
-                        `;
+
+        innercontent += `<div class="col-4">
+          <div class="card card-${colorClass}">
+              <div class="card-header">
+                <h3 class="card-title text-center" style="font-size: 2vh;"><strong>${
+                  typeof dodo["alert"] !== "undefined"
+                    ? dodo["alert"]
+                    : "Unknown Alert"
+                }</strong></h3>
+              </div>
+
+              <div class="card-body" style="font-size: 2vh;">
+                <p>Counties: ${
+                  typeof dodo["counties"] !== "undefined"
+                    ? dodo["counties"]
+                    : "Unknown Counties"
+                }</p>
+              </div>
+
+              <div class="card-footer" style="font-size: 2vh;">
+              Effective ${
+                moment(dodo["starts"]).isValid()
+                  ? moment
+                      .tz(
+                        dodo["starts"],
+                        Meta.meta ? Meta.meta.timezone : moment.tz.guess()
+                      )
+                      .format("MM/DD h:mm A")
+                  : "UNKNOWN"
+              } - ${
+            moment(dodo["expires"]).isValid()
+              ? moment
+                  .tz(
+                    dodo["expires"],
+                    Meta.meta ? Meta.meta.timezone : moment.tz.guess()
+                  )
+                  .format("MM/DD h:mm A")
+              : "UNKNOWN"
+          }
+              </div>
+            </div>
+          </div>`;
       } catch (e) {
         console.error(e);
         iziToast.show({
@@ -894,15 +881,11 @@ function processEas(db) {
       innercontent = `<strong class="text-white">No active alerts</strong>`;
     }
 
-    WWSUslides.slide(`eas-alerts`).active = makeActive;
-    WWSUslides.slide(`eas-alerts`).displayTime = displayTime;
-    WWSUslides.slide(
+    slides.slides.get(`eas-alerts`).active = makeActive;
+    slides.slides.get(`eas-alerts`).displayTime = displayTime;
+    slides.slides.get(
       `eas-alerts`
-    ).html = `<h1 style="text-align: center; font-size: 3em; color: ${
-      !isLightTheme ? `#ffffff` : `#000000`
-    }">WWSU EAS - Active Alerts</h1><h2 style="text-align: center; font-size: 1.5em; color: ${
-      !isLightTheme ? `#ffffff` : `#000000`
-    }">Clark, Greene, and Montgomery counties of Ohio</h2><div style="overflow-y: hidden;" class="d-flex flex-wrap">${innercontent}</div>`;
+    ).html = `<h1 style="text-align: center; font-size: 7vh;">WWSU Emergency Alert System</h1><h2 style="text-align: center; font-size: 5vh;">Active Alerts</h2><h3 style="text-align: center; font-size: 3vh;">Clark, Greene, and Montgomery counties of Ohio</h3><div class="container-fluid"><div class="row">${innercontent}</div></div>`;
 
     // Do EAS events
     doEas();
@@ -964,17 +947,17 @@ function doEas() {
         color4 = `rgb(${color4.red}, ${color4.green}, ${color4.blue})`;
         easAlert.style.display = "inline";
         easAlert.style.backgroundColor = `#0000ff`;
-        easAlert.innerHTML = `<div class="animated heartBeat" id="slide-interrupt-eas"><div style="text-align: center; color: #ffffff;">
-                    <h1 style="font-size: 7vh;">WWSU Emergency Alert System</h1>
-                    <div id="eas-alert-text" class="m-3 text-white" style="font-size: 5vh;">${alert}</div>
-                    <div class="m-1 text-white" style="font-size: 3vh;">Effective ${
+        easAlert.innerHTML = `<div class="animated flash slower" id="slide-interrupt-eas"><div style="text-align: center; color: #ffffff;">
+                    <h1 class="text-warning" style="font-size: 10vh;">WWSU Emergency Alert System</h1>
+                    <div id="eas-alert-text" class="m-3 text-white" style="font-size: 7vh;">${alert}</div>
+                    <div class="m-1 text-lime" style="font-size: 5vh;">Effective ${
                       moment(newEas[0]["starts"]).isValid()
                         ? moment
                             .tz(
                               newEas[0]["starts"],
                               Meta.meta ? Meta.meta.timezone : moment.tz.guess()
                             )
-                            .format("MM/DD h:mmA")
+                            .format("MM/DD h:mm A")
                         : "UNKNOWN"
                     } - ${
           moment(newEas[0]["expires"]).isValid()
@@ -983,26 +966,22 @@ function doEas() {
                   newEas[0]["expires"],
                   Meta.meta ? Meta.meta.timezone : moment.tz.guess()
                 )
-                .format("MM/DD h:mmA")
+                .format("MM/DD h:mm A")
             : "UNKNOWN"
         }</div>
-                    <div class="m-1 text-white" style="font-size: 3vh;">for the counties ${
+                    <div class="m-1 text-lime" style="font-size: 5vh;">for the counties ${
                       typeof newEas[0]["counties"] !== "undefined"
                         ? newEas[0]["counties"]
                         : "Unknown Counties"
                     }</div>
-                    <div id="alert-marquee" class="marquee m-3 shadow-4" style="color: #FFFFFF; background: rgb(${Math.round(
-                      color2.red / 4
-                    )}, ${Math.round(color2.green / 4)}, ${Math.round(
-          color2.blue / 4
-        )}); font-size: 5vh;">${text}</div>
+                    <div id="alert-marquee" class="marquee shadow-4 p-5 text-white" style="font-size: 7vh;">${text}</div>
                     </div></div>`;
         if (!isStudio) {
           sounds.severeeas.play();
         }
         if (easExtreme) {
           easAlert.style.display = "inline";
-          easAlert.innerHTML += `<h2 style="text-align: center; font-size: 5vh;" class="text-white"><strong>LIFE-THREATENING ALERTS IN EFFECT!</strong> Please stand by for details...</h2>`;
+          easAlert.innerHTML += `<div style="text-align: center; font-size: 7vh;" class="text-white m-5 p-5"><strong class="text-danger">LIFE-THREATENING ALERTS IN EFFECT!</strong><br /> Please stand by for details...</div>`;
         }
         $("#alert-marquee")
           .bind("finished", () => {
@@ -1023,11 +1002,11 @@ function doEas() {
           })
           .marquee({
             // duration in milliseconds of the marquee
-            speed: 180,
+            speed: 250,
             // gap in pixels between the tickers
-            gap: 50,
+            gap: 300,
             // time in milliseconds before the marquee will start animating
-            delayBeforeStart: 2000,
+            delayBeforeStart: 3000,
             // 'left' or 'right'
             direction: "left",
             // true or false - should the marquee be duplicated to show an effect of continues flow
@@ -1062,12 +1041,9 @@ function doEas() {
       clearInterval(flashInterval);
       let voiceCount = 180;
       flashInterval = setInterval(() => {
-        $("#eas-alert").css("background-color", "#D50000");
+        $("#eas-alert").addClass("bg-danger");
         setTimeout(() => {
-          $("#eas-alert").css(
-            "background-color",
-            !isLightTheme ? `#320000` : `#f6cccc`
-          );
+          $("#eas-alert").removeClass("bg-danger");
           voiceCount++;
           if (voiceCount > 179) {
             voiceCount = 0;
@@ -1081,16 +1057,10 @@ function doEas() {
       // Display the extreme alerts
       easAlert.style.display = "inline";
       easAlert.innerHTML = `<div id="slide-interrupt-eas">
-            <h1 style="text-align: center; font-size: 7vh; color: ${
-              !isLightTheme ? `#ffffff` : `#000000`
-            };">WWSU Emergency Alert System</h1>
-            <h2 style="text-align: center; font-size: 5vh;" class="${
-              !isLightTheme ? `text-white` : `text-dark`
-            }">Extreme Alerts in effect</h2>
-            <h2 style="text-align: center; font-size: 5vh;" class="${
-              !isLightTheme ? `text-white` : `text-dark`
-            }">SEEK SHELTER NOW!!!</h2>
-            <div style="overflow-y: hidden;" class="d-flex flex-wrap" id="alerts"></div></div>`;
+            <h1 style="text-align: center; font-size: 10vh;">WWSU Emergency Alert System</h1>
+            <h2 style="text-align: center; font-size: 7vh;" class="text-danger">Life Threatening Alerts in Effect</h2>
+            <h2 style="text-align: center; font-size: 7vh;" class="text-warning"><strong>TAKE ACTION NOW TO PROTECT YOUR LIFE!</strong></h2>
+            <div class="container-fluid"> <div class="row" id="alerts"></div></div></div>`;
       let innercontent = document.getElementById("alerts");
       Eas.find({ severity: "Extreme" }).forEach((dodo) => {
         try {
@@ -1102,46 +1072,47 @@ function doEas() {
           color = `rgb(${Math.round(color.red / 4)}, ${Math.round(
             color.green / 4
           )}, ${Math.round(color.blue / 4)});`;
-          innercontent.innerHTML += `<div style="width: 32%;${
-            !isLightTheme ? `background-color: ${color}` : ``
-          }" class="d-flex align-items-stretch m-1 ${
-            !isLightTheme ? `text-white` : `text-dark bg-light-1`
-          } border border-${borderclass} rounded shadow-4">
-                        <div class="m-1" style="text-align: center; width: 100%"><span style="font-size: 5vh;">${
-                          typeof dodo["alert"] !== "undefined"
-                            ? dodo["alert"]
-                            : "Unknown Alert"
-                        }</span><br />
-                        <span style="font-size: 2vh;" class="${
-                          !isLightTheme ? `text-white` : `text-dark`
-                        }">${
-            moment(dodo["starts"]).isValid()
-              ? moment
-                  .tz(
-                    dodo["starts"],
-                    Meta.meta ? Meta.meta.timezone : moment.tz.guess()
-                  )
-                  .format("MM/DD h:mmA")
-              : "UNKNOWN"
-          } - ${
+          innercontent.innerHTML += `<div class="col-4">
+          <div class="card card-danger">
+              <div class="card-header">
+                <h3 class="card-title text-center" style="font-size: 3vh;"><strong>${
+                  typeof dodo["alert"] !== "undefined"
+                    ? dodo["alert"]
+                    : "Unknown Alert"
+                }</strong></h3>
+              </div>
+
+              <div class="card-body" style="font-size: 3vh;">
+                <p>Counties: ${
+                  typeof dodo["counties"] !== "undefined"
+                    ? dodo["counties"]
+                    : "Unknown Counties"
+                }</p>
+              </div>
+
+              <div class="card-footer" style="font-size: 3vh;">
+              Effective ${
+                moment(dodo["starts"]).isValid()
+                  ? moment
+                      .tz(
+                        dodo["starts"],
+                        Meta.meta ? Meta.meta.timezone : moment.tz.guess()
+                      )
+                      .format("MM/DD h:mm A")
+                  : "UNKNOWN"
+              } - ${
             moment(dodo["expires"]).isValid()
               ? moment
                   .tz(
                     dodo["expires"],
                     Meta.meta ? Meta.meta.timezone : moment.tz.guess()
                   )
-                  .format("MM/DD h:mmA")
+                  .format("MM/DD h:mm A")
               : "UNKNOWN"
-          }</span><br />
-<span style="font-size: 1em;" class="${
-            !isLightTheme ? `text-white` : `text-dark`
-          }">${
-            typeof dodo["counties"] !== "undefined"
-              ? dodo["counties"]
-              : "Unknown Counties"
-          }</span><br />
-                        </div>
-                        `;
+          }
+              </div>
+            </div>
+          </div>`;
         } catch (e) {
           console.error(e);
           iziToast.show({
@@ -1188,12 +1159,14 @@ function processNowPlaying(response) {
         switch (response.state) {
           case "automation_on":
           case "automation_break":
-            nowplaying.style.background = "#495057";
+            nowplaying.style.background = Calendar.getColor({ type: "" });
             break;
           case "automation_genre":
-            nowplaying.style.background = "#2E4F54";
+            nowplaying.style.background = Calendar.getColor({ type: "genre" });
           case "automation_playlist":
-            nowplaying.style.background = "#0056B2";
+            nowplaying.style.background = Calendar.getColor({
+              type: "playlist",
+            });
             break;
           case "automation_prerecord":
           case "automation_live":
@@ -1205,11 +1178,13 @@ function processNowPlaying(response) {
           case "live_on":
           case "live_break":
           case "live_returning":
-            nowplaying.style.background = "#9E0C1A";
+            nowplaying.style.background = Calendar.getColor({ type: "show" });
             break;
           case "prerecord_on":
           case "prerecord_break":
-            nowplaying.style.background = "#773B57";
+            nowplaying.style.background = Calendar.getColor({
+              type: "prerecord",
+            });
             break;
           case "sports_on":
           case "sports_break":
@@ -1220,21 +1195,21 @@ function processNowPlaying(response) {
           case "sportsremote_returning":
           case "sportsremote_halftime":
           case "sportsremote_break_disconnected":
-            nowplaying.style.background = "#186429";
+            nowplaying.style.background = Calendar.getColor({ type: "sports" });
             break;
           case "remote_on":
           case "remote_break":
           case "remote_returning":
-            nowplaying.style.background = "#6610f2";
+            nowplaying.style.background = Calendar.getColor({ type: "remote" });
             break;
           default:
-            nowplaying.style.background = "#212529";
+            nowplaying.style.background = Calendar.getColor({ type: "" });
         }
 
         if (calendar.length > 0 && response.state.startsWith("automation_")) {
-          WWSUslides.slide(`show-info`).active = true;
+          slides.slides.get(`show-info`).active = true;
         } else {
-          WWSUslides.slide(`show-info`).active = false;
+          slides.slides.get(`show-info`).active = false;
         }
       }
 
@@ -1253,49 +1228,76 @@ function processNowPlaying(response) {
           Meta.meta.state.startsWith("sportsremote_") ||
           Meta.meta.state.startsWith("prerecord_")
         ) {
-          WWSUslides.slide(`on-air`).active = true;
-          let innercontent = ``;
+          slides.slides.get(`on-air`).active = true;
+          let eventType = ``;
+          if (Meta.meta.state.startsWith("live_")) eventType = "show";
+          if (Meta.meta.state.startsWith("prerecord_")) eventType = "prerecord";
+          if (Meta.meta.state.startsWith("remote_")) eventType = "remote";
+          if (
+            Meta.meta.state.startsWith("sports_") ||
+            Meta.meta.state.startsWith("sportsremote_")
+          )
+            eventType = "sports";
+
+          let showInfo = Meta.meta.show.split(" - ");
+          let innercontent = `<div class="card card-widget widget-user-2 shadow-sm" style="height: 70vh;">
+          <div class="widget-user-header bg-${Calendar.getColorClass({
+            type: eventType,
+          })}" style="font-size: 5vh">
+            <div class="widget-user-image">
+            ${
+              Meta.meta.showLogo
+                ? `<img
+            class="img-circle elevation-2"
+            src="uploads/calendar/logo/${Meta.meta.showLogo}"
+            alt="User Avatar"
+            style="width: 12vh"
+          />`
+                : ``
+            }
+            </div>
+            <h3
+              class="widget-user-desc"
+              style="font-size: 5vh; margin-left: 13vh; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);"
+            >
+              ${showInfo[1]}
+            </h3>
+            <h3
+              class="widget-user-username"
+              style="font-size: 5vh; margin-left: 13vh; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);"
+            >
+            ${showInfo[0]}
+            </h3>
+          </div>
+          <div class="card-body" style="font-size: 4vh; text-shadow: 1px 2px 1px rgba(0,0,0,0.3); height: 45vh;">
+            <div class="container-fluid">
+              <div class="row">
+                <div class="col-6">
+                  ${Meta.meta.topic}
+                </div>
+                <div class="col-6" style="font-size: 5vh;">
+                  <p class="text-danger">Tune in: wwsu1069.org</p>
+                  ${
+                    Meta.meta.webchat
+                      ? `<p class="text-info">Chat with DJ: wwsu1069.org</p>`
+                      : ``
+                  }
+                  <p class="text-warning">Request line: 937-775-5555</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>`;
           if (Meta.meta.topic.length > 2) {
-            WWSUslides.slide(`on-air`).displayTime = 20;
-            innercontent = `<h2 style="text-align: center; font-size: 5vh; text-shadow: 1px 2px 1px rgba(0,0,0,0.3); color: ${
-              !isLightTheme ? `#ffffff` : `#000000`
-            };"><strong>${Meta.meta.show}</strong></h2>`;
-            if ("webchat" in Meta.meta && Meta.meta.webchat) {
-              innercontent += `<h3 style="text-align: center; font-size: 4vh; color: ${
-                !isLightTheme ? `#ffffff` : `#000000`
-              }; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in & Chat with the DJ: <string>wwsu1069.org</strong></h3>`;
-            } else {
-              innercontent += `<h3 style="text-align: center; font-size: 4vh; color: ${
-                !isLightTheme ? `#ffffff` : `#000000`
-              }; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in: <strong>wwsu1069.org</strong></h3>`;
-            }
-            innercontent += `<div style="overflow-y: hidden; font-size: 4.5vh; color: ${
-              !isLightTheme ? `#ffffff` : `#000000`
-            }; height: 45vh;" class="${
-              !isLightTheme ? `bg-dark-4 text-white` : `bg-light-1 text-dark`
-            } p-1 m-1 shadow-8">${Meta.meta.topic}</div>`;
+            slides.slides.get(`on-air`).displayTime = 20;
           } else {
-            WWSUslides.slide(`on-air`).displayTime = 10;
-            innercontent = `<h2 style="text-align: center; font-size: 5vh; text-shadow: 1px 2px 1px rgba(0,0,0,0.3); color: ${
-              !isLightTheme ? `#ffffff` : `#000000`
-            };"><strong>${Meta.meta.show}</strong></h2>`;
-            if ("webchat" in Meta.meta && Meta.meta.webchat) {
-              innercontent += `<h3 style="text-align: center; font-size: 4vh; color: ${
-                !isLightTheme ? `#ffffff` : `#000000`
-              }; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in & Chat with the DJ: <strong>wwsu1069.org</strong></h3>`;
-            } else {
-              innercontent += `<h3 style="text-align: center; font-size: 4vh; color: ${
-                !isLightTheme ? `#ffffff` : `#000000`
-              }; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);">Tune in: <strong>wwsu1069.org</strong></h3>`;
-            }
+            slides.slides.get(`on-air`).displayTime = 10;
           }
-          WWSUslides.slide(
+          slides.slides.get(
             `on-air`
-          ).html = `<h1 style="text-align: center; font-size: 4vh; color: ${
-            !isLightTheme ? `#ffffff` : `#000000`
-          }">On the Air Right Now</h1>${innercontent}</div>`;
+          ).html = `<h1 class="p-1" style="text-align: center; font-size: 5vh; text-shadow: 1px 4px 1px rgba(0,0,0,0.3);">On the Air Right Now</h1>${innercontent}</div>`;
         } else {
-          WWSUslides.slide(`on-air`).active = false;
+          slides.slides.get(`on-air`).active = false;
         }
       }
       let countDown =
@@ -1316,7 +1318,7 @@ function processNowPlaying(response) {
       if (typeof response.line1 !== "undefined") {
         let line1Timer = setTimeout(() => {
           nowplayingline1.innerHTML = Meta.meta.line1;
-          nowplayingline1.className = ``;
+          nowplayingline1.className = `text-center`;
           if (Meta.meta.line1.length >= 80) {
             $("#nowplaying-line1").marquee({
               // duration in milliseconds of the marquee
@@ -1356,7 +1358,7 @@ function processNowPlaying(response) {
       if (typeof response.line2 !== "undefined") {
         let line2Timer = setTimeout(() => {
           nowplayingline2.innerHTML = Meta.meta.line2;
-          nowplayingline2.className = ``;
+          nowplayingline2.className = `text-center`;
           if (Meta.meta.line2.length >= 80) {
             $("#nowplaying-line2").marquee({
               // duration in milliseconds of the marquee
@@ -1485,8 +1487,9 @@ function hexRgb(hex, options = {}) {
 
 function createAnnouncement(data) {
   if (data.type.startsWith(`display-public`)) {
-    WWSUslides.newSlide({
+    slides.add({
       name: `attn-${data.ID}`,
+      category: `announcements`,
       label: data.title,
       weight: 0,
       isSticky: data.type === `display-public-sticky`,
@@ -1498,87 +1501,468 @@ function createAnnouncement(data) {
       transitionOut: `fadeOut`,
       displayTime: data.displayTime || 15,
       fitContent: true,
-      html: `<div style="overflow-y: hidden; box-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3);" class="${
-        !isLightTheme ? `text-white bg-dark-2` : `text-dark bg-light-3`
-      }">${data.announcement}</div>`,
+      html: `<div class="bg-dark">${data.announcement}</div>`,
     });
   }
 }
-
-function processDarksky(db) {
-  // Run data manipulation process
-  try {
-    darkskyWorker.postMessage([
-      db.get(),
-      moment(Meta.meta.time).toISOString(true),
-    ]);
-  } catch (e) {
-    console.error(e);
-    iziToast.show({
-      title: "An error occurred - Please check the logs",
-      message: "Error occurred during the call of processDirectors.",
-    });
-  }
-}
-
-darkskyWorker.onmessage = function (e) {
-  switch (e.data[0]) {
-    case `setWeatherSlide`:
-      setWeatherSlide(
-        e.data[1][0],
-        e.data[1][1],
-        e.data[1][2],
-        e.data[1][3],
-        e.data[1][4],
-        e.data[1][5]
-      );
-      break;
-    case `forecastGraph`:
-      let temp = document.querySelector(`#forecast-graph`);
-      temp.innerHTML = e.data[1];
-      break;
-  }
-};
 
 function processWeeklyStats(data) {
   if (!isStudio) {
-    WWSUslides.slide(
+    slides.slides.get(
       `weekly-stats`
-    ).html = `<h1 style="text-align: center; font-size: 7vh; color: #FFFFFF">Analytics last 7 days</h1><div style="overflow-y: hidden; overflow-x: hidden; font-size: 3vh;" class="container-full p-2 m-1 text-white scale-content"><p style="text-shadow: 2px 4px 3px rgba(0,0,0,0.3);"><strong class="ql-size-large">Top performing shows:</strong></p>
-  <ol><li><strong class="ql-size-large" style="color: rgb(255, 235, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">${
-    data.topShows[0] ? data.topShows[0] : "Unknown"
-  }</strong></li><li>${
-      data.topShows[1] ? data.topShows[1] : "Unknown"
-    }</li><li>${data.topShows[2] ? data.topShows[2] : "Unknown"}</li></ol>
-  <p><span style="color: rgb(204, 232, 232); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Top Genre: ${
-    data.topGenre
-  }</span></p><p><span style="color: rgb(204, 232, 232); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Top Playlist: ${
-      data.topPlaylist
-    }</span></p>
-  <p><span style="color: rgb(204, 232, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">OnAir programming: ${
-    Math.round((data.onAir / 60 / 24) * 1000) / 1000
-  } days (${
-      Math.round((data.onAir / (60 * 24 * 7)) * 1000) / 10
-    }% of the week)</span></p><p><span style="color: rgb(204, 232, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Online listenership during OnAir programming: ${
-      Math.round((data.onAirListeners / 60 / 24) * 1000) / 1000
-    } listener days</span></p><p><span style="color: rgb(235, 214, 255); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Tracks liked on website: ${
-      data.tracksLiked
-    }</span></p><p><span style="color: rgb(204, 224, 245); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Messages exchanged between DJ and website visitors: ${
-      data.webMessagesExchanged
-    }</span></p><p><span style="color: rgb(255, 255, 204); text-shadow: 2px 4px 3px rgba(0,0,0,0.3);">Track requests placed: ${
-      data.tracksRequested
-    }</span></p></div>`;
+    ).html = `            <h1 style="text-align: center; font-size: 5vh">
+    Analytics last 7 days
+  </h1>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-7">
+        <div
+          class="card card-success"
+          style="text-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3)"
+        >
+          <div class="card-header">
+            <h3 class="card-title" style="font-size: 4vh">
+              Top 3 Shows
+            </h3>
+          </div>
+
+          <div class="card-body">
+            <div class="container-fluid">
+              <div class="row p-1">
+                <div class="col-1">
+                  <img
+                    src="images/display/first.png"
+                    style="height: 5vh; width: auto"
+                  />
+                </div>
+                <div
+                  class="col-11 text-warning text-weight-bold"
+                  style="font-size: 3vh"
+                >
+                  ${data.topShows[0]}
+                </div>
+              </div>
+              <div class="row p-1">
+                <div class="col-1">
+                  <img
+                    src="images/display/second.png"
+                    style="height: 5vh; width: auto"
+                  />
+                </div>
+                <div class="col-11" style="font-size: 3vh">
+                ${data.topShows[1]}
+                </div>
+              </div>
+              <div class="row p-1">
+                <div class="col-1">
+                  <img
+                    src="images/display/third.png"
+                    style="height: 5vh; width: auto"
+                  />
+                </div>
+                <div class="col-11" style="font-size: 3vh">
+                ${data.topShows[2]}
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- /.card-body -->
+
+          <div class="card-footer">
+            Based on online listeners : showtime ratio, FCC
+            compliance, and messages sent / received
+          </div>
+        </div>
+      </div>
+      <div class="col-5">
+        <div
+          class="card card-info"
+          style="text-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3)"
+        >
+          <div class="card-header">
+            <h3 class="card-title" style="font-size: 4vh">
+              Other Top Stats
+            </h3>
+          </div>
+
+          <div class="card-body">
+            <div class="container-fluid">
+              <div class="row p-1">
+                <div class="col-5" style="font-size: 3vh">
+                  Top Genre:
+                </div>
+                <div
+                  class="col-7 text-warning text-weight-bold"
+                  style="font-size: 3vh"
+                >
+                ${data.topGenre}
+                </div>
+              </div>
+              <div class="row p-1">
+                <div class="col-5" style="font-size: 3vh">
+                  Top Playlist:
+                </div>
+                <div
+                  class="col-7 text-warning text-weight-bold"
+                  style="font-size: 3vh"
+                >
+                ${data.topPlaylist}
+                </div>
+              </div>
+              <div class="row p-1">
+                <div class="col-5" style="font-size: 3vh">
+                  Peak Listeners:
+                </div>
+                <div
+                  class="col-7 text-warning text-weight-bold"
+                  style="font-size: 3vh"
+                >
+                  ${data.listenerPeak || 0} (${moment(
+      data.listenerPeakTime
+    ).format("MM/DD h:mm A")})
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row" style="text-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3)">
+      <div class="col-3">
+        <div class="small-box bg-danger">
+          <div class="inner">
+            <h3 style="font-size: 4vh;">${Math.round(data.onAir / 6) / 10}</h3>
+
+            <p style="font-size: 3vh;">On-Air Hours<br /><small>Live, remote, sports, & prerecord</small></p>
+          </div>
+          <div class="icon">
+            <i class="fas fa-microphone"></i>
+          </div>
+          <div class="small-box-footer" style="font-size: 2.5vh;">${
+            Math.round((data.onAir / 60 / (24 * 7)) * 1000) / 10
+          }% of the week</div>
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="small-box bg-info">
+          <div class="inner">
+            <h3 style="font-size: 4vh;">${
+              Math.round((data.listeners || 0) / 6) / 10
+            }</h3>
+
+            <p style="font-size: 3vh;">Online Listener Hours</p>
+          </div>
+          <div class="icon">
+            <i class="fas fa-headphones"></i>
+          </div>
+          <div class="small-box-footer" style="font-size: 2.5vh;">
+          ${
+            data.listeners > 0
+              ? Math.round((data.onAirListeners / data.listeners) * 1000) / 10
+              : 0
+          }% during On-Air Program
+          </div>
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="small-box bg-primary">
+          <div class="inner">
+            <h3 style="font-size: 4vh;">${data.tracksRequested}</h3>
+
+            <p style="font-size: 3vh;">Track Requests Placed</p>
+          </div>
+          <div class="icon">
+            <i class="fas fa-compact-disc"></i>
+          </div>
+          <div class="small-box-footer" style="font-size: 2.5vh;">${
+            data.tracksLiked
+          } Tracks Liked</div>
+        </div>
+      </div>
+      <div class="col-3">
+        <div class="small-box bg-success">
+          <div class="inner">
+            <h3 style="font-size: 4vh;">${
+              data.webMessagesExchanged + data.discordMessagesExchanged
+            }</h3>
+
+            <p style="font-size: 3vh;">Messages Exchanged</p>
+          </div>
+          <div class="icon">
+            <i class="fas fa-comments"></i>
+          </div>
+          <div class="small-box-footer" style="font-size: 2.5vh;">${
+            data.discordMessagesExchanged
+          } were in Discord</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
   }
 }
 
-function setWeatherSlide(id, show, background, header, icon, body) {
-  weatherSlide.map((slide, index) => {
-    if (slide.id === id) {
-      weatherSlide[index].background = background || slide.background;
-      weatherSlide[index].header = header || slide.header;
-      weatherSlide[index].show = show;
-      weatherSlide[index].icon = icon || slide.icon;
-      weatherSlide[index].body = body || slide.body;
+/**
+ * Update director office hours
+ */
+function updateDirectorsCalendar() {
+  clearTimeout(directorCalendarTimer);
+  directorCalendarTimer = setTimeout(() => {
+    try {
+      let directorHours = {};
+
+      Directors.db().each((director) => {
+        directorHours[director.ID] = {
+          director: director,
+          hours: [],
+          html: ``,
+        };
+      });
+
+      // A list of Office Hours for the directors
+
+      // Define a comparison function that will order calendar events by start time when we run the iteration
+      var compare = function (a, b) {
+        try {
+          if (moment(a.start).valueOf() < moment(b.start).valueOf()) {
+            return -1;
+          }
+          if (moment(a.start).valueOf() > moment(b.start).valueOf()) {
+            return 1;
+          }
+          if (a.ID < b.ID) {
+            return -1;
+          }
+          if (a.ID > b.ID) {
+            return 1;
+          }
+          return 0;
+        } catch (e) {
+          console.error(e);
+          $(document).Toasts("create", {
+            class: "bg-danger",
+            title: "Calendar sort error",
+            subtitle: trackID,
+            autohide: true,
+            delay: 10000,
+            body: `There was a problem in the calendar sort function. Please report this to the engineer at wwsu4@wright.edu.`,
+          });
+        }
+      };
+
+      calendar
+        .sort(compare)
+        .filter((event) => event.type === "office-hours")
+        .map((event) => {
+          // null start or end? Use a default to prevent errors.
+          if (!moment(event.start).isValid()) {
+            event.start = moment(Meta.meta.time).startOf("day");
+          }
+          if (!moment(event.end).isValid()) {
+            event.end = moment(Meta.meta.time).add(1, "days").startOf("day");
+          }
+
+          event.startT =
+            moment(event.start).minutes() === 0
+              ? moment(event.start).format("h")
+              : moment(event.start).format("h:mm");
+          if (
+            (moment(event.start).hours() < 12 &&
+              moment(event.end).hours() >= 12) ||
+            (moment(event.start).hours() >= 12 &&
+              moment(event.end).hours() < 12)
+          ) {
+            event.startT += " " + moment(event.start).format("A");
+          }
+          event.endT =
+            moment(event.end).minutes() === 0
+              ? moment(event.end).format("h A")
+              : moment(event.end).format("h:mm A");
+
+          event.startD1 = moment(event.start).format("ddd");
+          event.startD2 = moment(event.start).format("MM/DD");
+
+          let html = `<div class="row">
+          <div class="col-2">${event.startD1}</div>
+          <div class="col-3">${event.startD2}</div>
+          <div class="col-7">${event.startT} - ${event.endT}</div>
+        </div>`;
+
+          if (event.timeChanged) {
+            html = `<div class="row">
+            <div class="col-2">${event.startD1}</div>
+            <div class="col-3">${event.startD2}</div>
+          <div class="col-7 text-teal">${event.startT} - ${event.endT} (Temp Hours)</div>
+        </div>`;
+          }
+          if (moment(Meta.meta.time).isAfter(moment(event.end))) {
+            html = `<div class="row">
+            <div class="col-2">${event.startD1}</div>
+            <div class="col-3">${event.startD2}</div>
+            <div class="col-7 text-muted"><s>${event.startT} - ${event.endT}</s> (Passed)</div>
+          </div>`;
+          }
+          if (event.scheduleType && event.scheduleType.startsWith("canceled")) {
+            html = `<div class="row">
+            <div class="col-2">${event.startD1}</div>
+            <div class="col-3">${event.startD2}</div>
+            <div class="col-7 text-danger"><s>${event.startT} - ${event.endT}</s> (Canceled)</div>
+          </div>`;
+          }
+
+          if (
+            typeof directorHours[event.director] !== "undefined" &&
+            typeof directorHours[event.director].hours !== "undefined"
+          ) {
+            directorHours[event.director].hours.push(html);
+          }
+        });
+
+      // Build outer director HTML
+      for (let key in directorHours) {
+        if (!Object.prototype.hasOwnProperty.call(directorHours, key)) continue;
+
+        directorHours[key].html = `
+          <div class="col" style="min-width: 20.4vw; max-width: 20.4vw;">
+                  <div
+                    class="p-2 card card-${
+                      directorHours[key].director.present
+                        ? directorHours[key].director.present === 2
+                          ? `indigo`
+                          : `success`
+                        : `danger`
+                    } card-outline position-relative"
+                  >
+                    <div class="ribbon-wrapper ribbon-lg">
+                    ${
+                      directorHours[key].director.present
+                        ? directorHours[key].director.present === 2
+                          ? `<div
+                        class="ribbon bg-indigo"
+                        title="This director is currently doing remote hours."
+                      >
+                        REMOTE
+                      </div>`
+                          : `<div
+                        class="ribbon bg-success"
+                        title="This director is currently doing WWSU office hours."
+                      >
+                        IN OFFICE
+                      </div>`
+                        : `<div
+                      class="ribbon bg-danger"
+                      title="This director is currently clocked out."
+                    >
+                      OUT OF OFFICE
+                    </div>`
+                    }
+                    </div>
+                    <div class="card-body box-profile">
+                      <div class="container-fluid">
+                        <div class="row">
+                          <div class="col-4 p-1">
+                          ${
+                            directorHours[key].director.avatar &&
+                            directorHours[key].director.avatar !== ""
+                              ? `<img class="profile-user-img img-fluid img-circle" width="48" src="uploads/directors/${directorHours[key].director.avatar}">`
+                              : `<div class="text-center">
+                              <div class="bg-danger profile-user-img img-fluid img-circle">${jdenticon.toSvg(
+                                `Director ${directorHours[key].director.name}`,
+                                72
+                              )}</div>
+                              </div>`
+                          }
+                          </div>
+                          <div class="col-8">
+                            <p class="profile-username font-weight-bold" style="font-size: 2vh;">
+                              ${directorHours[key].director.name}
+                            </p>
+
+                            <p class="text-warning" style="font-size: 1.66vh;">
+                            ${directorHours[key].director.position}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <ul class="list-group list-group-unbordered mb-3">
+                        <li class="list-group-item font-weight-bold">
+                          <div class="container-fluid" style="font-size: 1.3vh;">
+                            ${directorHours[key].hours.join("")}
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+          `;
+      }
+
+      // Director Office Hours slide
+      let displayTime = 5;
+      let innerHTML = ``;
+      let directorsActive = false;
+
+      for (let key in directorHours) {
+        if (!Object.prototype.hasOwnProperty.call(directorHours, key)) continue;
+        if (directorHours[key].director.assistant) continue;
+
+        innerHTML += directorHours[key].html;
+        displayTime += 3;
+        directorsActive = true;
+      }
+      slides.slides.get(
+        `hours-directors`
+      ).html = `<h1 style="text-align: center; font-size: 5vh; text-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3);">
+        Director Office Hours (next 7 days)
+      </h1>
+
+      <div class="container-fluid" style="text-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3);">
+        <div class="row">
+          ${innerHTML}
+        </div>
+      </div>
+        `;
+      slides.slides.get(`hours-directors`).displayTime = displayTime;
+      slides.slides.get(`hours-directors`).active = directorsActive;
+
+      // Assistant Director Office Hours slide
+      displayTime = 5;
+      innerHTML = ``;
+      directorsActive = false;
+
+      for (let key in directorHours) {
+        if (!Object.prototype.hasOwnProperty.call(directorHours, key)) continue;
+        if (!directorHours[key].director.assistant) continue;
+
+        innerHTML += directorHours[key].html;
+        displayTime += 3;
+        directorsActive = true;
+      }
+      slides.slides.get(
+        `hours-assistants`
+      ).html = `<h1 style="text-align: center; font-size: 5vh; text-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3);">
+              Assistant Office Hours (next 7 days)
+            </h1>
+      
+            <div class="container-fluid" style="text-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3);">
+              <div class="row">
+                ${innerHTML}
+              </div>
+            </div>
+              `;
+      slides.slides.get(`hours-assistants`).displayTime = displayTime;
+      slides.slides.get(`hours-assistants`).active = directorsActive;
+    } catch (e) {
+      console.error(e);
+      $(document).Toasts("create", {
+        class: "bg-danger",
+        title: "Directors Calendar Error",
+        subtitle: trackID,
+        autohide: true,
+        delay: 10000,
+        body: `There was a problem loading director office hours. Please report this to the engineer at wwsu4@wright.edu.`,
+      });
     }
-  });
+  }, 1000);
 }
