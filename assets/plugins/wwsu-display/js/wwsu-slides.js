@@ -32,10 +32,12 @@ class WWSUslides {
 
     this.active = null; // Name of the slide currently displayed
     this.timeLeft = 0; // Number of seconds left before display switches to the next slide
+    this.timeLeftFailsafe = 0; // In case timeLeft is null when it should not be
 
     this.timer = setInterval(() => {
       if (this.timeLeft !== null) {
         this.timeLeft--;
+        this.timeLeftFailsafe = 0;
 
         if (this.timeLeft <= 0) {
           this.timeLeft = 0;
@@ -73,6 +75,16 @@ class WWSUslides {
         }
 
         this.updateSidebar();
+
+        // Failsafe in case we get stuck in timeLeft = null
+      } else if (this.qualified.length > 1) {
+        this.timeLeftFailsafe++;
+        if (this.timeLeftFailsafe >= 10) {
+          this.timeLeftFailsafe = 0;
+          this.timeLeft = 15;
+        }
+      } else {
+        this.timeLeftFailsafe = 0;
       }
     }, 1000);
   }
@@ -187,8 +199,8 @@ class WWSUslides {
 
         // Animate slide in
         this.activeSlide.transitionIn(() => {
-            this.timeLeft = this.activeSlide.displayTime;
-            this.updateSidebar();
+          this.timeLeft = this.activeSlide.displayTime;
+          this.updateSidebar();
         });
 
         console.log(`setting time`);
@@ -217,7 +229,8 @@ class WWSUslides {
       console.log(`showing slide`);
 
       // Perform HTML reset if applicable
-      if (this.activeSlide && this.activeSlide.reset) this.activeSlide.reset = true;
+      if (this.activeSlide && this.activeSlide.reset)
+        this.activeSlide.reset = true;
 
       // Failsafe: iterate through all slides and add display: none to prevent stray slides from remaining visible
       this.slides.forEach((_slide, slideName) => {
@@ -338,7 +351,9 @@ class WWSUslides {
         }
 
         function scalePages(page, maxWidth, maxHeight) {
-          console.log(`scalePages: Max width... ${maxWidth}, maxHeight... ${maxHeight}`);
+          console.log(
+            `scalePages: Max width... ${maxWidth}, maxHeight... ${maxHeight}`
+          );
           var width = (temp2.height() / maxHeight) * 80;
           page.attr("width", `${width}%`);
           console.log(`Page width: ${width}%`);
@@ -410,7 +425,10 @@ class WWSUslides {
 
     // Sort according to category
     return activeSlides.sort((a, b) => {
-        return (this.categories.indexOf(a.category) - this.categories.indexOf(b.category));
+      return (
+        this.categories.indexOf(a.category) -
+        this.categories.indexOf(b.category)
+      );
     });
   }
 }
@@ -526,7 +544,9 @@ class WWSUslide {
   set reset(value) {
     this._reset = value;
     if (value) {
-      $(`#section-slide-${this._name}`).html(`<div id="section-slide-${this._name}-contents">${this._originalHtml}</div>`);
+      $(`#section-slide-${this._name}`).html(
+        `<div id="section-slide-${this._name}-contents">${this._originalHtml}</div>`
+      );
     }
   }
 
@@ -591,7 +611,9 @@ class WWSUslide {
   // Set new HTML for the slide and update it.
   set html(value) {
     this._html = value;
-    $(`#section-slide-${this._name}`).html(`<div id="section-slide-${this._name}-contents">${value}</div>`);
+    $(`#section-slide-${this._name}`).html(
+      `<div id="section-slide-${this._name}-contents">${value}</div>`
+    );
   }
 
   get originalHtml() {
@@ -637,6 +659,14 @@ class WWSUslide {
    * @param {?function} cb Callback called when the transition is finished.
    */
   transitionIn(cb = () => {}) {
+    // Sometimes, animation callback will not fire. Add a 5-second failsafe just in case.
+    let failsafe = setTimeout(() => {
+      console.log(`animation failsafe triggered`);
+      $(`#section-slide-${this._name}-contents`).attr("class", "");
+      this.visible = true;
+      cb();
+    }, 5000);
+
     // Reset all classes
     $(`#section-slide-${this._name}-contents`).attr("class", "");
 
@@ -644,9 +674,13 @@ class WWSUslide {
     this.visible = true;
 
     // Perform animate.css transition
-    $(`#section-slide-${this._name}-contents`).animateCss(this._transitionIn, () => {
-      cb();
-    });
+    $(`#section-slide-${this._name}-contents`).animateCss(
+      this._transitionIn,
+      () => {
+        clearTimeout(failsafe); // Disable failsafe timer
+        cb();
+      }
+    );
   }
 
   /**
@@ -664,11 +698,14 @@ class WWSUslide {
     }, 5000);
 
     // Do the transition out
-    $(`#section-slide-${this._name}-contents`).animateCss(this._transitionOut, () => {
-      clearTimeout(failsafe); // Disable failsafe timer
-      this.visible = false; // Invisible now
-      $(`#section-slide-${this._name}-contents`).attr("class", ""); // Remove animation classes
-      cb();
-    });
+    $(`#section-slide-${this._name}-contents`).animateCss(
+      this._transitionOut,
+      () => {
+        clearTimeout(failsafe); // Disable failsafe timer
+        this.visible = false; // Invisible now
+        $(`#section-slide-${this._name}-contents`).attr("class", ""); // Remove animation classes
+        cb();
+      }
+    );
   }
 }
