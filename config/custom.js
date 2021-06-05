@@ -176,16 +176,6 @@ var defaultConfig = {
     app: ``,
   },
 
-  // Used for Darksky weather API
-  // DEPRECATED; TODO: remove
-  darksky: {
-    api: ``,
-    position: {
-      latitude: 39.7846,
-      longitude: -84.0583,
-    },
-  },
-
   // Climacell weather API
   climacell: {
     api: ``,

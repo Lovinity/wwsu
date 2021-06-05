@@ -45,7 +45,6 @@ module.exports.policies = {
     "isAuthorizedHost"
   ],
   "config/get": ["isBanned", "isSocket", "isAuthorizedHost"],
-  "darksky/get": "isBanned",
   directors: "isBanned",
   "directors/*": ["isBanned", "isSocket", "isAuthorizedAdminDirector"],
   "directors/calendar": "isBanned",

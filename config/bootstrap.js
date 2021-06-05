@@ -13,13 +13,10 @@ const CalendarDb = require("../assets/plugins/wwsu-calendar/js/wwsu-calendar.js"
 var cron = require("node-cron");
 var sh = require("shorthash");
 const queryString = require("query-string");
-const DarkSkyApi = require("dark-sky"); // DEPRECATED. TODO: remove
 const cryptoRandomString = require("crypto-random-string");
 
 module.exports.bootstrap = async function (done) {
   sails.log.verbose(`BOOTSTRAP: started; initializing variables`);
-
-  const darksky = new DarkSkyApi(sails.config.custom.darksky.api);
 
   // Generate token secrets
   sails.log.verbose(`BOOTSTRAP: generating token secrets`);
@@ -34,14 +31,6 @@ module.exports.bootstrap = async function (done) {
   sails.config.custom.secrets.adminDirectorUab = cryptoRandomString({
     length: 256,
   });
-
-  // Load darksky
-  // DEPRECATED. TODO: remove.
-  sails.log.verbose(`BOOTSTRAP: Initiating Darksky`);
-  await sails.models.darksky.findOrCreate(
-    { ID: 1 },
-    { ID: 1, currently: {}, minutely: {}, hourly: {}, daily: {} }
-  );
 
   // Load calendardb
   sails.log.verbose(`BOOTSTRAP: Initiating calendar`);
@@ -2011,7 +2000,6 @@ module.exports.bootstrap = async function (done) {
           sails.models.underwritings,
           sails.models.emails,
           sails.models.attendance,
-          sails.models.darksky,
           sails.models.climacell,
           sails.models.listeners,
           sails.models.djs,
@@ -2341,44 +2329,6 @@ module.exports.bootstrap = async function (done) {
           await sails.models.recipients.destroy({ ID: destroyIt }).fetch();
         }
 
-        return resolve();
-      } catch (e) {
-        sails.log.error(e);
-        return reject(e);
-      }
-    });
-  });
-
-  // Every fifth minute at second 11, refresh sails.models.darksky weather information
-  // DEPRECATED. TODO: remove
-  sails.log.verbose(`BOOTSTRAP: scheduling darksky CRON.`);
-  cron.schedule("11 */5 * * * *", () => {
-    // eslint-disable-next-line no-async-promise-executor
-    return new Promise(async (resolve, reject) => {
-      sails.log.debug(`CRON darksky called.`);
-      try {
-        darksky
-          .latitude(sails.config.custom.darksky.position.latitude)
-          .longitude(sails.config.custom.darksky.position.longitude)
-          .exclude("alerts")
-          .get()
-          .then(async (resp) => {
-            await sails.models.darksky
-              .update(
-                { ID: 1 },
-                {
-                  currently: resp.currently,
-                  minutely: resp.minutely,
-                  hourly: resp.hourly,
-                  daily: resp.daily,
-                }
-              )
-              .fetch();
-          })
-          .catch((err) => {
-            sails.log.error(err);
-            reject(err);
-          });
         return resolve();
       } catch (e) {
         sails.log.error(e);
