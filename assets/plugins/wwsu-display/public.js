@@ -399,102 +399,160 @@ slides.add({
 								class="card-body"
 								title="Current weather conditions at WWSU."
 							>
-								<div class="row">
-									<div class="col-12">
-										<ul>
-											<li>
-												Conditions:
-												<span
-													class="climacell-current-0-weatherCode-string text-pink"
-													>???</span
-												>
-											<ul>
-                        <li>
-                          Cloud Cover:
-                          <span class="climacell-current-0-cloudCover text-pink"
-                            >???</span
-                          >%
-                        </li>
-                        <li>
-                          Precip:
-                          <span
-                            class="climacell-current-0-precipitationIntensity text-pink"
-                            >???</span
-                          >
-                          inches/hour of
-                          <span
-                            class="climacell-current-0-precipitationType-string text-pink"
-                            >???</span
-                          >
-                        </li>
-                      </ul>
-                      </li>
-											<li>
-												Temperature:
-												<span
-													class="climacell-current-0-temperature text-pink"
-													>???</span
-												>°F
-                      <ul>
-                        <li>Feels like
-												<span
-													class="climacell-current-0-temperatureApparent text-pink"
-													>???</span
-												>°F</li>
-                      </ul>
-											</li>
-											<li>
-												Wind: From the
-												<span
-													class="climacell-current-0-windDirection-card text-pink"
-													>???</span
-												>
-												at
-												<span class="climacell-current-0-windSpeed text-pink"
-													>???</span
-												>
-												MPH
-                        <ul>
-                        <li>Gusting to
-                          <span
-                            class="climacell-current-0-windGust text-pink"
-                          ></span>
-                          MPH</li>
-                        </ul>
-											</li>
-											<li>
-												Humidity:
-												<span class="climacell-current-0-humidity text-pink"
-													>???</span
-												>%
-                        <ul>
-                        <li>
-                        Dew point
-                          <span class="climacell-current-0-dewPoint text-pink"
-                            >???</span
-                          >°F
-                        </li>
-                        </ul>
-											</li>
-											<li>
-												Visibility:
-												<span class="climacell-current-0-visibility text-pink"
-													>???</span
-												>
-												miles
-											</li>
-											<li>
-												Air Quality:
-												<span
-													class="climacell-current-0-epaHealthConcern-string text-pink"
-													>???</span
-												>
-											</li>
-										</ul>
-									</div>
-								</div>
+              <div class="container-fluid">
+              <div class="row">
+                <div class="col-4">
+                  <strong>Current Conditions:</strong>
+                </div>
+                <div class="col-8">
+                  <span
+                    class="
+                      climacell-current-0-weatherCode-string
+                      text-danger
+                    "
+                    >???</span
+                  >
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-4">
+                  <strong>Cloud Cover:</strong>
+                </div>
+                <div class="col-8">
+                  <span
+                    class="climacell-current-0-cloudCover text-danger"
+                    >???</span
+                  >%
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-4">
+                  <strong>Precipitation:</strong>
+                </div>
+                <div class="col-8">
+                  <span
+                    class="
+                      climacell-current-0-precipitationIntensity
+                      text-danger
+                    "
+                    >???</span
+                  >
+                  inches/hour of
+                  <span
+                    class="
+                      climacell-current-0-precipitationType-string
+                      text-danger
+                    "
+                    >???</span
+                  >
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-4">
+                  <strong>Temperature:</strong>
+                </div>
+                <div class="col-8">
+                  <span
+                    class="climacell-current-0-temperature text-danger"
+                    >???</span
+                  >°F
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-4">
+                  <strong>Feels Like:</strong>
+                </div>
+                <div class="col-8">
+                  <span
+                    class="
+                      climacell-current-0-temperatureApparent
+                      text-danger
+                    "
+                    >???</span
+                  >°F
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-4">
+                  <strong>Sustained Wind:</strong>
+                </div>
+                <div class="col-8">
+                  From the
+                  <span
+                    class="
+                      climacell-current-0-windDirection-card
+                      text-danger
+                    "
+                    >???</span
+                  >
+                  at
+                  <span
+                    class="climacell-current-0-windSpeed text-danger"
+                    >???</span
+                  >
+                  MPH
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-4">
+                  <strong>Wind Gust:</strong>
+                </div>
+                <div class="col-8">
+                  <span
+                    class="climacell-current-0-windGust text-danger"
+                  ></span>
+                  MPH
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-4">
+                  <strong>Relative Humidity:</strong>
+                </div>
+                <div class="col-8">
+                  <span class="climacell-current-0-humidity text-danger"
+                    >???</span
+                  >%
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-4">
+                  <strong>Dew Point:</strong>
+                </div>
+                <div class="col-8">
+                  <span class="climacell-current-0-dewPoint text-danger"
+                    >???</span
+                  >°F
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-4">
+                  <strong>Visibility:</strong>
+                </div>
+                <div class="col-8">
+                  <span
+                    class="climacell-current-0-visibility text-danger"
+                    >???</span
+                  >
+                  miles
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-4">
+                  <strong>Air Quality:</strong>
+                </div>
+                <div class="col-8">
+                  <span
+                    class="
+                      climacell-current-0-epaHealthConcern-string
+                      text-danger
+                    "
+                    >???</span
+                  >
+                </div>
+              </div>
+            </div>
 							</div>
-						</div>
+	</div>
   `,
 });
 
