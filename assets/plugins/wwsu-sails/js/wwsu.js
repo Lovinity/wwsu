@@ -855,16 +855,16 @@ class WWSUqueue {
 		var options = options || {};
 		var relaxation = 1;
 		var timeout = options.timeout || relaxation;
-		var start = performance.now();
+		var start = Date.now();
 		return setTimeout(function() {
 			callback({
 				get didTimeout() {
 					return options.timeout
 						? false
-						: performance.now() - start - relaxation > timeout;
+						: Date.now() - start - relaxation > timeout;
 				},
 				timeRemaining: function() {
-					return Math.max(0, relaxation - (performance.now() - start));
+					return Math.max(0, relaxation - (Date.now() - start));
 				}
 			});
 		}, relaxation);
