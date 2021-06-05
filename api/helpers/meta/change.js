@@ -284,9 +284,10 @@ module.exports = {
         "The host ID who was called for the remote broadcast (null: no calls in progress)",
     },
     discordChannel: {
-      type: 'string',
+      type: "string",
       allowNull: true,
-      description: 'If not null, this is the discord channel pertaining to the current broadcast (the Discord bot should take these messages and publish them to internal chat system and count them in analytics).'
+      description:
+        "If not null, this is the discord channel pertaining to the current broadcast (the Discord bot should take these messages and publish them to internal chat system and count them in analytics).",
     },
   },
 
@@ -903,9 +904,10 @@ module.exports = {
             // TODO: Put stream metadata updating API query here
 
             // Set Discord activity based on what is playing on the air
-            await DiscordClient.user.setActivity(push[key3], {
-              type: "PLAYING",
-            });
+            if (DiscordClient && DiscordClient.user)
+              await DiscordClient.user.setActivity(push[key3], {
+                type: "PLAYING",
+              });
           }
         }
       }

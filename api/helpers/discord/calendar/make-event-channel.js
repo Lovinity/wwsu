@@ -13,6 +13,9 @@ module.exports = {
   exits: {},
 
   fn: async function(inputs) {
+    // Exit immediately if there is no Discord client.
+    if (!DiscordClient) return;
+    
     // Do not make channels for events that are not a broadcast or are a sports broadcast
     if (
       ["show", "remote", "prerecord", "playlist"].indexOf(inputs.event.type) ===

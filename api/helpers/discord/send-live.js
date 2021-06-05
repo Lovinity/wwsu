@@ -7,17 +7,17 @@ module.exports = {
   inputs: {
     event: {
       type: "json",
-      description: "Event object triggering the notification."
-    }
+      description: "Event object triggering the notification.",
+    },
   },
 
   exits: {
     success: {
-      description: "All done."
-    }
+      description: "All done.",
+    },
   },
 
-  fn: async function(inputs) {
+  fn: async function (inputs) {
     // Skip if the event is not a broadcast
     if (
       !inputs.event ||
@@ -68,19 +68,21 @@ module.exports = {
       );
 
     // Get the live channel
-    let channel = DiscordClient.channels.resolve(
-      sails.config.custom.discord.channels.live
-    );
+    if (DiscordClient) {
+      let channel = DiscordClient.channels.resolve(
+        sails.config.custom.discord.channels.live
+      );
 
-    // Send the embed
-    if (channel) await channel.send({ embed: embed });
-
-    // Get and send the same message in the show channel if it exists
-    if (inputs.event.discordChannel) {
-      channel = DiscordClient.channels.resolve(inputs.event.discordChannel);
+      // Send the embed
       if (channel) await channel.send({ embed: embed });
+
+      // Get and send the same message in the show channel if it exists
+      if (inputs.event.discordChannel) {
+        channel = DiscordClient.channels.resolve(inputs.event.discordChannel);
+        if (channel) await channel.send({ embed: embed });
+      }
     }
 
     return;
-  }
+  },
 };

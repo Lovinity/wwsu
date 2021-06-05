@@ -23,7 +23,7 @@ module.exports = {
         )
         .fetch();
 
-      if (records && records.length > 0) {
+      if (DiscordClient && records && records.length > 0) {
         let maps = records.map(async record => {
           // If there was a discord message, edit it to say the message was deleted
           if (record.discordChannel && record.discordMessage) {

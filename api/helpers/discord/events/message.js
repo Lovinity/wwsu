@@ -7,15 +7,16 @@ module.exports = {
     message: {
       type: "ref",
       required: true,
-      description: "The message object"
-    }
+      description: "The message object",
+    },
   },
 
-  fn: async function(inputs) {
+  fn: async function (inputs) {
     // Ignore DM messages and messages from self
     if (
-      inputs.message.author.id === DiscordClient.user.id ||
-      !inputs.message.guild
+      DiscordClient.user &&
+      (inputs.message.author.id === DiscordClient.user.id ||
+        !inputs.message.guild)
     )
       return;
 
@@ -72,7 +73,7 @@ module.exports = {
 
     // Convert attachments to markdown and append to message.
     if (inputs.message.attachments && inputs.message.attachments.size > 0) {
-      inputs.message.attachments.each(attachment => {
+      inputs.message.attachments.each((attachment) => {
         message += "\n" + `![attachment](${attachment.url})`;
       });
     }
@@ -91,7 +92,7 @@ module.exports = {
         toFriendly: sendPublic ? "Public" : "(log only)",
         message: inputs.message.cleanContent,
         discordChannel: inputs.message.channel.id,
-        discordMessage: inputs.message.id
+        discordMessage: inputs.message.id,
       })
       .fetch();
 
@@ -99,7 +100,7 @@ module.exports = {
     if (sendPublic) {
       inputs.message
         .react("✅")
-        .then(reaction => setTimeout(() => reaction.remove(), 15000));
+        .then((reaction) => setTimeout(() => reaction.remove(), 15000));
     }
-  }
+  },
 };

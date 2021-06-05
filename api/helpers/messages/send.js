@@ -62,7 +62,7 @@ module.exports = {
       )}`;
 
       // Send public messages in Discord as well if webchat is enabled. TODO: move these into config.custom
-      if (inputs.to === "website" && sails.models.meta.memory.webchat) {
+      if (DiscordClient && inputs.to === "website" && sails.models.meta.memory.webchat) {
         if (sails.models.meta.memory.discordChannel) {
           channel = DiscordClient.channels.resolve(
             sails.models.meta.memory.discordChannel

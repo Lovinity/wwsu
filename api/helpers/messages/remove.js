@@ -23,7 +23,7 @@ module.exports = {
         return exits.error(new Error(`The message does not exist.`));
       } else {
         // If there was a discord message, edit it to say the message was deleted
-        if (record.discordChannel && record.discordMessage) {
+        if (DiscordClient && record.discordChannel && record.discordMessage) {
           let channel = DiscordClient.channels.resolve(record.discordChannel);
           if (channel) {
             let message;

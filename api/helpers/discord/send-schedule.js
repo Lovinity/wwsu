@@ -46,8 +46,8 @@ module.exports = {
   },
 
   fn: async function (inputs) {
-    // If this is an event that is on the air now, skip.
-    if (inputs.started) return;
+    // If there is no Discord Client, or if this is an event that is on the air now, skip.
+    if (!DiscordClient || inputs.started) return;
 
     // Skip all events that are not a broadcast
     if (
