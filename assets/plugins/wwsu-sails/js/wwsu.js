@@ -172,7 +172,7 @@ class WWSUdb extends WWSUevents {
 	 */
 	replaceData(WWSUreq, path, data = {}) {
 		try {
-			WWSUreq.request({ method: "POST", url: path, data: data }, (body) => {
+			WWSUreq.request({ method: "POST", url: path, data: data }, body => {
 				this.query(body, true);
 			});
 		} catch (e) {
@@ -187,7 +187,7 @@ class WWSUdb extends WWSUevents {
 	 * @param {sails.io} socket WWSU socket to use
 	 */
 	assignSocketEvent(event, socket) {
-		socket.on(event, (data) => {
+		socket.on(event, data => {
 			this.query(data, false);
 		});
 	}
@@ -270,8 +270,9 @@ class WWSUreq {
 	request(opts, cb) {
 		// Called after logging in and getting a token
 		const step2 = (username, password) => {
-			this._authorize(username, password, (token) => {
+			this._authorize(username, password, token => {
 				if (token === 0) {
+					if (this.manager.has("WWSUehhh")) this.manager.get("WWSUehhh").play();
 					$(document).Toasts("create", {
 						class: "bg-danger",
 						title: "Error Authorizing",
@@ -279,12 +280,13 @@ class WWSUreq {
 							"There was an error authorizing. Did you type your password in correctly?",
 						autohide: true,
 						delay: 10000,
-						icon: "fas fa-skull-crossbones fa-lg",
+						icon: "fas fa-skull-crossbones fa-lg"
 					});
 				} else if (
 					typeof token.errToken !== `undefined` ||
 					typeof token.token === "undefined"
 				) {
+					if (this.manager.has("WWSUehhh")) this.manager.get("WWSUehhh").play();
 					$(document).Toasts("create", {
 						class: "bg-danger",
 						title: "Error Authorizing",
@@ -295,10 +297,10 @@ class WWSUreq {
 						}`,
 						autohide: true,
 						delay: 10000,
-						icon: "fas fa-skull-crossbones fa-lg",
+						icon: "fas fa-skull-crossbones fa-lg"
 					});
 				} else {
-					this._tryRequest(opts, (body2) => {
+					this._tryRequest(opts, body2 => {
 						cb(body2);
 					});
 				}
@@ -312,7 +314,7 @@ class WWSUreq {
 				step2(this.host, null);
 				// If auth path is null, this request doesn't need authentication; proceed with the request immediately
 			} else if (this.authPath === null) {
-				this._tryRequest(opts, (body2) => {
+				this._tryRequest(opts, body2 => {
 					cb(body2);
 				});
 				// Otherwise, prompt for a login
@@ -322,9 +324,8 @@ class WWSUreq {
 
 			// Otherwise, try the request, and for safe measures, prompt for login if we end up getting an auth error
 		} else {
-			this._tryRequest(opts, (body) => {
+			this._tryRequest(opts, body => {
 				if (body === -1 || typeof body.errToken !== "undefined") {
-
 					// For auth/host paths, we want to get a new token immediately; there is no login form for host authorization
 					if (this.authPath !== "/auth/host") {
 						this.token = null;
@@ -354,15 +355,15 @@ class WWSUreq {
 			if (this.authPath !== null) {
 				if (typeof opts.headers === `undefined`) {
 					opts.headers = {
-						Authorization: "Bearer " + this.token,
+						Authorization: "Bearer " + this.token
 					};
 				} else {
 					opts.headers["Authorization"] = "Bearer " + this.token;
 				}
 			}
 
-			const doRequest = (cb2) => {
-				this.socket.request(opts, (body) => {
+			const doRequest = cb2 => {
+				this.socket.request(opts, body => {
 					cb2();
 					if (!body) {
 						// eslint-disable-next-line standard/no-callback-literal
@@ -385,7 +386,7 @@ class WWSUreq {
 						doRequest(() => {
 							$(opts.dom).unblock();
 						});
-					},
+					}
 				});
 			} else {
 				doRequest(() => {});
@@ -409,9 +410,9 @@ class WWSUreq {
 				{
 					method: "POST",
 					url: this.authPath,
-					data: { username: username, password: password },
+					data: { username: username, password: password }
 				},
-				(body) => {
+				body => {
 					if (!body) {
 						// eslint-disable-next-line standard/no-callback-literal
 						cb(0);
@@ -449,25 +450,27 @@ class WWSUreq {
 			fdb = this.manager.get(this.db).db();
 		}
 		if (!fdb || fdb.length < 1) {
+			if (this.manager.has("WWSUehhh")) this.manager.get("WWSUehhh").play();
 			$(document).Toasts("create", {
 				class: "bg-danger",
 				title: "Authorization error",
 				body: `There is no ${this.authName} available to authorize. Please report this to the engineer.`,
 				autohide: true,
 				delay: 10000,
-				icon: "fas fa-skull-crossbones fa-lg",
+				icon: "fas fa-skull-crossbones fa-lg"
 			});
 			return null;
 		}
 
 		if (!this.usernameField) {
+			if (this.manager.has("WWSUehhh")) this.manager.get("WWSUehhh").play();
 			$(document).Toasts("create", {
 				class: "bg-danger",
 				title: "Authorization error",
 				body: `A username field was not specified for ${this.authName} authorization. Please report this to the engineer.`,
 				autohide: true,
 				delay: 10000,
-				icon: "fas fa-skull-crossbones fa-lg",
+				icon: "fas fa-skull-crossbones fa-lg"
 			});
 			return null;
 		}
@@ -488,7 +491,7 @@ class WWSUreq {
 					tempModal.iziModal("destroy");
 					$(`#modal-${tempModal.id}`).remove();
 					tempModal = undefined;
-				},
+				}
 			}
 		);
 
@@ -507,14 +510,14 @@ class WWSUreq {
 							type: "string",
 							title: `User`,
 							required: true,
-							enum: fdb.get().map((user) => user.name),
+							enum: fdb.get().map(user => user.name)
 						},
 						password: {
 							title: "Password",
 							format: "password",
-							required: true,
-						},
-					},
+							required: true
+						}
+					}
 				},
 				options: {
 					form: {
@@ -530,11 +533,11 @@ class WWSUreq {
 									let value = form.getValue();
 									tempModal.iziModal("close");
 									cb(value.username, value.password);
-								},
-							},
-						},
-					},
-				},
+								}
+							}
+						}
+					}
+				}
 			});
 		});
 	}
@@ -607,7 +610,7 @@ class WWSUutil {
 					"There was an error in the getUrlParameter function. Please report this to the engineer.",
 				autohide: true,
 				delay: 10000,
-				icon: "fas fa-skull-crossbones fa-lg",
+				icon: "fas fa-skull-crossbones fa-lg"
 			});
 		}
 	}
@@ -670,7 +673,7 @@ class WWSUutil {
 					"There was an error in the hexrgb function. Please report this to the engineer.",
 				autohide: true,
 				delay: 10000,
-				icon: "fas fa-skull-crossbones fa-lg",
+				icon: "fas fa-skull-crossbones fa-lg"
 			});
 		}
 	}
@@ -720,14 +723,13 @@ class WWSUutil {
 	 */
 	createUUID() {
 		let dt = new Date().getTime();
-		let uuid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
-			/[xy]/g,
-			function (c) {
-				let r = (dt + Math.random() * 16) % 16 | 0;
-				dt = Math.floor(dt / 16);
-				return (c == "x" ? r : (r & 0x3) | 0x8).toString(16);
-			}
-		);
+		let uuid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(
+			c
+		) {
+			let r = (dt + Math.random() * 16) % 16 | 0;
+			dt = Math.floor(dt / 16);
+			return (c == "x" ? r : (r & 0x3) | 0x8).toString(16);
+		});
 		return uuid;
 	}
 
@@ -750,7 +752,7 @@ class WWSUutil {
 				tempModal.iziModal("destroy");
 				$(`#modal-${tempModal.id}`).remove();
 				tempModal = undefined;
-			},
+			}
 		});
 
 		tempModal.body = `<p>${description}</p><div id="modal-${tempModal.id}-form"></div>`;
@@ -767,29 +769,29 @@ class WWSUutil {
 						confirmText: {
 							type: "string",
 							title: `Confirmation`,
-							required: confirmText ? true : false,
-						},
-					},
+							required: confirmText ? true : false
+						}
+					}
 				},
 				options: {
 					fields: {
 						confirmText: {
 							helper: `Please type <strong>${confirmText}</strong> to confirm your action (case sensitive).`,
 							hidden: confirmText ? false : true,
-							validator: function (callback) {
+							validator: function(callback) {
 								let value = this.getValue();
 								if (confirmText && value !== `${confirmText}`) {
 									callback({
 										status: false,
-										message: `You must type <strong>${confirmText}</strong> to confirm your action.`,
+										message: `You must type <strong>${confirmText}</strong> to confirm your action.`
 									});
 									return;
 								}
 								callback({
-									status: true,
+									status: true
 								});
-							},
-						},
+							}
+						}
 					},
 					form: {
 						buttons: {
@@ -803,7 +805,7 @@ class WWSUutil {
 									}
 									cb();
 									tempModal.iziModal("close");
-								},
+								}
 							},
 							dismiss: {
 								title: `No`,
@@ -813,14 +815,14 @@ class WWSUutil {
 										title: "Action canceled",
 										autohide: true,
 										delay: 10000,
-										body: `You clicked No.`,
+										body: `You clicked No.`
 									});
 									tempModal.iziModal("close");
-								},
-							},
-						},
-					},
-				},
+								}
+							}
+						}
+					}
+				}
 			});
 		});
 	}
@@ -849,30 +851,36 @@ class WWSUqueue {
 		this.taskList = [];
 	}
 
-	idleCallback(handler) {
-		let startTime = Date.now();
-
-		return setTimeout(() => {
-			handler({
-				didTimeout: false,
-				timeRemaining: () => {
-					return Math.max(0, 50.0 - (Date.now() - startTime));
+	idleCallback(callback, options) {
+		var options = options || {};
+		var relaxation = 1;
+		var timeout = options.timeout || relaxation;
+		var start = performance.now();
+		return setTimeout(function() {
+			callback({
+				get didTimeout() {
+					return options.timeout
+						? false
+						: performance.now() - start - relaxation > timeout;
 				},
+				timeRemaining: function() {
+					return Math.max(0, relaxation - (performance.now() - start));
+				}
 			});
-		}, 1);
+		}, relaxation);
 	}
 
 	handleTaskQueue(deadline) {
-		while (
-			(deadline.timeRemaining() > 0 || deadline.didTimeout) &&
-			this.taskList.length
+		if (
+			this.taskList.length &&
+			(deadline.timeRemaining() > 0 || deadline.didTimeout)
 		) {
 			let task = this.taskList.shift();
 			task();
 		}
 
 		if (this.taskList.length) {
-			this.timer = this.idleCallback((deadline) => {
+			this.timer = this.idleCallback(deadline => {
 				this.handleTaskQueue(deadline);
 			});
 		} else {
@@ -884,7 +892,7 @@ class WWSUqueue {
 		if (fn) {
 			this.taskList.push(fn);
 			if (this.taskList.length === 1 || !this.timer) {
-				this.timer = this.idleCallback((deadline) => {
+				this.timer = this.idleCallback(deadline => {
 					this.handleTaskQueue(deadline);
 				});
 			}
@@ -981,7 +989,7 @@ class WWSUmodal {
 
 	addEvent(event, fn) {
 		this.util.waitForElement(`#modal-${this.id}`, () => {
-			$(document).on(event, `#modal-${this.id}`, function (e) {
+			$(document).on(event, `#modal-${this.id}`, function(e) {
 				fn(e);
 			});
 		});
