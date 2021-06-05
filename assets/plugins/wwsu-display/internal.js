@@ -30,6 +30,11 @@ $.fn.extend({
   },
 });
 
+// Create restart function to restart the screen after 15 seconds if it does not connect.
+let restart = setTimeout(() => {
+  window.location.reload(true);
+}, 15000);
+
 // Sounds
 let sounds = {
   lifethreatening: new Howl({
@@ -39,6 +44,8 @@ let sounds = {
   displaymessage: new Howl({ src: ["/sounds/display/displaymessage.mp3"] }),
   goingonair: new Howl({ src: ["/sounds/display/goingonair.mp3"] }),
 };
+
+const displayName = "display-internal";
 
 // Define hexrgb constants
 let hexChars = "a-f\\d";
@@ -66,17 +73,19 @@ wwsumodules
   .add("WWSUanimations", WWSUanimations)
   .add(`WWSUutil`, WWSUutil)
   .add("WWSUslides", WWSUslides)
-  .add("noReq", WWSUreq, { host: `display-public` })
+  .add("noReq", WWSUreq, { host: displayName })
   .add("WWSUMeta", WWSUMeta)
-  .add("WWSUdirectors", WWSUdirectors, { host: `display-public` })
+  .add("WWSUdirectors", WWSUdirectors, { host: displayName })
   .add("WWSUeas", WWSUeas)
   .add("WWSUannouncements", WWSUannouncements, {
-    types: ["display-public", "display-public-sticky"],
+    types: [displayName, `${displayName}-sticky`],
   })
   .add("WWSUcalendar", WWSUcalendar)
   .add("WWSUrecipientsweb", WWSUrecipientsweb)
   .add("WWSUstatus", WWSUstatus)
-  .add("WWSUmessagesweb", WWSUmessagesweb);
+  .add("WWSUclimacell", WWSUclimacell)
+  .add("WWSUmessagesweb", WWSUmessagesweb)
+  .add("WWSUclocks", WWSUclocks);
 
 // Reference modules to variables
 let animations = wwsumodules.get("WWSUanimations");
@@ -91,6 +100,11 @@ let Recipients = wwsumodules.get("WWSUrecipientsweb");
 let Messages = wwsumodules.get("WWSUmessagesweb");
 let Status = wwsumodules.get("WWSUstatus");
 let Eas = wwsumodules.get("WWSUeas");
+let Climacell = wwsumodules.get("WWSUclimacell");
+let Clocks = wwsumodules.get("WWSUclocks");
+
+// Immediately initialize clocks so we can begin adding them.
+Clocks.init();
 
 // Assign other (deprecated) data managers
 let calendar = [];
@@ -129,7 +143,7 @@ Announcements.on("replace", "renderer", (db) => {
 });
 
 socket.on("connect", () => {
-  Recipients.addRecipientDisplay("display-public", (data, success) => {
+  Recipients.addRecipientDisplay(displayName, (data, success) => {
     if (success) {
       Meta.init();
       Calendar.init();
@@ -137,6 +151,7 @@ socket.on("connect", () => {
       Eas.init();
       Announcements.init();
       Messages.init();
+      Climacell.init();
 
       weeklyDJSocket();
       if (disconnected) {
@@ -191,7 +206,7 @@ socket.on("display-refresh", () => {
   if (isStudio) {
     setTimeout(() => {
       window.location.reload(true);
-    }, 5000);
+    }, 10000);
   } else {
     window.location.reload(true);
   }
@@ -199,8 +214,9 @@ socket.on("display-refresh", () => {
 
 // Display messages sent to the display
 Messages.on("insert", "renderer", (data) => {
+  if (data.to !== displayName) return;
   $(document).Toasts("create", {
-    class: "bg-primary",
+    class: "bg-lime",
     title: "Message!",
     body: data.message,
     autohide: true,
@@ -351,7 +367,7 @@ slides.add({
   label: `Active Alerts`,
   icon: `fas fa-bolt`,
   isSticky: false,
-  color: `warning`,
+  color: `danger`,
   active: false,
   transitionIn: `fadeIn`,
   transitionOut: `fadeOut`,
@@ -359,6 +375,251 @@ slides.add({
   fitContent: false,
   html: ``,
 });
+
+// Current Weather
+slides.add({
+  name: `current-weather`,
+  category: `weather`,
+  label: `Current Weather`,
+  icon: `fas fa-sun`,
+  isSticky: false,
+  color: `warning`,
+  active: true,
+  transitionIn: `fadeInDown`,
+  transitionOut: `fadeOutUp`,
+  displayTime: 20,
+  fitContent: false,
+  html: `
+  <div class="card card-info elevation-2" style="font-size: 4vh;">
+							<div class="card-header">
+								<h3 class="card-title" style="font-size: 4vh;">Current Weather at Wright State University (powered by tomorrow.io)</h3>
+							</div>
+							<!-- /.card-header -->
+							<div
+								class="card-body"
+								title="Current weather conditions at WWSU."
+							>
+								<div class="row">
+									<div class="col-12">
+										<ul>
+											<li>
+												Conditions:
+												<span
+													class="climacell-current-0-weatherCode-string text-pink"
+													>???</span
+												>
+											<ul>
+                        <li>
+                          Cloud Cover:
+                          <span class="climacell-current-0-cloudCover text-pink"
+                            >???</span
+                          >%
+                        </li>
+                        <li>
+                          Precip:
+                          <span
+                            class="climacell-current-0-precipitationIntensity text-pink"
+                            >???</span
+                          >
+                          inches/hour of
+                          <span
+                            class="climacell-current-0-precipitationType-string text-pink"
+                            >???</span
+                          >
+                        </li>
+                      </ul>
+                      </li>
+											<li>
+												Temperature:
+												<span
+													class="climacell-current-0-temperature text-pink"
+													>???</span
+												>°F
+                      <ul>
+                        <li>Feels like
+												<span
+													class="climacell-current-0-temperatureApparent text-pink"
+													>???</span
+												>°F</li>
+                      </ul>
+											</li>
+											<li>
+												Wind: From the
+												<span
+													class="climacell-current-0-windDirection-card text-pink"
+													>???</span
+												>
+												at
+												<span class="climacell-current-0-windSpeed text-pink"
+													>???</span
+												>
+												MPH
+                        <ul>
+                        <li>Gusting to
+                          <span
+                            class="climacell-current-0-windGust text-pink"
+                          ></span>
+                          MPH</li>
+                        </ul>
+											</li>
+											<li>
+												Humidity:
+												<span class="climacell-current-0-humidity text-pink"
+													>???</span
+												>%
+                        <ul>
+                        <li>
+                        Dew point
+                          <span class="climacell-current-0-dewPoint text-pink"
+                            >???</span
+                          >°F
+                        </li>
+                        </ul>
+											</li>
+											<li>
+												Visibility:
+												<span class="climacell-current-0-visibility text-pink"
+													>???</span
+												>
+												miles
+											</li>
+											<li>
+												Air Quality:
+												<span
+													class="climacell-current-0-epaHealthConcern-string text-pink"
+													>???</span
+												>
+											</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+  `,
+});
+
+// 12-hour forecast
+slides.add({
+  name: `forecast-12-hours`,
+  category: `weather`,
+  label: `12-hour Forecast`,
+  icon: `fas fa-clock`,
+  isSticky: false,
+  color: `warning`,
+  active: true,
+  transitionIn: `fadeIn`,
+  transitionOut: `fadeOut`,
+  displayTime: 20,
+  fitContent: false,
+  html: `
+  <div class="card card-success elevation-2" style="font-size: 2.5vh;">
+							<div class="card-header">
+								<h3 class="card-title" style="font-size: 4vh;">12-hour Weather Forecast (powered by tomorrow.io)</h3>
+							</div>
+							<!-- /.card-header -->
+							<div
+								class="card-body"
+								title="Weather conditions for the next 12 hours at WWSU."
+							>
+								<div class="container-fluid">
+									<div class="row">
+										<div class="col-md-6 col-12">
+                      <div id="climacell-clock" style="position: relative;"></div>
+										</div>
+										<div class="col-md-6 col-12">
+											<ul id="weather-forecast-description"></ul>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="card-footer">
+								<h4>Legend</h4>
+								<div class="container-fluid">
+									<div class="row">
+										<div class="col-12 col-md-6 col-lg-4">
+											Clear
+											<span style="background: #ffd700"
+												><i class="fas fa-sun"></i
+											></span>
+											<span class="text-light" style="background: #b29600"
+												><i class="fas fa-cloud-sun"></i
+											></span>
+											<span class="text-light" style="background: #665600"
+												><i class="fas fa-cloud"></i
+											></span>
+											Cloudy
+										</div>
+										<div class="col-12 col-md-6 col-lg-4">
+											Light Rain
+											<span style="background: #b2b2ff"
+												><i class="fas fa-cloud-sun-rain"></i
+											></span>
+											<span class="text-light" style="background: #6666ff"
+												><i class="fas fa-cloud-showers-heavy"></i
+											></span>
+											<span class="text-light" style="background: #0000ff"
+												><i class="fas fa-cloud-rain"></i
+											></span>
+											Heavy Rain
+										</div>
+										<div class="col-12 col-md-6 col-lg-4">
+											Light Snow
+											<span style="background: #aeaeae"
+												><i class="far fa-snowflake"></i
+											></span>
+											<span class="text-light" style="background: #787878"
+												><i class="fas fa-snowman"></i
+											></span>
+											<span class="text-light" style="background: #484848"
+												><i class="fas fa-snowboarding"></i
+											></span>
+											Heavy Snow
+										</div>
+										<div class="col-12 col-md-6 col-lg-4">
+											Light Storms
+											<span class="text-light" style="background: #ff6666"
+												><i class="fas fa-bolt"></i
+											></span>
+											<span class="text-light" style="background: #ff0000"
+												><i class="fas fa-bolt"></i
+											></span>
+											<span class="text-light" style="background: #990000"
+												><i class="fas fa-poo-storm"></i
+											></span>
+											Heavy Storms
+										</div>
+										<div class="col-12 col-md-6 col-lg-4">
+											Light Ice
+											<span style="background: #e2a3ff"
+												><i class="fas fa-icicles"></i
+											></span>
+											<span class="text-light" style="background: #cf66ff"
+												><i class="fas fa-skating"></i
+											></span>
+											<span class="text-light" style="background: #b000ff"
+												><i class="fas fa-igloo"></i
+											></span>
+											Heavy Ice
+										</div>
+										<div class="col-12 col-md-6 col-lg-4">
+											Breezy
+											<span style="background: #7fbf7f"
+												><i class="fas fa-fan"></i
+											></span>
+											<span class="text-light" style="background: #008000"
+												><i class="fas fa-wind"></i
+											></span>
+											<span class="text-light" style="background: #004000"
+												><i class="fas fa-wind"></i
+											></span>
+											Very Windy
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>`,
+});
+Climacell.initClockForecast("forecast-12-hours", "#climacell-clock");
 
 // Upcoming shows
 let upcomingTable;
@@ -547,11 +808,6 @@ slides.add({
   fitContent: false,
   html: ``,
 });
-
-// Create restart function to restart the screen after 15 seconds if it does not connect.
-let restart = setTimeout(() => {
-  window.location.reload(true);
-}, 15000);
 
 // Burnguard is the line that sweeps across the screen to prevent screen burn-in
 let $burnGuard = $("<div>")
@@ -856,15 +1112,15 @@ function processEas(db) {
                       .format("MM/DD h:mm A")
                   : "UNKNOWN"
               } - ${
-            moment(dodo["expires"]).isValid()
-              ? moment
-                  .tz(
-                    dodo["expires"],
-                    Meta.meta ? Meta.meta.timezone : moment.tz.guess()
-                  )
-                  .format("MM/DD h:mm A")
-              : "UNKNOWN"
-          }
+          moment(dodo["expires"]).isValid()
+            ? moment
+                .tz(
+                  dodo["expires"],
+                  Meta.meta ? Meta.meta.timezone : moment.tz.guess()
+                )
+                .format("MM/DD h:mm A")
+            : "UNKNOWN"
+        }
               </div>
             </div>
           </div>`;
@@ -1486,13 +1742,13 @@ function hexRgb(hex, options = {}) {
 }
 
 function createAnnouncement(data) {
-  if (data.type.startsWith(`display-public`)) {
+  if (data.type.startsWith(displayName)) {
     slides.add({
       name: `attn-${data.ID}`,
       category: `announcements`,
       label: data.title,
       weight: 0,
-      isSticky: data.type === `display-public-sticky`,
+      isSticky: data.type === `${displayName}-sticky`,
       color: data.level,
       active: true,
       starts: moment(data.starts),

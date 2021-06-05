@@ -11,140 +11,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta http-equiv="x-ua-compatible" content="ie=edge" />
-
-    <!-- Clock styling -->
-    <style>
-      .clock-container {
-        width: 200px;
-        height: 200px;
-        position: absolute;
-        left: 50%;
-        margin-left: -100px;
-        top: 50%;
-        margin-top: -100px;
-      }
-
-      .clock {
-        width: 100%;
-        height: 100%;
-        margin: auto;
-        position: relative;
-      }
-
-      .clock div,
-      .faceBox {
-        border: 0;
-        background-color: black;
-        position: absolute;
-        transform-origin: center bottom;
-        -webkit-transform-origin: center bottom;
-        -moz-transform-origin: center bottom;
-        -o-transform-origin: center bottom;
-        transform: rotate(0deg);
-      }
-
-      .dark-mode .clock div,
-      .dark-mode .faceBox {
-        background-color: white;
-      }
-
-      .clock .clock-hour {
-        border-radius: 0.5em 0.5em 0 0;
-        width: 3%;
-        height: 20%;
-        top: 30%;
-        left: 47.5%;
-        z-index: 30;
-      }
-
-      .clock .clock-minute {
-        border-radius: 0.33em;
-        width: 2%;
-        height: 36.66%;
-        top: 13.33%;
-        left: 48.33%;
-        z-index: 20;
-      }
-
-      .clock .clock-second {
-        border-radius: 0.2em;
-        width: 0.83%;
-        height: 46.66%;
-        top: 3.33%;
-        left: 49.16%;
-        z-index: 10;
-        background-color: red;
-      }
-
-      .clock .clock-center {
-        height: 6.66%;
-        width: 6.66%;
-        border-radius: 50%;
-        top: 46.66%;
-        left: 46.66%;
-        z-index: 50;
-        transform: rotate(0deg);
-      }
-
-      .smallTick {
-        width: 3.33%;
-        height: 16.66%;
-        background-color: black;
-      }
-
-      .dark-mode .smallTick {
-        background-color: white;
-      }
-
-      .mediumTick {
-        width: 8.33%;
-        height: 26.66%;
-        background-color: black;
-      }
-
-      .dark-mode .mediumTick {
-        background-color: white;
-      }
-
-      .largeTick {
-        width: 13.33%;
-        height: 26.66%;
-        background-color: black;
-        position: relative;
-      }
-
-      .dark-mode .largeTick {
-        background-color: white;
-      }
-
-      .tickNum {
-        font-family: Arial, sans-serif;
-        font-size: 0.75em;
-        line-height: 0;
-        color: black;
-        position: relative;
-        top: 3.33%;
-        left: -0.66%;
-        z-index: 1;
-      }
-
-      .dark-mode .tickNum {
-        color: white;
-      }
-
-      .faceBox {
-        border: 0;
-        width: 0;
-        height: 50%;
-        top: 0;
-        left: 50%;
-        position: absolute;
-        text-align: center;
-        overflow: visible;
-        margin: 0 auto;
-      }
-    </style>
-
+    
     <!-- Pace styling -->
     <style>
       .pace {
@@ -291,23 +158,29 @@
       environment="production"
       reconnection="true"
     ></script>
-    <script src="/plugins/wwsu-modules/js/wwsu-modules.js?t=202106050155"></script>
-    <script src="/plugins/wwsu-sails/js/wwsu.js?t=202106050155"></script>
-    <script src="/plugins/wwsu-meta/js/wwsu-meta.js?t=202106050155"></script>
-    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-web.js?t=202106050155"></script>
-    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-class.js?t=202106050155"></script>
-    <script src="/plugins/wwsu-announcements/js/wwsu-announcements.js?t=202106050155"></script>
-    <script src="/plugins/wwsu-directors/js/wwsu-directors.js?t=202106050155"></script>
-    <script src="/plugins/wwsu-eas/js/wwsu-eas.js?t=202106050155"></script>
-    <script src="/plugins/wwsu-recipients/js/wwsu-recipients-web.js?t=202106050155"></script>
-    <script src="/plugins/wwsu-messages/js/wwsu-messages-web.js?t=202106050155"></script>
-    <script src="/plugins/wwsu-status/js/wwsu-status.js?t=202106050155"></script>
-    <script src="/plugins/wwsu-shootout/js/wwsu-shootout.js?t=202106050155"></script>
-    <script src="/plugins/wwsu-display/js/wwsu-slides.js?t=202106050155"></script>
+    <script src="/plugins/wwsu-modules/js/wwsu-modules.js?t=202106051458"></script>
+    <script src="/plugins/wwsu-sails/js/wwsu.js?t=202106051458"></script>
+    <script src="/plugins/wwsu-meta/js/wwsu-meta.js?t=202106051458"></script>
+    <script src="/plugins/wwsu-climacell/js/wwsu-climacell.js?t=202105102106"></script>
+    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-web.js?t=202106051458"></script>
+    <script src="/plugins/wwsu-calendar/js/wwsu-calendar-class.js?t=202106051458"></script>
+    <script src="/plugins/wwsu-announcements/js/wwsu-announcements.js?t=202106051458"></script>
+    <script src="/plugins/wwsu-directors/js/wwsu-directors.js?t=202106051458"></script>
+    <script src="/plugins/wwsu-eas/js/wwsu-eas.js?t=202106051458"></script>
+    <script src="/plugins/wwsu-recipients/js/wwsu-recipients-web.js?t=202106051458"></script>
+    <script src="/plugins/wwsu-messages/js/wwsu-messages-web.js?t=202106051458"></script>
+    <script src="/plugins/wwsu-status/js/wwsu-status.js?t=202106051458"></script>
+    <script src="/plugins/wwsu-shootout/js/wwsu-shootout.js?t=202106051458"></script>
+    <script src="/plugins/wwsu-display/js/wwsu-slides.js?t=202106051458"></script>
+    <script src="/plugins/wwsu-clocks/js/wwsu-clocks.js?t=202105102106"></script>
     <link
       rel="stylesheet"
       href="/plugins/wwsu-navigation/css/wwsu-navigation-flash.css"
     />
+    <link
+    rel="stylesheet"
+    href="/plugins/wwsu-clocks/css/wwsu-clocks.css"
+  />
   </head>
 
   <%- body %>
