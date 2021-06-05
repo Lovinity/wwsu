@@ -110,7 +110,8 @@ module.exports = {
       description: inputs.description,
       logo: inputs.logo,
       banner: inputs.banner,
-      lastAired: moment('2002-01-01 00:00:00').toISOString(true)
+      // Set lastAired to now even though it has not aired yet; this prevents auto cleanup from deleting or marking the event inactive too soon.
+      lastAired: moment().toISOString(true)
     };
 
     try {

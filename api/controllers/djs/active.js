@@ -18,7 +18,14 @@ module.exports = {
 
     try {
       // Mark DJ as active.
-      await sails.models.djs.updateOne({ ID: inputs.ID }, { active: true });
+      await sails.models.djs.updateOne(
+        { ID: inputs.ID },
+        {
+          active: true,
+          // Set last seen to now so auto-cleanup does not re-mark DJ as inactive. It is assumed when marking a DJ active again, they have been "seen".
+          lastSeen: moment().toISOString(true)
+        }
+      );
 
       return exits.success();
     } catch (e) {
