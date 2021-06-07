@@ -1051,19 +1051,19 @@ function updateCalendar() {
 
               let image;
               if (event.type === "show") {
-                image = `<i class="img-circle img-size-36 fas fa-microphone" style="font-size: 36px; background: ${color};"></i>`;
+                image = `<i class="img-circle img-size-50 fas fa-microphone" style="font-size: 36px; background: ${color};"></i>`;
               } else if (event.type === "prerecord") {
-                image = `<i class="img-circle img-size-36 fas fa-play-circle" style="font-size: 36px; background: ${color};"></i>`;
+                image = `<i class="img-circle img-size-50 fas fa-play-circle" style="font-size: 36px; background: ${color};"></i>`;
               } else if (event.type === "remote") {
-                image = `<i class="img-circle img-size-36 fas fa-broadcast-tower" style="font-size: 36px; background: ${color};"></i>`;
+                image = `<i class="img-circle img-size-50 fas fa-broadcast-tower" style="font-size: 36px; background: ${color};"></i>`;
               } else if (event.type === "sports") {
-                image = `<i class="img-circle img-size-36 fas fa-trophy" style="font-size: 36px; background: ${color};"></i>`;
+                image = `<i class="img-circle img-size-50 fas fa-trophy" style="font-size: 36px; background: ${color};"></i>`;
               } else {
-                image = `<i class="img-circle img-size-36 fas fa-calendar" style="font-size: 36px; background: ${color};"></i>`;
+                image = `<i class="img-circle img-size-50 fas fa-calendar" style="font-size: 36px; background: ${color};"></i>`;
               }
 
               if (event.logo)
-                image = `<img class="img-circle img-size-36" src="/uploads/calendar/logo/${event.logo}" style="background: ${color};">`;
+                image = `<img class="img-circle img-size-50" src="/uploads/calendar/logo/${event.logo}" style="background: ${color};">`;
 
               noEvents = false;
 
