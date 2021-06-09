@@ -390,7 +390,7 @@ slides.add({
   displayTime: 20,
   fitContent: false,
   html: `
-  <div class="card card-info elevation-2" style="font-size: 4vh;">
+  <div class="card card-info elevation-2" style="font-size: 4vh; text-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3);">
 							<div class="card-header">
 								<h3 class="card-title" style="font-size: 4vh;">Current Weather at Wright State University (powered by tomorrow.io)</h3>
 							</div>
@@ -408,7 +408,7 @@ slides.add({
                   <span
                     class="
                       climacell-current-0-weatherCode-string
-                      text-danger
+                      text-orange
                     "
                     >???</span
                   >
@@ -420,7 +420,7 @@ slides.add({
                 </div>
                 <div class="col-8">
                   <span
-                    class="climacell-current-0-cloudCover text-danger"
+                    class="climacell-current-0-cloudCover text-orange"
                     >???</span
                   >%
                 </div>
@@ -433,7 +433,7 @@ slides.add({
                   <span
                     class="
                       climacell-current-0-precipitationIntensity
-                      text-danger
+                      text-orange
                     "
                     >???</span
                   >
@@ -441,7 +441,7 @@ slides.add({
                   <span
                     class="
                       climacell-current-0-precipitationType-string
-                      text-danger
+                      text-orange
                     "
                     >???</span
                   >
@@ -453,7 +453,7 @@ slides.add({
                 </div>
                 <div class="col-8">
                   <span
-                    class="climacell-current-0-temperature text-danger"
+                    class="climacell-current-0-temperature text-orange"
                     >???</span
                   >°F
                 </div>
@@ -466,7 +466,7 @@ slides.add({
                   <span
                     class="
                       climacell-current-0-temperatureApparent
-                      text-danger
+                      text-orange
                     "
                     >???</span
                   >°F
@@ -481,13 +481,13 @@ slides.add({
                   <span
                     class="
                       climacell-current-0-windDirection-card
-                      text-danger
+                      text-orange
                     "
                     >???</span
                   >
                   at
                   <span
-                    class="climacell-current-0-windSpeed text-danger"
+                    class="climacell-current-0-windSpeed text-orange"
                     >???</span
                   >
                   MPH
@@ -499,7 +499,7 @@ slides.add({
                 </div>
                 <div class="col-8">
                   <span
-                    class="climacell-current-0-windGust text-danger"
+                    class="climacell-current-0-windGust text-orange"
                   ></span>
                   MPH
                 </div>
@@ -509,7 +509,7 @@ slides.add({
                   <strong>Relative Humidity:</strong>
                 </div>
                 <div class="col-8">
-                  <span class="climacell-current-0-humidity text-danger"
+                  <span class="climacell-current-0-humidity text-orange"
                     >???</span
                   >%
                 </div>
@@ -519,7 +519,7 @@ slides.add({
                   <strong>Dew Point:</strong>
                 </div>
                 <div class="col-8">
-                  <span class="climacell-current-0-dewPoint text-danger"
+                  <span class="climacell-current-0-dewPoint text-orange"
                     >???</span
                   >°F
                 </div>
@@ -530,7 +530,7 @@ slides.add({
                 </div>
                 <div class="col-8">
                   <span
-                    class="climacell-current-0-visibility text-danger"
+                    class="climacell-current-0-visibility text-orange"
                     >???</span
                   >
                   miles
@@ -544,7 +544,7 @@ slides.add({
                   <span
                     class="
                       climacell-current-0-epaHealthConcern-string
-                      text-danger
+                      text-orange
                     "
                     >???</span
                   >
@@ -570,7 +570,7 @@ slides.add({
   displayTime: 20,
   fitContent: false,
   html: `
-  <div class="card card-success elevation-2" style="font-size: 2.5vh;">
+  <div class="card card-success elevation-2" style="font-size: 2.5vh; text-shadow: 1px 2px 1px rgba(0, 0, 0, 0.3);">
 							<div class="card-header">
 								<h3 class="card-title" style="font-size: 4vh;">12-hour Weather Forecast (powered by tomorrow.io)</h3>
 							</div>
@@ -765,7 +765,7 @@ slides.add({
                 </div>
                 <!-- /.widget-user-image -->
                 <h3
-                  class="widget-user-desc"
+                  class="widget-user-desc font-weight-bold"
                   style="font-size: 5vh; margin-left: 13vh;"
                 >
                   ${tcalendar[index].name}
@@ -1051,15 +1051,15 @@ function updateCalendar() {
 
               let image;
               if (event.type === "show") {
-                image = `<i class="img-circle img-size-50 fas fa-microphone" style="font-size: 36px; background: ${color};"></i>`;
+                image = `<i class="img-circle img-size-50 fas fa-microphone text-center" style="font-size: 48px; background: ${color};"></i>`;
               } else if (event.type === "prerecord") {
-                image = `<i class="img-circle img-size-50 fas fa-play-circle" style="font-size: 36px; background: ${color};"></i>`;
+                image = `<i class="img-circle img-size-50 fas fa-play-circle text-center" style="font-size: 48px; background: ${color};"></i>`;
               } else if (event.type === "remote") {
-                image = `<i class="img-circle img-size-50 fas fa-broadcast-tower" style="font-size: 36px; background: ${color};"></i>`;
+                image = `<i class="img-circle img-size-50 fas fa-broadcast-tower text-center" style="font-size: 48px; background: ${color};"></i>`;
               } else if (event.type === "sports") {
-                image = `<i class="img-circle img-size-50 fas fa-trophy" style="font-size: 36px; background: ${color};"></i>`;
+                image = `<i class="img-circle img-size-50 fas fa-trophy text-center" style="font-size: 48px; background: ${color};"></i>`;
               } else {
-                image = `<i class="img-circle img-size-50 fas fa-calendar" style="font-size: 36px; background: ${color};"></i>`;
+                image = `<i class="img-circle img-size-50 fas fa-calendar text-center" style="font-size: 48px; background: ${color};"></i>`;
               }
 
               if (event.logo)
@@ -1571,7 +1571,7 @@ function processNowPlaying(response) {
             }
             </div>
             <h3
-              class="widget-user-desc"
+              class="widget-user-desc font-weight-bold"
               style="font-size: 5vh; margin-left: 13vh; text-shadow: 1px 2px 1px rgba(0,0,0,0.3);"
             >
               ${showInfo[1]}
