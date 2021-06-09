@@ -874,7 +874,7 @@ module.exports = {
 
       // Update timeout according to the state
       if (typeof push.state !== "undefined") {
-        if ((push.state = "prerecord_break")) {
+        if ((push.state === "prerecord_break")) {
           // No timing out for prerecord breaks because these are automatic
           if (sails.models.meta.memory.timeout !== null) push2.timeout = null;
         } else if (push.state === "automation_break") {
