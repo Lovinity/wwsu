@@ -143,7 +143,6 @@ module.exports = {
         await sails.helpers.meta.change.with({ show: inputs.showname, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat })
       }
 
-      await sails.helpers.error.reset('automationBreak')
       await sails.helpers.meta.change.with({ changingState: null })
       return exits.success()
     } catch (e) {

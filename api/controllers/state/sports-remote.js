@@ -166,7 +166,6 @@ module.exports = {
         });
       }
 
-      await sails.helpers.error.reset("automationBreak");
       await sails.helpers.meta.change.with({ changingState: null });
       return exits.success();
     } catch (e) {

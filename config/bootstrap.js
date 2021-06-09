@@ -1206,9 +1206,35 @@ module.exports.bootstrap = async function (done) {
             }
           }
 
-          // Counter to ensure automation break is not running for too long
-          if (sails.models.meta.memory.state === "automation_break") {
-            await sails.helpers.error.count("automationBreak");
+          // Check if we should timeout
+          if (
+            sails.models.meta.memory.timeout !== null &&
+            moment().isAfter(sails.models.meta.memory.timeout) &&
+            sails.models.meta.memory.changingState === null
+          ) {
+            try {
+              await sails.helpers.meta.change.with({
+                changingState: `Break timed out; switching to automation`,
+              });
+              await sails.models.logs
+                .create({
+                  attendanceID: sails.models.meta.memory.attendanceID,
+                  logtype: "timeout",
+                  loglevel: "warning",
+                  logsubtype: sails.models.meta.memory.show,
+                  logIcon: `fas fa-hourglass-end`,
+                  title: `A break timed out, and the system was sent to automation.`,
+                  event: `Broadcast: ${sails.models.meta.memory.show}`,
+                })
+                .fetch()
+                .tolerate((err) => {
+                  // Do not throw for errors, but log it.
+                  sails.log.error(err);
+                });
+              await sails.helpers.state.automation(false);
+            } catch (e) {
+              await sails.helpers.meta.change.with({ changingState: null });
+            }
           }
 
           // Manage breaks intelligently using track queue length. This gets complicated, so comments explain the process.

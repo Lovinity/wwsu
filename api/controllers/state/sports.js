@@ -94,7 +94,6 @@ module.exports = {
         await sails.helpers.meta.change.with({ dj: null, cohostDJ1: null, cohostDJ2: null, cohostDJ3: null, show: inputs.sport, topic: inputs.topic, trackStamp: null, webchat: inputs.webchat })
       }
 
-      await sails.helpers.error.reset('automationBreak')
       await sails.helpers.meta.change.with({ changingState: null })
       return exits.success()
     } catch (e) {

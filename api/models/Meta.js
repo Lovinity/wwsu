@@ -161,6 +161,11 @@ module.exports = {
       columnType: 'datetime'
     },
 
+    timeout: {
+      type: 'ref',
+      columnType: 'datetime'
+    },
+
     discordChannel: {
       type: 'string',
       allowNull: true,
@@ -434,6 +439,14 @@ module.exports = {
       type: 'string',
       allowNull: true,
       description: 'An ISO timestamp of when the last top of hour ID break was aired.',
+      custom: function (value) {
+        return moment(value).isValid()
+      }
+    },
+    timeout: {
+      type: 'string',
+      allowNull: true,
+      description: 'ISO timestamp of when the current break / state will time out.',
       custom: function (value) {
         return moment(value).isValid()
       }
