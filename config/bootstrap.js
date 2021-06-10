@@ -990,26 +990,8 @@ module.exports.bootstrap = async function (done) {
                       }
                       break;
                   }
-                  await sails.helpers.rest.cmd("EnableAssisted", 0);
-
-                  // Add up to 3 track requests if any are pending
-                  await sails.helpers.requests.queue(3, true, true);
-
-                  // Switch back to automation
-                  await sails.helpers.meta.change.with({
-                    changingState: `Ending prerecord`,
-                    state: "automation_on",
-                    genre: "",
-                    show: "",
-                    topic: "",
-                    playlist: null,
-                    playlistPosition: 0,
-                  });
-
-                  // Re-check for programs that should begin.
-                  await sails.helpers.calendar.check(true);
-
-                  await sails.helpers.meta.change.with({ changingState: null });
+                  
+                  await sails.helpers.state.automation(false);
 
                   // Did not finish the playlist? Ensure the position is updated in meta.
                 } else if (thePosition !== -1) {
