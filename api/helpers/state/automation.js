@@ -59,7 +59,6 @@ module.exports = {
       // We are going to automation
       if (!inputs.transition) {
         await sails.helpers.meta.change.with({ host: null, dj: null, cohostDJ1: null, cohostDJ2: null, cohostDJ3: null, genre: '', state: 'automation_on', show: '', track: '', topic: '', webchat: true, playlist: null, playlistPosition: -1, playlistPlayed: moment('2002-01-01').toISOString(), hostCalling: null, hostCalled: null })
-        await sails.helpers.error.reset('automationBreak')
 
         // Add up to 3 track requests if any are pending
         await sails.helpers.requests.queue(3, true, true)

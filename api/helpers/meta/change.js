@@ -260,6 +260,15 @@ module.exports = {
         return moment(value).isValid();
       },
     },
+    timeout: {
+      type: "string",
+      allowNull: true,
+      description:
+        "ISO timestamp of when the current break / state will time out.",
+      custom: function (value) {
+        return moment(value).isValid();
+      },
+    },
     delaySystem: {
       type: "number",
       allowNull: true,
@@ -860,6 +869,28 @@ module.exports = {
               60 * 15
             );
           }
+        }
+      }
+
+      // Update timeout according to the state
+      if (typeof push.state !== "undefined") {
+        if ((push.state === "prerecord_break")) {
+          // No timing out for prerecord breaks because these are automatic
+          if (sails.models.meta.memory.timeout !== null) push2.timeout = null;
+        } else if (push.state === "automation_break") {
+          // 5 minute timeout for automation_break
+          if (sails.models.meta.memory.timeout === null)
+            push2.timeout = moment().add(5, "minutes").toISOString(true);
+        } else if (push.state.endsWith("_break")) {
+          // 10 minute timeout for standard breaks
+          if (sails.models.meta.memory.timeout === null)
+            push2.timeout = moment().add(10, "minutes").toISOString(true);
+        } else if (push.state.endsWith("_halftime")) {
+          // 30 minute timeout for halftime breaks
+          if (sails.models.meta.memory.timeout === null)
+            push2.timeout = moment().add(30, "minutes").toISOString(true);
+        } else {
+          if (sails.models.meta.memory.timeout !== null) push2.timeout = null;
         }
       }
 

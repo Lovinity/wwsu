@@ -475,56 +475,6 @@ module.exports = {
       }
     },
 
-    // do not allow automation break to continue for more than 5 minutes.
-    automationBreak: {
-      count: 0,
-      trigger: 300,
-      active: false,
-      fn: function() {
-        // LINT: async required because of sails.js lint
-        // eslint-disable-next-line no-async-promise-executor
-        return new Promise(async (resolve, reject) => {
-          try {
-            if (sails.models.meta.memory.changingState !== null) {
-              return resolve(295);
-            }
-
-            await sails.helpers.meta.change.with({
-              changingState: `Switching to automation via automationBreak`
-            });
-            await sails.helpers.meta.change.with({
-              state: "automation_on",
-              genre: "",
-              show: "",
-              trackStamp: null,
-              topic: "",
-              webchat: true,
-              playlist: null,
-              playlistPosition: -1,
-              playlistPlayed: moment("2002-01-01").toISOString()
-            });
-
-            // Add up to 3 track requests if any are pending
-            await sails.helpers.requests.queue(3, true, true);
-
-            // Re-check and trigger any programs that should begin
-            try {
-              await sails.helpers.calendar.check(true);
-            } catch (unusedE2) {
-              // Couldn't load calendar? Fall back to Default automation
-              await sails.helpers.genre.start(null, true);
-            }
-
-            await sails.helpers.meta.change.with({ changingState: null });
-            return resolve(0);
-          } catch (e) {
-            await sails.helpers.meta.change.with({ changingState: null });
-            return reject(e);
-          }
-        });
-      }
-    },
-
     // Check to see if we are in genre rotation and the queue is empty (usually mean no more tracks can play)
     genreEmpty: {
       count: 0,

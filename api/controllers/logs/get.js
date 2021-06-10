@@ -103,6 +103,7 @@ module.exports = {
           "sign-off-problem",
           "recipient-discipline",
           "cleanup",
+          "timeout"
         ];
       } else if (inputs.subtype !== "" && inputs.subtype !== null) {
         query.logsubtype = inputs.subtype;
