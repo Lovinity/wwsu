@@ -8,28 +8,28 @@ module.exports = {
     event: {
       type: "json",
       description:
-        "Event object triggering the new attendance record. If undefined, the current attendance will be closed, but a new one will not be created. If null, an attendance record for default genre rotation will be started."
+        "Event object triggering the new attendance record. If undefined, the current attendance will be closed, but a new one will not be created. If null, an attendance record for default genre rotation will be started.",
     },
     useMeta: {
       type: "boolean",
       defaultsTo: false,
       description:
-        "If true, will use the DJs and show name in the current meta information instead of in the provided event."
+        "If true, will use the DJs and show name in the current meta information instead of in the provided event.",
     },
     unscheduled: {
       type: "boolean",
       defaultsTo: false,
-      description: "If true, this is an unscheduled show."
+      description: "If true, this is an unscheduled show.",
     },
     problemTerminated: {
       type: "boolean",
       defaultsTo: false,
       description:
-        "If true, this attendance record is being changed because of a major system problem or lofi being activated. Accountability will not be logged."
-    }
+        "If true, this attendance record is being changed because of a major system problem or lofi being activated. Accountability will not be logged.",
+    },
   },
 
-  fn: async function(inputs, exits) {
+  fn: async function (inputs, exits) {
     sails.log.debug("Helper attendance.createRecord called.");
 
     try {
@@ -47,7 +47,7 @@ module.exports = {
           hostDJ: null,
           cohostDJ1: null,
           cohostDJ2: null,
-          cohostDJ3: null
+          cohostDJ3: null,
         };
       }
 
@@ -62,11 +62,11 @@ module.exports = {
             cohostDJ2: sails.models.meta.memory.cohostDJ2,
             cohostDJ3: sails.models.meta.memory.cohostDJ3,
             logo: sails.models.meta.memory.showLogo,
-            description: sails.models.meta.memory.topic
+            description: sails.models.meta.memory.topic,
           });
 
           nowEvent = Object.assign(nowEvent, {
-            hosts: await sails.helpers.calendar.generateHosts(nowEvent)
+            hosts: await sails.helpers.calendar.generateHosts(nowEvent),
           });
         }
 
@@ -87,14 +87,14 @@ module.exports = {
               event: `${nowEvent.type}: ${nowEvent.hosts} - ${nowEvent.name}`,
               scheduledStart: moment(nowEvent.start).toISOString(true),
               scheduledEnd: moment(nowEvent.end).toISOString(true),
-              actualStart: moment().toISOString(true)
+              actualStart: moment().toISOString(true),
             })
             .fetch();
 
           // Log if any specified DJs do not match the DJs that were on the schedule
           let scheduledDJs = [];
           let onAirDJs = [];
-          ["dj", "cohostDJ1", "cohostDJ2", "cohostDJ3"].map(dj => {
+          ["dj", "cohostDJ1", "cohostDJ2", "cohostDJ3"].map((dj) => {
             if (inputs.event[dj]) scheduledDJs.push(inputs.event[dj]);
             if (sails.models.meta.memory[dj])
               onAirDJs.push(sails.models.meta.memory[dj]);
@@ -107,24 +107,21 @@ module.exports = {
                 logtype: "unspecified-djs",
                 loglevel: "info",
                 logsubtype: `${nowEvent.hosts} - ${nowEvent.name}`,
-                logIcon: sails.models.calendar.calendardb.getIconClass(
-                  nowEvent
-                ),
+                logIcon:
+                  sails.models.calendar.calendardb.getIconClass(nowEvent),
                 title: `One or more specified DJs for this broadcast were not on the event schedule.`,
                 event: `Listed on the schedule: ${inputs.event.hosts} - ${inputs.event.name}<br />Specified on the air: ${sails.models.meta.memory.show}`,
-                createdAt: moment().toISOString(true)
+                createdAt: moment().toISOString(true),
               })
               .fetch()
-              .tolerate(err => {
+              .tolerate((err) => {
                 sails.log.error(err);
               });
           }
 
           // Log if actualStart was 5 or more minutes before scheduledStart
           if (
-            moment()
-              .add(5, "minutes")
-              .isSameOrBefore(moment(nowEvent.start)) &&
+            moment().add(5, "minutes").isSameOrBefore(moment(nowEvent.start)) &&
             ["show", "sports", "remote", "prerecord", "playlist"].indexOf(
               nowEvent.type
             ) !== -1
@@ -135,15 +132,14 @@ module.exports = {
                 logtype: "sign-on-early",
                 loglevel: "orange",
                 logsubtype: `${nowEvent.hosts} - ${nowEvent.name}`,
-                logIcon: sails.models.calendar.calendardb.getIconClass(
-                  nowEvent
-                ),
+                logIcon:
+                  sails.models.calendar.calendardb.getIconClass(nowEvent),
                 title: `The broadcast started 5 or more minutes early.`,
                 event: `${nowEvent.type}: ${nowEvent.hosts} - ${nowEvent.name}`,
-                createdAt: moment().toISOString(true)
+                createdAt: moment().toISOString(true),
               })
               .fetch()
-              .tolerate(err => {
+              .tolerate((err) => {
                 sails.log.error(err);
               });
           }
@@ -163,15 +159,14 @@ module.exports = {
                 logtype: "sign-on-late",
                 loglevel: "warning",
                 logsubtype: `${nowEvent.hosts} - ${nowEvent.name}`,
-                logIcon: sails.models.calendar.calendardb.getIconClass(
-                  nowEvent
-                ),
+                logIcon:
+                  sails.models.calendar.calendardb.getIconClass(nowEvent),
                 title: `The broadcast started 10 or more minutes late.`,
                 event: `${nowEvent.type}: ${nowEvent.hosts} - ${nowEvent.name}`,
-                createdAt: moment().toISOString(true)
+                createdAt: moment().toISOString(true),
               })
               .fetch()
-              .tolerate(err => {
+              .tolerate((err) => {
                 sails.log.error(err);
               });
           }
@@ -187,7 +182,7 @@ module.exports = {
               event: `${nowEvent.type}: ${nowEvent.hosts} - ${nowEvent.name}`,
               actualStart: moment().toISOString(true),
               scheduledStart: null,
-              scheduledEnd: null
+              scheduledEnd: null,
             })
             .fetch();
         }
@@ -200,7 +195,7 @@ module.exports = {
           calendarUnique: nowEvent.unique || null,
           calendarID: nowEvent.calendarID || null,
           scheduledStart: nowEvent.start || null,
-          scheduledEnd: nowEvent.end || null
+          scheduledEnd: nowEvent.end || null,
         });
       } else if (inputs.event === null) {
         var created = await sails.models.attendance
@@ -208,7 +203,7 @@ module.exports = {
             unique: "",
             happened: 1,
             event: `genre: Unknown Hosts - Default Rotation`,
-            actualStart: moment().toISOString(true)
+            actualStart: moment().toISOString(true),
           })
           .fetch();
         returnData.newID = created.ID;
@@ -217,7 +212,7 @@ module.exports = {
           calendarUnique: null,
           calendarID: null,
           scheduledStart: null,
-          scheduledEnd: null
+          scheduledEnd: null,
         });
       } else {
         returnData.newID = null;
@@ -226,113 +221,112 @@ module.exports = {
           calendarUnique: null,
           calendarID: null,
           scheduledStart: null,
-          scheduledEnd: null
+          scheduledEnd: null,
         });
       }
 
       // Add actualEnd to the previous attendance record, calculate showTime, calculate listenerMinutes, and calculate new weekly DJ stats to broadcast
       if (currentID !== null) {
         // Add actualEnd
-        var currentRecord = await sails.models.attendance.updateOne(
+        var _currentRecord = await sails.models.attendance.updateOne(
           { ID: currentID },
           { actualEnd: moment().toISOString(true) }
         );
 
-        if (currentRecord) {
-          var event = currentRecord.event.split(": ");
-          if (!inputs.problemTerminated) {
-            // Log if actualEnd was 10 or more minutes before scheduledEnd
-            if (
-              currentRecord &&
-              currentRecord.scheduledEnd &&
-              moment()
-                .add(10, "minutes")
-                .isSameOrBefore(moment(currentRecord.scheduledEnd)) &&
-              (currentRecord.event.toLowerCase().startsWith("show:") ||
-                currentRecord.event.toLowerCase().startsWith("sports:") ||
-                currentRecord.event.toLowerCase().startsWith("remote:") ||
-                currentRecord.event.toLowerCase().startsWith("prerecord:") ||
-                currentRecord.event.toLowerCase().startsWith("playlist:"))
-            ) {
+        if (_currentRecord) {
+          // Calculate attendance information in the background as it may take some time
+          var temp = (async (currentRecord) => {
+            var event = currentRecord.event.split(": ");
+            if (!inputs.problemTerminated) {
+              // Log if actualEnd was 10 or more minutes before scheduledEnd
+              if (
+                currentRecord &&
+                currentRecord.scheduledEnd &&
+                moment()
+                  .add(10, "minutes")
+                  .isSameOrBefore(moment(currentRecord.scheduledEnd)) &&
+                (currentRecord.event.toLowerCase().startsWith("show:") ||
+                  currentRecord.event.toLowerCase().startsWith("sports:") ||
+                  currentRecord.event.toLowerCase().startsWith("remote:") ||
+                  currentRecord.event.toLowerCase().startsWith("prerecord:") ||
+                  currentRecord.event.toLowerCase().startsWith("playlist:"))
+              ) {
+                await sails.models.logs
+                  .create({
+                    attendanceID: currentRecord.ID,
+                    logtype: "sign-off-early",
+                    loglevel: "warning",
+                    logsubtype: `${event[1]}`,
+                    logIcon: sails.models.calendar.calendardb.getIconClass({
+                      type: event[0],
+                    }),
+                    title: `The broadcast signed off 10 or more minutes early.`,
+                    event: `${currentRecord.event}`,
+                    createdAt: moment().toISOString(true),
+                  })
+                  .fetch()
+                  .tolerate((err) => {
+                    sails.log.error(err);
+                  });
+              }
+
+              // Log if actualEnd was 5 or more minutes after scheduledEnd
+              if (
+                currentRecord &&
+                currentRecord.scheduledEnd &&
+                moment()
+                  .subtract(5, "minutes")
+                  .isSameOrAfter(moment(currentRecord.scheduledEnd)) &&
+                (currentRecord.event.toLowerCase().startsWith("show:") ||
+                  currentRecord.event.toLowerCase().startsWith("sports:") ||
+                  currentRecord.event.toLowerCase().startsWith("remote:") ||
+                  currentRecord.event.toLowerCase().startsWith("prerecord:") ||
+                  currentRecord.event.toLowerCase().startsWith("playlist:"))
+              ) {
+                await sails.models.logs
+                  .create({
+                    attendanceID: currentRecord.ID,
+                    logtype: "sign-off-late",
+                    loglevel: "orange",
+                    logsubtype: `${event[1]}`,
+                    logIcon: sails.models.calendar.calendardb.getIconClass({
+                      type: event[0],
+                    }),
+                    title: `The broadcast signed off 5 or more minutes late.`,
+                    event: `${currentRecord.event}`,
+                    createdAt: moment().toISOString(true),
+                  })
+                  .fetch()
+                  .tolerate((err) => {
+                    sails.log.error(err);
+                  });
+              }
+            } else {
               await sails.models.logs
                 .create({
                   attendanceID: currentRecord.ID,
-                  logtype: "sign-off-early",
-                  loglevel: "warning",
+                  logtype: "sign-off-problem",
+                  loglevel: "yellow",
                   logsubtype: `${event[1]}`,
                   logIcon: sails.models.calendar.calendardb.getIconClass({
-                    type: event[0]
+                    type: event[0],
                   }),
-                  title: `The broadcast signed off 10 or more minutes early.`,
+                  title: `The broadcast was signed off due to a system problem or CRON being disabled.`,
                   event: `${currentRecord.event}`,
-                  createdAt: moment().toISOString(true)
+                  createdAt: moment().toISOString(true),
                 })
                 .fetch()
-                .tolerate(err => {
+                .tolerate((err) => {
                   sails.log.error(err);
                 });
             }
-
-            // Log if actualEnd was 5 or more minutes after scheduledEnd
-            if (
-              currentRecord &&
-              currentRecord.scheduledEnd &&
-              moment()
-                .subtract(5, "minutes")
-                .isSameOrAfter(moment(currentRecord.scheduledEnd)) &&
-              (currentRecord.event.toLowerCase().startsWith("show:") ||
-                currentRecord.event.toLowerCase().startsWith("sports:") ||
-                currentRecord.event.toLowerCase().startsWith("remote:") ||
-                currentRecord.event.toLowerCase().startsWith("prerecord:") ||
-                currentRecord.event.toLowerCase().startsWith("playlist:"))
-            ) {
-              await sails.models.logs
-                .create({
-                  attendanceID: currentRecord.ID,
-                  logtype: "sign-off-late",
-                  loglevel: "orange",
-                  logsubtype: `${event[1]}`,
-                  logIcon: sails.models.calendar.calendardb.getIconClass({
-                    type: event[0]
-                  }),
-                  title: `The broadcast signed off 5 or more minutes late.`,
-                  event: `${currentRecord.event}`,
-                  createdAt: moment().toISOString(true)
-                })
-                .fetch()
-                .tolerate(err => {
-                  sails.log.error(err);
-                });
-            }
-          } else {
-            await sails.models.logs
-              .create({
-                attendanceID: currentRecord.ID,
-                logtype: "sign-off-problem",
-                loglevel: "yellow",
-                logsubtype: `${event[1]}`,
-                logIcon: sails.models.calendar.calendardb.getIconClass({
-                  type: event[0]
-                }),
-                title: `The broadcast was signed off due to a system problem or CRON being disabled.`,
-                event: `${currentRecord.event}`,
-                createdAt: moment().toISOString(true)
-              })
-              .fetch()
-              .tolerate(err => {
-                sails.log.error(err);
-              });
-          }
-
-          // Calculate attendance stats and weekly analytics in the background; this takes several seconds
-          var temp = (async cID => {
-            var stats = await sails.helpers.attendance.recalculate(cID);
+            var stats = await sails.helpers.attendance.recalculate(currentRecord.ID);
             var topStats = await sails.helpers.attendance.calculateStats();
             let _djStats = await sails.helpers.analytics.showtime([
               currentRecord.dj,
               currentRecord.cohostDJ1,
               currentRecord.cohostDJ2,
-              currentRecord.cohostDJ3
+              currentRecord.cohostDJ3,
             ])[0];
 
             let djStats = [];
@@ -348,7 +342,7 @@ module.exports = {
                 hostDJ: currentRecord.dj,
                 cohostDJ1: currentRecord.cohostDJ1,
                 cohostDJ2: currentRecord.cohostDJ2,
-                cohostDJ3: currentRecord.cohostDJ3
+                cohostDJ3: currentRecord.cohostDJ3,
               },
               `Analytics for ${currentRecord.event}`,
               `<p>Hello!</p>
@@ -375,9 +369,9 @@ module.exports = {
   <li><strong>Messages sent / received:</strong> ${stats.webMessages}</li>
   ${
     topStats[0].topShows.indexOf(event[1]) !== -1
-      ? `<li><strong>Congratulations! Your show is placed ${topStats[0].topShows.indexOf(
-          event[1]
-        ) + 1} in the top ${
+      ? `<li><strong>Congratulations! Your show is placed ${
+          topStats[0].topShows.indexOf(event[1]) + 1
+        } in the top ${
           topStats[0].topShows.length
         } shows of the last 7 days!</strong></li>`
       : ``
@@ -401,14 +395,14 @@ module.exports = {
   ${
     stats.missedIDs.length > 0 && typeof stats.missedIDs.map === "function"
       ? `<li><strong>You failed to take a required top-of-the-hour ID break at these times</strong>; it is mandatory by the FCC to take a break at the top of every hour no later than :05 past the hour. For prerecords and playlists, ensure your audio cut-offs allow for the top-of-hour ID break to air on time:<br />
-  ${stats.missedIDs.map(record => moment(record).format("LT")).join("<br />")}
+  ${stats.missedIDs.map((record) => moment(record).format("LT")).join("<br />")}
   </li>`
       : ``
   }
   ${
     stats.silence.length > 0 && typeof stats.silence.map === "function"
       ? `<li><strong>There was excessive silence / very low audio at these times;</strong> please avoid excessive silence on the air as this violates FCC regulations:</strong><br />
-  ${stats.silence.map(record => moment(record).format("LT")).join("<br />")}
+  ${stats.silence.map((record) => moment(record).format("LT")).join("<br />")}
   </li>`
       : ``
   }
@@ -444,7 +438,7 @@ module.exports = {
   <p>Here is a break-down of the number of online listeners tuned in during your broadcast and at what time:</p>
   <ul>${stats.listeners
     .map(
-      stat =>
+      (stat) =>
         `<li><strong>${moment(stat.time).format("LT")}</strong>: ${
           stat.listeners
         }</li>`
@@ -456,7 +450,7 @@ module.exports = {
   <p>Here are the messages (if any) sent/received between you and listeners:</p>
   <ul>${stats.messages
     .map(
-      message =>
+      (message) =>
         `<li><strong>${moment(message.createdAt).format("LT")} by ${
           message.fromFriendly
         }</strong>: ${message.message}</li>`
@@ -468,7 +462,7 @@ module.exports = {
   <p>Here is your full show log:</p>
   <ul>${stats.logs
     .map(
-      log =>
+      (log) =>
         `<li><strong>${moment(log.createdAt).format("LT")}: ${
           log.title
         }</strong><ul><li>${log.event}</li>${
@@ -521,7 +515,7 @@ module.exports = {
     topStats[1][currentRecord.calendarID].semester.messages
   }</li>
   <li><strong>Remote credits earned:</strong> <ul>${djStats
-    .map(stat => `<li>${stat.name}: ${stat.semester.remoteCredits}</li>`)
+    .map((stat) => `<li>${stat.name}: ${stat.semester.remoteCredits}</li>`)
     .join("")}</ul></li>
   </ul>
 
@@ -562,7 +556,7 @@ module.exports = {
     topStats[1][currentRecord.calendarID].overall.messages
   }</li>
   <li><strong>Remote credits earned:</strong> <ul>${djStats
-    .map(stat => `<li>${stat.name}: ${stat.overall.remoteCredits}</li>`)
+    .map((stat) => `<li>${stat.name}: ${stat.overall.remoteCredits}</li>`)
     .join("")}</ul></li>
   </ul>`
       : ``
@@ -574,7 +568,7 @@ module.exports = {
               false,
               true
             );
-          })(currentID);
+          })(_currentRecord);
         }
       }
 
@@ -583,5 +577,5 @@ module.exports = {
       sails.log.error(e);
       return exits.error(e);
     }
-  }
+  },
 };
