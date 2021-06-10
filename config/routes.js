@@ -120,5 +120,8 @@ module.exports.routes = {
       layout: "directors/layout",
       director: req.param("director")
     });
-  }
+  },
+
+  "GET /recordings":
+    "https://raidermailwright-my.sharepoint.com/:f:/g/personal/wwsu4_wright_edu/EtXkb0rxp8RLgDIkUF7qg-QB-MQ1vxguf-qUrx0dUPq5eg"
 };

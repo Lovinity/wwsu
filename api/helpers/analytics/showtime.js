@@ -58,9 +58,9 @@ module.exports = {
 
     // filter out all falsey values from inputs
     if (inputs.djs && typeof inputs.djs.filter !== "undefined")
-      inputs.djs = inputs.djs.filter(dj => dj);
+      inputs.djs = inputs.djs.filter(dj => dj && dj !== null);
     if (inputs.calendarIDs && typeof inputs.calendarIDs.filter !== "undefined")
-      inputs.calendarIDs = inputs.calendarIDs.filter(cal => cal);
+      inputs.calendarIDs = inputs.calendarIDs.filter(cal => cal && cal !== null);
 
     // Preload show groups
     shows[0] = {
