@@ -24,46 +24,8 @@ module.exports = {
         .fetch()
         .tolerate(() => {});
 
-      // If a track is playing in RadioDJ, skip it and log it (provided we are not in a prerecord)
-      if (
-        typeof sails.models.meta.automation[0] !== "undefined" &&
-        parseInt(sails.models.meta.automation[0].ID) !== 0 &&
-        sails.models.meta.memory.state !== "prerecord_on"
-      ) {
-        // Add a log about the track
-        await sails.models.logs
-          .create({
-            attendanceID: sails.models.meta.memory.attendanceID,
-            logtype: "silence-track",
-            loglevel: "warning",
-            logsubtype: sails.models.meta.memory.show,
-            logIcon: `fas fa-forward`,
-            title: `Track was skipped due to silence detection.`,
-            event: `Track: ${sails.models.meta.automation[0].ID} (${sails.models.meta.automation[0].Artist} - ${sails.models.meta.automation[0].Title})<br />Please check this track to ensure it does not have more consecutive silence / very low audio than what silence detection is set at.`
-          })
-          .fetch()
-          .tolerate(() => {});
-
-        // Skip the track if there's a track playing in automation and there's another track queued
-        if (typeof sails.models.meta.automation[1] !== "undefined") {
-          await sails.helpers.rest.cmd("PlayPlaylistTrack", 0);
-        }
-
-        // Activate status issue
-        await sails.helpers.status.change.with({
-          name: `silence`,
-          status: 2,
-          label: `Silence`,
-          data: `Silence / very low audio detected! Track skipped due to potential silence.
-          <ul>
-            <li>Check track ${sails.models.meta.automation[0].ID} (${sails.models.meta.automation[0].Artist} - ${sails.models.meta.automation[0].Title}) in RadioDJ by looking at its waveform; ensure it does not have excessive silence / low audio.</li>
-            <li>If audio is going over the air, check the Audio Settings on the DJ Controls responsible for silence detection.</li>
-          </ul>`
-        });
-      }
-
       // If we are in automation, and prevSilence is less than 3 minutes ago, assume an audio issue and switch RadioDJs
-      else if (
+      if (
         sails.models.status.errorCheck.prevSilence &&
         moment().isBefore(
           moment(sails.models.status.errorCheck.prevSilence).add(3, "minutes")
@@ -71,7 +33,7 @@ module.exports = {
         sails.models.meta.memory.state.startsWith("automation_")
       ) {
         await sails.helpers.meta.change.with({
-          changingState: `Switching automation instances due to no audio`
+          changingState: `Multiple silence alarms; switching automation instances`
         });
 
         // Log the problem
@@ -131,11 +93,12 @@ module.exports = {
 
         sails.sockets.broadcast("system-error", "system-error", true);
 
-        // Execute these without awaiting in case RadioDJ is frozen
-        sails.helpers.rest.cmd("EnableAutoDJ", 0, 0).exec(() => {});
-        sails.helpers.rest.cmd("EnableAssisted", 1, 0).exec(() => {});
-        sails.helpers.rest.cmd("StopPlayer", 0, 0).exec(() => {});
+        // Only wait 1 second for these commands in case radioDJ is frozen; we don't want too much additional silence.
+        await sails.helpers.rest.cmd("EnableAutoDJ", 0, 1000);
+        await sails.helpers.rest.cmd("EnableAssisted", 1, 1000);
+        await sails.helpers.rest.cmd("StopPlayer", 0, 1000);
 
+        // Switch RadioDJs and re-queue the queue
         var queue = sails.models.meta.automation;
         await sails.helpers.rest.changeRadioDj();
         await sails.helpers.rest.cmd("ClearPlaylist", 1);
@@ -143,7 +106,45 @@ module.exports = {
         await sails.helpers.meta.change.with({ changingState: null });
       }
 
-      // If we are not in automation, and prvSilence is less than 2 minutes ago, assume irresponsible DJ and automatically end the show (but go into automation_break).
+      // else If a track is playing in RadioDJ, skip it and log it (provided we are not in a prerecord)
+      else if (
+        typeof sails.models.meta.automation[0] !== "undefined" &&
+        parseInt(sails.models.meta.automation[0].ID) !== 0 &&
+        sails.models.meta.memory.state !== "prerecord_on"
+      ) {
+        // Add a log about the track
+        await sails.models.logs
+          .create({
+            attendanceID: sails.models.meta.memory.attendanceID,
+            logtype: "silence-track",
+            loglevel: "warning",
+            logsubtype: sails.models.meta.memory.show,
+            logIcon: `fas fa-forward`,
+            title: `Track was skipped due to silence detection.`,
+            event: `Track: ${sails.models.meta.automation[0].ID} (${sails.models.meta.automation[0].Artist} - ${sails.models.meta.automation[0].Title})<br />Please check this track to ensure it does not have more consecutive silence / very low audio than what silence detection is set at.`
+          })
+          .fetch()
+          .tolerate(() => {});
+
+        // Skip the track if there's a track playing in automation and there's another track queued
+        if (typeof sails.models.meta.automation[1] !== "undefined") {
+          await sails.helpers.rest.cmd("PlayPlaylistTrack", 0);
+        }
+
+        // Activate status issue
+        await sails.helpers.status.change.with({
+          name: `silence`,
+          status: 2,
+          label: `Silence`,
+          data: `Silence / very low audio detected! Track skipped due to potential silence.
+          <ul>
+            <li>Check track ${sails.models.meta.automation[0].ID} (${sails.models.meta.automation[0].Artist} - ${sails.models.meta.automation[0].Title}) in RadioDJ by looking at its waveform; ensure it does not have excessive silence / low audio.</li>
+            <li>If audio is going over the air, check the Audio Settings on the DJ Controls responsible for silence detection.</li>
+          </ul>`
+        });
+      }
+
+      // else If we are not in automation, and prevSilence is less than 2 minutes ago, assume irresponsible DJ and automatically end the show (but go into automation_break).
       else if (
         sails.models.status.errorCheck.prevSilence &&
         moment().isBefore(
@@ -192,6 +193,8 @@ module.exports = {
         });
 
         await sails.helpers.state.automation(true);
+
+        // Otherwise, do not do anything except update status.
       } else {
         await sails.helpers.status.change.with({
           name: `silence`,
