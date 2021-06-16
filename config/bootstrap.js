@@ -2898,14 +2898,18 @@ module.exports.bootstrap = async function (done) {
     });
   });
 
-  // Every day at 23:59:52, archive logs that are older than 2 years
+  // Every day at 23:59:52, run cleanup tasks.
   sails.log.verbose("BOOTSTRAP: scheduling archiveLogs CRON.");
   cron.schedule("52 59 23 * * *", () => {
     return new Promise(async (resolve, reject) => {
       sails.log.debug("CRON archiveLogs called");
       let cleanedUp = ``;
       let records;
+      let wasLofi = sails.config.custom.lofi;
       try {
+        // Activate lofi; clean-up tends to freeze Node for several seconds. We don't want accidental false positive errors tripping.
+        sails.config.custom.lofi = true;
+
         // Delete announcements that expired over a month ago
         records = await sails.models.announcements
           .destroy({
@@ -3108,7 +3112,28 @@ module.exports.bootstrap = async function (done) {
             // Don't throw errors, but log them
             sails.log.error(err);
           });
+
+          // Turn lofi back off if it was off when this process started.
+          sails.config.custom.lofi = wasLofi;
       } catch (e) {
+        // Add a log indicating an error
+        await sails.models.logs
+          .create({
+            attendanceID: null,
+            logtype: "cleanup",
+            loglevel: "yellow",
+            logsubtype: "",
+            logIcon: `fas fa-broom`,
+            title: `There was a problem running the daily cleanup!`,
+            event: `${e.message}<br />See node logs for more information.`,
+          })
+          .fetch()
+          .tolerate((err) => {
+            // Don't throw errors, but log them
+            sails.log.error(err);
+          });
+
+        sails.config.custom.lofi = wasLofi;
         sails.log.error(e);
         return reject(e);
       }
