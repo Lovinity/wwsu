@@ -320,7 +320,9 @@ module.exports = {
                   sails.log.error(err);
                 });
             }
-            var stats = await sails.helpers.attendance.recalculate(currentRecord.ID);
+            var stats = await sails.helpers.attendance.recalculate(
+              currentRecord.ID
+            );
             var topStats = await sails.helpers.attendance.calculateStats();
             let _djStats = await sails.helpers.analytics.showtime([
               currentRecord.dj,
@@ -368,12 +370,12 @@ module.exports = {
   }</li>
   <li><strong>Messages sent / received:</strong> ${stats.webMessages}</li>
   ${
-    topStats[0].topShows.indexOf(event[1]) !== -1
-      ? `<li><strong>Congratulations! Your show is placed ${
-          topStats[0].topShows.indexOf(event[1]) + 1
+    topStats[0].topShows.findIndex((show) => show.name === event[1]) !== -1
+      ? `<li><strong>Congratulations! Your broadcast placed ${
+          topStats[0].topShows.findIndex((show) => show.name === event[1]) + 1
         } in the top ${
           topStats[0].topShows.length
-        } shows of the last 7 days!</strong></li>`
+        } shows of the last week!</strong></li>`
       : ``
   }
   </ul>

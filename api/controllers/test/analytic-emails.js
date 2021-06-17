@@ -75,9 +75,9 @@ module.exports = {
             stats.webMessages
           }</li>
 ${
-  topStats[0].topShows.indexOf(event[1]) !== -1
+  topStats[0].topShows.findIndex((show) => show.name === event[1]) !== -1
     ? `<li><strong>Congratulations! Your broadcast placed number ${
-        topStats[0].topShows.indexOf(event[1]) + 1
+        topStats[0].topShows.findIndex((show) => show.name === event[1]) + 1
       } in the top ${
         topStats[0].topShows.length
       } shows of the last week!</strong></li>`

@@ -634,6 +634,7 @@ module.exports = {
       if (id && typeof shows[id] === "undefined") {
         shows[id] = {
           name: null,
+          type: null,
           week: {
             showtime: 0,
             tuneins: 0,
@@ -4807,7 +4808,7 @@ module.exports = {
           let name = await sails.models.djs.findOne({ ID: index });
           if (name) {
             DJs[index].name = `${name.name} (${
-              name.realName || `Unknown Person`
+              name.realName || `Unknown Full Name`
             })`;
           } else {
             DJs[index].name = `Unknown DJ`;
@@ -4882,9 +4883,11 @@ module.exports = {
         if (index > 0) {
           let name = await sails.models.calendar.findOne({ ID: index });
           if (name) {
-            shows[index].name = `${name.type}: ${name.hosts} - ${name.name}`;
+            shows[index].name = name.name;
+            shows[index].type = name.type;
           } else {
             shows[index].name = `Unknown Event`;
+            shows[index].type = `event`;
           }
         }
       }

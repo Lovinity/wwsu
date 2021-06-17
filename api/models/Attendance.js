@@ -197,12 +197,16 @@ module.exports = {
 
   weeklyAnalytics: {
     topShows: [],
-    topGenre: 'None',
-    topPlaylist: 'None',
+    topGenre: { name: "None", score: 0 },
+    topPlaylist: { name: "None", score: 0 },
     onAir: 0,
+    listeners: 0,
     onAirListeners: 0,
+    listenerPeak: 0,
+    listenerPeakTime: null,
     tracksLiked: 0,
     tracksRequested: 0,
-    webMessagesExchanged: 0
+    webMessagesExchanged: 0,
+    discordMessagesExchanged: 0,
   }
 }

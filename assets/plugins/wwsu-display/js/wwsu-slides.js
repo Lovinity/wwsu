@@ -1,4 +1,6 @@
-// This class manages slides on the display signs as a whole; WWSUslide is an individual slide (and should not be used explicitly; use this.slides.add instead)
+// This class manages slides and tickers on the display signs as a whole;
+// WWSUslide is an individual slide (and should not be used explicitly; use this.add instead)
+// WWSUticker is an individual ticker (and should not be used explicitly; use this.addTicker instead)
 
 class WWSUslides {
   /**
@@ -17,6 +19,7 @@ class WWSUslides {
         nav: `.sidebar-nav`,
         classes: `nav nav-sidebar nav-flat flex-column`,
         contents: `#slide-contents`,
+        ticker: `#footer-ticker`,
       },
       options
     );
@@ -24,24 +27,30 @@ class WWSUslides {
     this.manager = manager;
     this.options = options;
 
-    // This is where we keep track of the slides added
+    // This is where we keep track of the slides and tickers added
     this.slides = new Map();
+    this.tickers = new Map();
     this.categories = [];
 
     // Properties for cycling slides
-
     this.active = null; // Name of the slide currently displayed
     this.timeLeft = 0; // Number of seconds left before display switches to the next slide
     this.timeLeftFailsafe = 0; // In case timeLeft is null when it should not be
 
+    // Properties for tickers
+    this.tickerActive = null; // Name of the ticker currently displayed.
+    this.tickerTimeLeft = 0; // Number of seconds left before display switches to the next ticker
+    this.tickerTimeLeftFailsafe = 0; // In case tickerTimeLeft is null when it should not be
+
     this.timer = setInterval(() => {
+      // SLIDES
+
       if (this.timeLeft !== null) {
         this.timeLeft--;
         this.timeLeftFailsafe = 0;
 
         if (this.timeLeft <= 0) {
           this.timeLeft = 0;
-          console.log(`Time is up!`);
 
           let activeSlides = this.qualified;
 
@@ -54,22 +63,15 @@ class WWSUslides {
           );
 
           if (qualified.length <= 0) {
-            console.log(`No more slides; start at the beginning`);
-
             qualified = activeSlides;
 
             if (qualified.length > 0) {
-              console.log(
-                `At least 1 qualified slide detected. Displaying first one.`
-              );
               this.show(qualified[0].name);
             } else {
-              console.log(`There are no slides we can display currently.`);
               this.active = null;
               this.timeLeft = 5;
             }
           } else {
-            console.log(`There is a slide we can display`);
             this.show(qualified[0].name);
           }
         }
@@ -85,6 +87,58 @@ class WWSUslides {
         }
       } else {
         this.timeLeftFailsafe = 0;
+      }
+
+      // TICKERS
+      if (this.tickerTimeLeft !== null) {
+        this.tickerTimeLeftFailsafe = 0;
+
+        // Bail if the current ticker is a marquee and still in progress
+        if (
+          this.activeTicker &&
+          this.activeTicker.marquee &&
+          this.tickerTimeLeft > 0
+        )
+          return;
+
+        this.tickerTimeLeft--;
+
+        if (this.tickerTimeLeft <= 0) {
+          this.tickerTimeLeft = 0;
+
+          let activeTickers = this.qualifiedTickers;
+
+          // Determine based on the above which slide we should show next
+          let currentIndex = activeTickers
+            .map((ticker) => ticker.name)
+            .indexOf(this.tickerActive);
+          let qualified = activeTickers.filter(
+            (value, index) => index > currentIndex
+          );
+
+          if (qualified.length <= 0) {
+            qualified = activeTickers;
+
+            if (qualified.length > 0) {
+              this.showTicker(qualified[0].name);
+            } else {
+              this.tickerActive = null;
+              this.tickerTimeLeft = 5;
+            }
+          } else {
+            this.showTicker(qualified[0].name);
+          }
+        }
+
+        this.updateTickers();
+      } else if (this.qualifiedTickers.length > 1) {
+        this.tickerTimeLeftFailsafe++;
+        if (this.tickerTimeLeftFailsafe >= 10) {
+          this.tickerTimeLeftFailsafe = 0;
+          this.tickerTimeLeft = 15;
+        }
+      } else {
+        this.tickerTimeLeftFailsafe = 0;
       }
     }, 1000);
   }
@@ -130,6 +184,29 @@ class WWSUslides {
   }
 
   /**
+   * Add a ticker
+   *
+   * @param {object} data WWSUticker properties (see WWSUticker)
+   */
+
+  addTicker(data) {
+    // Check if the ticker already exists. If so, replace it instead of adding a new one.
+    let changed = false;
+    [...this.tickers.values()]
+      .filter((ticker) => ticker && ticker.name === data.name)
+      .forEach((ticker) => {
+        changed = true;
+        this.removeTicker(ticker.name);
+        this.tickers.set(ticker.name, new WWSUticker(this, data));
+        this.updateTickers();
+      });
+    if (!changed) {
+      this.tickers.set(data.name, new WWSUticker(this, data));
+      this.updateTickers();
+    }
+  }
+
+  /**
    * Remove a slide.
    *
    * @param {string} name Name of the slide to remove
@@ -149,6 +226,21 @@ class WWSUslides {
   }
 
   /**
+   * Remove a ticker.
+   *
+   * @param {string} name Name of the ticker to remove
+   */
+  removeTicker(name) {
+    this.tickers.forEach((_ticker, slideName) => {
+      if (_ticker.name === name) {
+        $(`#ticker-${_ticker.name}`).remove();
+        this.tickers.delete(name);
+      }
+    });
+    this.updateTickers();
+  }
+
+  /**
    * Transition to the specified slide.
    *
    * @param {string} name Name of the slide to display.
@@ -163,12 +255,8 @@ class WWSUslides {
 
     // If the provided slide to show is not the one currently visible, switch to it.
     if (!this.activeSlide || name !== this.activeSlide.name) {
-      console.log(`Different slide.`);
-
       // Executed when we are ready to show the slide
       let afterFunction = () => {
-        console.log(`afterFunction executed`);
-
         let slide = this.slides.get(name);
 
         // Whoops! The provided slide does not exist. Start over in the slides as a failsafe.
@@ -179,9 +267,6 @@ class WWSUslides {
         }
 
         this.active = name;
-
-        // Update inner html to configured value in case fn changed it.
-        console.log(`showing slide`);
 
         // Perform HTML reset if applicable
         if (this.activeSlide && this.activeSlide.reset)
@@ -203,31 +288,21 @@ class WWSUslides {
           this.updateSidebar();
         });
 
-        console.log(`setting time`);
         this.updateSidebar();
 
-        console.log(`Fitting Content`);
         this.fitContent();
       };
 
       // Process transitioning out of the current slide
       if (this.active) {
-        console.log(`transition out`);
-
         // Transition the current slide out
         this.activeSlide.transitionOut(() => {
           afterFunction();
         });
       } else {
-        console.log(`No active slide`);
         afterFunction();
       }
     } else {
-      console.log(`Same slide; resetting clock`);
-
-      // Show the slide. Update inner html to configured value in case fn changed it.
-      console.log(`showing slide`);
-
       // Perform HTML reset if applicable
       if (this.activeSlide && this.activeSlide.reset)
         this.activeSlide.reset = true;
@@ -245,12 +320,97 @@ class WWSUslides {
       // Display current slide immediately
       this.activeSlide.visible = true;
 
-      console.log(`setting time`);
       this.timeLeft = this.activeSlide.displayTime;
       this.updateSidebar();
 
-      console.log(`Fitting Content`);
       this.fitContent();
+    }
+  }
+
+  /**
+   * Transition to the specified ticker.
+   *
+   * @param {string} name Name of the ticker to display.
+   */
+  showTicker(name) {
+    this.tickerTimeLeft = null; // Timeout the time left
+
+    // Call fnEnd if it exists for the active ticker
+    if (this.activeTicker && this.activeTicker.fnEnd) {
+      this.activeTicker.fnEnd();
+    }
+
+    // If the provided slide to show is not the one currently visible, or if the slide is a marquee (we have to restart it), switch to it.
+    if (!this.activeTicker || name !== this.activeTicker.name || this.activeTicker.marquee) {
+      // Executed when we are ready to show the ticker
+      let afterFunction = () => {
+        let ticker = this.tickers.get(name);
+
+        // Whoops! The provided ticker does not exist. Start over in the tickers as a failsafe.
+        if (!ticker) {
+          this.tickerTimeLeft = 0;
+          this.tickerActive = null;
+          return null;
+        }
+
+        this.tickerActive = name;
+
+        // Perform HTML reset if applicable
+        if (this.activeTicker && this.activeTicker.reset)
+          this.activeTicker.reset = true;
+
+        // Failsafe: iterate through all ckers and add display: none to prevent stray tickers from remaining visible
+        this.tickers.forEach((_ticker, tickerName) => {
+          _ticker.visible = false;
+        });
+
+        // Call fnStart if it exists
+        if (this.activeTicker && this.activeTicker.fnStart) {
+          this.activeTicker.fnStart();
+        }
+
+        // Animate ticker in
+        this.activeTicker.transitionIn(() => {
+          this.tickerTimeLeft = this.activeTicker.marquee
+            ? 5
+            : this.activeTicker.displayTime;
+          this.updateTickers();
+        });
+
+        this.updateTickers();
+      };
+
+      // Process transitioning out of the current slide
+      if (this.activeTicker) {
+        // Transition the current slide out
+        this.activeTicker.transitionOut(() => {
+          afterFunction();
+        });
+      } else {
+        afterFunction();
+      }
+    } else {
+      // Perform HTML reset if applicable
+      if (this.activeTicker && this.activeTicker.reset)
+        this.activeTicker.reset = true;
+
+      // Failsafe: iterate through all ckers and add display: none to prevent stray tickers from remaining visible
+      this.tickers.forEach((_ticker, tickerName) => {
+        _ticker.visible = false;
+      });
+
+      // Call fnStart if it exists
+      if (this.activeTicker && this.activeTicker.fnStart) {
+        this.activeTicker.fnStart();
+      }
+
+      // Display current ticker immediately
+      this.activeTicker.visible = true;
+
+      this.tickerTimeLeft = this.activeTicker.marquee
+        ? 5
+        : this.activeTicker.displayTime;
+      this.updateTickers();
     }
   }
 
@@ -304,14 +464,23 @@ class WWSUslides {
     });
   }
 
+  updateTickers() {
+    this.tickers.forEach((ticker) => {
+      // Whoops! The currently visible ticker is not supposed to be visible. Time it out to go to the next ticker.
+      if (
+        ticker.name === this.tickerActive &&
+        (!ticker.active || (this.hasActiveStickyTicker && !ticker.isSticky))
+      )
+        this.tickerTimeLeft = 0;
+    });
+  }
+
   // Scale content of the active slide to fit the screen if fitContent is true (otherwise, reset to 1 scaling)
   fitContent() {
     let temp = $(`#section-slide-${this.activeSlide.name}`).first();
     let temp2 = $(`#section-slide-${this.activeSlide.name}-contents`).first();
 
     if (this.activeSlide.fitContent && temp && temp2) {
-      console.log(`fitting content`);
-
       temp.addClass("scale-wrapper");
       temp2.addClass("scale-content");
 
@@ -327,7 +496,6 @@ class WWSUslides {
       };
 
       $(() => {
-        console.log(`fitting content self function`);
         let $page = temp;
 
         getPageSize();
@@ -345,18 +513,11 @@ class WWSUslides {
         function getPageSize() {
           pageHeight = temp.outerHeight();
           pageWidth = temp.outerWidth();
-          console.log(
-            `Page size... height: ${pageHeight}, width: ${pageWidth}`
-          );
         }
 
         function scalePages(page, maxWidth, maxHeight) {
-          console.log(
-            `scalePages: Max width... ${maxWidth}, maxHeight... ${maxHeight}`
-          );
           var width = (temp2.height() / maxHeight) * 80;
           page.attr("width", `${width}%`);
-          console.log(`Page width: ${width}%`);
           var scaleX = 1;
           var scaleY = 1;
           scaleX = (maxWidth / temp2.width()) * 0.95;
@@ -364,7 +525,6 @@ class WWSUslides {
           basePage.scaleX = scaleX;
           basePage.scaleY = scaleY;
           basePage.scale = scaleX > scaleY ? scaleY : scaleX;
-          console.dir(basePage);
 
           var newLeftPos = Math.abs(
             Math.floor((temp2.width() * basePage.scale - maxWidth) / 2)
@@ -372,8 +532,6 @@ class WWSUslides {
           var newTopPos = Math.abs(
             Math.floor((temp2.height() * basePage.scale - maxHeight) / 2)
           );
-
-          console.log(`Left: ${newLeftPos}, Top: ${newTopPos}`);
 
           temp2.attr(
             "style",
@@ -388,7 +546,6 @@ class WWSUslides {
 
       // Failsafe for fitContent. When it's false, we should always have 1 scale and 100% width.
     } else {
-      console.log(`FitContent Failsafe`);
       var $page = temp;
       $page.attr("width", `100%`);
       temp2.attr("style", "transform:scale(1);left:0px;top:0px;");
@@ -400,10 +557,24 @@ class WWSUslides {
     return this.slides.get(this.active);
   }
 
+  // Return the active WWSUticker
+  get activeTicker() {
+    return this.tickers.get(this.tickerActive);
+  }
+
   // Check if there is an active sticky slide
   get hasActiveSticky() {
     return [...this.slides.values()].find(
       (slide) => slide.isSticky && slide.active
+    )
+      ? true
+      : false;
+  }
+
+  // Check if there is an active sticky ticker
+  get hasActiveStickyTicker() {
+    return [...this.tickers.values()].find(
+      (ticker) => ticker.isSticky && ticker.active
     )
       ? true
       : false;
@@ -425,6 +596,29 @@ class WWSUslides {
 
     // Sort according to category
     return activeSlides.sort((a, b) => {
+      return (
+        this.categories.indexOf(a.category) -
+        this.categories.indexOf(b.category)
+      );
+    });
+  }
+
+  // Array of tickers that are allowed to be displayed at this time.
+  get qualifiedTickers() {
+    // Determine which tickers qualify to be displayed
+    let activeTickers = [];
+    if (this.hasActiveStickyTicker) {
+      this.tickers.forEach((ticker) => {
+        if (ticker.active && ticker.isSticky) activeTickers.push(ticker);
+      });
+    } else {
+      this.tickers.forEach((ticker) => {
+        if (ticker.active) activeTickers.push(ticker);
+      });
+    }
+
+    // Sort according to category
+    return activeTickers.sort((a, b) => {
       return (
         this.categories.indexOf(a.category) -
         this.categories.indexOf(b.category)
@@ -661,7 +855,6 @@ class WWSUslide {
   transitionIn(cb = () => {}) {
     // Sometimes, animation callback will not fire. Add a 5-second failsafe just in case.
     let failsafe = setTimeout(() => {
-      console.log(`animation failsafe triggered`);
       $(`#section-slide-${this._name}-contents`).attr("class", "");
       this.visible = true;
       cb();
@@ -691,7 +884,6 @@ class WWSUslide {
   transitionOut(cb) {
     // Sometimes, animation callback will not fire. Add a 5-second failsafe just in case, and hard-set visibility to none.
     let failsafe = setTimeout(() => {
-      console.log(`animation failsafe triggered`);
       $(`#section-slide-${this._name}-contents`).attr("class", "");
       this.visible = false;
       cb();
@@ -707,5 +899,319 @@ class WWSUslide {
         cb();
       }
     );
+  }
+}
+
+// Ticker class for managing a single ticker
+// DO NOT use this class directly; use the WWSUSlides instead.
+class WWSUticker {
+  /**
+   * Create a slide.
+   *
+   * @param {WWSUslides} slides The WWSUslides that added this ticker
+   * @param {object} options Initial options. See constructor for properties.
+   */
+  constructor(slides, options = {}) {
+    this.slides = slides;
+
+    this._name = options.name || ""; // Unique name (DOM ID) assigned to the ticker
+    this._category = options.category || ""; // The category to assign this ticker (DOM)
+    this._isSticky = options.isSticky || false; // If true, all non-sticky tickers will be hidden as long as one sticky ticker is present
+    this._classes = options.classes || "secondary"; // Class(es) for the footer of the ticker when this ticker is displayed
+    this._flashClasses = options.flashClasses || false; // If true, the classes will toggle between empty and this._classes every second (for flashing)
+    this._active =
+      typeof options.active !== `undefined` ? options.active : true; // Whether or not to display this ticker
+    this._starts = options.starts || null; // Date/time to start showing this ticker
+    this._expires = options.expires || null; // Date/time to stop showing this ticker
+    this._originalHtml = options.html || ``; // Original HTML contents of this ticker
+    this._html = options.html || ``; // Current HTML contents of this ticker
+    this._reset = options.reset || false; // If true, reset the ticker's HTML content to the original whenever it is displayed
+    this._transitionIn = options.transitionIn || "slideInUp"; // Animate.css animation class when the ticker appears
+    this._transitionOut = options.transitionOut || "slideOutUp"; // Animate.css animation class when the ticker disappears
+    this._displayTime = options.displayTime || 7; // Number of seconds the ticker should be displayed. Ignored if marquee is true.
+    this._marquee = options.marquee || false; // Display ticker as a marquee instead of a static text for displayTime seconds.
+    this._fnStart = options.fnStart || (() => {}); // Callback executed when the ticker is first displayed. Passes the ticker as a parameter.
+    this._fnEnd = options.fnEnd || (() => {}); // Callback executed when the ticker is ending (ran out of displayTime). Passes the ticker as a parameter.
+
+    // Create the HTML section for the contents
+    $(`${this.slides.options.ticker}`).append(`
+    <div id="ticker-${this._name}">
+      <div id="ticker-${this._name}-contents" class="${
+      this._marquee ? `marquee` : ``
+    }">${this._html}</div>
+    </div>
+    `);
+  }
+
+  get name() {
+    return this._name;
+  }
+
+  get category() {
+    return this._category;
+  }
+
+  get isSticky() {
+    return this._isSticky;
+  }
+
+  // Changes whether or not this slide is sticky, and updates all slides.
+  set isSticky(value) {
+    this._isSticky = value;
+    this.slides.updateTickers();
+  }
+
+  get classes() {
+    return this._classes;
+  }
+
+  set classes(value) {
+    this._classes = value;
+  }
+
+  get flashClasses() {
+    return this._flashClasses;
+  }
+
+  set flashClasses(value) {
+    this._flashClasses = value;
+  }
+
+  get reset() {
+    return this._reset;
+  }
+
+  // Set whether or not this slide should reset to original HTML upon visible. Also, if true, perform the reset.
+  set reset(value) {
+    this._reset = value;
+    if (value) {
+      $(`#ticker-${this._name}`).html(
+        `<div id="ticker-${this._name}-contents" class="${
+          this._marquee ? `marquee` : ``
+        }">${this._originalHtml}</div>`
+      );
+    }
+  }
+
+  // Determine whether or not this slide should be displayed.
+  get active() {
+    if (!this._active) {
+      return false;
+    }
+
+    if (
+      this._starts !== null &&
+      moment(
+        this.slides.manager.get("WWSUMeta")
+          ? this.slides.manager.get("WWSUMeta").meta.time
+          : undefined
+      ).isBefore(moment(this._starts))
+    ) {
+      return false;
+    }
+
+    if (
+      this._expires !== null &&
+      moment(
+        this.slides.manager.get("WWSUMeta")
+          ? this.slides.manager.get("WWSUMeta").meta.time
+          : undefined
+      ).isAfter(moment(this._expires))
+    ) {
+      return false;
+    }
+
+    return true;
+  }
+
+  // Set manually whether or not to make the slide active, and update all slides.
+  set active(value) {
+    this._active = value;
+    this.slides.updateTickers();
+  }
+
+  // Determine whether to hard-set display: none
+  set visible(value) {
+    $(`#ticker-${this._name}`).css("display", value ? "inline" : "none");
+  }
+
+  // Set the ISO start date/time for the slide.
+  set starts(value) {
+    this._starts = value;
+    this.slides.updateTickers();
+  }
+
+  // Set the ISO string expires time for the slide.
+  set expires(value) {
+    this._expires = value;
+    this.slides.updateTickers();
+  }
+
+  get html() {
+    return this._html;
+  }
+
+  // Set new HTML for the slide and update it.
+  set html(value) {
+    this._html = value;
+    $(`#ticker-${this._name}`).html(
+      `<div id="ticker-${this._name}-contents" class="${
+        this._marquee ? `marquee` : ``
+      }">${value}</div>`
+    );
+  }
+
+  get originalHtml() {
+    return this._originalHtml;
+  }
+
+  // Set new original HTML (when reset = true)
+  set originalHtml(value) {
+    this._originalHtml = value;
+  }
+
+  get transitionIn() {
+    return this._transitionIn;
+  }
+
+  get transitionOut() {
+    return this._transitionOut;
+  }
+
+  get displayTime() {
+    return this._displayTime;
+  }
+
+  set displayTime(value) {
+    this._displayTime = value;
+  }
+
+  get marquee() {
+    return this._marquee;
+  }
+
+  fnStart() {
+    return this._fnStart(this);
+  }
+
+  fnEnd() {
+    return this._fnEnd(this);
+  }
+
+  /**
+   * Transition the slide in
+   *
+   * @param {?function} cb Callback called when the transition is finished.
+   */
+  transitionIn(cb = () => {}) {
+    // Sometimes, animation callback will not fire. Add a 5-second failsafe just in case.
+    let failsafe = setTimeout(() => {
+      $(`#ticker-${this._name}-contents`).attr("class", "");
+      this.visible = true;
+      cb();
+    }, 5000);
+
+    // Reset all classes
+    $(`#ticker-${this._name}-contents`).attr("class", "");
+    $(`${this.slides.options.ticker}`).attr("class", this._classes);
+
+    // Mark visible
+    this.visible = true;
+
+    // Flash effects (on 750ms, off 250ms)
+    if (this.flashClasses) {
+      let flashClassOn = 1;
+      this.flashClassesTimer = setInterval(() => {
+        flashClassOn++;
+        if (flashClassOn > 3) flashClassOn = 0;
+        if (this.name === this.slides.tickerActive) {
+          $(`${this.slides.options.ticker}`).attr(
+            "class",
+            flashClassOn > 0 ? this.classes : ""
+          );
+        } else {
+          clearInterval(this.flashClassesTimer);
+        }
+      }, 250);
+    }
+
+    // No transition for marquees
+    if (this.marquee) {
+      clearTimeout(failsafe); // Disable failsafe timer
+      this._initMarquee();
+      cb();
+      return;
+    }
+
+    // Perform animate.css transition
+    $(`#ticker-${this._name}-contents`).animateCss(this._transitionIn, () => {
+      clearTimeout(failsafe); // Disable failsafe timer
+      this._initMarquee();
+      cb();
+    });
+  }
+
+  /**
+   * Transition the slide out
+   *
+   * @param {?function} cb Callback executed when the slide is finished transitioning out
+   */
+  transitionOut(cb) {
+    // Sometimes, animation callback will not fire. Add a 5-second failsafe just in case, and hard-set visibility to none.
+    let failsafe = setTimeout(() => {
+      $(`#ticker-${this._name}-contents`).attr("class", "");
+      this.visible = false;
+      clearInterval(this.flashClassesTimer);
+      cb();
+    }, 5000);
+
+    // No transition for marquees
+    if (this.marquee) {
+      clearTimeout(failsafe); // Disable failsafe timer
+      clearInterval(this.flashClassesTimer);
+      cb();
+      return;
+    }
+
+    // Do the transition out
+    $(`#ticker-${this._name}-contents`).animateCss(this._transitionOut, () => {
+      clearTimeout(failsafe); // Disable failsafe timer
+      clearInterval(this.flashClassesTimer);
+      this.visible = false; // Invisible now
+      $(`#ticker-${this._name}-contents`).attr("class", ""); // Remove animation classes
+      cb();
+    });
+  }
+
+  // Function to initialize the marquee for the ticker. Should only be called within the class itself.
+  _initMarquee() {
+    if (!this.marquee) return;
+
+    // Destroy the original marquee just in case
+    $(`#ticker-${this._name}-contents`).marquee("destroy");
+
+    $(`#ticker-${this._name}-contents`)
+      .bind("finished", () => {
+        try {
+          $(`#ticker-${this._name}-contents`).marquee("destroy");
+          this.visible = false;
+          this.slides.tickerTimeLeft = 0;
+        } catch (e) {
+          console.error(e);
+          this.slides.tickerTimeLeft = 0;
+        }
+      })
+      .marquee({
+        // duration in milliseconds of the marquee
+        speed: 150,
+        // gap in pixels between the tickers
+        gap: 3000,
+        // time in milliseconds before the marquee will start animating
+        delayBeforeStart: 250,
+        // 'left' or 'right'
+        direction: "left",
+        // true or false - should the marquee be duplicated to show an effect of continues flow
+        duplicated: false,
+      });
   }
 }

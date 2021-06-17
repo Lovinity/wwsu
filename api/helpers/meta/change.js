@@ -298,6 +298,10 @@ module.exports = {
       description:
         "If not null, this is the discord channel pertaining to the current broadcast (the Discord bot should take these messages and publish them to internal chat system and count them in analytics).",
     },
+    recalculatingAnalytics: {
+      type: 'boolean',
+      description: 'Is weekly analytics currently being re-calculated?'
+    },
   },
 
   fn: async function (inputs, exits) {

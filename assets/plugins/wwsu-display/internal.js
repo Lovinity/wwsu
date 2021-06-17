@@ -556,6 +556,44 @@ slides.add({
   `,
 });
 
+// Weather tickers
+slides.addTicker({
+  name: `current-weather`,
+  category: `weather`,
+  isSticky: false,
+  active: true,
+  displayTime: 7,
+  html: `<i class="fas fa-sun p-1"></i><strong>Current Weather</strong>: <span class="climacell-current-0-weatherCode-string"></span>, <span class="climacell-current-0-temperature"></span>°F (tomorrow.io)`,
+});
+slides.addTicker({
+  name: `weather-precipitation-soon`,
+  category: `weather`,
+  isSticky: false,
+  active: false,
+  classes: "bg-info",
+  displayTime: 7,
+  html: `<i class="fas fa-umbrella p-1"></i><strong><span class="climacell-upcoming-precipitationType">???</span></strong> is forecast to begin around <span class="climacell-upcoming-precipitationTime">???</span>! (tomorrow.io)`,
+});
+slides.addTicker({
+  name: `weather-precipitation-now`,
+  category: `weather`,
+  isSticky: false,
+  active: false,
+  classes: "bg-warning",
+  displayTime: 7,
+  html: `<i class="fas fa-umbrella p-1"></i><strong><span class="climacell-now-precipitationType">???</span></strong> is falling <span class="climacell-now-precipitationUntil">until ???</span>! Rate: <span class="climacell-now-precipitationIntensity">???</span> inches/hour. (tomorrow.io)`,
+});
+
+// TODO: remove
+slides.addTicker({
+  name: `prototype`,
+  category: `weather`,
+  isSticky: false,
+  active: true,
+  displayTime: 7,
+  html: `This is a prototype of our new Display Sign design. More features to come!`,
+});
+
 // 12-hour forecast
 slides.add({
   name: `forecast-12-hours`,
@@ -678,6 +716,24 @@ slides.add({
 						</div>`,
 });
 Climacell.initClockForecast("forecast-12-hours", "#climacell-clock");
+
+/*
+Climacell.on("change", "display", (db, query) => {
+  console.log(`Climacell change`);
+  if (JSON.stringify(query).includes("")) {
+    console.log(`Climacell current-0 detected`);
+    let record = db.get().find((record) => record.dataClass === "current-0");
+    if (record) {
+      console.log(`Climacell current-0 found`);
+      slides.addTicker({
+        name: `weather-current`,
+        category: `weather`,
+        html: `<i class="fas fa-sun p-1"></i><strong>Current Weather</strong> (by tomorrow.io): <span class="climacell-current-0-weatherCode-string"></span>, <span class="climacell-current-0-temperature"></span>°F`,
+      });
+    }
+  }
+});
+*/
 
 // Upcoming shows
 let upcomingTable;
@@ -1109,11 +1165,14 @@ function processEas(db) {
 
     prevEas = [];
     let innercontent = ``;
+    let tickercontent = ``;
 
     // eslint-disable-next-line no-unused-lets
     let makeActive = false;
     // eslint-disable-next-line no-unused-lets
     let displayTime = 7;
+
+    let mostSevere = 5;
 
     db.each((dodo) => {
       try {
@@ -1130,12 +1189,16 @@ function processEas(db) {
         if (typeof dodo["severity"] !== "undefined") {
           if (dodo["severity"] === "Extreme") {
             colorClass = "danger";
+            mostSevere = 1;
           } else if (dodo["severity"] === "Severe") {
             colorClass = "orange";
+            if (mostSevere > 2) mostSevere = 2;
           } else if (dodo["severity"] === "Moderate") {
             colorClass = "warning";
+            if (mostSevere > 3) mostSevere = 3;
           } else {
             colorClass = "primary";
+            if (mostSevere > 4) mostSevere = 4;
           }
         }
         // LINT LIES: This letiable is used.
@@ -1182,6 +1245,46 @@ function processEas(db) {
               </div>
             </div>
           </div>`;
+
+        // Add ticker
+        slides.addTicker({
+          name: `eas-alert-${dodo.ID}`,
+          category: `weather`,
+          classes: `bg-${colorClass}`,
+          flashClasses:
+            dodo["severity"] === "Extreme" || dodo["severity"] === "Severe",
+          isSticky:
+            dodo["severity"] === "Extreme" || dodo["severity"] === "Severe",
+          active: true,
+          marquee: true,
+          html: `<i class="fas fa-bolt p-1"></i> <strong>${
+            typeof dodo["alert"] !== "undefined"
+              ? dodo["alert"]
+              : "Unknown Alert"
+          }</strong>... for ${
+            typeof dodo["counties"] !== "undefined"
+              ? dodo["counties"]
+              : "Unknown Counties"
+          }... from ${
+            moment(dodo["starts"]).isValid()
+              ? moment
+                  .tz(
+                    dodo["starts"],
+                    Meta.meta ? Meta.meta.timezone : moment.tz.guess()
+                  )
+                  .format("MM/DD h:mm A")
+              : "UNKNOWN"
+          } to ${
+            moment(dodo["expires"]).isValid()
+              ? moment
+                  .tz(
+                    dodo["expires"],
+                    Meta.meta ? Meta.meta.timezone : moment.tz.guess()
+                  )
+                  .format("MM/DD h:mm A")
+              : "UNKNOWN"
+          }.`,
+        });
       } catch (e) {
         console.error(e);
         iziToast.show({
@@ -1200,6 +1303,16 @@ function processEas(db) {
     slides.slides.get(
       `eas-alerts`
     ).html = `<h1 style="text-align: center; font-size: 7vh;">WWSU Emergency Alert System</h1><h2 style="text-align: center; font-size: 5vh;">Active Alerts</h2><h3 style="text-align: center; font-size: 3vh;">Clark, Greene, and Montgomery counties of Ohio</h3><div class="container-fluid"><div class="row">${innercontent}</div></div>`;
+
+    // Remove old eas tickers
+    slides.tickers.forEach((ticker, tickerName) => {
+      if (!ticker.name.startsWith("eas-alert-")) return;
+
+      if (
+        prevEas.indexOf(parseInt(ticker.name.replace("eas-alert-", ""))) === -1
+      )
+        slides.removeTicker(ticker.name);
+    });
 
     // Do EAS events
     doEas();
@@ -1297,6 +1410,8 @@ function doEas() {
           easAlert.style.display = "inline";
           easAlert.innerHTML += `<div style="text-align: center; font-size: 7vh;" class="text-white m-5 p-5"><strong class="text-danger">LIFE-THREATENING ALERTS IN EFFECT!</strong><br /> Please stand by for details...</div>`;
         }
+        // Destroy the original marquee just in case
+        $(`#alert-marquee`).marquee("destroy");
         $("#alert-marquee")
           .bind("finished", () => {
             try {
@@ -1709,6 +1824,16 @@ function processNowPlaying(response) {
           }
         });
       }
+
+      // Display message when recalculating analytics
+      if (typeof response.recalculatingAnalytics !== `undefined`) {
+        if (response.recalculatingAnalytics) {
+          $(`#section-analytics-recalculation`).removeClass("d-none");
+        } else {
+          $(`#section-analytics-recalculation`).addClass("d-none");
+        }
+      }
+
       nowplayingtime.innerHTML = `${
         disconnected
           ? "DISPLAY DISCONNECTED FROM WWSU"
@@ -1855,7 +1980,7 @@ function processWeeklyStats(data) {
                   class="col-11 text-warning text-weight-bold"
                   style="font-size: 3vh"
                 >
-                  ${data.topShows[0]}
+                  ${data.topShows[0].name} (score: ${data.topShows[0].score})
                 </div>
               </div>
               <div class="row p-1">
@@ -1866,7 +1991,7 @@ function processWeeklyStats(data) {
                   />
                 </div>
                 <div class="col-11" style="font-size: 3vh">
-                ${data.topShows[1]}
+                ${data.topShows[1].name} (score: ${data.topShows[1].score})
                 </div>
               </div>
               <div class="row p-1">
@@ -1877,7 +2002,7 @@ function processWeeklyStats(data) {
                   />
                 </div>
                 <div class="col-11" style="font-size: 3vh">
-                ${data.topShows[2]}
+                ${data.topShows[2].name} (score: ${data.topShows[2].score})
                 </div>
               </div>
             </div>
@@ -1911,7 +2036,7 @@ function processWeeklyStats(data) {
                   class="col-7 text-warning text-weight-bold"
                   style="font-size: 3vh"
                 >
-                ${data.topGenre}
+                ${data.topGenre.name}
                 </div>
               </div>
               <div class="row p-1">
@@ -1922,7 +2047,7 @@ function processWeeklyStats(data) {
                   class="col-7 text-warning text-weight-bold"
                   style="font-size: 3vh"
                 >
-                ${data.topPlaylist}
+                ${data.topPlaylist.name}
                 </div>
               </div>
               <div class="row p-1">
@@ -2013,7 +2138,11 @@ function processWeeklyStats(data) {
         </div>
       </div>
     </div>
-  </div>`;
+  </div>
+  
+  <p class="${
+    Meta.meta.recalculatingAnalytics ? `` : `d-none `
+  }text-warning" id="section-analytics-recalculation" style="font-size: 2.5vh;"><i class="fas fa-exclamation-triangle p-1"></i> Analytics are currently being re-calculated. This may take several minutes.</p>`;
   }
 }
 

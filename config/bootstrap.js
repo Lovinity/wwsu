@@ -990,7 +990,7 @@ module.exports.bootstrap = async function (done) {
                       }
                       break;
                   }
-                  
+
                   await sails.helpers.state.automation(false);
 
                   // Did not finish the playlist? Ensure the position is updated in meta.
@@ -2824,24 +2824,28 @@ module.exports.bootstrap = async function (done) {
     return new Promise(async (resolve, reject) => {
       sails.log.debug(`CRON weeklyAnalyticsEmail called`);
       try {
-        var stats = await sails.helpers.attendance.calculateStats();
-        var weekly = stats[0];
-        var overall = stats[1];
-        var body = `<p>Dear directors,</p>
+        let stats = await sails.helpers.attendance.calculateStats();
+        let weekly = stats[0];
+        let overall = stats[1];
+        let body = `<p>Dear directors,</p>
           <p>Here is the weekly analytic report for on-air programming.</p>
           
-          <p><strong>Top 3 shows/remotes/prerecords for this week:</strong>
+          <p><strong>Top ${
+            weekly.topShows.length
+          } shows/remotes/prerecords for this week:</strong>
           <ul>
-          <li>1. ${weekly.topShows[0]}</li>
-          <li>2. ${weekly.topShows[1]}</li>
-          <li>3. ${weekly.topShows[2]}</li>
+          ${weekly.topShows
+            .map((show) => `<li>1. ${show.name} (${show.score})</li>`)
+            .join("")}
           </ul>
-          Top 3 shows are calculated based on listener:showtime ratio, web messages sent/received (interactivity), number of breaks taken in an hour (4 is best), and reputation (followed all on-air regulations, did show on-time, etc)</p>
+          Top shows are calculated based on listener:showtime ratio, messages sent/received (interactivity), number of breaks taken in an hour (4 is best), and reputation (followed all on-air regulations, did show on-time, etc)</p>
 
-          <p><strong>Top Genre of the week:</strong> ${weekly.topGenre}</p>
+          <p><strong>Top Genre of the week:</strong> ${
+            weekly.topGenre.name
+          } (Score: ${weekly.topGenre.score})</p>
           <p><strong>Top Playlist of the week:</strong> ${
-            weekly.topPlaylist
-          }</p>
+            weekly.topPlaylist.name
+          } (Score: ${weekly.topPlaylist.score})</p>
           <p><strong>Tracks liked on the website:</strong> ${
             weekly.tracksLiked
           }</p>
@@ -3113,8 +3117,8 @@ module.exports.bootstrap = async function (done) {
             sails.log.error(err);
           });
 
-          // Turn lofi back off if it was off when this process started.
-          sails.config.custom.lofi = wasLofi;
+        // Turn lofi back off if it was off when this process started.
+        sails.config.custom.lofi = wasLofi;
       } catch (e) {
         // Add a log indicating an error
         await sails.models.logs
