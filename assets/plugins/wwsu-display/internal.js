@@ -1158,6 +1158,7 @@ function updateCalendar() {
 
 // Check for new Eas alerts and push them out when necessary.
 function processEas(db) {
+  console.log(`Process EAS`);
   // Data processing
   try {
     // Check to see if any alerts are extreme, and update our previous Eas ID array
@@ -1980,7 +1981,11 @@ function processWeeklyStats(data) {
                   class="col-11 text-warning text-weight-bold"
                   style="font-size: 3vh"
                 >
-                  ${data.topShows[0].name} (score: ${data.topShows[0].score})
+                  ${
+                    data.topShows[0]
+                      ? `${data.topShows[0].name} (score: ${data.topShows[0].score})`
+                      : ``
+                  }
                 </div>
               </div>
               <div class="row p-1">
@@ -1991,7 +1996,11 @@ function processWeeklyStats(data) {
                   />
                 </div>
                 <div class="col-11" style="font-size: 3vh">
-                ${data.topShows[1].name} (score: ${data.topShows[1].score})
+                ${
+                  data.topShows[1]
+                    ? `${data.topShows[1].name} (score: ${data.topShows[1].score})`
+                    : ``
+                }
                 </div>
               </div>
               <div class="row p-1">
@@ -2002,7 +2011,11 @@ function processWeeklyStats(data) {
                   />
                 </div>
                 <div class="col-11" style="font-size: 3vh">
-                ${data.topShows[2].name} (score: ${data.topShows[2].score})
+                ${
+                  data.topShows[2]
+                    ? `${data.topShows[2].name} (score: ${data.topShows[2].score})`
+                    : ``
+                }
                 </div>
               </div>
             </div>
@@ -2036,7 +2049,7 @@ function processWeeklyStats(data) {
                   class="col-7 text-warning text-weight-bold"
                   style="font-size: 3vh"
                 >
-                ${data.topGenre.name}
+                ${data.topGenre ? data.topGenre.name : ``}
                 </div>
               </div>
               <div class="row p-1">
@@ -2047,7 +2060,7 @@ function processWeeklyStats(data) {
                   class="col-7 text-warning text-weight-bold"
                   style="font-size: 3vh"
                 >
-                ${data.topPlaylist.name}
+                ${data.topPlaylist ? data.topPlaylist.name : ``}
                 </div>
               </div>
               <div class="row p-1">
@@ -2058,9 +2071,11 @@ function processWeeklyStats(data) {
                   class="col-7 text-warning text-weight-bold"
                   style="font-size: 3vh"
                 >
-                  ${data.listenerPeak || 0} (${moment(
+                  ${data.listenerPeak || 0} (${
       data.listenerPeakTime
-    ).format("MM/DD h:mm A")})
+        ? moment(data.listenerPeakTime).format("MM/DD h:mm A")
+        : `Unknown Time`
+    })
                 </div>
               </div>
             </div>
@@ -2072,7 +2087,9 @@ function processWeeklyStats(data) {
       <div class="col-3">
         <div class="small-box bg-danger">
           <div class="inner">
-            <h3 style="font-size: 4vh;">${Math.round(data.onAir / 6) / 10}</h3>
+            <h3 style="font-size: 4vh;">${
+              Math.round((data.onAir || 0) / 6) / 10
+            }</h3>
 
             <p style="font-size: 3vh;">On-Air Hours<br /><small>Live, remote, sports, & prerecord</small></p>
           </div>
@@ -2098,7 +2115,7 @@ function processWeeklyStats(data) {
           </div>
           <div class="small-box-footer" style="font-size: 2.5vh;">
           ${
-            data.listeners > 0
+            data.listeners && data.onAirListeners && data.listeners > 0
               ? Math.round((data.onAirListeners / data.listeners) * 1000) / 10
               : 0
           }% during On-Air Program
@@ -2108,7 +2125,7 @@ function processWeeklyStats(data) {
       <div class="col-3">
         <div class="small-box bg-primary">
           <div class="inner">
-            <h3 style="font-size: 4vh;">${data.tracksRequested}</h3>
+            <h3 style="font-size: 4vh;">${data.tracksRequested || 0}</h3>
 
             <p style="font-size: 3vh;">Track Requests Placed</p>
           </div>
@@ -2116,7 +2133,7 @@ function processWeeklyStats(data) {
             <i class="fas fa-compact-disc"></i>
           </div>
           <div class="small-box-footer" style="font-size: 2.5vh;">${
-            data.tracksLiked
+            data.tracksLiked || 0
           } Tracks Liked</div>
         </div>
       </div>
@@ -2124,7 +2141,7 @@ function processWeeklyStats(data) {
         <div class="small-box bg-success">
           <div class="inner">
             <h3 style="font-size: 4vh;">${
-              data.webMessagesExchanged + data.discordMessagesExchanged
+              (data.webMessagesExchanged || 0) + (data.discordMessagesExchanged || 0)
             }</h3>
 
             <p style="font-size: 3vh;">Messages Exchanged</p>
@@ -2133,7 +2150,7 @@ function processWeeklyStats(data) {
             <i class="fas fa-comments"></i>
           </div>
           <div class="small-box-footer" style="font-size: 2.5vh;">${
-            data.discordMessagesExchanged
+            (data.discordMessagesExchanged || 0)
           } were in Discord</div>
         </div>
       </div>
