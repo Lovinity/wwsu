@@ -119,7 +119,7 @@ module.exports = {
         // Start with shows, remotes, and prerecords
         records = stats2.filter(
           (stat) =>
-            ["show", "remote", "prerecord"].indexOf(stat.type) &&
+            ["show", "remote", "prerecord"].indexOf(stat.type) !== -1 &&
             stat.week.showtime > 0
         );
 
