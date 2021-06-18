@@ -216,6 +216,7 @@ class WWSUslides {
       if (_slide.name === name) {
         if (slideName === this.active) {
           this.active = null;
+          this.timeLeft = 0;
         }
         $(`#sidebar-slide-${_slide.name}`).remove();
         $(`#section-slide-${_slide.name}`).remove();
@@ -231,9 +232,15 @@ class WWSUslides {
    * @param {string} name Name of the ticker to remove
    */
   removeTicker(name) {
-    this.tickers.forEach((_ticker, slideName) => {
+    this.tickers.forEach((_ticker, tickerName) => {
       if (_ticker.name === name) {
+        if (tickerName === this.tickerActive) {
+          this.tickerActive = null;
+          this.tickerTimeLeft = 0;
+        }
         $(`#ticker-${_ticker.name}`).remove();
+        $(`#ticker-${_ticker._name}-contents`).marquee("destroy");
+        clearInterval(_ticker.flashClassesTimer);
         this.tickers.delete(name);
       }
     });
@@ -341,7 +348,11 @@ class WWSUslides {
     }
 
     // If the provided slide to show is not the one currently visible, or if the slide is a marquee (we have to restart it), switch to it.
-    if (!this.activeTicker || name !== this.activeTicker.name || this.activeTicker.marquee) {
+    if (
+      !this.activeTicker ||
+      name !== this.activeTicker.name ||
+      this.activeTicker.marquee
+    ) {
       // Executed when we are ready to show the ticker
       let afterFunction = () => {
         let ticker = this.tickers.get(name);
@@ -1121,6 +1132,7 @@ class WWSUticker {
     // Flash effects (on 750ms, off 250ms)
     if (this.flashClasses) {
       let flashClassOn = 1;
+      clearInterval(this.flashClassesTimer);
       this.flashClassesTimer = setInterval(() => {
         flashClassOn++;
         if (flashClassOn > 3) flashClassOn = 0;
