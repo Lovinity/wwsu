@@ -1429,6 +1429,35 @@ module.exports.bootstrap = async function (done) {
                     breakDebug.push(`Error: ${srerror.message}`);
                   }
 
+                  // Queue a return if in a prerecord
+                  if (sails.models.meta.memory.state.startsWith("prerecord_")) {
+                    if (
+                      typeof sails.config.custom.showcats[
+                        sails.models.meta.memory.show.split(" - ")[1]
+                      ] !== "undefined"
+                    ) {
+                      await sails.helpers.songs.queue(
+                        [
+                          sails.config.custom.showcats[
+                            sails.models.meta.memory.show.split(" - ")[1]
+                          ]["Show Returns"],
+                        ],
+                        "Top",
+                        1
+                      );
+                    } else {
+                      await sails.helpers.songs.queue(
+                        [
+                          sails.config.custom.showcats["Default"][
+                            "Show Returns"
+                          ],
+                        ],
+                        "Top",
+                        1
+                      );
+                    }
+                  }
+
                   // Execute the break array
                   try {
                     await sails.helpers.break.executeArray(

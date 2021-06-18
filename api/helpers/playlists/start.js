@@ -330,6 +330,11 @@ module.exports = {
 
         // Regular playlist
         if (inputs.event.type === "playlist") {
+          await sails.helpers.songs.queue(
+            sails.config.custom.subcats.IDs,
+            "Top",
+            1
+          );
           sails.log.verbose(`playlists.start: Type playlist`);
           await sails.helpers.rest.cmd("EnableAutoDJ", 0);
           sails.log.verbose(`playlists.start: clear queue`);
@@ -362,6 +367,28 @@ module.exports = {
           // Prerecords
         } else if (inputs.event.type === "prerecord") {
           sails.log.verbose(`playlists.start: Type prerecord`);
+          // Queue a show opener if applicable
+          if (
+            typeof sails.config.custom.showcats[inputs.event.name] !==
+            "undefined"
+          ) {
+            await sails.helpers.songs.queue(
+              [sails.config.custom.showcats[inputs.event.name]["Show Openers"]],
+              "Top",
+              1
+            );
+          } else {
+            await sails.helpers.songs.queue(
+              [sails.config.custom.showcats["Default"]["Show Openers"]],
+              "Top",
+              1
+            );
+          }
+          await sails.helpers.songs.queue(
+            sails.config.custom.subcats.IDs,
+            "Top",
+            1
+          );
           if (forced) {
             sails.log.verbose(`playlists.start: Forced`);
             await sails.models.logs
